@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, it } from 'vitest';
 import { Modal } from '../index.js';
+import ModalAccessibilityTest from './modal-accessibility-test.svelte';
 import ModalBasicTest from './modal-basic-test.svelte';
 
 describe('Modal Component', () => {
@@ -189,5 +190,23 @@ describe('Modal Component', () => {
         const modal = container.querySelector('.modal');
         expect(modal).toHaveAttribute('aria-modal', 'true');
         expect(modal).toHaveAttribute('role', 'dialog');
+    });
+
+    it('should label the dialog from Modal.Title and manage focus', async () => {
+        render(ModalAccessibilityTest);
+
+        const opener = screen.getByTestId('modal-opener');
+        opener.focus();
+        await fireEvent.click(opener);
+
+        const modal = await screen.findByRole('dialog', { name: 'Accessible modal' });
+        const titleId = modal.getAttribute('aria-labelledby');
+        expect(titleId).toBeTruthy();
+        expect(document.getElementById(titleId as string)).toHaveTextContent('Accessible modal');
+
+        await waitFor(() => expect(screen.getByLabelText('Close')).toHaveFocus());
+
+        await fireEvent.keyDown(window, { key: 'Escape' });
+        await waitFor(() => expect(opener).toHaveFocus());
     });
 });

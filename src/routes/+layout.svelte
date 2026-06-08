@@ -1,25 +1,58 @@
 <script lang="ts">
     import { page } from '$app/state';
-    import { onMount, type Snippet } from 'svelte';
+    import { onMount, tick, type Snippet } from 'svelte';
     import routeJson from './(common)/routes.json' with { type: 'json' };
     import type { RouteType } from './(common)/types.js';
 
     let { children }: { children: Snippet } = $props();
 
     let sidebarIsShown: boolean = $state(false);
+    let sidebarIsMobile: boolean = $state(false);
+    let searchQuery: string = $state('');
+    let sidebarElement: HTMLElement | null = $state(null);
+    let sidebarOverlayElement: HTMLDivElement | null = $state(null);
+    let sidebarToggleElement: HTMLButtonElement | null = $state(null);
+    let sidebarCloseElement: HTMLButtonElement | null = $state(null);
+    let previousSidebarIsShown: boolean = $state(false);
+    let previousActiveRoute: string = $state('');
     let routes: RouteType[] = routeJson as RouteType[];
     let activeRoute: string = $derived(page.url.pathname);
     let pageHeadings = $state<{ id: string; text: string }[]>([]);
     let activeRouteLabel: string = $derived(getActiveRouteLabel(activeRoute));
+    let activeRouteSection: string = $derived(getActiveRouteSection(activeRoute));
+    let pageTitle: string = $derived(`${activeRouteLabel} | Bootstrap Svelte`);
+    let sidebarIsInert: boolean = $derived(sidebarIsMobile && !sidebarIsShown);
+    let filteredRoutes: RouteType[] = $derived.by(() => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return routes;
+
+        return routes
+            .map((route) => ({
+                ...route,
+                items: route.items.filter((item) => `${route.section} ${item.label}`.toLowerCase().includes(query))
+            }))
+            .filter((route) => route.items.length > 0);
+    });
 
     $effect(() => {
-        if (activeRoute) {
+        if (activeRoute && activeRoute !== previousActiveRoute) {
             buildPageHeadings();
             sidebarIsShown = false;
+            previousActiveRoute = activeRoute;
         }
     });
 
+    $effect(() => {
+        if (sidebarIsShown && sidebarIsMobile && !previousSidebarIsShown) {
+            focusSidebarCloseButton();
+        }
+
+        previousSidebarIsShown = sidebarIsShown;
+    });
+
     onMount(() => {
+        updateSidebarViewport();
+
         if (import.meta.hot) {
             import.meta.hot.on('vite:afterUpdate', () => {
                 buildPageHeadings();
@@ -36,6 +69,17 @@
         }
 
         return 'Bootstrap Svelte';
+    }
+
+    function getActiveRouteSection(pathname: string): string {
+        if (pathname === '/') return 'Home';
+
+        for (const route of routes) {
+            const item = route.items.find((entry) => entry.href === pathname);
+            if (item) return route.section;
+        }
+
+        return 'Documentation';
     }
 
     function buildPageHeadings() {
@@ -76,36 +120,100 @@
     function scrollToHeading(id: string): void {
         const element = document.getElementById(id);
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            element.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+        }
+    }
+
+    function updateSidebarViewport(): void {
+        sidebarIsMobile = window.innerWidth < 992;
+        if (!sidebarIsMobile) {
+            sidebarIsShown = false;
         }
     }
 
     function handleWindowResize(event: Event): void {
-        if ((event.target as Window).innerWidth >= 992) {
-            sidebarIsShown = false;
+        const windowElement = event.target as Window;
+        sidebarIsMobile = windowElement.innerWidth < 992;
+        if (!sidebarIsMobile) {
+            closeSidebar();
         }
     }
 
     function handleWindowKeyDown(event: KeyboardEvent): void {
-        if (event.key === 'Escape') {
-            sidebarIsShown = false;
+        if (event.key === 'Escape' && sidebarIsShown) {
+            closeSidebar({ returnFocus: true });
+            return;
+        }
+
+        if (event.key === 'Tab' && sidebarIsShown && sidebarIsMobile) {
+            trapSidebarFocus(event);
         }
     }
 
     function handleWindowClick(event: MouseEvent): void {
         const target = event.target as HTMLElement;
-        const sidebar = document.querySelector('.wk-docs-sidebar');
-        const toggleButton = document.getElementById('sidebarToggle');
-        if (sidebarIsShown && sidebar && !sidebar.contains(target) && toggleButton && !toggleButton.contains(target)) {
-            sidebarIsShown = false;
+        if (target.closest('#sidebarToggle')) return;
+        if (sidebarIsShown && sidebarElement && !sidebarElement.contains(target) && sidebarToggleElement && !sidebarToggleElement.contains(target)) {
+            closeSidebar();
         }
+    }
+
+    async function closeSidebar(options: { returnFocus?: boolean } = {}): Promise<void> {
+        if (!sidebarIsShown) return;
+        sidebarIsShown = false;
+        await tick();
+        if (options.returnFocus) sidebarToggleElement?.focus();
+    }
+
+    function toggleSidebar(): void {
+        sidebarIsShown = !sidebarIsShown;
+    }
+
+    function clearSearch(): void {
+        searchQuery = '';
+    }
+
+    function getFocusableElements(container: HTMLElement): HTMLElement[] {
+        return Array.from(
+            container.querySelectorAll<HTMLElement>(
+                'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )
+        ).filter((element) => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true');
+    }
+
+    function trapSidebarFocus(event: KeyboardEvent): void {
+        if (!sidebarElement) return;
+
+        const focusableElements = getFocusableElements(sidebarElement);
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (!firstElement || !lastElement) {
+            event.preventDefault();
+            sidebarElement.focus();
+            return;
+        }
+
+        if (event.shiftKey && document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+        }
+    }
+
+    async function focusSidebarCloseButton(): Promise<void> {
+        await tick();
+        sidebarCloseElement?.focus();
     }
 </script>
 
 <svelte:window onresize={handleWindowResize} onkeydown={handleWindowKeyDown} onclick={handleWindowClick} />
 
 <svelte:head>
-    <title>Bootstrap Svelte Component Library</title>
+    <title>{pageTitle}</title>
     <meta name="description" content="Bootstrap components for Svelte 5 with TypeScript support, live examples, and package-local documentation." />
 </svelte:head>
 
@@ -129,9 +237,20 @@
 {/snippet}
 
 <div class="wk-docs-shell">
-    <div class="wk-sidebar-overlay" class:show={sidebarIsShown} onclick={() => (sidebarIsShown = false)} role="presentation"></div>
+    <a class="wk-skip-link" href="#main-content">Skip to main content</a>
 
-    <aside id="documentation-sidebar" class="wk-docs-sidebar" class:show={sidebarIsShown} aria-label="Documentation navigation">
+    <div class="wk-sidebar-overlay" class:show={sidebarIsShown} bind:this={sidebarOverlayElement} role="presentation" onclick={() => closeSidebar()}>
+    </div>
+
+    <aside
+        id="documentation-sidebar"
+        class="wk-docs-sidebar"
+        class:show={sidebarIsShown}
+        aria-hidden={sidebarIsInert ? 'true' : undefined}
+        aria-label="Documentation navigation"
+        bind:this={sidebarElement}
+        inert={sidebarIsInert ? true : undefined}
+        tabindex="-1">
         <div class="wk-brand-card">
             <a class="wk-brand-mark" href="/" aria-label="Bootstrap Svelte home">
                 <span class="wk-brand-icon">BS</span>
@@ -143,33 +262,57 @@
             <button
                 class="btn btn-sm btn-outline-secondary d-lg-none"
                 type="button"
-                onclick={() => (sidebarIsShown = false)}
+                bind:this={sidebarCloseElement}
+                onclick={() => closeSidebar({ returnFocus: true })}
                 aria-label="Close navigation">
                 ×
             </button>
         </div>
 
-        <nav class="wk-sidebar-nav">
-            {#each routes as route, routeIndex (`route-${routeIndex}`)}
-                {@render routeMenu(route)}
-            {/each}
+        <div class="wk-docs-search">
+            <label class="form-label" for="docsSearch">Search docs</label>
+            <div class="input-group input-group-sm">
+                <input
+                    id="docsSearch"
+                    class="form-control"
+                    type="search"
+                    bind:value={searchQuery}
+                    placeholder="Filter components"
+                    aria-describedby="docsSearchHelp" />
+                {#if searchQuery}
+                    <button class="btn btn-outline-secondary" type="button" onclick={clearSearch} aria-label="Clear documentation search"
+                        >Clear</button>
+                {/if}
+            </div>
+            <div id="docsSearchHelp" class="form-text">Filters navigation by section and component name.</div>
+        </div>
+
+        <nav class="wk-sidebar-nav" aria-label="Primary documentation">
+            {#if filteredRoutes.length > 0}
+                {#each filteredRoutes as route, routeIndex (`route-${routeIndex}`)}
+                    {@render routeMenu(route)}
+                {/each}
+            {:else}
+                <p class="wk-search-empty">No documentation routes match "{searchQuery}".</p>
+            {/if}
         </nav>
     </aside>
 
     <div class="wk-docs-main">
         <header class="wk-docs-topbar">
             <button
-                class="btn btn-outline-secondary wk-sidebar-toggle"
                 id="sidebarToggle"
+                class="btn btn-outline-secondary wk-sidebar-toggle"
                 type="button"
-                onclick={() => (sidebarIsShown = !sidebarIsShown)}
+                bind:this={sidebarToggleElement}
+                onclick={toggleSidebar}
                 aria-controls="documentation-sidebar"
                 aria-expanded={sidebarIsShown}
-                aria-label="Open navigation">
+                aria-label={sidebarIsShown ? 'Close navigation' : 'Open navigation'}>
                 ☰
             </button>
             <div>
-                <div class="wk-eyebrow">Documentation</div>
+                <div class="wk-eyebrow">{activeRouteSection}</div>
                 <div class="wk-current-page">{activeRouteLabel}</div>
             </div>
             <div class="wk-topbar-actions">
@@ -179,14 +322,28 @@
         </header>
 
         <div class="wk-docs-grid">
-            <main class="wk-content" tabindex="-1">
+            <main id="main-content" class="wk-content" tabindex="-1">
+                {#if pageHeadings.length > 0}
+                    <details class="wk-mobile-toc">
+                        <summary>On this page</summary>
+                        <nav aria-label="Page sections compact">
+                            <ul class="nav flex-column gap-1">
+                                {#each pageHeadings as heading, headingIndex (`mobile-heading-${headingIndex}`)}
+                                    <li class="nav-item">
+                                        <a href={`#${heading.id}`} class="wk-toc-link" onclick={handleQuickLinkClick}>{heading.text}</a>
+                                    </li>
+                                {/each}
+                            </ul>
+                        </nav>
+                    </details>
+                {/if}
                 {@render children()}
             </main>
 
             <aside class="wk-toc" aria-label="On this page">
                 <div class="wk-toc-card">
                     <div class="wk-toc-title">On this page</div>
-                    <nav>
+                    <nav aria-label="Page sections">
                         <ul class="nav flex-column gap-1">
                             {#if pageHeadings.length > 0}
                                 {#each pageHeadings as heading, headingIndex (`heading-${headingIndex}`)}
@@ -230,6 +387,25 @@
         min-height: 100vh;
     }
 
+    .wk-skip-link {
+        background: #fff;
+        border: 2px solid #0d6efd;
+        border-radius: 0.5rem;
+        color: #0d6efd;
+        font-weight: 700;
+        left: 1rem;
+        padding: 0.65rem 0.85rem;
+        position: fixed;
+        top: 1rem;
+        transform: translateY(-150%);
+        transition: transform 0.16s ease;
+        z-index: 2000;
+    }
+
+    .wk-skip-link:focus {
+        transform: translateY(0);
+    }
+
     .wk-docs-sidebar {
         background: rgba(255, 255, 255, 0.88);
         border-right: 1px solid rgba(108, 117, 125, 0.18);
@@ -249,6 +425,29 @@
         gap: 0.75rem;
         justify-content: space-between;
         margin-bottom: 1.5rem;
+    }
+
+    .wk-docs-search {
+        border-bottom: 1px solid rgba(108, 117, 125, 0.16);
+        margin-bottom: 1.1rem;
+        padding-bottom: 1.1rem;
+    }
+
+    .wk-docs-search .form-label {
+        color: #172033;
+        font-size: 0.86rem;
+        font-weight: 800;
+        margin-bottom: 0.4rem;
+    }
+
+    .wk-docs-search .form-text,
+    .wk-search-empty {
+        color: #6c757d;
+        font-size: 0.82rem;
+    }
+
+    .wk-search-empty {
+        margin: 0;
     }
 
     .wk-brand-mark {
@@ -392,6 +591,26 @@
         min-width: 0;
     }
 
+    .wk-mobile-toc {
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(108, 117, 125, 0.16);
+        border-radius: 0.75rem;
+        box-shadow: 0 0.75rem 1.5rem rgba(15, 23, 42, 0.05);
+        display: none;
+        margin-bottom: 1.25rem;
+        padding: 0.85rem 1rem;
+    }
+
+    .wk-mobile-toc summary {
+        color: #172033;
+        cursor: pointer;
+        font-weight: 800;
+    }
+
+    .wk-mobile-toc nav {
+        margin-top: 0.75rem;
+    }
+
     .wk-toc {
         display: block;
     }
@@ -474,6 +693,10 @@
         .wk-toc {
             display: none;
         }
+
+        .wk-mobile-toc {
+            display: block;
+        }
     }
 
     @media (max-width: 991.98px) {
@@ -505,6 +728,25 @@
 
         .wk-docs-grid {
             padding: 1rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        :global(html) {
+            scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+        }
+
+        .wk-nav-link:hover {
+            transform: none;
         }
     }
 </style>

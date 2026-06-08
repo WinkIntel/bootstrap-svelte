@@ -48,7 +48,7 @@ pnpm add svelte@~5.0.0`;
         </div>
     </div>
 
-    <div class="wk-hero-panel" aria-label="Package preview">
+    <div class="wk-hero-panel" aria-hidden="true">
         <div class="wk-window-bar">
             <span></span>
             <span></span>
@@ -66,7 +66,7 @@ pnpm add svelte@~5.0.0`;
                             <h2 class="h5 mb-2">Typed component APIs</h2>
                             <p class="text-secondary mb-0">Compose forms, overlays, navigation, tables, and feedback patterns.</p>
                         </div>
-                        <button class="btn btn-dark btn-sm" type="button">Preview</button>
+                        <span class="btn btn-dark btn-sm">Preview</span>
                     </div>
                 </div>
             </div>
@@ -162,22 +162,22 @@ pnpm add svelte@~5.0.0`;
         gap: 2rem;
         grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
         margin-bottom: 2rem;
-        min-height: calc(100vh - 10rem);
+        min-height: 34rem;
     }
 
     .wk-hero-copy h1 {
         color: #101827;
-        font-size: clamp(3rem, 8vw, 6.7rem);
+        font-size: 4.75rem;
         font-weight: 850;
-        letter-spacing: -0.075em;
-        line-height: 0.92;
+        letter-spacing: 0;
+        line-height: 1;
         margin: 1rem 0;
-        max-width: 12ch;
+        max-width: 14ch;
     }
 
     .wk-hero-copy p {
         color: #5f6b7a;
-        font-size: clamp(1.1rem, 2vw, 1.35rem);
+        font-size: 1.18rem;
         line-height: 1.65;
         max-width: 46rem;
     }
@@ -404,6 +404,10 @@ pnpm add svelte@~5.0.0`;
         .wk-hero {
             min-height: auto;
             padding-top: 2rem;
+        }
+
+        .wk-hero-copy h1 {
+            font-size: 2.75rem;
         }
 
         .wk-stats,

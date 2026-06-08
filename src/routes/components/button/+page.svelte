@@ -139,7 +139,8 @@
     <section class="mb-5" id="outline">
         <h2 class="wk-quick-link">Outline Buttons</h2>
         <p>
-            Create outline buttons with <code>variant="outline-*"</code>
+            Create outline buttons with <code>colorVariant="outline-*"</code>. The warning, info, and light examples use docs-only contrast treatment
+            so their text remains readable on a white preview surface.
         </p>
 
         <div class="card">
@@ -149,9 +150,9 @@
                     <Button id="outlineSecondary" colorVariant="outline-secondary">Secondary</Button>
                     <Button id="outlineSuccess" colorVariant="outline-success">Success</Button>
                     <Button id="outlineDanger" colorVariant="outline-danger">Danger</Button>
-                    <Button id="outlineWarning" colorVariant="outline-warning">Warning</Button>
-                    <Button id="outlineInfo" colorVariant="outline-info">Info</Button>
-                    <Button id="outlineLight" colorVariant="outline-light">Light</Button>
+                    <Button id="outlineWarning" class="wk-outline-warning-demo" colorVariant="outline-warning">Warning</Button>
+                    <Button id="outlineInfo" class="wk-outline-info-demo" colorVariant="outline-info">Info</Button>
+                    <Button id="outlineLight" class="wk-outline-light-demo" colorVariant="outline-light">Light</Button>
                     <Button id="outlineDark" colorVariant="outline-dark">Dark</Button>
                 </div>
 
@@ -161,7 +162,7 @@
     </section>
 
     <!-- With Spinner -->
-    <section class="mb-5" id="outline">
+    <section class="mb-5" id="spinner">
         <h2 class="wk-quick-link">Using with the Spinner component</h2>
         <p>Use a Spinner inside a button to indicate loading state. The Spinner will automatically adjust its size based on the button size.</p>
         <p>⚠️ Note: This will not work for <code>&lt;input /&gt;</code> buttons.</p>
@@ -201,12 +202,25 @@
         </div>
     </section>
 
+    <section class="mb-5" id="accessibility">
+        <h2 class="wk-quick-link">Accessibility</h2>
+        <ul>
+            <li>Use clear action text; avoid icon-only buttons unless you provide an accessible label.</li>
+            <li>
+                Set <code>type="button"</code>, <code>type="submit"</code>, or <code>type="reset"</code> intentionally when buttons live inside forms.
+            </li>
+            <li>Check contrast when using Bootstrap outline warning, info, and light variants on light backgrounds.</li>
+            <li>For loading states, keep the button text meaningful and include visually hidden text for spinner-only indicators.</li>
+        </ul>
+    </section>
+
     <!-- API Reference -->
     <section class="mb-5" id="api">
         <h2 class="wk-quick-link">API Reference</h2>
 
         <h3 class="h5 mt-4">Props</h3>
-        <div class="table-responsive">
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+        <div class="table-responsive" tabindex="0" role="region" aria-label="Button props API table">
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -288,3 +302,18 @@
         </ul>
     </section>
 </div>
+
+<style>
+    :global(.wk-outline-warning-demo.btn-outline-warning) {
+        --bs-btn-color: #664d03;
+    }
+
+    :global(.wk-outline-info-demo.btn-outline-info) {
+        --bs-btn-color: #055160;
+    }
+
+    :global(.wk-outline-light-demo.btn-outline-light) {
+        --bs-btn-border-color: #6c757d;
+        --bs-btn-color: #495057;
+    }
+</style>
