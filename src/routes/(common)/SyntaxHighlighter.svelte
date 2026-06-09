@@ -13,7 +13,7 @@
     hljs.registerLanguage('javascript', javascript);
     hljs.registerLanguage('css', css);
 
-    let highlighted = $derived.by(() => hljs.highlightAuto(code).value);
+    let highlighted = $derived.by(() => hljs.highlight(code, { language: 'xml' }).value);
     let regionLabel = $derived(label === 'Code example' ? `Code example ${uid}` : label);
     let copyStatus: 'idle' | 'copied' | 'failed' = $state('idle');
     let copyStatusTimeout: ReturnType<typeof setTimeout> | undefined;
