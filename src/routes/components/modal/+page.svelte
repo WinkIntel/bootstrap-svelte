@@ -322,6 +322,19 @@
 
     <hr class="my-5" />
 
+    <section class="mb-5" id="accessibility">
+        <h2 class="wk-quick-link">Accessibility</h2>
+        <ul>
+            <li><code>Modal.Title</code> automatically labels the open dialog with <code>aria-labelledby</code>.</li>
+            <li>When the modal opens, focus moves to the first focusable control inside the dialog, usually the dismiss button.</li>
+            <li>Tab and Shift+Tab stay within the open dialog until it closes.</li>
+            <li>Escape closes the dialog when <code>isKeyboardDismissible</code> is enabled, and closing returns focus to the opener.</li>
+            <li>
+                Use a visible title for every modal. If a custom title is not visible, pass an explicit accessible label to <code>Modal.Root</code>.
+            </li>
+        </ul>
+    </section>
+
     <section class="mb-5">
         <h2 class="wk-quick-link">Basic Example</h2>
         <p>
@@ -714,8 +727,9 @@
 
         <section class="mb-4">
             <h3>Modal.Root Props</h3>
-            <div class="table-responsive">
-                <table class="table table-bordered">
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Root props API table">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -724,7 +738,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -812,8 +826,9 @@
 
         <section class="mb-4">
             <h3>Modal.Content Props</h3>
-            <div class="table-responsive">
-                <table class="table table-bordered">
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Content props API table">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -822,7 +837,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -848,8 +863,9 @@
 
         <section class="mb-4">
             <h3>Modal.Dialog Props</h3>
-            <div class="table-responsive">
-                <table class="table table-bordered">
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Dialog props API table">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -858,7 +874,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -908,8 +924,9 @@
 
         <section class="mb-4">
             <h3>Modal.Footer Props</h3>
-            <div class="table-responsive">
-                <table class="table table-bordered">
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Footer props API table">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -918,7 +935,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -944,8 +961,9 @@
 
         <section class="mb-4">
             <h3>Modal.Header Props</h3>
-            <div class="table-responsive">
-                <table class="table table-bordered">
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Header props API table">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -954,7 +972,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -986,8 +1004,9 @@
 
         <section class="mb-4">
             <h3>Modal.Title Props</h3>
-            <div class="table-responsive">
-                <table class="table table-bordered">
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Title props API table">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -996,7 +1015,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -1030,8 +1049,9 @@
             <h3>CSS Classes</h3>
             <p>These classes can be used to customize the modal components:</p>
 
-            <div class="table-responsive">
-                <table class="table table-bordered">
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Modal CSS classes table">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Class</th>
@@ -1039,7 +1059,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>.modal</code></td>
                             <td>Modal.Root</td>

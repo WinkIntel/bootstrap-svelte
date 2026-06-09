@@ -42,6 +42,16 @@
         <hr />
     </div>
 
+    <section class="mb-4" id="accessibility">
+        <h2 class="wk-quick-link mb-3">Accessibility</h2>
+        <ul>
+            <li>Pair every visible control with <code>Form.InputLabel</code>, <code>Form.CheckLabel</code>, or an equivalent accessible label.</li>
+            <li>Use helper text for accepted file types, formatting requirements, and validation expectations.</li>
+            <li>Avoid relying on <code>title</code> or placeholder text as the only accessible name.</li>
+            <li>Check contrast for button-style form controls when using light outline variants on white backgrounds.</li>
+        </ul>
+    </section>
+
     <section class="mb-4" id="control-examples">
         <h2 class="wk-quick-link mb-3">ButtonCheck Inputs</h2>
         <p>Use <code>ButtonCheck</code> to bind checkbox and radio toggle inputs.</p>
@@ -67,14 +77,14 @@
                     <div>Bounded radio group value</div>
                     <ButtonCheck
                         bind:group={buttonCheckRadioGroupValue}
-                        colorVariant="outline-warning"
+                        colorVariant="outline-secondary"
                         id="btnGroupRadio1"
                         name="btnGroupRadio"
                         type="radio"
                         value="option1">Option 1</ButtonCheck>
                     <ButtonCheck
                         bind:group={buttonCheckRadioGroupValue}
-                        colorVariant="outline-warning"
+                        colorVariant="outline-secondary"
                         id="btnGroupRadio2"
                         name="btnGroupRadio"
                         type="radio"
@@ -111,10 +121,10 @@
 
 <hr/>
 
-<ButtonCheck bind:group={buttonCheckRadioGroupValue} colorVariant="outline-warning" id="btnGroupRadio1" name="btnGroupRadio" type="radio" value="option1">
+<ButtonCheck bind:group={buttonCheckRadioGroupValue} colorVariant="outline-secondary" id="btnGroupRadio1" name="btnGroupRadio" type="radio" value="option1">
     Option 1
 </ButtonCheck>
-<ButtonCheck bind:group={buttonCheckRadioGroupValue} colorVariant="outline-warning" id="btnGroupRadio2" name="btnGroupRadio" type="radio" value="option2">
+<ButtonCheck bind:group={buttonCheckRadioGroupValue} colorVariant="outline-secondary" id="btnGroupRadio2" name="btnGroupRadio" type="radio" value="option2">
     Option 2
 </ButtonCheck>
 <span>Output:</span>&nbsp;<code>{buttonCheckRadioGroupValue}</code>`} />
@@ -215,27 +225,48 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.ColorInput title="Choose your color" value="#563d7c" />
-                    <Form.HelperText>Default</Form.HelperText>
-                    <Form.ColorInput disabled title="Choose your color" value="#563d7c" />
-                    <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.ColorInput sizing="sm" title="Choose your color" value="#563d7c" />
-                    <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.ColorInput sizing="lg" title="Choose your color" value="#563d7c" />
-                    <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.ColorInput bind:value={colorInputValue} title="Choose your color" />
-                    <span>Output:</span>&nbsp;<code>{colorInputValue}</code>
-                    <Form.HelperText>Bounded value</Form.HelperText>
+                    <div class="wk-control-stack">
+                        <div>
+                            <Form.InputLabel for="colorDefault">Default color</Form.InputLabel>
+                            <Form.ColorInput id="colorDefault" value="#563d7c" />
+                        </div>
+                        <div>
+                            <Form.InputLabel for="colorDisabled">Disabled color</Form.InputLabel>
+                            <Form.ColorInput id="colorDisabled" disabled value="#563d7c" />
+                        </div>
+                        <div>
+                            <Form.InputLabel for="colorSmall">Small color</Form.InputLabel>
+                            <Form.ColorInput id="colorSmall" sizing="sm" value="#563d7c" />
+                        </div>
+                        <div>
+                            <Form.InputLabel for="colorLarge">Large color</Form.InputLabel>
+                            <Form.ColorInput id="colorLarge" sizing="lg" value="#563d7c" />
+                        </div>
+                        <div>
+                            <Form.InputLabel for="colorBound">Bound color</Form.InputLabel>
+                            <Form.ColorInput id="colorBound" bind:value={colorInputValue} />
+                            <span>Output:</span>&nbsp;<code>{colorInputValue}</code>
+                        </div>
+                    </div>
                 </div>
                 <SyntaxHighlighter
                     code={`<script lang="ts">
     let colorInputValue: string = $state("#563d7c");
 \u003c/script>
-<Form.ColorInput title="Choose your color" value="#563d7c" /><!-- Default -->
-<Form.ColorInput disabled title="Choose your color" value="#563d7c" /><!-- Disabled -->
-<Form.ColorInput sizing="sm" title="Choose your color" value="#563d7c" /><!-- Small sizing -->
-<Form.ColorInput sizing="lg" title="Choose your color" value="#563d7c" /><!-- Large sizing -->
-<Form.ColorInput bind:value={colorInputValue} title="Choose your color" /><!-- Bounded value -->
+<Form.InputLabel for="colorDefault">Default color</Form.InputLabel>
+<Form.ColorInput id="colorDefault" value="#563d7c" />
+
+<Form.InputLabel for="colorDisabled">Disabled color</Form.InputLabel>
+<Form.ColorInput id="colorDisabled" disabled value="#563d7c" />
+
+<Form.InputLabel for="colorSmall">Small color</Form.InputLabel>
+<Form.ColorInput id="colorSmall" sizing="sm" value="#563d7c" />
+
+<Form.InputLabel for="colorLarge">Large color</Form.InputLabel>
+<Form.ColorInput id="colorLarge" sizing="lg" value="#563d7c" />
+
+<Form.InputLabel for="colorBound">Bound color</Form.InputLabel>
+<Form.ColorInput id="colorBound" bind:value={colorInputValue} />
 <span>Output:</span>&nbsp;<code>{colorInputValue}</code>`} />
             </div>
         </div>
@@ -243,19 +274,19 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.DateInput value="2025-06-10" title="Choose your date" />
+                    <Form.DateInput value="2025-06-10" aria-label="Choose date" title="Choose your date" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.DateInput disabled value="2025-06-10" title="Choose your date" />
+                    <Form.DateInput disabled value="2025-06-10" aria-label="Choose date" title="Choose your date" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.DateInput readonly value="2025-06-10" title="Choose your date" />
+                    <Form.DateInput readonly value="2025-06-10" aria-label="Choose date" title="Choose your date" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.DateInput isPlaintext readonly value="2025-06-10" title="Choose your date" />
+                    <Form.DateInput isPlaintext readonly value="2025-06-10" aria-label="Choose date" title="Choose your date" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.DateInput sizing="sm" value="2025-06-10" title="Choose your date" />
+                    <Form.DateInput sizing="sm" value="2025-06-10" aria-label="Choose date" title="Choose your date" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.DateInput sizing="lg" value="2025-06-10" title="Choose your date" />
+                    <Form.DateInput sizing="lg" value="2025-06-10" aria-label="Choose date" title="Choose your date" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.DateInput list="listOfDates" title="Choose your date" />
+                    <Form.DateInput list="listOfDates" aria-label="Choose date" title="Choose your date" />
                     <datalist id="listOfDates">
                         <option value="2025-01-01"></option>
                         <option value="2025-02-01"></option>
@@ -271,7 +302,7 @@
                         <option value="2025-12-01"></option>
                     </datalist>
                     <Form.HelperText>Datalist</Form.HelperText>
-                    <Form.DateInput bind:value={dateInputValue} title="Choose your date" />
+                    <Form.DateInput bind:value={dateInputValue} aria-label="Choose date" title="Choose your date" />
                     <span>Output:</span>&nbsp;<code>{dateInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -279,13 +310,13 @@
                     code={`<script lang="ts">
     let dateInputValue: string = $state("2025-06-10");
 \u003c/script>
-<Form.DateInput value="2025-06-10" title="Choose your date" /><!-- Default -->
-<Form.DateInput disabled value="2025-06-10" title="Choose your date" /><!-- Disabled -->
-<Form.DateInput readonly value="2025-06-10" title="Choose your date" /><!-- Readonly -->
-<Form.DateInput isPlaintext readonly value="2025-06-10" title="Choose your date" /><!-- Readonly plaintext -->
-<Form.DateInput sizing="sm" value="2025-06-10" title="Choose your date" /><!-- Small sizing -->
-<Form.DateInput sizing="lg" value="2025-06-10" title="Choose your date" /><!-- Large sizing -->
-<Form.DateInput list="listOfDates" title="Choose your date" /><!-- Datalist -->
+<Form.DateInput value="2025-06-10" aria-label="Choose date" title="Choose your date" /><!-- Default -->
+<Form.DateInput disabled value="2025-06-10" aria-label="Choose date" title="Choose your date" /><!-- Disabled -->
+<Form.DateInput readonly value="2025-06-10" aria-label="Choose date" title="Choose your date" /><!-- Readonly -->
+<Form.DateInput isPlaintext readonly value="2025-06-10" aria-label="Choose date" title="Choose your date" /><!-- Readonly plaintext -->
+<Form.DateInput sizing="sm" value="2025-06-10" aria-label="Choose date" title="Choose your date" /><!-- Small sizing -->
+<Form.DateInput sizing="lg" value="2025-06-10" aria-label="Choose date" title="Choose your date" /><!-- Large sizing -->
+<Form.DateInput list="listOfDates" aria-label="Choose date" title="Choose your date" /><!-- Datalist -->
 <datalist id="listOfDates">
     <option value="2025-01-01"></option>
     <option value="2025-02-01"></option>
@@ -300,7 +331,7 @@
     <option value="2025-11-01"></option>
     <option value="2025-12-01"></option>
 </datalist>
-<Form.DateInput bind:value={dateInputValue} title="Choose your date" /><!-- Bounded value -->
+<Form.DateInput bind:value={dateInputValue} aria-label="Choose date" title="Choose your date" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{dateInputValue}</code>`} />
             </div>
         </div>
@@ -308,19 +339,32 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.DatetimeLocalInput title="Choose your datetime local" value="2025-06-10T19:30" />
+                    <Form.DatetimeLocalInput aria-label="Choose date and time" title="Choose your datetime local" value="2025-06-10T19:30" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.DatetimeLocalInput disabled title="Choose your datetime local" value="2025-06-10T19:30" />
+                    <Form.DatetimeLocalInput disabled aria-label="Choose date and time" title="Choose your datetime local" value="2025-06-10T19:30" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.DatetimeLocalInput readonly title="Choose your datetime local" value="2025-06-10T19:30" />
+                    <Form.DatetimeLocalInput readonly aria-label="Choose date and time" title="Choose your datetime local" value="2025-06-10T19:30" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.DatetimeLocalInput isPlaintext readonly title="Choose your datetime local" value="2025-06-10T19:30" />
+                    <Form.DatetimeLocalInput
+                        isPlaintext
+                        readonly
+                        aria-label="Choose date and time"
+                        title="Choose your datetime local"
+                        value="2025-06-10T19:30" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.DatetimeLocalInput sizing="sm" title="Choose your datetime local" value="2025-06-10T19:30" />
+                    <Form.DatetimeLocalInput
+                        sizing="sm"
+                        aria-label="Choose date and time"
+                        title="Choose your datetime local"
+                        value="2025-06-10T19:30" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.DatetimeLocalInput sizing="lg" title="Choose your datetime local" value="2025-06-10T19:30" />
+                    <Form.DatetimeLocalInput
+                        sizing="lg"
+                        aria-label="Choose date and time"
+                        title="Choose your datetime local"
+                        value="2025-06-10T19:30" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.DatetimeLocalInput list="listOfDatetimes" title="Choose your datetime local" />
+                    <Form.DatetimeLocalInput list="listOfDatetimes" aria-label="Choose date and time" title="Choose your datetime local" />
                     <datalist id="listOfDatetimes">
                         <option value="2025-01-01T00:00"></option>
                         <option value="2025-02-01T00:00"></option>
@@ -334,7 +378,10 @@
                         <option value="2025-10-01T00:00"></option>
                     </datalist>
                     <Form.HelperText>Datalist</Form.HelperText>
-                    <Form.DatetimeLocalInput title="Choose your datetime local" bind:value={datetimeLocalInputValue} />
+                    <Form.DatetimeLocalInput
+                        aria-label="Choose date and time"
+                        title="Choose your datetime local"
+                        bind:value={datetimeLocalInputValue} />
                     <span>Output:</span>&nbsp;<code>{datetimeLocalInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -342,13 +389,13 @@
                     code={`<script lang="ts">
     let datetimeLocalInputValue: string = $state("2025-06-10T19:30");
 \u003c/script>
-<Form.DatetimeLocalInput title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Default -->
-<Form.DatetimeLocalInput disabled title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Disabled -->
-<Form.DatetimeLocalInput readonly title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Readonly -->
-<Form.DatetimeLocalInput isPlaintext readonly title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Readonly plaintext -->
-<Form.DatetimeLocalInput sizing="sm" title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Small sizing -->
-<Form.DatetimeLocalInput sizing="lg" title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Large sizing -->
-<Form.DatetimeLocalInput list="listOfDatetimes" title="Choose your datetime local" /><!-- Datalist -->
+<Form.DatetimeLocalInput aria-label="Choose date and time" title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Default -->
+<Form.DatetimeLocalInput disabled aria-label="Choose date and time" title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Disabled -->
+<Form.DatetimeLocalInput readonly aria-label="Choose date and time" title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Readonly -->
+<Form.DatetimeLocalInput isPlaintext readonly aria-label="Choose date and time" title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Readonly plaintext -->
+<Form.DatetimeLocalInput sizing="sm" aria-label="Choose date and time" title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Small sizing -->
+<Form.DatetimeLocalInput sizing="lg" aria-label="Choose date and time" title="Choose your datetime local" value="2025-06-10T19:30" /><!-- Large sizing -->
+<Form.DatetimeLocalInput list="listOfDatetimes" aria-label="Choose date and time" title="Choose your datetime local" /><!-- Datalist -->
 <datalist id="listOfDatetimes">
     <option value="2025-01-01T00:00"></option>
     <option value="2025-02-01T00:00"></option>
@@ -361,7 +408,7 @@
     <option value="2025-09-01T00:00"></option>
     <option value="2025-10-01T00:00"></option>
 </datalist>
-<Form.DatetimeLocalInput title="Choose your datetime local" bind:value={datetimeLocalInputValue} /><!-- Bounded value -->
+<Form.DatetimeLocalInput aria-label="Choose date and time" title="Choose your datetime local" bind:value={datetimeLocalInputValue} /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{datetimeLocalInputValue}</code>`} />
             </div>
         </div>
@@ -417,27 +464,54 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.FileInput accept=".png, .jpg, image/png, image/jpeg" name="newFile" />
-                    <Form.HelperText>Default</Form.HelperText>
-                    <Form.FileInput accept=".png, .jpg, image/png, image/jpeg" disabled name="newFile" />
-                    <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.FileInput accept=".png, .jpg, image/png, image/jpeg" name="newFile" sizing="sm" />
-                    <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.FileInput accept=".png, .jpg, image/png, image/jpeg" name="newFile" sizing="lg" />
-                    <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.FileInput accept=".png, .jpg, image/png, image/jpeg" bind:value={fileInputValue} name="newFile" />
-                    <span>Output:</span>&nbsp;<code>{fileInputValue ? fileInputValue : 'No file selected'}</code>
-                    <Form.HelperText>Bounded value</Form.HelperText>
+                    <div class="wk-control-stack">
+                        <div>
+                            <Form.InputLabel for="fileDefault">Upload image</Form.InputLabel>
+                            <Form.FileInput id="fileDefault" accept=".png, .jpg, image/png, image/jpeg" name="newFile" />
+                            <Form.HelperText>Accepts PNG or JPG files.</Form.HelperText>
+                        </div>
+                        <div>
+                            <Form.InputLabel for="fileDisabled">Disabled upload</Form.InputLabel>
+                            <Form.FileInput id="fileDisabled" accept=".png, .jpg, image/png, image/jpeg" disabled name="newFileDisabled" />
+                        </div>
+                        <div>
+                            <Form.InputLabel for="fileSmall">Small upload</Form.InputLabel>
+                            <Form.FileInput id="fileSmall" accept=".png, .jpg, image/png, image/jpeg" name="newFileSmall" sizing="sm" />
+                        </div>
+                        <div>
+                            <Form.InputLabel for="fileLarge">Large upload</Form.InputLabel>
+                            <Form.FileInput id="fileLarge" accept=".png, .jpg, image/png, image/jpeg" name="newFileLarge" sizing="lg" />
+                        </div>
+                        <div>
+                            <Form.InputLabel for="fileBound">Bound upload</Form.InputLabel>
+                            <Form.FileInput
+                                id="fileBound"
+                                accept=".png, .jpg, image/png, image/jpeg"
+                                bind:value={fileInputValue}
+                                name="newFileBound" />
+                            <span>Output:</span>&nbsp;<code>{fileInputValue ? fileInputValue : 'No file selected'}</code>
+                        </div>
+                    </div>
                 </div>
                 <SyntaxHighlighter
                     code={`<script lang="ts">
     let fileInputValue: string | null = $state(null);
 \u003c/script>
-<Form.FileInput accept=".png, .jpg, image/png, image/jpeg" name="newFile" /><!-- Default -->
-<Form.FileInput accept=".png, .jpg, image/png, image/jpeg" disabled name="newFile" /><!-- Disabled -->
-<Form.FileInput accept=".png, .jpg, image/png, image/jpeg" name="newFile" sizing="sm" /><!-- Small sizing -->
-<Form.FileInput accept=".png, .jpg, image/png, image/jpeg" name="newFile" sizing="lg" /><!-- Large sizing -->
-<Form.FileInput accept=".png, .jpg, image/png, image/jpeg" bind:value={fileInputValue} name="newFile" /><!-- Bounded value -->
+<Form.InputLabel for="fileDefault">Upload image</Form.InputLabel>
+<Form.FileInput id="fileDefault" accept=".png, .jpg, image/png, image/jpeg" name="newFile" />
+<Form.HelperText>Accepts PNG or JPG files.</Form.HelperText>
+
+<Form.InputLabel for="fileDisabled">Disabled upload</Form.InputLabel>
+<Form.FileInput id="fileDisabled" accept=".png, .jpg, image/png, image/jpeg" disabled name="newFileDisabled" />
+
+<Form.InputLabel for="fileSmall">Small upload</Form.InputLabel>
+<Form.FileInput id="fileSmall" accept=".png, .jpg, image/png, image/jpeg" name="newFileSmall" sizing="sm" />
+
+<Form.InputLabel for="fileLarge">Large upload</Form.InputLabel>
+<Form.FileInput id="fileLarge" accept=".png, .jpg, image/png, image/jpeg" name="newFileLarge" sizing="lg" />
+
+<Form.InputLabel for="fileBound">Bound upload</Form.InputLabel>
+<Form.FileInput id="fileBound" accept=".png, .jpg, image/png, image/jpeg" bind:value={fileInputValue} name="newFileBound" />
 <span>Output:</span>&nbsp;<code>{fileInputValue ? fileInputValue : 'No file selected'}</code>`} />
             </div>
         </div>
@@ -543,19 +617,19 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.MonthInput title="Choose a month" value="2025-06" />
+                    <Form.MonthInput aria-label="Choose month" title="Choose a month" value="2025-06" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.MonthInput disabled title="Choose a month" value="2025-06" />
+                    <Form.MonthInput disabled aria-label="Choose month" title="Choose a month" value="2025-06" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.MonthInput readonly title="Choose a month" value="2025-06" />
+                    <Form.MonthInput readonly aria-label="Choose month" title="Choose a month" value="2025-06" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.MonthInput isPlaintext readonly title="Choose a month" value="2025-06" />
+                    <Form.MonthInput isPlaintext readonly aria-label="Choose month" title="Choose a month" value="2025-06" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.MonthInput sizing="sm" title="Choose a month" value="2025-06" />
+                    <Form.MonthInput sizing="sm" aria-label="Choose month" title="Choose a month" value="2025-06" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.MonthInput sizing="lg" title="Choose a month" value="2025-06" />
+                    <Form.MonthInput sizing="lg" aria-label="Choose month" title="Choose a month" value="2025-06" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.MonthInput list="listOfMonths" title="Choose a month" />
+                    <Form.MonthInput list="listOfMonths" aria-label="Choose month" title="Choose a month" />
                     <datalist id="listOfMonths">
                         <option value="2025-01"></option>
                         <option value="2025-02"></option>
@@ -571,7 +645,7 @@
                         <option value="2025-12"></option>
                     </datalist>
                     <Form.HelperText>Datalist</Form.HelperText>
-                    <Form.MonthInput bind:value={monthInputValue} title="Choose a month" />
+                    <Form.MonthInput bind:value={monthInputValue} aria-label="Choose month" title="Choose a month" />
                     <span>Output:</span>&nbsp;<code>{monthInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -579,13 +653,13 @@
                     code={`<script lang="ts">
     let monthInputValue: string = $state('2025-06');
 \u003c/script>
-<Form.MonthInput title="Choose a month" value="2025-06" /><!-- Default -->
-<Form.MonthInput disabled title="Choose a month" value="2025-06" /><!-- Disabled -->
-<Form.MonthInput readonly title="Choose a month" value="2025-06" /><!-- Readonly -->
-<Form.MonthInput isPlaintext readonly title="Choose a month" value="2025-06" /><!-- Readonly plaintext -->
-<Form.MonthInput sizing="sm" title="Choose a month" value="2025-06" /><!-- Small sizing -->
-<Form.MonthInput sizing="lg" title="Choose a month" value="2025-06" /><!-- Large sizing -->
-<Form.MonthInput list="listOfMonths" title="Choose a month" /><!-- Datalist -->
+<Form.MonthInput aria-label="Choose month" title="Choose a month" value="2025-06" /><!-- Default -->
+<Form.MonthInput disabled aria-label="Choose month" title="Choose a month" value="2025-06" /><!-- Disabled -->
+<Form.MonthInput readonly aria-label="Choose month" title="Choose a month" value="2025-06" /><!-- Readonly -->
+<Form.MonthInput isPlaintext readonly aria-label="Choose month" title="Choose a month" value="2025-06" /><!-- Readonly plaintext -->
+<Form.MonthInput sizing="sm" aria-label="Choose month" title="Choose a month" value="2025-06" /><!-- Small sizing -->
+<Form.MonthInput sizing="lg" aria-label="Choose month" title="Choose a month" value="2025-06" /><!-- Large sizing -->
+<Form.MonthInput list="listOfMonths" aria-label="Choose month" title="Choose a month" /><!-- Datalist -->
 <datalist id="listOfMonths">
     <option value="2025-01"></option>
     <option value="2025-02"></option>
@@ -600,7 +674,7 @@
     <option value="2025-11"></option>
     <option value="2025-12"></option>
 </datalist>
-<Form.MonthInput bind:value={monthInputValue} title="Choose a month" /><!-- Bounded value -->
+<Form.MonthInput bind:value={monthInputValue} aria-label="Choose month" title="Choose a month" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{monthInputValue}</code>`} />
             </div>
         </div>
@@ -608,19 +682,19 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.NumberInput max="5" min="1" title="Set a number" value="1" />
+                    <Form.NumberInput max="5" min="1" aria-label="Set number" title="Set a number" value="1" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.NumberInput disabled max="5" min="1" title="Set a number" value="1" />
+                    <Form.NumberInput disabled max="5" min="1" aria-label="Set number" title="Set a number" value="1" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.NumberInput max="5" min="1" readonly title="Set a number" value="1" />
+                    <Form.NumberInput max="5" min="1" readonly aria-label="Set number" title="Set a number" value="1" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.NumberInput isPlaintext max="5" min="1" readonly title="Set a number" value="1" />
+                    <Form.NumberInput isPlaintext max="5" min="1" readonly aria-label="Set number" title="Set a number" value="1" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.NumberInput max="5" min="1" sizing="sm" title="Set a number" value="1" />
+                    <Form.NumberInput max="5" min="1" sizing="sm" aria-label="Set number" title="Set a number" value="1" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.NumberInput max="5" min="1" sizing="lg" title="Set a number" value="1" />
+                    <Form.NumberInput max="5" min="1" sizing="lg" aria-label="Set number" title="Set a number" value="1" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.NumberInput list="listOfNumbers" max="5" min="1" title="Set a number" />
+                    <Form.NumberInput list="listOfNumbers" max="5" min="1" aria-label="Set number" title="Set a number" />
                     <datalist id="listOfNumbers">
                         <option value="1"></option>
                         <option value="2"></option>
@@ -629,7 +703,7 @@
                         <option value="5"></option>
                     </datalist>
                     <Form.HelperText>Datalist</Form.HelperText>
-                    <Form.NumberInput bind:value={numberInputValue} max="5" min="1" title="Set a number" />
+                    <Form.NumberInput bind:value={numberInputValue} max="5" min="1" aria-label="Set number" title="Set a number" />
                     <span>Output:</span>&nbsp;<code>{numberInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -637,13 +711,13 @@
                     code={`<script lang="ts">
     let numberInputValue: number = $state(1);
 \u003c/script>
-<Form.NumberInput max="5" min="1" title="Set a number" value="1" /><!-- Default -->
-<Form.NumberInput disabled max="5" min="1" title="Set a number" value="1" /><!-- Disabled -->
-<Form.NumberInput max="5" min="1" readonly title="Set a number" value="1" /><!-- Readonly -->
-<Form.NumberInput isPlaintext max="5" min="1" readonly title="Set a number" value="1" /><!-- Readonly plaintext -->
-<Form.NumberInput max="5" min="1" sizing="sm" title="Set a number" value="1" /><!-- Small sizing -->
-<Form.NumberInput max="5" min="1" sizing="lg" title="Set a number" value="1" /><!-- Large sizing -->
-<Form.NumberInput list="listOfNumbers" max="5" min="1" title="Set a number" /><!-- Datalist -->
+<Form.NumberInput max="5" min="1" aria-label="Set number" title="Set a number" value="1" /><!-- Default -->
+<Form.NumberInput disabled max="5" min="1" aria-label="Set number" title="Set a number" value="1" /><!-- Disabled -->
+<Form.NumberInput max="5" min="1" readonly aria-label="Set number" title="Set a number" value="1" /><!-- Readonly -->
+<Form.NumberInput isPlaintext max="5" min="1" readonly aria-label="Set number" title="Set a number" value="1" /><!-- Readonly plaintext -->
+<Form.NumberInput max="5" min="1" sizing="sm" aria-label="Set number" title="Set a number" value="1" /><!-- Small sizing -->
+<Form.NumberInput max="5" min="1" sizing="lg" aria-label="Set number" title="Set a number" value="1" /><!-- Large sizing -->
+<Form.NumberInput list="listOfNumbers" max="5" min="1" aria-label="Set number" title="Set a number" /><!-- Datalist -->
 <datalist id="listOfNumbers">
     <option value="1"></option>
     <option value="2"></option>
@@ -651,7 +725,7 @@
     <option value="4"></option>
     <option value="5"></option>
 </datalist>
-<Form.NumberInput bind:value={numberInputValue} max="5" min="1" title="Set a number" /><!-- Bounded value -->
+<Form.NumberInput bind:value={numberInputValue} max="5" min="1" aria-label="Set number" title="Set a number" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{numberInputValue}</code>`} />
             </div>
         </div>
@@ -659,22 +733,22 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.PasswordInput title="Set a password" value="myP@55w0rd" data-form-type="other" />
+                    <Form.PasswordInput aria-label="Set password" title="Set a password" value="myP@55w0rd" data-form-type="other" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.PasswordInput disabled title="Set a password" value="myP@55w0rd" />
+                    <Form.PasswordInput disabled aria-label="Set password" title="Set a password" value="myP@55w0rd" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.PasswordInput readonly title="Set a password" value="myP@55w0rd" />
+                    <Form.PasswordInput readonly aria-label="Set password" title="Set a password" value="myP@55w0rd" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.PasswordInput isPlaintext readonly title="Set a password" value="myP@55w0rd" />
+                    <Form.PasswordInput isPlaintext readonly aria-label="Set password" title="Set a password" value="myP@55w0rd" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.PasswordInput sizing="sm" title="Set a password" value="myP@55w0rd" data-form-type="other" />
+                    <Form.PasswordInput sizing="sm" aria-label="Set password" title="Set a password" value="myP@55w0rd" data-form-type="other" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.PasswordInput sizing="lg" title="Set a password" value="myP@55w0rd" data-form-type="other" />
+                    <Form.PasswordInput sizing="lg" aria-label="Set password" title="Set a password" value="myP@55w0rd" data-form-type="other" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.PasswordInput bind:value={passwordInputValue} title="Set a password" data-form-type="other" />
+                    <Form.PasswordInput bind:value={passwordInputValue} aria-label="Set password" title="Set a password" data-form-type="other" />
                     <span>Output:</span>&nbsp;<code>{passwordInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
-                    <Form.PasswordInput {showPassword} title="Set a password" value="myP@55w0rd" data-form-type="other" />
+                    <Form.PasswordInput {showPassword} aria-label="Set password" title="Set a password" value="myP@55w0rd" data-form-type="other" />
                     <Form.Check>
                         <Form.CheckInput id="showPassword" bind:checked={showPassword} />
                         <Form.CheckLabel for="showPassword">Show password</Form.CheckLabel>
@@ -686,15 +760,15 @@
     let passwordInputValue: string = $state('myP@55w0rd');
     let showPassword: boolean = $state(false);
 \u003c/script>
-<Form.PasswordInput title="Set a password" value="myP@55w0rd" /><!-- Default -->
-<Form.PasswordInput disabled title="Set a password" value="myP@55w0rd" /><!-- Disabled -->
-<Form.PasswordInput readonly title="Set a password" value="myP@55w0rd" /><!-- Readonly -->
-<Form.PasswordInput isPlaintext readonly title="Set a password" value="myP@55w0rd" /><!-- Readonly plaintext -->
-<Form.PasswordInput sizing="sm" title="Set a password" value="myP@55w0rd" /><!-- Small sizing -->
-<Form.PasswordInput sizing="lg" title="Set a password" value="myP@55w0rd" /><!-- Large sizing -->
-<Form.PasswordInput bind:value={passwordInputValue} title="Set a password" /><!-- Bounded value -->
+<Form.PasswordInput aria-label="Set password" title="Set a password" value="myP@55w0rd" /><!-- Default -->
+<Form.PasswordInput disabled aria-label="Set password" title="Set a password" value="myP@55w0rd" /><!-- Disabled -->
+<Form.PasswordInput readonly aria-label="Set password" title="Set a password" value="myP@55w0rd" /><!-- Readonly -->
+<Form.PasswordInput isPlaintext readonly aria-label="Set password" title="Set a password" value="myP@55w0rd" /><!-- Readonly plaintext -->
+<Form.PasswordInput sizing="sm" aria-label="Set password" title="Set a password" value="myP@55w0rd" /><!-- Small sizing -->
+<Form.PasswordInput sizing="lg" aria-label="Set password" title="Set a password" value="myP@55w0rd" /><!-- Large sizing -->
+<Form.PasswordInput bind:value={passwordInputValue} aria-label="Set password" title="Set a password" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{passwordInputValue}</code>
-<Form.PasswordInput {showPassword} title="Set a password" value="myP@55w0rd" /><!-- Show Password -->
+<Form.PasswordInput {showPassword} aria-label="Set password" title="Set a password" value="myP@55w0rd" /><!-- Show Password -->
 <Form.Check>
     <Form.CheckInput id="showPassword" bind:checked={showPassword} />
     <Form.CheckLabel for="showPassword">Show password</Form.CheckLabel>
@@ -770,11 +844,11 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.RangeInput max="5" min="0" step="0.5" title="Set a number" value="1" />
+                    <Form.RangeInput max="5" min="0" step="0.5" aria-label="Set number" title="Set a number" value="1" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.RangeInput disabled max="5" min="0" step="0.5" title="Set a number" value="1" />
+                    <Form.RangeInput disabled max="5" min="0" step="0.5" aria-label="Set number" title="Set a number" value="1" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.RangeInput bind:value={rangeInputValue} max="5" min="0" step="0.5" title="Set a number" />
+                    <Form.RangeInput bind:value={rangeInputValue} max="5" min="0" step="0.5" aria-label="Set number" title="Set a number" />
                     <span>Output:</span>&nbsp;<code>{rangeInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -782,9 +856,9 @@
                     code={`<script lang="ts">
     let rangeInputValue: number = $state(1);
 \u003c/script>
-<Form.RangeInput max="5" min="0" step="0.5" title="Set a number" value="1" /><!-- Default -->
-<Form.RangeInput disabled max="5" min="0" step="0.5" title="Set a number" value="1" /><!-- Disabled -->
-<Form.RangeInput bind:value={rangeInputValue} max="5" min="0" step="0.5" title="Set a number" /><!-- Bounded value -->
+<Form.RangeInput max="5" min="0" step="0.5" aria-label="Set number" title="Set a number" value="1" /><!-- Default -->
+<Form.RangeInput disabled max="5" min="0" step="0.5" aria-label="Set number" title="Set a number" value="1" /><!-- Disabled -->
+<Form.RangeInput bind:value={rangeInputValue} max="5" min="0" step="0.5" aria-label="Set number" title="Set a number" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{rangeInputValue}</code>`} />
             </div>
         </div>
@@ -792,19 +866,19 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.SearchInput title="Set a search value" value="search value" />
+                    <Form.SearchInput aria-label="Set search value" title="Set a search value" value="search value" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.SearchInput disabled title="Set a search value" value="search value" />
+                    <Form.SearchInput disabled aria-label="Set search value" title="Set a search value" value="search value" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.SearchInput readonly title="Set a search value" value="search value" />
+                    <Form.SearchInput readonly aria-label="Set search value" title="Set a search value" value="search value" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.SearchInput isPlaintext readonly title="Set a search value" value="search value" />
+                    <Form.SearchInput isPlaintext readonly aria-label="Set search value" title="Set a search value" value="search value" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.SearchInput sizing="sm" title="Set a search value" value="search value" />
+                    <Form.SearchInput sizing="sm" aria-label="Set search value" title="Set a search value" value="search value" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.SearchInput sizing="lg" title="Set a search value" value="search value" />
+                    <Form.SearchInput sizing="lg" aria-label="Set search value" title="Set a search value" value="search value" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.SearchInput list="listOfSearchValues" title="Set a search value" value="search value" />
+                    <Form.SearchInput list="listOfSearchValues" aria-label="Set search value" title="Set a search value" value="search value" />
                     <datalist id="listOfSearchValues">
                         <option value="search value 1"></option>
                         <option value="search value 2"></option>
@@ -813,7 +887,7 @@
                         <option value="search value 5"></option>
                     </datalist>
                     <Form.HelperText>Datalist</Form.HelperText>
-                    <Form.SearchInput bind:value={searchInputValue} title="Set a search value" />
+                    <Form.SearchInput bind:value={searchInputValue} aria-label="Set search value" title="Set a search value" />
                     <span>Output:</span>&nbsp;<code>{searchInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -821,13 +895,13 @@
                     code={`<script lang="ts">
     let searchInputValue: string = $state('search value');
 \u003c/script>
-<Form.SearchInput title="Set a search value" value="search value" /><!-- Default -->
-<Form.SearchInput disabled title="Set a search value" value="search value" /><!-- Disabled -->
-<Form.SearchInput readonly title="Set a search value" value="search value" /><!-- Readonly -->
-<Form.SearchInput isPlaintext readonly title="Set a search value" value="search value" /><!-- Readonly plaintext -->
-<Form.SearchInput sizing="sm" title="Set a search value" value="search value" /><!-- Small sizing -->
-<Form.SearchInput sizing="lg" title="Set a search value" value="search value" /><!-- Large sizing -->
-<Form.SearchInput list="listOfSearchValues" title="Set a search value" value="search value" /><!-- Datalist -->
+<Form.SearchInput aria-label="Set search value" title="Set a search value" value="search value" /><!-- Default -->
+<Form.SearchInput disabled aria-label="Set search value" title="Set a search value" value="search value" /><!-- Disabled -->
+<Form.SearchInput readonly aria-label="Set search value" title="Set a search value" value="search value" /><!-- Readonly -->
+<Form.SearchInput isPlaintext readonly aria-label="Set search value" title="Set a search value" value="search value" /><!-- Readonly plaintext -->
+<Form.SearchInput sizing="sm" aria-label="Set search value" title="Set a search value" value="search value" /><!-- Small sizing -->
+<Form.SearchInput sizing="lg" aria-label="Set search value" title="Set a search value" value="search value" /><!-- Large sizing -->
+<Form.SearchInput list="listOfSearchValues" aria-label="Set search value" title="Set a search value" value="search value" /><!-- Datalist -->
 <datalist id="listOfSearchValues">
     <option value="search value 1"></option>
     <option value="search value 2"></option>
@@ -835,7 +909,7 @@
     <option value="search value 4"></option>
     <option value="search value 5"></option>
 </datalist>
-<Form.SearchInput bind:value={searchInputValue} title="Set a search value" /><!-- Bounded value -->
+<Form.SearchInput bind:value={searchInputValue} aria-label="Set search value" title="Set a search value" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{searchInputValue}</code>`} />
             </div>
         </div>
@@ -1111,19 +1185,19 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.TextArea title="Set a text value" value="textarea value" />
+                    <Form.TextArea aria-label="Set text value" title="Set a text value" value="textarea value" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.TextArea disabled title="Set a textarea value" value="textarea value" />
+                    <Form.TextArea disabled aria-label="Set textarea value" title="Set a textarea value" value="textarea value" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.TextArea readonly title="Set a textarea value" value="textarea value" />
+                    <Form.TextArea readonly aria-label="Set textarea value" title="Set a textarea value" value="textarea value" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.TextArea sizing="sm" title="Set a textarea value" value="textarea value" />
+                    <Form.TextArea sizing="sm" aria-label="Set textarea value" title="Set a textarea value" value="textarea value" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.TextArea sizing="lg" title="Set a textarea value" value="textarea value" />
+                    <Form.TextArea sizing="lg" aria-label="Set textarea value" title="Set a textarea value" value="textarea value" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.TextArea isResizable={false} title="Set a text value" value="textarea value" />
+                    <Form.TextArea isResizable={false} aria-label="Set text value" title="Set a text value" value="textarea value" />
                     <Form.HelperText>Not resizable</Form.HelperText>
-                    <Form.TextArea bind:value={textAreaValue} title="Set a textarea value" />
+                    <Form.TextArea bind:value={textAreaValue} aria-label="Set textarea value" title="Set a textarea value" />
                     <span>Output:</span>&nbsp;<code>{textAreaValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -1131,13 +1205,13 @@
                     code={`<script lang="ts">
     let textAreaValue: string = $state('textarea value');
 \u003c/script>
-<Form.TextArea title="Set a text value" value="textarea value" /><!-- Default -->
-<Form.TextArea disabled title="Set a textarea value" value="textarea value" /><!-- Disabled -->
-<Form.TextArea readonly title="Set a textarea value" value="textarea value" /><!-- Readonly -->
-<Form.TextArea sizing="sm" title="Set a textarea value" value="textarea value" /><!-- Small sizing -->
-<Form.TextArea sizing="lg" title="Set a textarea value" value="textarea value" /><!-- Large sizing -->
-<Form.TextArea isResizable={false} title="Set a textarea value" value="textarea value" /><!-- Not resizable -->
-<Form.TextArea bind:value={textAreaValue} title="Set a textarea value" /><!-- Bounded value -->
+<Form.TextArea aria-label="Set text value" title="Set a text value" value="textarea value" /><!-- Default -->
+<Form.TextArea disabled aria-label="Set textarea value" title="Set a textarea value" value="textarea value" /><!-- Disabled -->
+<Form.TextArea readonly aria-label="Set textarea value" title="Set a textarea value" value="textarea value" /><!-- Readonly -->
+<Form.TextArea sizing="sm" aria-label="Set textarea value" title="Set a textarea value" value="textarea value" /><!-- Small sizing -->
+<Form.TextArea sizing="lg" aria-label="Set textarea value" title="Set a textarea value" value="textarea value" /><!-- Large sizing -->
+<Form.TextArea isResizable={false} aria-label="Set textarea value" title="Set a textarea value" value="textarea value" /><!-- Not resizable -->
+<Form.TextArea bind:value={textAreaValue} aria-label="Set textarea value" title="Set a textarea value" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{textAreaValue}</code>`} />
             </div>
         </div>
@@ -1145,19 +1219,19 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.TextInput title="Set a text value" value="text value" />
+                    <Form.TextInput aria-label="Set text value" title="Set a text value" value="text value" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.TextInput disabled title="Set a text value" value="text value" />
+                    <Form.TextInput disabled aria-label="Set text value" title="Set a text value" value="text value" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.TextInput readonly title="Set a text value" value="text value" />
+                    <Form.TextInput readonly aria-label="Set text value" title="Set a text value" value="text value" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.TextInput isPlaintext readonly title="Set a text value" value="text value" />
+                    <Form.TextInput isPlaintext readonly aria-label="Set text value" title="Set a text value" value="text value" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.TextInput sizing="sm" title="Set a text value" value="text value" />
+                    <Form.TextInput sizing="sm" aria-label="Set text value" title="Set a text value" value="text value" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.TextInput sizing="lg" title="Set a text value" value="text value" />
+                    <Form.TextInput sizing="lg" aria-label="Set text value" title="Set a text value" value="text value" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.TextInput list="listOfTextValues" title="Set a text value" value="text value" />
+                    <Form.TextInput list="listOfTextValues" aria-label="Set text value" title="Set a text value" value="text value" />
                     <datalist id="listOfTextValues">
                         <option value="text value 1"></option>
                         <option value="text value 2"></option>
@@ -1166,7 +1240,7 @@
                         <option value="text value 5"></option>
                     </datalist>
                     <Form.HelperText>Datalist</Form.HelperText>
-                    <Form.TextInput bind:value={textInputValue} title="Set a text value" />
+                    <Form.TextInput bind:value={textInputValue} aria-label="Set text value" title="Set a text value" />
                     <span>Output:</span>&nbsp;<code>{textInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -1174,13 +1248,13 @@
                     code={`<script lang="ts">
     let textInputValue: string = $state('text value');
 \u003c/script>
-<Form.TextInput title="Set a text value" value="text value" /><!-- Default -->
-<Form.TextInput disabled title="Set a text value" value="text value" /><!-- Disabled -->
-<Form.TextInput readonly title="Set a text value" value="text value" /><!-- Readonly -->
-<Form.TextInput isPlaintext readonly title="Set a text value" value="text value" /><!-- Readonly plaintext -->
-<Form.TextInput sizing="sm" title="Set a text value" value="text value" /><!-- Small sizing -->
-<Form.TextInput sizing="lg" title="Set a text value" value="text value" /><!-- Large sizing -->
-<Form.TextInput list="listOfTextValues" title="Set a text value" value="text value" /><!-- Datalist -->
+<Form.TextInput aria-label="Set text value" title="Set a text value" value="text value" /><!-- Default -->
+<Form.TextInput disabled aria-label="Set text value" title="Set a text value" value="text value" /><!-- Disabled -->
+<Form.TextInput readonly aria-label="Set text value" title="Set a text value" value="text value" /><!-- Readonly -->
+<Form.TextInput isPlaintext readonly aria-label="Set text value" title="Set a text value" value="text value" /><!-- Readonly plaintext -->
+<Form.TextInput sizing="sm" aria-label="Set text value" title="Set a text value" value="text value" /><!-- Small sizing -->
+<Form.TextInput sizing="lg" aria-label="Set text value" title="Set a text value" value="text value" /><!-- Large sizing -->
+<Form.TextInput list="listOfTextValues" aria-label="Set text value" title="Set a text value" value="text value" /><!-- Datalist -->
 <datalist id="listOfTextValues">
     <option value="text value 1"></option>
     <option value="text value 2"></option>
@@ -1188,7 +1262,7 @@
     <option value="text value 4"></option>
     <option value="text value 5"></option>
 </datalist>
-<Form.TextInput bind:value={textInputValue} title="Set a text value" /><!-- Bounded value -->
+<Form.TextInput bind:value={textInputValue} aria-label="Set text value" title="Set a text value" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{textInputValue}</code>`} />
             </div>
         </div>
@@ -1196,19 +1270,19 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.TimeInput max="12:00" min="00:00" title="Set a time" value="07:32" />
+                    <Form.TimeInput max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.TimeInput disabled max="12:00" min="00:00" title="Set a time" value="07:32" />
+                    <Form.TimeInput disabled max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.TimeInput readonly max="12:00" min="00:00" title="Set a time" value="07:32" />
+                    <Form.TimeInput readonly max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.TimeInput isPlaintext readonly max="12:00" min="00:00" title="Set a time" value="07:32" />
+                    <Form.TimeInput isPlaintext readonly max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.TimeInput sizing="sm" max="12:00" min="00:00" title="Set a time" value="07:32" />
+                    <Form.TimeInput sizing="sm" max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.TimeInput sizing="lg" max="12:00" min="00:00" title="Set a time" value="07:32" />
+                    <Form.TimeInput sizing="lg" max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.TimeInput list="listOfTimes" max="12:00" min="00:00" title="Set a time" />
+                    <Form.TimeInput list="listOfTimes" max="12:00" min="00:00" aria-label="Set time" title="Set a time" />
                     <datalist id="listOfTimes">
                         <option value="00:00"></option>
                         <option value="01:00"></option>
@@ -1225,7 +1299,7 @@
                         <option value="12:00"></option>
                     </datalist>
                     <Form.HelperText>Datalist</Form.HelperText>
-                    <Form.TimeInput bind:value={timeInputValue} max="12:00" min="00:00" title="Set a time" />
+                    <Form.TimeInput bind:value={timeInputValue} max="12:00" min="00:00" aria-label="Set time" title="Set a time" />
                     <span>Output:</span>&nbsp;<code>{timeInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -1233,13 +1307,13 @@
                     code={`<script lang="ts">
     let timeInputValue: string = $state('07:32');
 \u003c/script>
-<Form.TimeInput max="12:00" min="00:00" title="Set a time" value="07:32" /><!-- Default -->
-<Form.TimeInput disabled max="12:00" min="00:00" title="Set a time" value="07:32" /><!-- Disabled -->
-<Form.TimeInput readonly max="12:00" min="00:00" title="Set a time" value="07:32" /><!-- Readonly -->
-<Form.TimeInput isPlaintext readonly max="12:00" min="00:00" title="Set a time" value="07:32" /><!-- Readonly plaintext -->
-<Form.TimeInput sizing="sm" max="12:00" min="00:00" title="Set a time" value="07:32" /><!-- Small sizing -->
-<Form.TimeInput sizing="lg" max="12:00" min="00:00" title="Set a time" value="07:32" /><!-- Large sizing -->
-<Form.TimeInput list="listOfTimes" max="12:00" min="00:00" title="Set a time" /><!-- Datalist -->
+<Form.TimeInput max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" /><!-- Default -->
+<Form.TimeInput disabled max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" /><!-- Disabled -->
+<Form.TimeInput readonly max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" /><!-- Readonly -->
+<Form.TimeInput isPlaintext readonly max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" /><!-- Readonly plaintext -->
+<Form.TimeInput sizing="sm" max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" /><!-- Small sizing -->
+<Form.TimeInput sizing="lg" max="12:00" min="00:00" aria-label="Set time" title="Set a time" value="07:32" /><!-- Large sizing -->
+<Form.TimeInput list="listOfTimes" max="12:00" min="00:00" aria-label="Set time" title="Set a time" /><!-- Datalist -->
 <datalist id="listOfTimes">
     <option value="00:00"></option>
     <option value="01:00"></option>
@@ -1255,7 +1329,7 @@
     <option value="11:00"></option>
     <option value="12:00"></option>
 </datalist>
-<Form.TimeInput bind:value={timeInputValue} max="12:00" min="00:00" title="Set a time" /><!-- Bounded value -->
+<Form.TimeInput bind:value={timeInputValue} max="12:00" min="00:00" aria-label="Set time" title="Set a time" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{timeInputValue}</code>`} />
             </div>
         </div>
@@ -1263,19 +1337,25 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.UrlInput pattern="https://.*" placeholder="https://example.com" title="Set a URL" />
+                    <Form.UrlInput pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.UrlInput disabled pattern="https://.*" placeholder="https://example.com" title="Set a URL" />
+                    <Form.UrlInput disabled pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.UrlInput readonly pattern="https://.*" placeholder="https://example.com" title="Set a URL" />
+                    <Form.UrlInput readonly pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.UrlInput isPlaintext readonly pattern="https://.*" placeholder="https://example.com" title="Set a URL" />
+                    <Form.UrlInput
+                        isPlaintext
+                        readonly
+                        pattern="https://.*"
+                        placeholder="https://example.com"
+                        aria-label="Set URL"
+                        title="Set a URL" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.UrlInput sizing="sm" pattern="https://.*" placeholder="https://example.com" title="Set a URL" />
+                    <Form.UrlInput sizing="sm" pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.UrlInput sizing="lg" pattern="https://.*" placeholder="https://example.com" title="Set a URL" />
+                    <Form.UrlInput sizing="lg" pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.UrlInput list="listOfUrls" pattern="https://.*" placeholder="https://example.com" title="Set a URL" />
+                    <Form.UrlInput list="listOfUrls" pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" />
                     <datalist id="listOfUrls">
                         <option value="https://developer.mozilla.org/"></option>
                         <option value="http://www.google.com/"></option>
@@ -1284,7 +1364,12 @@
                         <option value="http://w3.org/"></option>
                     </datalist>
                     <Form.HelperText>Datalist</Form.HelperText>
-                    <Form.UrlInput bind:value={urlInputValue} pattern="https://.*" placeholder="https://example.com" title="Set a URL" />
+                    <Form.UrlInput
+                        bind:value={urlInputValue}
+                        pattern="https://.*"
+                        placeholder="https://example.com"
+                        aria-label="Set URL"
+                        title="Set a URL" />
                     <span>Output:</span>&nbsp;<code>{urlInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -1292,13 +1377,13 @@
                     code={`<script lang="ts">
     let urlInputValue: string = $state('https://example.com');
 \u003c/script>
-<Form.UrlInput pattern="https://.*" placeholder="https://example.com" title="Set a URL" /><!-- Default -->
-<Form.UrlInput disabled pattern="https://.*" placeholder="https://example.com" title="Set a URL" /><!-- Disabled -->
-<Form.UrlInput readonly pattern="https://.*" placeholder="https://example.com" title="Set a URL" /><!-- Readonly -->
-<Form.UrlInput isPlaintext readonly pattern="https://.*" placeholder="https://example.com" title="Set a URL" /><!-- Readonly plaintext -->
-<Form.UrlInput sizing="sm" pattern="https://.*" placeholder="https://example.com" title="Set a URL" /><!-- Small sizing -->
-<Form.UrlInput sizing="lg" pattern="https://.*" placeholder="https://example.com" title="Set a URL" /><!-- Large sizing -->
-<Form.UrlInput list="listOfUrls" pattern="https://.*" placeholder="https://example.com" title="Set a URL" /><!-- Datalist -->
+<Form.UrlInput pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" /><!-- Default -->
+<Form.UrlInput disabled pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" /><!-- Disabled -->
+<Form.UrlInput readonly pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" /><!-- Readonly -->
+<Form.UrlInput isPlaintext readonly pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" /><!-- Readonly plaintext -->
+<Form.UrlInput sizing="sm" pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" /><!-- Small sizing -->
+<Form.UrlInput sizing="lg" pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" /><!-- Large sizing -->
+<Form.UrlInput list="listOfUrls" pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" /><!-- Datalist -->
 <datalist id="listOfUrls">
     <option value="https://developer.mozilla.org/"></option>
     <option value="http://www.google.com/"></option>
@@ -1306,7 +1391,7 @@
     <option value="https://www.mozilla.org/"></option>
     <option value="http://w3.org/"></option>
 </datalist>
-<Form.UrlInput bind:value={urlInputValue} pattern="https://.*" placeholder="https://example.com" title="Set a URL" /><!-- Bounded value -->
+<Form.UrlInput bind:value={urlInputValue} pattern="https://.*" placeholder="https://example.com" aria-label="Set URL" title="Set a URL" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{urlInputValue}</code>`} />
             </div>
         </div>
@@ -1314,19 +1399,19 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.WeekInput title="Set a week" value="2025-W07" />
+                    <Form.WeekInput aria-label="Set week" title="Set a week" value="2025-W07" />
                     <Form.HelperText>Default</Form.HelperText>
-                    <Form.WeekInput disabled title="Set a week" value="2025-W07" />
+                    <Form.WeekInput disabled aria-label="Set week" title="Set a week" value="2025-W07" />
                     <Form.HelperText>Disabled</Form.HelperText>
-                    <Form.WeekInput readonly title="Set a week" value="2025-W07" />
+                    <Form.WeekInput readonly aria-label="Set week" title="Set a week" value="2025-W07" />
                     <Form.HelperText>Readonly</Form.HelperText>
-                    <Form.WeekInput isPlaintext readonly title="Set a week" value="2025-W07" />
+                    <Form.WeekInput isPlaintext readonly aria-label="Set week" title="Set a week" value="2025-W07" />
                     <Form.HelperText>Readonly plaintext</Form.HelperText>
-                    <Form.WeekInput sizing="sm" title="Set a week" value="2025-W07" />
+                    <Form.WeekInput sizing="sm" aria-label="Set week" title="Set a week" value="2025-W07" />
                     <Form.HelperText>Small sizing</Form.HelperText>
-                    <Form.WeekInput sizing="lg" title="Set a week" value="2025-W07" />
+                    <Form.WeekInput sizing="lg" aria-label="Set week" title="Set a week" value="2025-W07" />
                     <Form.HelperText>Large sizing</Form.HelperText>
-                    <Form.WeekInput list="listOfWeeks" title="Set a week" />
+                    <Form.WeekInput list="listOfWeeks" aria-label="Set week" title="Set a week" />
                     <datalist id="listOfWeeks">
                         <option value="2025-W01"></option>
                         <option value="2025-W02"></option>
@@ -1340,7 +1425,7 @@
                         <option value="2025-W10"></option>
                     </datalist>
                     <Form.HelperText>Datalist</Form.HelperText>
-                    <Form.WeekInput bind:value={weekInputValue} title="Set a week" />
+                    <Form.WeekInput bind:value={weekInputValue} aria-label="Set week" title="Set a week" />
                     <span>Output:</span>&nbsp;<code>{weekInputValue}</code>
                     <Form.HelperText>Bounded value</Form.HelperText>
                 </div>
@@ -1348,13 +1433,13 @@
                     code={`<script lang="ts">
     let weekInputValue: string = $state('2025-W07');
 \u003c/script>
-<Form.WeekInput title="Set a week" value="2025-W07" /><!-- Default -->
-<Form.WeekInput disabled title="Set a week" value="2025-W07" /><!-- Disabled -->
-<Form.WeekInput readonly title="Set a week" value="2025-W07" /><!-- Readonly -->
-<Form.WeekInput isPlaintext readonly title="Set a week" value="2025-W07" /><!-- Readonly plaintext -->
-<Form.WeekInput sizing="sm" title="Set a week" value="2025-W07" /><!-- Small sizing -->
-<Form.WeekInput sizing="lg" title="Set a week" value="2025-W07" /><!-- Large sizing -->
-<Form.WeekInput list="listOfTextValues" title="Set a week" /><!-- Datalist -->
+<Form.WeekInput aria-label="Set week" title="Set a week" value="2025-W07" /><!-- Default -->
+<Form.WeekInput disabled aria-label="Set week" title="Set a week" value="2025-W07" /><!-- Disabled -->
+<Form.WeekInput readonly aria-label="Set week" title="Set a week" value="2025-W07" /><!-- Readonly -->
+<Form.WeekInput isPlaintext readonly aria-label="Set week" title="Set a week" value="2025-W07" /><!-- Readonly plaintext -->
+<Form.WeekInput sizing="sm" aria-label="Set week" title="Set a week" value="2025-W07" /><!-- Small sizing -->
+<Form.WeekInput sizing="lg" aria-label="Set week" title="Set a week" value="2025-W07" /><!-- Large sizing -->
+<Form.WeekInput list="listOfTextValues" aria-label="Set week" title="Set a week" /><!-- Datalist -->
 <datalist id="listOfWeeks">
     <option value="2025-W01"></option>
     <option value="2025-W02"></option>
@@ -1367,7 +1452,7 @@
     <option value="2025-W09"></option>
     <option value="2025-W10"></option>
 </datalist>
-<Form.WeekInput bind:value={weekInputValue} title="Set a week" /><!-- Bounded value -->
+<Form.WeekInput bind:value={weekInputValue} aria-label="Set week" title="Set a week" /><!-- Bounded value -->
 <span>Output:</span>&nbsp;<code>{weekInputValue}</code>`} />
             </div>
         </div>
@@ -1375,6 +1460,12 @@
 </div>
 
 <style global>
+    .wk-control-stack {
+        display: grid;
+        gap: 1rem;
+        max-width: 32rem;
+    }
+
     #control-examples input:not([type='checkbox']):not([type='radio']),
     #control-examples select,
     #control-examples textarea {

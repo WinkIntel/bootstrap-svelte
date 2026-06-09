@@ -186,14 +186,14 @@
 <div class="playground">
     <div class="card mb-4">
         <div class="card-header">
-            <h3 class="h5 mb-0">Interactive Playground</h3>
+            <h2 class="h5 mb-0">Interactive Playground</h2>
         </div>
 
         <div class="card-body">
             <div class="row">
                 <!-- Controls Column -->
                 <div class="col-md-4">
-                    <h4 class="h6">Controls</h4>
+                    <h3 class="h6">Controls</h3>
 
                     <div class="mb-3">
                         <label for="size" class="form-label">Size</label>
@@ -273,7 +273,7 @@
 
                 <!-- Preview Column -->
                 <div class="col-md-8">
-                    <h4 class="h6">Preview</h4>
+                    <h3 class="h6">Preview</h3>
 
                     <div class="p-2 border rounded bg-light" style="min-height: 200px;">
                         <div class="mb-3">
@@ -338,7 +338,7 @@
                     </div>
 
                     <div class="mt-3">
-                        <h4 class="h6">Code</h4>
+                        <h3 class="h6">Code</h3>
                         <SyntaxHighlighter code={codeSnippet} />
                     </div>
                 </div>

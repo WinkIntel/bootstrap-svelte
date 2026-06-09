@@ -10,6 +10,7 @@ export class ModalRootState {
     // Private
     #isShown: boolean = $state(false);
     #useBackdrop: ModalBackdrop = $state(true);
+    titleId: string | undefined = $state(undefined);
 
     constructor(readonly props: Modal.RootProps) {
         this.toggleIsShown = this.toggleIsShown.bind(this);
@@ -34,6 +35,16 @@ export class ModalRootState {
 
     toggleIsShown() {
         this.#isShown = !this.#isShown;
+    }
+
+    registerTitleId(id: string) {
+        this.titleId ??= id;
+    }
+
+    unregisterTitleId(id: string) {
+        if (this.titleId === id) {
+            this.titleId = undefined;
+        }
     }
 }
 
@@ -79,4 +90,12 @@ export function initModalRootState(props: Modal.RootProps): ModalRootState {
 export function initModalHeaderState(props: Modal.HeaderProps): ModalHeaderState {
     const rootState = ModalRootContext.get();
     return new ModalHeaderState(props, rootState);
+}
+
+export function getModalRootState(): ModalRootState {
+    return ModalRootContext.get();
+}
+
+export function getOptionalModalRootState(): ModalRootState | undefined {
+    return ModalRootContext.getOr(undefined);
 }

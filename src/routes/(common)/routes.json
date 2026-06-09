@@ -1,5 +1,14 @@
 [
     {
+        "section": "Guides",
+        "items": [
+            {
+                "href": "/theming",
+                "label": "Theming"
+            }
+        ]
+    },
+    {
         "section": "Layout",
         "items": [
             {

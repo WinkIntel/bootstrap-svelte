@@ -279,6 +279,21 @@
     </section>
 
     <section class="mb-5">
+        <h2 class="wk-quick-link">Accessibility</h2>
+        <p>
+            Do not rely on hover-only tooltips for essential information. Hover does not work for keyboard-only users, many touch interfaces, or users
+            who need more time to read content.
+        </p>
+        <ul>
+            <li>Pair hover triggers with focus behavior, or provide the same information in visible page text.</li>
+            <li>Make the trigger element keyboard focusable and ensure the tooltip appears when the trigger receives focus.</li>
+            <li>For touch interfaces, prefer click or manual control so users can intentionally open and dismiss the tooltip.</li>
+            <li>Keep tooltip content short and non-interactive. Use a popover or dialog when the content needs links, buttons, or form controls.</li>
+            <li>Persistent or manually opened tooltip-like UI should have an obvious dismissal path, including keyboard dismissal.</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
         <h2 class="wk-quick-link">API Reference</h2>
 
         <div class="card mb-4">
@@ -287,7 +302,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -296,7 +311,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>container</code></td>
                                 <td><code>string | HTMLElement | false</code></td>
@@ -373,7 +388,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -382,7 +397,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td>All <code>div</code> element props</td>
                                 <td>Various</td>
@@ -401,14 +416,14 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Class</th>
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>.tooltip</code></td>
                                 <td>Main container class for the tooltip</td>

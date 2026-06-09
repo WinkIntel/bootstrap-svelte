@@ -537,7 +537,7 @@
 
             <h3 class="h5 mt-4">Card.Root Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -546,7 +546,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -571,7 +571,7 @@
 
             <h3 class="h5 mt-4">Card.Body Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -580,7 +580,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -605,7 +605,7 @@
 
             <h3 class="h5 mt-4">Card.Title Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -614,7 +614,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -645,7 +645,7 @@
 
             <h3 class="h5 mt-4">Card.Subtitle Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -654,7 +654,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -685,7 +685,7 @@
 
             <h3 class="h5 mt-4">Card.Text Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -694,7 +694,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -719,7 +719,7 @@
 
             <h3 class="h5 mt-4">Card.Img Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -728,7 +728,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -771,7 +771,7 @@
 
             <h3 class="h5 mt-4">Card.ImgOverlay Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -780,7 +780,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -805,7 +805,7 @@
 
             <h3 class="h5 mt-4">Card.Header Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -814,7 +814,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -839,7 +839,7 @@
 
             <h3 class="h5 mt-4">Card.Footer Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -848,7 +848,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -873,7 +873,7 @@
 
             <h3 class="h5 mt-4">Card.Link Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -882,7 +882,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -913,7 +913,7 @@
 
             <h3 class="h5 mt-4">Card.Group Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -922,7 +922,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -971,6 +971,6 @@
 
 <style>
     .wk-card-example {
-        background-color: white;
+        background-color: var(--bs-tertiary-bg);
     }
 </style>

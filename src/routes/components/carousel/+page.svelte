@@ -619,7 +619,7 @@
 
             <h3 class="h5 mt-4">Carousel.Root Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -628,7 +628,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>animation</code></td>
                             <td><code>'none' | 'slide' | 'fade' | 'crossfade'</code></td>
@@ -689,7 +689,7 @@
 
             <h3 class="h5 mt-4">Carousel.Item Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -698,7 +698,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -753,7 +753,7 @@
 
             <h3 class="h5 mt-4">Carousel.IndicatorButton Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -762,7 +762,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>ariaLabel</code></td>
                             <td><code>string</code></td>
@@ -787,7 +787,7 @@
 
             <h3 class="h5 mt-4">Carousel.ControlPrev/ControlNext Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -796,7 +796,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -834,6 +834,6 @@
 
 <style>
     .wk-carousel-example {
-        background-color: white;
+        background-color: var(--bs-tertiary-bg);
     }
 </style>

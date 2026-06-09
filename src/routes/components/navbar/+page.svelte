@@ -625,7 +625,7 @@
 
         <h3 class="h5 mt-4">Navbar.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -634,7 +634,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -679,7 +679,7 @@
 
         <h3 class="h5 mt-4">Navbar.Brand Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -688,7 +688,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -719,7 +719,7 @@
 
         <h3 class="h5 mt-4">Navbar.Toggler Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -728,7 +728,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>ariaLabel</code></td>
                         <td><code>string</code></td>
@@ -765,7 +765,7 @@
 
         <h3 class="h5 mt-4">Navbar.TogglerIcon Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -774,7 +774,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -793,7 +793,7 @@
 
         <h3 class="h5 mt-4">Navbar.Collapse Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -802,7 +802,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -851,7 +851,7 @@
 
         <h3 class="h5 mt-4">Navbar.Nav Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -860,7 +860,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -891,7 +891,7 @@
 
         <h3 class="h5 mt-4">Navbar.Text Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -900,7 +900,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>

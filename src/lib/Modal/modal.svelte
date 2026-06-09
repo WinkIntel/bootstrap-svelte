@@ -50,7 +50,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 <script lang="ts">
     import { disableBodyScrolling, noop, resetBodyScrolling, uniqueClsx } from '$lib/common/index.js';
     import { Portal } from '$lib/index.js';
-    import { onMount } from 'svelte';
+    import { onMount, tick } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import type { Modal } from './index.js';
     import { initModalRootState, ModalRootState } from './modal.svelte.js';
@@ -78,8 +78,10 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
     // Initialize the root state of the modal component...
     let bodyElement: HTMLElement | null = $state(null);
+    let previouslyFocusedElement: HTMLElement | null = null;
     const unset = Symbol('unset');
     let previousIsShown: Modal.RootProps['isShown'] | typeof unset = unset;
+    let previousRootIsShown = false;
     let previousUseBackdrop: Modal.RootProps['useBackdrop'] | typeof unset = unset;
     const rootState: ModalRootState = initModalRootState({
         get isShown() {
@@ -132,6 +134,17 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         previousUseBackdrop = useBackdrop;
     });
 
+    $effect(() => {
+        if (rootState.isShown && !previousRootIsShown) {
+            previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+            focusModal();
+        } else if (!rootState.isShown && previousRootIsShown) {
+            restoreFocus();
+        }
+
+        previousRootIsShown = rootState.isShown;
+    });
+
     const handleOnShow: EventListener = (event: Event) => {
         if (bodyElement) {
             disableBodyScrolling(bodyElement);
@@ -147,6 +160,48 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         }
         onHidden(event);
     };
+
+    async function focusModal(): Promise<void> {
+        if (!isFocusable) return;
+
+        await tick();
+
+        const focusTarget = getFocusableElements()[0] ?? elementRef;
+        focusTarget?.focus({ preventScroll: true });
+    }
+
+    function restoreFocus(): void {
+        if (previouslyFocusedElement?.isConnected) {
+            previouslyFocusedElement.focus({ preventScroll: true });
+        }
+        previouslyFocusedElement = null;
+    }
+
+    function getFocusableElements(): HTMLElement[] {
+        if (!elementRef) return [];
+
+        return Array.from(
+            elementRef.querySelectorAll<HTMLElement>(
+                'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )
+        ).filter((element) => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true');
+    }
+
+    function trapFocus(event: KeyboardEvent): void {
+        const focusableElements = getFocusableElements();
+        const firstElement = focusableElements[0] ?? elementRef;
+        const lastElement = focusableElements[focusableElements.length - 1] ?? elementRef;
+
+        if (!firstElement || !lastElement) return;
+
+        if (event.shiftKey && document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+        }
+    }
 
     // Get the body element when the component is mounted...
     onMount(() => {
@@ -181,6 +236,13 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
     // Handle keyboard events to dismiss modal on Escape key press
     const handleKeydown: EventListener = (event: Event) => {
         const keyboardEvent = event as KeyboardEvent;
+        if (!rootState.isShown) return;
+
+        if (keyboardEvent.key === 'Tab') {
+            trapFocus(keyboardEvent);
+            return;
+        }
+
         if (rootState.isShown && isKeyboardDismissible && keyboardEvent.key === 'Escape') {
             rootState.toggleIsShown();
         }
@@ -191,6 +253,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
 {#if rootState.isShown}
     <div
+        aria-labelledby={rootState.titleId}
         aria-modal={rootState.isShown}
         bind:this={elementRef}
         class={classes}

@@ -23,7 +23,9 @@ Title component for the Modal.Header.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
+    import { onDestroy } from 'svelte';
     import type { Modal } from './index.js';
+    import { getOptionalModalRootState } from './modal.svelte.js';
 
     // Generate a unique ID for the modal title element, in case one is not provided...
     const uid: string = $props.id();
@@ -40,6 +42,15 @@ Title component for the Modal.Header.
     let elementType: string = $derived(`h${level}`);
 
     let classes: string = $derived(uniqueClsx('modal-title', classValues));
+    const rootState = getOptionalModalRootState();
+
+    $effect(() => {
+        if (id) rootState?.registerTitleId(id);
+    });
+
+    onDestroy(() => {
+        if (id) rootState?.unregisterTitleId(id);
+    });
 </script>
 
 <svelte:element this={elementType} bind:this={elementRef} class={classes} {id} {...restOfProps}>

@@ -991,7 +991,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1000,7 +1000,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>autoClose</code></td>
                         <td><code>boolean | 'inside' | 'outside'</code></td>
@@ -1075,7 +1075,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Toggle Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1084,7 +1084,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -1140,7 +1140,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Menu Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1149,7 +1149,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -1200,7 +1200,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Item Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1209,7 +1209,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -1264,7 +1264,7 @@
 
         <h3 class="h5 mt-4">Dropdown.ItemText Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1273,7 +1273,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -1298,7 +1298,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Header Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1307,7 +1307,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -1338,7 +1338,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Divider Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1347,7 +1347,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>

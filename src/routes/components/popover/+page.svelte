@@ -542,7 +542,7 @@
         <section class="mb-4">
             <h3>Popover.Root Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -551,7 +551,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -642,7 +642,7 @@
         <section class="mb-4">
             <h3>Popover.Header Props</h3>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -651,7 +651,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>level</code></td>
                             <td><code>1 | 2 | 3 | 4 | 5 | 6</code></td>
@@ -668,7 +668,7 @@
             <p>These classes can be used to customize the popover components:</p>
 
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Class</th>
@@ -676,7 +676,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>.popover</code></td>
                             <td>Popover.Root</td>

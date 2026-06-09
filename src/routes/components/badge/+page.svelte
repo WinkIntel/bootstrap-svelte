@@ -21,13 +21,13 @@
 <Badge isPill={true} colorVariant="text-bg-info">Info</Badge>
 <Badge isPill={true} colorVariant="text-bg-light">Light</Badge>
 <Badge isPill={true} colorVariant="text-bg-dark">Dark</Badge>`;
-    const subtleExampleCode = `<Badge class="text-dark" colorVariant="bg-secondary-subtle">Subtle</Badge>
-<Badge class="text-dark" colorVariant="bg-success-subtle">Subtle</Badge>
-<Badge class="text-dark" colorVariant="bg-danger-subtle">Subtle</Badge>
-<Badge class="text-dark" colorVariant="bg-warning-subtle">Subtle</Badge>
-<Badge class="text-dark" colorVariant="bg-info-subtle">Subtle</Badge>
-<Badge class="text-dark" colorVariant="bg-light-subtle">Subtle</Badge>
-<Badge class="text-dark" colorVariant="bg-dark-subtle">Subtle</Badge>`;
+    const subtleExampleCode = `<Badge class="text-secondary-emphasis" colorVariant="bg-secondary-subtle">Subtle</Badge>
+<Badge class="text-success-emphasis" colorVariant="bg-success-subtle">Subtle</Badge>
+<Badge class="text-danger-emphasis" colorVariant="bg-danger-subtle">Subtle</Badge>
+<Badge class="text-warning-emphasis" colorVariant="bg-warning-subtle">Subtle</Badge>
+<Badge class="text-info-emphasis" colorVariant="bg-info-subtle">Subtle</Badge>
+<Badge class="text-light-emphasis" colorVariant="bg-light-subtle">Subtle</Badge>
+<Badge class="text-dark-emphasis" colorVariant="bg-dark-subtle">Subtle</Badge>`;
     const positionedExampleCode = `<!-- Positioned badge on button -->
 <button type="button" class="btn btn-primary position-relative">
     Inbox
@@ -179,13 +179,13 @@
         <div class="card">
             <div class="card-body">
                 <div class="mb-3 d-flex flex-wrap gap-2">
-                    <Badge class="text-dark" id="subtleSecondary" colorVariant="bg-secondary-subtle">Subtle</Badge>
-                    <Badge class="text-dark" id="subtleSuccess" colorVariant="bg-success-subtle">Subtle</Badge>
-                    <Badge class="text-dark" id="subtleDanger" colorVariant="bg-danger-subtle">Subtle</Badge>
-                    <Badge class="text-dark" id="subtleWarning" colorVariant="bg-warning-subtle">Subtle</Badge>
-                    <Badge class="text-dark" id="subtleInfo" colorVariant="bg-info-subtle">Subtle</Badge>
-                    <Badge class="text-dark" id="subtleLight" colorVariant="bg-light-subtle">Subtle</Badge>
-                    <Badge class="text-dark" id="subtleDark" colorVariant="bg-dark-subtle">Subtle</Badge>
+                    <Badge class="text-secondary-emphasis" id="subtleSecondary" colorVariant="bg-secondary-subtle">Subtle</Badge>
+                    <Badge class="text-success-emphasis" id="subtleSuccess" colorVariant="bg-success-subtle">Subtle</Badge>
+                    <Badge class="text-danger-emphasis" id="subtleDanger" colorVariant="bg-danger-subtle">Subtle</Badge>
+                    <Badge class="text-warning-emphasis" id="subtleWarning" colorVariant="bg-warning-subtle">Subtle</Badge>
+                    <Badge class="text-info-emphasis" id="subtleInfo" colorVariant="bg-info-subtle">Subtle</Badge>
+                    <Badge class="text-light-emphasis" id="subtleLight" colorVariant="bg-light-subtle">Subtle</Badge>
+                    <Badge class="text-dark-emphasis" id="subtleDark" colorVariant="bg-dark-subtle">Subtle</Badge>
                 </div>
 
                 <SyntaxHighlighter code={subtleExampleCode} />
@@ -231,7 +231,7 @@
 
         <h3 class="h5 mt-4">Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -240,7 +240,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>

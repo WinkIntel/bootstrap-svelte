@@ -36,12 +36,14 @@ describe('/components/collapse/+page.svelte', () => {
             const multipleSection = container.querySelector('#multiple-targets');
             expect(multipleSection).toBeInTheDocument();
 
-            const buttons = multipleSection?.querySelectorAll('button');
-            expect(buttons?.length).toBe(3);
+            const buttons = Array.from(multipleSection?.querySelectorAll('button') ?? []).filter((button) =>
+                ['Toggle First Element', 'Toggle Second Element', 'Toggle Both Elements'].includes(button.textContent?.trim() ?? '')
+            );
+            expect(buttons.length).toBe(3);
 
-            expect(buttons?.[0]).toHaveTextContent('Toggle First Element');
-            expect(buttons?.[1]).toHaveTextContent('Toggle Second Element');
-            expect(buttons?.[2]).toHaveTextContent('Toggle Both Elements');
+            expect(buttons[0]).toHaveTextContent('Toggle First Element');
+            expect(buttons[1]).toHaveTextContent('Toggle Second Element');
+            expect(buttons[2]).toHaveTextContent('Toggle Both Elements');
         });
     });
 

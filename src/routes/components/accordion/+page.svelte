@@ -368,7 +368,7 @@
 
             <h4 class="h6 mt-3">Props</h4>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -377,7 +377,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         {#each apiComponent.props as prop, propIndex (`apiComponent-${apiComponentIndex}-prop-${propIndex}`)}
                             <tr>
                                 <td><code>{prop.name}</code></td>

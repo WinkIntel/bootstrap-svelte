@@ -589,22 +589,27 @@
     <section class="mb-5">
         <h2 class="wk-quick-link">Accessibility</h2>
         <p>
-            Toasts are intended to be small interruptions to your visitors or users, so to help those with screen readers and similar assistive
-            technologies, toasts are wrapped in an <code>aria-live</code> region.
+            Toasts are status messages, not modal dialogs. Render the toast container before updating the toast content so assistive technologies can
+            detect the change in a live region.
         </p>
 
-        <p>
-            The <code>Toast.Root</code> component handles accessibility by setting appropriate ARIA attributes:
-        </p>
+        <p>Match the announcement priority to the content:</p>
         <ul>
-            <li>Sets <code>role="alert"</code> and <code>aria-live="assertive"</code> for important notifications</li>
-            <li>Includes <code>aria-atomic="true"</code> to ensure the entire toast is announced as a single unit</li>
+            <li>Use <code>role="status"</code> with <code>aria-live="polite"</code> for routine confirmations and background updates.</li>
+            <li>Use <code>role="alert"</code> with <code>aria-live="assertive"</code> only for urgent messages that need immediate attention.</li>
+            <li>Keep <code>aria-atomic="true"</code> so the whole toast is announced as one message.</li>
         </ul>
 
         <div class="alert alert-info">
-            <strong>Note:</strong> For toasts with <code>doAutohide={false}</code>, the component includes a close button to allow users to dismiss
-            the toast.
+            <strong>Timing:</strong> Avoid auto-hiding important, interactive, or lengthy messages. When a toast does auto-hide, give users enough time
+            to read it, pause the timer while the toast is hovered or focused, and provide a visible dismiss control for persistent messages.
         </div>
+
+        <p>
+            Do not move focus to a toast just because it appears. Keep keyboard focus where the user is working unless the toast contains an action
+            that the user explicitly opened or must complete. If a toast includes buttons or links, make sure it remains visible while focus is inside
+            it and can be dismissed without requiring pointer input.
+        </p>
     </section>
 
     <section class="mb-5">
@@ -616,7 +621,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -625,7 +630,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>children</code></td>
                                 <td><code>Snippet</code></td>
@@ -704,7 +709,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -713,7 +718,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>children</code></td>
                                 <td><code>Snippet</code></td>
@@ -750,7 +755,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -759,7 +764,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>children</code></td>
                                 <td><code>Snippet</code></td>
@@ -790,7 +795,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -799,7 +804,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>children</code></td>
                                 <td><code>Snippet</code></td>
@@ -838,14 +843,14 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Class</th>
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>.toast</code></td>
                                 <td>Main container class for the toast</td>

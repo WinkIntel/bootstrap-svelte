@@ -639,7 +639,7 @@ export type ScrollspyOptions = {
         </div>
         <h4>Options</h4>
         <div class="table-responsive">
-            <table class="table">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Option</th>
@@ -648,7 +648,7 @@ export type ScrollspyOptions = {
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>targetSelector</code></td>
                         <td><code>string</code></td>
