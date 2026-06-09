@@ -705,6 +705,6 @@
 
 <style>
     .wk-list-group-example {
-        background-color: white;
+        background-color: var(--bs-tertiary-bg);
     }
 </style>
