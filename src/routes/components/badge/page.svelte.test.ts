@@ -210,13 +210,13 @@ describe('/components/badge/+page.svelte', () => {
 
     // Subtle Badges tests
     describe('Subtle badges', () => {
-        test('should render subtle badge with text-dark', () => {
+        test('should render subtle badge with matching emphasis text color', () => {
             const { container } = render(Page);
             const badge = container.querySelector('#subtleSecondary');
             expect(badge).toBeInTheDocument();
             expect(badge).toHaveClass('badge');
             expect(badge).toHaveClass('bg-secondary-subtle');
-            expect(badge).toHaveClass('text-dark');
+            expect(badge).toHaveClass('text-secondary-emphasis');
             expect(badge).toHaveTextContent('Subtle');
         });
     });
