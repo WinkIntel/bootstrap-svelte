@@ -42,7 +42,7 @@
                 <div class="col">
                     <h4 class="h6">Preview</h4>
 
-                    <div class="p-0 border rounded bg-light" style="min-height: 300px; position: relative; overflow: hidden;">
+                    <div class="p-0 border rounded bg-light" data-bs-theme="light" style="min-height: 300px; position: relative; overflow: hidden;">
                         <div class="bg-secondary bg-opacity-10 p-2 text-muted small border-bottom">
                             Container Preview (colored to show boundaries)
                         </div>

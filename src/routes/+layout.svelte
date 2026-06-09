@@ -794,6 +794,23 @@
         color: var(--wk-muted-color) !important;
     }
 
+    :global(.wk-content [data-bs-theme] h1),
+    :global(.wk-content [data-bs-theme] h2),
+    :global(.wk-content [data-bs-theme] h3),
+    :global(.wk-content [data-bs-theme] h4),
+    :global(.wk-content [data-bs-theme] h5),
+    :global(.wk-content [data-bs-theme] h6),
+    :global(.wk-content [data-bs-theme] p),
+    :global(.wk-content [data-bs-theme] li) {
+        color: var(--bs-body-color);
+    }
+
+    :global(.wk-content [data-bs-theme] .text-secondary),
+    :global(.wk-content [data-bs-theme] .text-body-secondary),
+    :global(.wk-content [data-bs-theme] .text-muted) {
+        color: var(--bs-secondary-color) !important;
+    }
+
     :global(.wk-content a:not(.btn)) {
         color: var(--wk-link-color);
     }
