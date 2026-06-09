@@ -392,7 +392,7 @@
 
 <style>
     .wk-placeholder-example {
-        background-color: white;
+        background-color: var(--bs-tertiary-bg);
     }
     p {
         margin-bottom: 0.5rem;
