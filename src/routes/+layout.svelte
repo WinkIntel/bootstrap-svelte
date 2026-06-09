@@ -967,6 +967,10 @@
         color: #94a3b8;
     }
 
+    :global([data-bs-theme='dark'] .wk-docs-shell .form-floating > .form-control::placeholder) {
+        color: transparent;
+    }
+
     :global([data-bs-theme='dark'] .wk-docs-shell .form-label),
     :global([data-bs-theme='dark'] .wk-docs-shell .form-check-label) {
         color: var(--wk-heading-color);
