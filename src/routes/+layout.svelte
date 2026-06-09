@@ -783,9 +783,7 @@
     }
 
     :global(.wk-content p),
-    :global(.wk-content li),
-    :global(.wk-content td),
-    :global(.wk-content th) {
+    :global(.wk-content li) {
         color: var(--wk-body-color);
     }
 
