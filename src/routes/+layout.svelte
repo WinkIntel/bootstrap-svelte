@@ -917,7 +917,7 @@
         --bs-link-hover-color: var(--wk-link-hover-color);
     }
 
-    :global([data-bs-theme='dark'] .wk-docs-shell .card),
+    :global([data-bs-theme='dark'] .wk-docs-shell .card:not([class*='text-bg-'])),
     :global([data-bs-theme='dark'] .wk-docs-shell .dropdown-menu),
     :global([data-bs-theme='dark'] .wk-docs-shell .list-group),
     :global([data-bs-theme='dark'] .wk-docs-shell .toast) {
@@ -930,12 +930,17 @@
         color: var(--wk-body-color);
     }
 
-    :global([data-bs-theme='dark'] .wk-docs-shell .card-header),
-    :global([data-bs-theme='dark'] .wk-docs-shell .card-footer),
+    :global([data-bs-theme='dark'] .wk-docs-shell .card:not([class*='text-bg-']) > .card-header),
+    :global([data-bs-theme='dark'] .wk-docs-shell .card:not([class*='text-bg-']) > .card-footer),
     :global([data-bs-theme='dark'] .wk-docs-shell .toast-header) {
         background-color: var(--wk-surface-soft);
         border-color: var(--wk-border);
         color: var(--wk-heading-color);
+    }
+
+    :global(.wk-docs-shell .card[class*='text-bg-'] > .card-header),
+    :global(.wk-docs-shell .card[class*='text-bg-'] > .card-footer) {
+        background-color: transparent;
     }
 
     :global([data-bs-theme='dark'] .wk-docs-shell .bg-light),
