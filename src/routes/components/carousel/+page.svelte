@@ -834,6 +834,6 @@
 
 <style>
     .wk-carousel-example {
-        background-color: white;
+        background-color: var(--bs-tertiary-bg);
     }
 </style>
