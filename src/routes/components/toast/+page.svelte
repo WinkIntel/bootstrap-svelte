@@ -616,7 +616,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -625,7 +625,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>children</code></td>
                                 <td><code>Snippet</code></td>
@@ -704,7 +704,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -713,7 +713,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>children</code></td>
                                 <td><code>Snippet</code></td>
@@ -750,7 +750,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -759,7 +759,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>children</code></td>
                                 <td><code>Snippet</code></td>
@@ -790,7 +790,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -799,7 +799,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>children</code></td>
                                 <td><code>Snippet</code></td>
@@ -838,14 +838,14 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Class</th>
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>.toast</code></td>
                                 <td>Main container class for the toast</td>

@@ -4,17 +4,36 @@
     import routeJson from './(common)/routes.json' with { type: 'json' };
     import type { RouteType } from './(common)/types.js';
 
+    type ColorMode = 'auto' | 'dark' | 'light';
+
+    const installCommand = 'pnpm add @winkintel/bootstrap-svelte';
+    const colorModeLabels: Record<ColorMode, string> = {
+        auto: 'Auto',
+        dark: 'Dark',
+        light: 'Light'
+    };
+    const colorModeIcons: Record<ColorMode, string> = {
+        auto: 'bi-circle-half',
+        dark: 'bi-moon-stars',
+        light: 'bi-sun'
+    };
+    const colorModeOptions: ColorMode[] = ['dark', 'light', 'auto'];
+
     let { children }: { children: Snippet } = $props();
 
     let sidebarIsShown: boolean = $state(false);
     let sidebarIsMobile: boolean = $state(false);
     let searchQuery: string = $state('');
+    let colorMode: ColorMode = $state('auto');
+    let installCopied: boolean = $state(false);
     let sidebarElement: HTMLElement | null = $state(null);
     let sidebarOverlayElement: HTMLDivElement | null = $state(null);
     let sidebarToggleElement: HTMLButtonElement | null = $state(null);
     let sidebarCloseElement: HTMLButtonElement | null = $state(null);
     let previousSidebarIsShown: boolean = $state(false);
     let previousActiveRoute: string = $state('');
+    let colorModeMediaQuery: MediaQueryList | null = null;
+    let installCopiedTimeout: ReturnType<typeof setTimeout> | undefined;
     let routes: RouteType[] = routeJson as RouteType[];
     let activeRoute: string = $derived(page.url.pathname);
     let pageHeadings = $state<{ id: string; text: string }[]>([]);
@@ -22,6 +41,9 @@
     let activeRouteSection: string = $derived(getActiveRouteSection(activeRoute));
     let pageTitle: string = $derived(`${activeRouteLabel} | Bootstrap Svelte`);
     let sidebarIsInert: boolean = $derived(sidebarIsMobile && !sidebarIsShown);
+    let colorModeLabel: string = $derived(colorModeLabels[colorMode]);
+    let colorModeIcon: string = $derived(colorModeIcons[colorMode]);
+    let copyInstallLabel: string = $derived(installCopied ? 'Install command copied' : 'Copy install command');
     let filteredRoutes: RouteType[] = $derived.by(() => {
         const query = searchQuery.trim().toLowerCase();
         if (!query) return routes;
@@ -52,12 +74,23 @@
 
     onMount(() => {
         updateSidebarViewport();
+        const savedColorMode = localStorage.getItem('wk-color-mode');
+        if (isColorMode(savedColorMode)) colorMode = savedColorMode;
+
+        colorModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        colorModeMediaQuery.addEventListener('change', handleSystemColorModeChange);
+        applyColorMode(colorMode);
 
         if (import.meta.hot) {
             import.meta.hot.on('vite:afterUpdate', () => {
                 buildPageHeadings();
             });
         }
+
+        return () => {
+            colorModeMediaQuery?.removeEventListener('change', handleSystemColorModeChange);
+            if (installCopiedTimeout) clearTimeout(installCopiedTimeout);
+        };
     });
 
     function getActiveRouteLabel(pathname: string): string {
@@ -172,6 +205,56 @@
 
     function clearSearch(): void {
         searchQuery = '';
+    }
+
+    function isColorMode(value: string | null): value is ColorMode {
+        return value === 'auto' || value === 'dark' || value === 'light';
+    }
+
+    function getSystemColorMode(): Exclude<ColorMode, 'auto'> {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyColorMode(mode: ColorMode): void {
+        const resolvedMode = mode === 'auto' ? getSystemColorMode() : mode;
+        document.documentElement.setAttribute('data-bs-theme', resolvedMode);
+    }
+
+    function handleSystemColorModeChange(): void {
+        if (colorMode === 'auto') applyColorMode(colorMode);
+    }
+
+    function setColorMode(mode: ColorMode): void {
+        colorMode = mode;
+        localStorage.setItem('wk-color-mode', mode);
+        applyColorMode(mode);
+    }
+
+    function cycleColorMode(): void {
+        const currentIndex = colorModeOptions.indexOf(colorMode);
+        const nextIndex = currentIndex === colorModeOptions.length - 1 ? 0 : currentIndex + 1;
+        setColorMode(colorModeOptions[nextIndex] ?? 'auto');
+    }
+
+    async function copyInstallCommand(): Promise<void> {
+        try {
+            await navigator.clipboard.writeText(installCommand);
+        } catch {
+            const textArea = document.createElement('textarea');
+            textArea.value = installCommand;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.append(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            textArea.remove();
+        }
+
+        installCopied = true;
+        if (installCopiedTimeout) clearTimeout(installCopiedTimeout);
+        installCopiedTimeout = setTimeout(() => {
+            installCopied = false;
+        }, 1800);
     }
 
     function getFocusableElements(container: HTMLElement): HTMLElement[] {
@@ -316,7 +399,52 @@
                 <div class="wk-current-page">{activeRouteLabel}</div>
             </div>
             <div class="wk-topbar-actions">
-                <code class="wk-install-chip">pnpm add @winkintel/bootstrap-svelte</code>
+                <div class="wk-install-action">
+                    <code class="wk-install-chip">{installCommand}</code>
+                    <button
+                        class="btn btn-sm btn-outline-secondary"
+                        type="button"
+                        onclick={copyInstallCommand}
+                        aria-label={copyInstallLabel}
+                        title={copyInstallLabel}>
+                        <i class={installCopied ? 'bi bi-check2' : 'bi bi-clipboard'} aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="btn-group">
+                    <button
+                        class="btn btn-sm btn-outline-secondary"
+                        type="button"
+                        onclick={cycleColorMode}
+                        aria-label={`Cycle color mode. Current mode: ${colorModeLabel}`}
+                        title={`Current color mode: ${colorModeLabel}`}>
+                        <i class={`bi ${colorModeIcon} me-1`} aria-hidden="true"></i>
+                        {colorModeLabel}
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Change color mode"
+                        title="Change color mode">
+                        <span class="visually-hidden">Toggle color mode</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {#each colorModeOptions as mode (mode)}
+                            <li>
+                                <button
+                                    class="dropdown-item d-flex align-items-center gap-2"
+                                    class:active={colorMode === mode}
+                                    type="button"
+                                    onclick={() => setColorMode(mode)}
+                                    aria-current={colorMode === mode ? 'true' : undefined}>
+                                    <i class={`bi ${colorModeIcons[mode]}`} aria-hidden="true"></i>
+                                    {colorModeLabels[mode]}
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
                 <a class="btn btn-sm btn-dark" href="https://github.com/WinkIntel/bootstrap-svelte" target="_blank" rel="noreferrer">GitHub</a>
             </div>
         </header>
@@ -570,12 +698,70 @@
         margin-left: auto;
     }
 
+    .wk-install-action {
+        align-items: center;
+        display: inline-flex;
+        gap: 0.35rem;
+    }
+
     .wk-install-chip {
         background: #172033;
         border-radius: 999px;
         color: #f8f9fa;
         font-size: 0.8rem;
         padding: 0.45rem 0.75rem;
+    }
+
+    :global([data-bs-theme='dark'] body) {
+        background:
+            radial-gradient(circle at top left, rgba(112, 44, 249, 0.2), transparent 30rem), linear-gradient(180deg, #111827 0%, #0b1020 22rem);
+        color: #f8f9fa;
+    }
+
+    :global([data-bs-theme='dark']) .wk-docs-sidebar,
+    :global([data-bs-theme='dark']) .wk-docs-topbar,
+    :global([data-bs-theme='dark']) .wk-mobile-toc,
+    :global([data-bs-theme='dark']) .wk-toc-card {
+        background: rgba(17, 24, 39, 0.88);
+        border-color: rgba(248, 249, 250, 0.16);
+    }
+
+    :global([data-bs-theme='dark']) .wk-brand-subtitle,
+    :global([data-bs-theme='dark']) .wk-docs-search .form-text,
+    :global([data-bs-theme='dark']) .wk-search-empty,
+    :global([data-bs-theme='dark']) .wk-eyebrow,
+    :global([data-bs-theme='dark']) .wk-toc-title,
+    :global([data-bs-theme='dark']) .wk-toc-empty {
+        color: #aeb7c2;
+    }
+
+    :global([data-bs-theme='dark']) .wk-docs-search .form-label,
+    :global([data-bs-theme='dark']) .wk-current-page,
+    :global([data-bs-theme='dark']) .wk-mobile-toc summary {
+        color: #f8f9fa;
+    }
+
+    :global([data-bs-theme='dark']) .wk-nav-link,
+    :global([data-bs-theme='dark']) .wk-toc-link,
+    :global([data-bs-theme='dark']) .wk-resource-links a {
+        color: #d5dce5;
+    }
+
+    :global([data-bs-theme='dark']) .wk-nav-link:hover,
+    :global([data-bs-theme='dark']) .wk-toc-link:hover,
+    :global([data-bs-theme='dark']) .wk-resource-links a:hover {
+        background: rgba(13, 110, 253, 0.16);
+        color: #8bb9fe;
+    }
+
+    :global([data-bs-theme='dark']) .wk-nav-link.active {
+        background: #f8f9fa;
+        color: #111827;
+    }
+
+    :global([data-bs-theme='dark']) .wk-install-chip {
+        background: #f8f9fa;
+        color: #111827;
     }
 
     .wk-docs-grid {

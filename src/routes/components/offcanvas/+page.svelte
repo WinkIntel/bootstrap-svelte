@@ -333,7 +333,7 @@
 
         <h3 class="h5 mt-4">Offcanvas.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -342,7 +342,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -441,7 +441,7 @@
 
         <h3 class="h5 mt-4">Offcanvas.Header Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -450,7 +450,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -475,7 +475,7 @@
 
         <h3 class="h5 mt-4">Offcanvas.Title Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -484,7 +484,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
@@ -509,7 +509,7 @@
 
         <h3 class="h5 mt-4">Offcanvas.Body Props</h3>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -518,7 +518,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>

@@ -1873,7 +1873,7 @@
                 <h3 class="h5">Table Element Classes</h3>
                 <p class="text-muted">Classes applied to the <code>&lt;table&gt;</code> element</p>
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-sm">
                         <thead>
                             <tr>
                                 <th>Class Name</th>
@@ -1881,7 +1881,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>table</code></td>
                                 <td><span class="badge bg-primary">Bootstrap v5</span></td>
@@ -1957,7 +1957,7 @@
                 <h3 class="h5">Container & Wrapper Classes</h3>
                 <p class="text-muted">Classes applied to wrapper elements around the table</p>
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-sm">
                         <thead>
                             <tr>
                                 <th>Class Name</th>
@@ -1965,7 +1965,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>table-container</code></td>
                                 <td><span class="badge bg-success">Custom</span></td>
@@ -2001,7 +2001,7 @@
                 <h3 class="h5">Row & Cell Classes</h3>
                 <p class="text-muted">Classes applied to <code>&lt;tr&gt;</code>, <code>&lt;th&gt;</code>, and <code>&lt;td&gt;</code> elements</p>
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-sm">
                         <thead>
                             <tr>
                                 <th>Class Name</th>
@@ -2009,7 +2009,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>table-active</code></td>
                                 <td><span class="badge bg-primary">Bootstrap v5</span></td>
@@ -2046,7 +2046,7 @@
                     Classes applied to <code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, and <code>&lt;tfoot&gt;</code> elements
                 </p>
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-sm">
                         <thead>
                             <tr>
                                 <th>Class Name</th>
@@ -2054,7 +2054,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>table-light</code></td>
                                 <td><span class="badge bg-primary">Bootstrap v5</span></td>

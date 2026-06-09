@@ -729,7 +729,7 @@
             <h3>Modal.Root Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Root props API table">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -738,7 +738,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -828,7 +828,7 @@
             <h3>Modal.Content Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Content props API table">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -837,7 +837,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -865,7 +865,7 @@
             <h3>Modal.Dialog Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Dialog props API table">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -874,7 +874,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -926,7 +926,7 @@
             <h3>Modal.Footer Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Footer props API table">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -935,7 +935,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -963,7 +963,7 @@
             <h3>Modal.Header Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Header props API table">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -972,7 +972,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -1006,7 +1006,7 @@
             <h3>Modal.Title Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Title props API table">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -1015,7 +1015,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>class</code></td>
                             <td><code>string</code></td>
@@ -1051,7 +1051,7 @@
 
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal CSS classes table">
-                <table class="table table-bordered">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Class</th>
@@ -1059,7 +1059,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-group-divider">
                         <tr>
                             <td><code>.modal</code></td>
                             <td>Modal.Root</td>

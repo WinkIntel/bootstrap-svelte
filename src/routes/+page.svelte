@@ -36,7 +36,7 @@ pnpm add svelte@~5.0.0`;
 
 <section class="wk-hero">
     <div class="wk-hero-copy">
-        <div class="wk-pill">Private preview · Svelte 5 · Bootstrap components</div>
+        <div class="wk-pill">Svelte 5 · Bootstrap components</div>
         <h1>Bootstrap components, rebuilt for Svelte.</h1>
         <p>
             Bootstrap Svelte packages a focused set of Bootstrap-compatible UI primitives for Svelte 5 apps, with live examples and package-local
@@ -57,7 +57,7 @@ pnpm add svelte@~5.0.0`;
         <div class="wk-preview-card">
             <div class="alert alert-primary d-flex justify-content-between align-items-center" role="alert">
                 <span>Bootstrap styling, Svelte ergonomics.</span>
-                <span class="badge text-bg-primary">v0.0.1</span>
+                <span class="badge text-bg-primary">v1.0.0</span>
             </div>
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -66,7 +66,6 @@ pnpm add svelte@~5.0.0`;
                             <h2 class="h5 mb-2">Typed component APIs</h2>
                             <p class="text-secondary mb-0">Compose forms, overlays, navigation, tables, and feedback patterns.</p>
                         </div>
-                        <span class="btn btn-dark btn-sm">Preview</span>
                     </div>
                 </div>
             </div>
@@ -147,12 +146,9 @@ pnpm add svelte@~5.0.0`;
     <div>
         <p class="wk-section-kicker">Next</p>
         <h2 class="wk-quick-link">What to review</h2>
-        <p>
-            Before public release, review the placeholder license, npm package metadata, component API consistency, accessibility notes, and the final
-            showcase visual direction.
-        </p>
+        <p>Review the license, npm package metadata, component API consistency, accessibility notes, and showcase visual direction.</p>
     </div>
-    <a class="btn btn-dark" href="/components/alert">Open first component</a>
+    <a class="btn btn-dark" href="/components/accordion">Open first component</a>
 </section>
 
 <style>

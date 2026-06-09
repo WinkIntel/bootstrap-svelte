@@ -287,7 +287,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -296,7 +296,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>container</code></td>
                                 <td><code>string | HTMLElement | false</code></td>
@@ -373,7 +373,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -382,7 +382,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td>All <code>div</code> element props</td>
                                 <td>Various</td>
@@ -401,14 +401,14 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Class</th>
                                 <th>Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <tr>
                                 <td><code>.tooltip</code></td>
                                 <td>Main container class for the tooltip</td>

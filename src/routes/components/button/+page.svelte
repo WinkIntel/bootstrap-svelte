@@ -221,7 +221,7 @@
         <h3 class="h5 mt-4">Props</h3>
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <div class="table-responsive" tabindex="0" role="region" aria-label="Button props API table">
-            <table class="table table-bordered">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -230,7 +230,7 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>
