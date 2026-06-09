@@ -61,7 +61,7 @@
                 Code could not be copied.
             {/if}
         </span>
-        <button class="btn btn-sm btn-outline-dark" type="button" onclick={copyCode} aria-label={`Copy ${label.toLowerCase()}`}>
+        <button class="btn btn-sm btn-outline-secondary" type="button" onclick={copyCode} aria-label={`Copy ${label.toLowerCase()}`}>
             {copyStatus === 'copied' ? 'Copied' : 'Copy'}
         </button>
     </div>
@@ -76,21 +76,24 @@
 
 <style>
     .wk-code-example {
-        background: #fff;
+        background: var(--wk-code-bg, #fff);
+        border-color: var(--wk-border, rgba(108, 117, 125, 0.2)) !important;
         overflow: hidden;
     }
 
     .wk-code-toolbar {
         align-items: center;
-        background: #f8f9fa;
-        border-bottom: 1px solid rgba(108, 117, 125, 0.2);
+        background: var(--wk-code-toolbar-bg, #f8f9fa);
+        border-bottom: 1px solid var(--wk-border, rgba(108, 117, 125, 0.2));
         display: flex;
         justify-content: flex-end;
         padding: 0.45rem 0.6rem;
     }
 
     .wk-code-scroll {
+        background: var(--wk-code-bg, #fff);
         overflow: auto;
+        scrollbar-color: var(--wk-border-strong, rgba(108, 117, 125, 0.28)) var(--wk-code-bg, #fff);
     }
 
     :global(.wk-code-scroll pre) {
@@ -103,7 +106,65 @@
     }
 
     :global(.wk-code-scroll code.hljs) {
+        background: var(--wk-code-bg, #fff) !important;
+        color: var(--wk-code-color, #172033) !important;
         font-size: 0.75rem !important;
         overflow: visible !important;
+    }
+
+    :global([data-bs-theme='dark'] .wk-code-example .btn-outline-secondary) {
+        --bs-btn-color: #dbeafe;
+        --bs-btn-border-color: #64748b;
+        --bs-btn-hover-bg: #334155;
+        --bs-btn-hover-border-color: #94a3b8;
+        --bs-btn-hover-color: #ffffff;
+        --bs-btn-active-bg: #475569;
+        --bs-btn-active-border-color: #94a3b8;
+        --bs-btn-active-color: #ffffff;
+    }
+
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-comment),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-quote) {
+        color: #94a3b8 !important;
+    }
+
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-keyword),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-selector-tag),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-subst) {
+        color: #c4b5fd !important;
+    }
+
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-string),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-attr),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-symbol),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-bullet),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-addition) {
+        color: #86efac !important;
+    }
+
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-title),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-section),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-name),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-selector-id),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-selector-class) {
+        color: #93c5fd !important;
+    }
+
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-number),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-literal),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-variable),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-template-variable),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-type) {
+        color: #fbbf24 !important;
+    }
+
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-built_in),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-builtin-name),
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-tag) {
+        color: #67e8f9 !important;
+    }
+
+    :global([data-bs-theme='dark'] .wk-code-scroll .hljs-deletion) {
+        color: #fca5a5 !important;
     }
 </style>

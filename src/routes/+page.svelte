@@ -44,7 +44,7 @@ pnpm add svelte@~5.0.0`;
         </p>
         <div class="wk-hero-actions">
             <a class="btn btn-primary btn-lg" href="/components/button">Browse components</a>
-            <a class="btn btn-outline-dark btn-lg" href="#installation">Install package</a>
+            <a class="btn btn-outline-dark btn-lg wk-hero-secondary-action" href="#installation">Install package</a>
         </div>
     </div>
 
@@ -162,7 +162,7 @@ pnpm add svelte@~5.0.0`;
     }
 
     .wk-hero-copy h1 {
-        color: #101827;
+        color: var(--wk-heading-color);
         font-size: 4.75rem;
         font-weight: 850;
         letter-spacing: 0;
@@ -172,7 +172,7 @@ pnpm add svelte@~5.0.0`;
     }
 
     .wk-hero-copy p {
-        color: #5f6b7a;
+        color: var(--wk-muted-color);
         font-size: 1.18rem;
         line-height: 1.65;
         max-width: 46rem;
@@ -180,7 +180,7 @@ pnpm add svelte@~5.0.0`;
 
     .wk-pill,
     .wk-section-kicker {
-        color: #6f42c1;
+        color: var(--wk-accent-color);
         font-size: 0.78rem;
         font-weight: 800;
         letter-spacing: 0.13em;
@@ -203,8 +203,8 @@ pnpm add svelte@~5.0.0`;
     }
 
     .wk-hero-panel {
-        background: linear-gradient(135deg, rgba(13, 110, 253, 0.12), rgba(111, 66, 193, 0.14)), rgba(255, 255, 255, 0.8);
-        border: 1px solid rgba(108, 117, 125, 0.16);
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.12), rgba(111, 66, 193, 0.14)), var(--wk-surface);
+        border: 1px solid var(--wk-border);
         border-radius: 2rem;
         box-shadow: 0 2rem 5rem rgba(15, 23, 42, 0.12);
         overflow: hidden;
@@ -218,14 +218,14 @@ pnpm add svelte@~5.0.0`;
     }
 
     .wk-window-bar span {
-        background: rgba(23, 32, 51, 0.22);
+        background: color-mix(in srgb, var(--wk-body-color) 22%, transparent);
         border-radius: 999px;
         height: 0.75rem;
         width: 0.75rem;
     }
 
     .wk-preview-card {
-        background: #fff;
+        background: var(--wk-surface-elevated);
         border-radius: 1.25rem;
         display: grid;
         gap: 1rem;
@@ -244,8 +244,8 @@ pnpm add svelte@~5.0.0`;
     .wk-principle-grid article,
     .wk-next-steps,
     .wk-code-grid > div {
-        background: rgba(255, 255, 255, 0.82);
-        border: 1px solid rgba(108, 117, 125, 0.16);
+        background: var(--wk-surface);
+        border: 1px solid var(--wk-border);
         border-radius: 1.25rem;
         box-shadow: 0 1rem 2rem rgba(15, 23, 42, 0.05);
     }
@@ -260,13 +260,13 @@ pnpm add svelte@~5.0.0`;
     }
 
     .wk-stats strong {
-        color: #172033;
+        color: var(--wk-heading-color);
         font-size: 1.35rem;
         letter-spacing: -0.04em;
     }
 
     .wk-stats span {
-        color: #6c757d;
+        color: var(--wk-muted-color);
         font-size: 0.92rem;
         margin-top: 0.2rem;
     }
@@ -291,7 +291,7 @@ pnpm add svelte@~5.0.0`;
 
     .wk-section-heading p,
     .wk-next-steps p {
-        color: #5f6b7a;
+        color: var(--wk-muted-color);
         font-size: 1.05rem;
         line-height: 1.7;
     }
@@ -320,7 +320,7 @@ pnpm add svelte@~5.0.0`;
     }
 
     .wk-component-card {
-        color: #172033;
+        color: var(--wk-heading-color);
         display: grid;
         min-height: 8rem;
         padding: 1.1rem;
@@ -344,7 +344,7 @@ pnpm add svelte@~5.0.0`;
 
     .wk-component-card small {
         align-self: end;
-        color: #0d6efd;
+        color: var(--wk-link-color);
         font-weight: 700;
     }
 
@@ -365,7 +365,7 @@ pnpm add svelte@~5.0.0`;
     }
 
     .wk-principle-grid p {
-        color: #5f6b7a;
+        color: var(--wk-muted-color);
         line-height: 1.65;
         margin-bottom: 0;
     }
@@ -381,6 +381,41 @@ pnpm add svelte@~5.0.0`;
     .wk-next-steps p {
         margin-bottom: 0;
         max-width: 58rem;
+    }
+
+    :global([data-bs-theme='dark']) .wk-hero-copy h1 {
+        color: #f8fbff;
+        text-shadow: 0 0.08rem 1.25rem rgba(139, 185, 254, 0.12);
+    }
+
+    :global([data-bs-theme='dark']) .wk-hero-copy p {
+        color: #cbd5e1;
+    }
+
+    :global([data-bs-theme='dark']) .wk-pill {
+        background: rgba(196, 181, 253, 0.16);
+        border-color: rgba(196, 181, 253, 0.42);
+        color: #ddd6fe;
+    }
+
+    :global([data-bs-theme='dark']) .wk-hero-secondary-action {
+        --bs-btn-color: #f8fbff;
+        --bs-btn-border-color: #94a3b8;
+        --bs-btn-hover-bg: #f8fbff;
+        --bs-btn-hover-border-color: #f8fbff;
+        --bs-btn-hover-color: #0b1020;
+        --bs-btn-active-bg: #e2e8f0;
+        --bs-btn-active-border-color: #e2e8f0;
+        --bs-btn-active-color: #0b1020;
+    }
+
+    :global([data-bs-theme='dark']) .wk-hero-panel {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.18), rgba(196, 181, 253, 0.14)), #111827;
+        box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.34);
+    }
+
+    :global([data-bs-theme='dark']) .wk-preview-card {
+        background: #182235;
     }
 
     @media (max-width: 1199.98px) {
