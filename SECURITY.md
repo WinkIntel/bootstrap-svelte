@@ -1,12 +1,12 @@
 # Security Policy
 
-This repository is currently private while WinkIntel prepares Bootstrap Svelte for public release.
+WinkIntel takes the security of Bootstrap Svelte seriously.
 
 ## Reporting a vulnerability
 
-For now, report suspected vulnerabilities directly to the WinkIntel maintainers through the private repository or internal WinkIntel channels.
+Report suspected vulnerabilities privately through GitHub's vulnerability reporting flow for this repository when available, or contact the WinkIntel maintainers directly.
 
-Before public release, WinkIntel should replace this placeholder with the final public security reporting process.
+Please do not publicly disclose a suspected vulnerability until WinkIntel has had a reasonable opportunity to investigate and coordinate a fix.
 
 ## Scope
 

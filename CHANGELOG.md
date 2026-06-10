@@ -2,8 +2,16 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 0.0.2
+
+- Published the first usable public npm release under `@winkintel/bootstrap-svelte`.
+- Licensed the package under Apache License 2.0.
+- Declared runtime dependencies required by packaged output: `@popperjs/core`, `bezier-easing`, and `clsx`.
+- Widened the Svelte peer dependency to `^5.0.0` so current Svelte 5 applications can install cleanly.
+- Deprecated `0.0.1` because its Svelte peer dependency was too narrow.
+
 ## 0.0.1-private-preview
 
 - Initial private GitHub preview prepared from the approved Bootstrap Svelte package source.
 - Package renamed for public npm scope preparation: `@winkintel/bootstrap-svelte`.
-- License intentionally left as a placeholder pending WinkIntel's final public release decision.
+- License was deferred until public release readiness.

@@ -16,12 +16,12 @@ Bootstrap Svelte provides ready-to-use, type-safe Bootstrap components built spe
 ## Installation
 
 ```bash
-pnpm add @winkintel/bootstrap-svelte
+pnpm add @winkintel/bootstrap-svelte bootstrap
 
 # or
-npm install @winkintel/bootstrap-svelte
+npm install @winkintel/bootstrap-svelte bootstrap
 
-yarn add @winkintel/bootstrap-svelte
+yarn add @winkintel/bootstrap-svelte bootstrap
 ```
 
 ### Peer dependency
@@ -29,8 +29,10 @@ yarn add @winkintel/bootstrap-svelte
 This package requires Svelte 5:
 
 ```bash
-pnpm add svelte@~5.0.0
+pnpm add svelte@^5.0.0
 ```
+
+Bootstrap CSS is expected to be provided by the consuming application.
 
 ## Bootstrap CSS
 
