@@ -1,0 +1,87 @@
+name: Publish
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: npm dist-tag to publish
+        type: choice
+        required: true
+        default: next
+        options:
+          - next
+          - latest
+      dry-run:
+        description: Run publish checks without publishing to npm
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          registry-url: https://registry.npmjs.org
+
+      - name: Setup pnpm with Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.5.2 --activate
+          pnpm --version
+          npm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm check-types
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build and package lint
+        run: pnpm build
+
+      - name: Inspect npm package contents
+        run: npm pack --dry-run
+
+      - name: Verify package version is unpublished
+        if: ${{ !inputs.dry-run }}
+        run: |
+          PKG=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$PKG@$VERSION" version >/dev/null 2>&1; then
+            echo "Package $PKG@$VERSION is already published. Bump package.json before publishing."
+            exit 1
+          fi
+
+      - name: Publish dry run
+        if: ${{ inputs.dry-run }}
+        run: npm publish --access public --tag "${{ inputs.tag }}" --dry-run
+
+      - name: Publish to npm
+        if: ${{ !inputs.dry-run }}
+        run: npm publish --access public --tag "${{ inputs.tag }}"
