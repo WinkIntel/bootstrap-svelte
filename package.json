@@ -1,7 +1,7 @@
 {
     "author": "Wink, Inc.",
     "name": "@winkintel/bootstrap-svelte",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Bootstrap components for Svelte 5 with TypeScript support.",
     "license": "Apache-2.0",
     "repository": {
@@ -53,7 +53,7 @@
         }
     },
     "peerDependencies": {
-        "svelte": "~5.0.0"
+        "svelte": "^5.0.0"
     },
     "dependencies": {
         "@popperjs/core": "~2.11.8",
