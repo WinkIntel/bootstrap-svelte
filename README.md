@@ -209,7 +209,9 @@ Bootstrap Svelte targets modern browsers that support:
 
 ## License
 
-This private preview repository currently uses a placeholder license. Public release and npm publication are blocked until WinkIntel chooses the final license. See [LICENSE.md](./LICENSE.md).
+Licensed under the [Apache License 2.0](./LICENSE.md).
+
+Copyright 2026 Wink, Inc.
 
 ## Acknowledgments
 

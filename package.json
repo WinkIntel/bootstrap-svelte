@@ -3,7 +3,7 @@
     "name": "@winkintel/bootstrap-svelte",
     "version": "0.0.1",
     "description": "Bootstrap components for Svelte 5 with TypeScript support.",
-    "license": "SEE LICENSE IN LICENSE.md",
+    "license": "Apache-2.0",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/WinkIntel/bootstrap-svelte.git"
