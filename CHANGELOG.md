@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 0.0.3
+
+- Added GitHub Actions release workflow for npm trusted publishing.
+- Added release process documentation for dry runs and npm dist-tag selection.
+- Prepared the public repository for tokenless npm publishing through GitHub Actions OIDC.
+
 ## 0.0.2
 
 - Published the first usable public npm release under `@winkintel/bootstrap-svelte`.
