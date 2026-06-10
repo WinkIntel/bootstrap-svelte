@@ -1,17 +1,41 @@
 # Bootstrap Svelte
 
-> Bootstrap components for Svelte 5 with TypeScript support.
+> Bootstrap 5 components for Svelte 5 with TypeScript support.
 
-Bootstrap Svelte provides ready-to-use, type-safe Bootstrap components built specifically for Svelte 5 applications. The package follows Bootstrap's design language while exposing Svelte-native component APIs.
+Bootstrap Svelte provides ready-to-use, type-safe Bootstrap components for Svelte 5 applications. It follows Bootstrap's design language and class conventions while exposing Svelte-native component APIs.
+
+Use it when you want Bootstrap's familiar grid, utilities, and UI patterns in a Svelte app without copying Bootstrap markup by hand.
+
+## Links
+
+- npm: [`@winkintel/bootstrap-svelte`](https://www.npmjs.com/package/@winkintel/bootstrap-svelte)
+- Repository: [`WinkIntel/bootstrap-svelte`](https://github.com/WinkIntel/bootstrap-svelte)
+- Bootstrap: <https://getbootstrap.com/>
+- Svelte: <https://svelte.dev/>
+
+## Why this exists
+
+Bootstrap is still a practical choice for many product, enterprise, and internal applications: it is familiar, well documented, stable, and easy for mixed frontend/backend teams to work with.
+
+This package is for teams that specifically want Bootstrap in a Svelte 5 app, but would rather use maintained Svelte components than hand-roll Bootstrap's required markup and interactive behavior for every project.
+
+It is not trying to replace Tailwind, shadcn-style workflows, or fully custom design systems.
 
 ## Features
 
 - **Svelte 5 compatible** — built for current Svelte syntax and reactivity.
-- **Bootstrap-oriented components** — implements common Bootstrap UI patterns.
 - **TypeScript support** — component props and public utilities are typed.
+- **Bootstrap-oriented APIs** — keeps components close to Bootstrap's naming and mental model.
 - **Modular exports** — import only the components/utilities you need.
-- **Responsive by default** — intended to work with Bootstrap's responsive CSS.
-- **Package-local showcase** — the SvelteKit docs/showcase app lives in `src/routes`.
+- **Responsive by default** — designed to work with Bootstrap's responsive CSS.
+- **SvelteKit-friendly project structure** — the package-local showcase/docs app lives in `src/routes`.
+- **No bundled Bootstrap CSS** — consumers control their own Bootstrap CSS/SCSS pipeline.
+
+## Requirements
+
+- Svelte 5
+- Bootstrap 5 CSS supplied by the consuming application
+- A modern Svelte/Vite/SvelteKit-style build pipeline
 
 ## Installation
 
@@ -21,6 +45,7 @@ pnpm add @winkintel/bootstrap-svelte bootstrap
 # or
 npm install @winkintel/bootstrap-svelte bootstrap
 
+# or
 yarn add @winkintel/bootstrap-svelte bootstrap
 ```
 
@@ -32,11 +57,11 @@ This package requires Svelte 5:
 pnpm add svelte@^5.0.0
 ```
 
-Bootstrap CSS is expected to be provided by the consuming application.
-
 ## Bootstrap CSS
 
-Import Bootstrap CSS in your application:
+Bootstrap CSS is expected to be provided by your application.
+
+Import Bootstrap CSS in your app entry point or root layout:
 
 ```javascript
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -109,6 +134,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
 - `Placeholder`
 - `Progress`
 - `Spinner`
+- `Table`
 
 ### Navigation
 
@@ -116,6 +142,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
 - `Nav`
 - `Navbar`
 - `Pagination`
+- `Scrollspy`
 - `Tab`
 
 ### Interactive
@@ -123,6 +150,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
 - `Button`
 - `ButtonGroup`
 - `Carousel`
+- `CloseButton`
 - `Dropdown`
 - `Modal`
 - `Offcanvas`
@@ -137,6 +165,25 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
 - `Portal`
 - `BreakpointListener`
 - CSS/class/style utilities
+
+## Notes for SvelteKit and SSR
+
+Bootstrap Svelte is designed for Svelte 5 projects, including SvelteKit applications. Bootstrap CSS should be imported through the consuming app's normal CSS pipeline.
+
+Interactive components are implemented as Svelte components rather than requiring consumers to wire Bootstrap's JavaScript snippets manually. If you find an SSR or hydration edge case, please open an issue with a minimal reproduction.
+
+## Status and feedback
+
+This package is published as `1.0.0`, but feedback from Svelte developers is still very welcome. Useful feedback includes:
+
+- Component API ergonomics
+- Svelte 5 idioms and runes compatibility
+- Accessibility issues
+- SvelteKit/SSR edge cases
+- Missing Bootstrap components or variants
+- README/docs gaps
+
+Please use [GitHub Issues](https://github.com/WinkIntel/bootstrap-svelte/issues) for bugs, feature requests, and design/API feedback.
 
 ## Local development
 
