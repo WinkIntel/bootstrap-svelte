@@ -52,6 +52,8 @@ tag: next
 dry-run: true
 ```
 
+If the current `package.json` version is already published, the workflow skips `npm publish --dry-run` after completing the build, package lint, and `npm pack --dry-run` checks. For an unpublished version, it also runs `npm publish --dry-run`.
+
 4. If the dry run succeeds, run the same workflow again with:
 
 ```text

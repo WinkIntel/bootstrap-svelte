@@ -68,20 +68,35 @@ jobs:
       - name: Inspect npm package contents
         run: npm pack --dry-run
 
-      - name: Verify package version is unpublished
-        if: ${{ !inputs.dry-run }}
+      - name: Check package version status
+        id: package-version
         run: |
           PKG=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")
+          echo "package=$PKG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           if npm view "$PKG@$VERSION" version >/dev/null 2>&1; then
-            echo "Package $PKG@$VERSION is already published. Bump package.json before publishing."
-            exit 1
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "Package $PKG@$VERSION is already published."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "Package $PKG@$VERSION is not published yet."
           fi
 
+      - name: Fail if package version is already published
+        if: ${{ !inputs.dry-run && steps.package-version.outputs.published == 'true' }}
+        run: |
+          echo "Package ${{ steps.package-version.outputs.package }}@${{ steps.package-version.outputs.version }} is already published. Bump package.json before publishing."
+          exit 1
+
       - name: Publish dry run
-        if: ${{ inputs.dry-run }}
+        if: ${{ inputs.dry-run && steps.package-version.outputs.published != 'true' }}
         run: npm publish --access public --tag "${{ inputs.tag }}" --dry-run
 
+      - name: Skip publish dry run for existing version
+        if: ${{ inputs.dry-run && steps.package-version.outputs.published == 'true' }}
+        run: echo "Skipping npm publish --dry-run because ${{ steps.package-version.outputs.package }}@${{ steps.package-version.outputs.version }} already exists. Build, package lint, and npm pack dry run completed successfully."
+
       - name: Publish to npm
-        if: ${{ !inputs.dry-run }}
+        if: ${{ !inputs.dry-run && steps.package-version.outputs.published != 'true' }}
         run: npm publish --access public --tag "${{ inputs.tag }}"
