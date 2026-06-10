@@ -7,6 +7,16 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@popperjs/core':
+        specifier: ~2.11.8
+        version: 2.11.8
+      bezier-easing:
+        specifier: ~3.0.0
+        version: 3.0.0
+      clsx:
+        specifier: ~2.1.1
+        version: 2.1.1
     devDependencies:
       '@eslint/compat':
         specifier: ~2.1.0
@@ -14,9 +24,6 @@ importers:
       '@eslint/js':
         specifier: ~10.0.1
         version: 10.0.1(eslint@10.4.1)
-      '@popperjs/core':
-        specifier: ~2.11.8
-        version: 2.11.8
       '@sveltejs/adapter-vercel':
         specifier: ^6.3.3
         version: 6.3.3(@sveltejs/kit@2.61.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.2(@typescript-eslint/types@8.60.1))(vite@8.0.16(@types/node@25.9.2)(sass@1.77.6)))(svelte@5.56.2(@typescript-eslint/types@8.60.1))(typescript@6.0.3)(vite@8.0.16(@types/node@25.9.2)(sass@1.77.6)))(rollup@4.61.1)
@@ -50,12 +57,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: ~4.1.8
         version: 4.1.8(vitest@4.1.8)
-      bezier-easing:
-        specifier: ~3.0.0
-        version: 3.0.0
-      clsx:
-        specifier: ~2.1.1
-        version: 2.1.1
       eslint:
         specifier: ~10.4.1
         version: 10.4.1
