@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.0
+
+- Declared the public Bootstrap Svelte package as the first stable release.
+- Published from the public GitHub repository with npm trusted publishing.
+- Kept the validated Svelte 5 peer dependency and runtime dependency declarations from the public baseline.
+
 ## 0.0.3
 
 - Added GitHub Actions release workflow for npm trusted publishing.
