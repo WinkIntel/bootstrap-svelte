@@ -36,3 +36,6 @@ vite.config.ts.timestamp-*
 test-results
 playwright-report
 coverage
+
+# Improve skill
+plans/*
