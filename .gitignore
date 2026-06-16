@@ -20,6 +20,9 @@ dist
 .env.*
 !.env.example
 
+# Claude Code — commit settings.json (team-wide), ignore personal local overrides
+.claude/settings.local.json
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
@@ -33,3 +36,6 @@ vite.config.ts.timestamp-*
 test-results
 playwright-report
 coverage
+
+# Improve skill
+plans/*
