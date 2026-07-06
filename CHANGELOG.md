@@ -2,6 +2,11 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.1
+
+- Corrected `BreakpointListener` documentation examples to close with `</BreakpointListener>` instead of `</BreakpointMonitor>`.
+- Recognized first-time community contributor [@munHunger](https://github.com/munHunger) for the documentation fix.
+
 ## 1.0.0
 
 - Declared the public Bootstrap Svelte package as the first stable release.

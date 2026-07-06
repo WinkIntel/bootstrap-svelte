@@ -57,7 +57,7 @@ pnpm add svelte@~5.0.0`;
         <div class="wk-preview-card">
             <div class="alert alert-primary d-flex justify-content-between align-items-center" role="alert">
                 <span>Bootstrap styling, Svelte ergonomics.</span>
-                <span class="badge text-bg-primary">v1.0.0</span>
+                <span class="badge text-bg-primary">v1.0.1</span>
             </div>
             <div class="card shadow-sm">
                 <div class="card-body">
