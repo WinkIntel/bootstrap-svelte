@@ -56,7 +56,7 @@
                 <SyntaxHighlighter
                     code={`<BreakpointListener renderOn={BreakpointEnum.MD}>
     <p>👋🏼😁 Hello Medium Screens</p>
-</BreakpointMonitor>`} />
+</BreakpointListener>`} />
             </div>
         </div>
     </section>
@@ -74,7 +74,7 @@
                 <SyntaxHighlighter
                     code={`<BreakpointListener renderOn={[BreakpointEnum.MD, BreakpointEnum.LG]}>
     <p>👋🏼😁 Hello Medium and Large Screens</p>
-</BreakpointMonitor>`} />
+</BreakpointListener>`} />
             </div>
         </div>
     </section>
