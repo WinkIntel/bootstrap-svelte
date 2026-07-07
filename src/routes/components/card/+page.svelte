@@ -24,8 +24,8 @@
         <Card.Title>Card title</Card.Title>
         <Card.Subtitle class="mb-2 text-body-secondary">Card subtitle</Card.Subtitle>
         <Card.Text>Some quick example text to build on the card title and make up the bulk of the card's content.</Card.Text>
-        <Card.Link href="#!">Card link</Card.Link>
-        <Card.Link href="#!">Another link</Card.Link>
+        <Card.Link href="#card-demo-link">Card link</Card.Link>
+        <Card.Link href="#card-demo-link">Another link</Card.Link>
     </Card.Body>
 </Card.Root>`;
 
@@ -67,8 +67,8 @@
         <li class="list-group-item">A third item</li>
     </ul>
     <Card.Body>
-        <Card.Link href="#!">Card link</Card.Link>
-        <Card.Link href="#!">Another link</Card.Link>
+        <Card.Link href="#card-demo-link">Card link</Card.Link>
+        <Card.Link href="#card-demo-link">Another link</Card.Link>
     </Card.Body>
 </Card.Root>`;
 
@@ -184,6 +184,7 @@
 
 <div>
     <h1 class="mb-4">Card</h1>
+    <span id="card-demo-link" class="visually-hidden">Card demo link target</span>
 
     <p class="lead">Bootstrap's card component provides a flexible and extensible content container with multiple variants and options.</p>
 
@@ -240,8 +241,8 @@
                         <Card.Title>Card title</Card.Title>
                         <Card.Subtitle class="mb-2 text-body-secondary">Card subtitle</Card.Subtitle>
                         <Card.Text>Some quick example text to build on the card title and make up the bulk of the card's content.</Card.Text>
-                        <Card.Link href="#!">Card link</Card.Link>
-                        <Card.Link href="#!">Another link</Card.Link>
+                        <Card.Link href="#card-demo-link">Card link</Card.Link>
+                        <Card.Link href="#card-demo-link">Another link</Card.Link>
                     </Card.Body>
                 </Card.Root>
             </div>
@@ -307,8 +308,8 @@
                         <li class="list-group-item">A third item</li>
                     </ul>
                     <Card.Body>
-                        <Card.Link href="#!">Card link</Card.Link>
-                        <Card.Link href="#!">Another link</Card.Link>
+                        <Card.Link href="#card-demo-link">Card link</Card.Link>
+                        <Card.Link href="#card-demo-link">Another link</Card.Link>
                     </Card.Body>
                 </Card.Root>
             </div>

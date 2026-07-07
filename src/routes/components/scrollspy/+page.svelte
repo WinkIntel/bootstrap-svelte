@@ -60,7 +60,7 @@ const callback: IntersectionObserverCallback = (entries: IntersectionObserverEnt
 \u003c/script>
 
 <Navbar.Root id="navbar-example" class="bg-body-tertiary px-3 mb-3">
-    <Navbar.Brand href="#!">Navbar</Navbar.Brand>
+    <Navbar.Brand href="#scrollspy-demo-link">Navbar</Navbar.Brand>
     <Nav.Root itemStyle="pills">
         <Nav.Item>
             <Nav.Link href="#scrollspyHeading1" isActive={activeNavLinkId === 'scrollspyHeading1'}>First</Nav.Link>
@@ -274,6 +274,7 @@ export type ScrollspyOptions = {
 <div>
     <div class="mb-5">
         <h1>Scrollspy</h1>
+        <span id="scrollspy-demo-link" class="visually-hidden">Scrollspy demo link target</span>
         <p class="lead">
             An attachment-based scrollspy component that automatically updates navigation or list group components based on scroll position to
             indicate which section of the page is currently active in the viewport.
@@ -309,7 +310,7 @@ export type ScrollspyOptions = {
         <div class="card mb-3">
             <div class="card-body">
                 <Navbar.Root id="navbar-example2" class="bg-body-tertiary px-3 mb-3">
-                    <Navbar.Brand href="#!">Navbar</Navbar.Brand>
+                    <Navbar.Brand href="#scrollspy-demo-link">Navbar</Navbar.Brand>
                     <Nav.Root itemStyle="pills">
                         <Nav.Item>
                             <Nav.Link href="#scrollspyHeading1" isActive={activeNavLinkId === 'scrollspyHeading1'}>First</Nav.Link>

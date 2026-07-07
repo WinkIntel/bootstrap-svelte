@@ -77,53 +77,53 @@
 \u003c/script>
 <ListGroup.Root>
     <ListGroup.ItemAction
-        href="#!"
+        href="#list-group-demo-link"
         colorVariant="primary"
         isActive={currentContextualColor === 'primary'}
         onclick={() => (currentContextualColor = 'primary')}>Primary</ListGroup.ItemAction>
     <ListGroup.ItemAction
-        href="#!"
+        href="#list-group-demo-link"
         colorVariant="secondary"
         isActive={currentContextualColor === 'secondary'}
         onclick={() => (currentContextualColor = 'secondary')}>Secondary</ListGroup.ItemAction>
     <ListGroup.ItemAction
-        href="#!"
+        href="#list-group-demo-link"
         colorVariant="success"
         isActive={currentContextualColor === 'success'}
         onclick={() => (currentContextualColor = 'success')}>Success</ListGroup.ItemAction>
     <ListGroup.ItemAction
-        href="#!"
+        href="#list-group-demo-link"
         colorVariant="danger"
         isActive={currentContextualColor === 'danger'}
         onclick={() => (currentContextualColor = 'danger')}>Danger</ListGroup.ItemAction>
     <ListGroup.ItemAction
-        href="#!"
+        href="#list-group-demo-link"
         colorVariant="warning"
         isActive={currentContextualColor === 'warning'}
         onclick={() => (currentContextualColor = 'warning')}>Warning</ListGroup.ItemAction>
     <ListGroup.ItemAction
-        href="#!"
+        href="#list-group-demo-link"
         colorVariant="info"
         isActive={currentContextualColor === 'info'}
         onclick={() => (currentContextualColor = 'info')}>Info</ListGroup.ItemAction>
     <ListGroup.ItemAction
-        href="#!"
+        href="#list-group-demo-link"
         colorVariant="light"
         isActive={currentContextualColor === 'light'}
         onclick={() => (currentContextualColor = 'light')}>Light</ListGroup.ItemAction>
     <ListGroup.ItemAction
-        href="#!"
+        href="#list-group-demo-link"
         colorVariant="dark"
         isActive={currentContextualColor === 'dark'}
         onclick={() => (currentContextualColor = 'dark')}>Dark</ListGroup.ItemAction>
 </ListGroup.Root>`;
 
     const actionableItemsCode = `<ListGroup.Root>
-    <ListGroup.ItemAction href="#!" isActive={true}>The current link item</ListGroup.ItemAction>
-    <ListGroup.ItemAction href="#!">A second link item</ListGroup.ItemAction>
+    <ListGroup.ItemAction href="#list-group-demo-link" isActive={true}>The current link item</ListGroup.ItemAction>
+    <ListGroup.ItemAction href="#list-group-demo-link">A second link item</ListGroup.ItemAction>
     <ListGroup.ItemAction onclick={() => console.log('click')}>A button item</ListGroup.ItemAction>
     <ListGroup.ItemAction onclick={() => console.log('click')}>A second button item</ListGroup.ItemAction>
-    <ListGroup.ItemAction href="#!" isDisabled={true}>A disabled link item</ListGroup.ItemAction>
+    <ListGroup.ItemAction href="#list-group-demo-link" isDisabled={true}>A disabled link item</ListGroup.ItemAction>
     <ListGroup.ItemAction isDisabled={true}>A disabled button item</ListGroup.ItemAction>
 </ListGroup.Root>`;
 
@@ -190,6 +190,7 @@
 
 <div>
     <h1 class="mb-4">List Group</h1>
+    <span id="list-group-demo-link" class="visually-hidden">List group demo link target</span>
 
     <p class="lead">
         List groups are a flexible component for displaying a series of content. Modify and extend them to support just about any content within.
@@ -249,11 +250,11 @@
 
             <div class="wk-list-group-example p-4 border rounded">
                 <ListGroup.Root>
-                    <ListGroup.ItemAction href="#!" isActive={true}>The current link item</ListGroup.ItemAction>
-                    <ListGroup.ItemAction href="#!">A second link item</ListGroup.ItemAction>
+                    <ListGroup.ItemAction href="#list-group-demo-link" isActive={true}>The current link item</ListGroup.ItemAction>
+                    <ListGroup.ItemAction href="#list-group-demo-link">A second link item</ListGroup.ItemAction>
                     <ListGroup.ItemAction onclick={() => console.log('click')}>A button item</ListGroup.ItemAction>
                     <ListGroup.ItemAction onclick={() => console.log('click')}>A second button item</ListGroup.ItemAction>
-                    <ListGroup.ItemAction href="#!" isDisabled={true}>A disabled link item</ListGroup.ItemAction>
+                    <ListGroup.ItemAction href="#list-group-demo-link" isDisabled={true}>A disabled link item</ListGroup.ItemAction>
                     <ListGroup.ItemAction isDisabled={true}>A disabled button item</ListGroup.ItemAction>
                 </ListGroup.Root>
             </div>
@@ -381,42 +382,42 @@
             <div class="wk-list-group-example p-4 border rounded">
                 <ListGroup.Root>
                     <ListGroup.ItemAction
-                        href="#!"
+                        href="#list-group-demo-link"
                         colorVariant="primary"
                         isActive={currentContextualColor === 'primary'}
                         onclick={() => (currentContextualColor = 'primary')}>Primary</ListGroup.ItemAction>
                     <ListGroup.ItemAction
-                        href="#!"
+                        href="#list-group-demo-link"
                         colorVariant="secondary"
                         isActive={currentContextualColor === 'secondary'}
                         onclick={() => (currentContextualColor = 'secondary')}>Secondary</ListGroup.ItemAction>
                     <ListGroup.ItemAction
-                        href="#!"
+                        href="#list-group-demo-link"
                         colorVariant="success"
                         isActive={currentContextualColor === 'success'}
                         onclick={() => (currentContextualColor = 'success')}>Success</ListGroup.ItemAction>
                     <ListGroup.ItemAction
-                        href="#!"
+                        href="#list-group-demo-link"
                         colorVariant="danger"
                         isActive={currentContextualColor === 'danger'}
                         onclick={() => (currentContextualColor = 'danger')}>Danger</ListGroup.ItemAction>
                     <ListGroup.ItemAction
-                        href="#!"
+                        href="#list-group-demo-link"
                         colorVariant="warning"
                         isActive={currentContextualColor === 'warning'}
                         onclick={() => (currentContextualColor = 'warning')}>Warning</ListGroup.ItemAction>
                     <ListGroup.ItemAction
-                        href="#!"
+                        href="#list-group-demo-link"
                         colorVariant="info"
                         isActive={currentContextualColor === 'info'}
                         onclick={() => (currentContextualColor = 'info')}>Info</ListGroup.ItemAction>
                     <ListGroup.ItemAction
-                        href="#!"
+                        href="#list-group-demo-link"
                         colorVariant="light"
                         isActive={currentContextualColor === 'light'}
                         onclick={() => (currentContextualColor = 'light')}>Light</ListGroup.ItemAction>
                     <ListGroup.ItemAction
-                        href="#!"
+                        href="#list-group-demo-link"
                         colorVariant="dark"
                         isActive={currentContextualColor === 'dark'}
                         onclick={() => (currentContextualColor = 'dark')}>Dark</ListGroup.ItemAction>

@@ -5,35 +5,35 @@
 
     // Sample code examples for demonstration
     const basicExampleCode = `<Breadcrumb.Root>
-    <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-    <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+    <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
     <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
 </Breadcrumb.Root>`;
 
     const customDividerExampleCode = `<!-- Using character divider -->
 <Breadcrumb.Root divider=">">
-    <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-    <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+    <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
     <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
 </Breadcrumb.Root>
 
 <!-- Using SVG divider -->
 <Breadcrumb.Root divider="url(data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E)">
-    <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-    <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+    <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
     <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
 </Breadcrumb.Root>`;
 
     const noDividerExampleCode = `<!-- No divider -->
 <Breadcrumb.Root divider="">
-    <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-    <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+    <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
     <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
 </Breadcrumb.Root>`;
 
     const accessibilityExampleCode = `<Breadcrumb.Root ariaLabel="breadcrumb navigation">
-    <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-    <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+    <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
     <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
 </Breadcrumb.Root>`;
 </script>
@@ -63,8 +63,8 @@
             <div class="card-body">
                 <div class="mb-3">
                     <Breadcrumb.Root>
-                        <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-                        <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
                         <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
                     </Breadcrumb.Root>
                 </div>
@@ -88,8 +88,8 @@
                 <div class="mb-3">
                     <h6 class="text-muted">Using character divider</h6>
                     <Breadcrumb.Root divider=">">
-                        <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-                        <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
                         <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
                     </Breadcrumb.Root>
                 </div>
@@ -98,8 +98,8 @@
                     <h6 class="text-muted">Using SVG divider</h6>
                     <Breadcrumb.Root
                         divider="url(data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 -960 960 960' width='24'%3E%3Cpath d='M504-480 348-636q-11-11-11-28t11-28q11-11 28-11t28 11l184 184q6 6 8.5 13t2.5 15q0 8-2.5 15t-8.5 13L404-268q-11 11-28 11t-28-11q-11-11-11-28t11-28l156-156Z'/%3E%3C/svg%3E)">
-                        <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-                        <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
                         <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
                     </Breadcrumb.Root>
                 </div>
@@ -120,8 +120,8 @@
             <div class="card-body">
                 <div class="mb-3">
                     <Breadcrumb.Root divider="">
-                        <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-                        <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
                         <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
                     </Breadcrumb.Root>
                 </div>
@@ -145,8 +145,8 @@
             <div class="card-body">
                 <div class="mb-3">
                     <Breadcrumb.Root ariaLabel="breadcrumb navigation">
-                        <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
-                        <Breadcrumb.Item href="#!">Library</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/components">Library</Breadcrumb.Item>
                         <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
                     </Breadcrumb.Root>
                 </div>

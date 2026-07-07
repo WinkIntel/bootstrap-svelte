@@ -66,7 +66,7 @@
         <div class="card-body">
             <h5 class="card-title">Card title</h5>
             <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-            <a href="#!" class="btn btn-primary">Go somewhere</a>
+            <button type="button" class="btn btn-primary">Go somewhere</button>
         </div>
     </div>
 
@@ -130,7 +130,7 @@
                         <div class="card-body">
                             <h5 class="card-title">Card title</h5>
                             <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="#!" class="btn btn-primary">Go somewhere</a>
+                            <button type="button" class="btn btn-primary">Go somewhere</button>
                         </div>
                     </div>
 
@@ -151,7 +151,11 @@
                                     <Placeholder.Item class="col-8" />
                                 </Placeholder.Root>
                             </p>
-                            <a href="#!" class="btn btn-primary disabled placeholder col-6" aria-label="Example button with placeholder"></a>
+                            <button
+                                type="button"
+                                class="btn btn-primary disabled placeholder col-6"
+                                disabled
+                                aria-label="Example button with placeholder"></button>
                         </div>
                     </div>
                 </div>
@@ -174,7 +178,8 @@
                 <p aria-hidden="true">
                     <Placeholder.Item class="col-6" />
                 </p>
-                <a href="#!" class="btn btn-primary disabled placeholder col-4" aria-disabled="true" aria-label="Example button with placeholder"></a>
+                <button type="button" class="btn btn-primary disabled placeholder col-4" disabled aria-label="Example button with placeholder"
+                ></button>
             </div>
 
             <p class="mt-3">

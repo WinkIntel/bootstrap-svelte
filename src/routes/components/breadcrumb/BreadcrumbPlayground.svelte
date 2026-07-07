@@ -24,9 +24,9 @@
 
     // Generate items
     let items = $state([
-        { label: 'Home', href: '#!' },
-        { label: 'Library', href: '#!' },
-        { label: 'Data', href: '#!' }
+        { label: 'Home', href: '/' },
+        { label: 'Library', href: '/components' },
+        { label: 'Data', href: '/components/breadcrumb' }
     ]);
 
     // Update items when numItems changes
@@ -34,13 +34,13 @@
         const newItems = [];
         for (let i = 0; i < numItems; i++) {
             if (i === 0) {
-                newItems.push({ label: 'Home', href: '#!' });
+                newItems.push({ label: 'Home', href: '/' });
             } else if (i === numItems - 1) {
-                newItems.push({ label: 'Data', href: '#!' });
+                newItems.push({ label: 'Data', href: '/components/breadcrumb' });
             } else if (i === 1) {
-                newItems.push({ label: 'Library', href: '#!' });
+                newItems.push({ label: 'Library', href: '/components' });
             } else {
-                newItems.push({ label: `Level ${i}`, href: '#!' });
+                newItems.push({ label: `Level ${i}`, href: '#playground' });
             }
         }
         items = newItems;

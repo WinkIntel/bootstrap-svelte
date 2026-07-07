@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-vercel';
+import adapter from '@sveltejs/adapter-static';
 import sass from 'sass';
 import { sveltePreprocess } from 'svelte-preprocess'; // replace vitePreprocess with sveltePreprocess to use sass or sass-embedded
 
@@ -9,7 +9,8 @@ const config = {
         runes: true
     },
     kit: {
-        adapter: adapter({ runtime: 'nodejs22.x' })
+        // adapter-static's zero-config mode detects Vercel and writes .vercel/output/static plus config.json.
+        adapter: adapter()
     },
     preprocess: sveltePreprocess({
         sourceMap: process.env.NODE_ENV === 'development',

@@ -304,11 +304,11 @@
                         <Dropdown.Root>
                             <Dropdown.Toggle class="rounded-end-0" colorVariant="outline-secondary">Dropdown</Dropdown.Toggle>
                             <Dropdown.Menu>
-                                <Dropdown.Item href="#!">Action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Another action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+                                <Dropdown.Item>Action</Dropdown.Item>
+                                <Dropdown.Item>Another action</Dropdown.Item>
+                                <Dropdown.Item>Something else here</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+                                <Dropdown.Item>Separated link</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown.Root>
                         <Form.TextInput aria-label="Text input with dropdown button" />
@@ -319,11 +319,11 @@
                         <Dropdown.Root>
                             <Dropdown.Toggle class="rounded-start-0" colorVariant="outline-secondary">Dropdown</Dropdown.Toggle>
                             <Dropdown.Menu>
-                                <Dropdown.Item href="#!">Action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Another action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+                                <Dropdown.Item>Action</Dropdown.Item>
+                                <Dropdown.Item>Another action</Dropdown.Item>
+                                <Dropdown.Item>Something else here</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+                                <Dropdown.Item>Separated link</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown.Root>
                     </Form.InputGroup>
@@ -332,22 +332,22 @@
                         <Dropdown.Root>
                             <Dropdown.Toggle class="rounded-end-0" colorVariant="outline-secondary">Dropdown</Dropdown.Toggle>
                             <Dropdown.Menu>
-                                <Dropdown.Item href="#!">Action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Another action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+                                <Dropdown.Item>Action</Dropdown.Item>
+                                <Dropdown.Item>Another action</Dropdown.Item>
+                                <Dropdown.Item>Something else here</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+                                <Dropdown.Item>Separated link</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown.Root>
                         <Form.TextInput aria-label="Text input with 2 dropdown buttons" />
                         <Dropdown.Root>
                             <Dropdown.Toggle class="rounded-start-0" colorVariant="outline-secondary">Dropdown</Dropdown.Toggle>
                             <Dropdown.Menu>
-                                <Dropdown.Item href="#!">Action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Another action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+                                <Dropdown.Item>Action</Dropdown.Item>
+                                <Dropdown.Item>Another action</Dropdown.Item>
+                                <Dropdown.Item>Something else here</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+                                <Dropdown.Item>Separated link</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown.Root>
                     </Form.InputGroup>
@@ -357,11 +357,11 @@
     <Dropdown.Root>
         <Dropdown.Toggle class="rounded-end-0" colorVariant="outline-secondary">Dropdown</Dropdown.Toggle>
         <Dropdown.Menu>
-            <Dropdown.Item href="#!">Action</Dropdown.Item>
-            <Dropdown.Item href="#!">Another action</Dropdown.Item>
-            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+            <Dropdown.Item>Action</Dropdown.Item>
+            <Dropdown.Item>Another action</Dropdown.Item>
+            <Dropdown.Item>Something else here</Dropdown.Item>
             <Dropdown.Divider />
-            <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+            <Dropdown.Item>Separated link</Dropdown.Item>
         </Dropdown.Menu>
     </Dropdown.Root>
     <Form.TextInput aria-label="Text input with dropdown button" />
@@ -372,11 +372,11 @@
     <Dropdown.Root>
         <Dropdown.Toggle class="rounded-start-0" colorVariant="outline-secondary">Dropdown</Dropdown.Toggle>
         <Dropdown.Menu>
-            <Dropdown.Item href="#!">Action</Dropdown.Item>
-            <Dropdown.Item href="#!">Another action</Dropdown.Item>
-            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+            <Dropdown.Item>Action</Dropdown.Item>
+            <Dropdown.Item>Another action</Dropdown.Item>
+            <Dropdown.Item>Something else here</Dropdown.Item>
             <Dropdown.Divider />
-            <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+            <Dropdown.Item>Separated link</Dropdown.Item>
         </Dropdown.Menu>
     </Dropdown.Root>
 </Form.InputGroup>
@@ -385,22 +385,22 @@
     <Dropdown.Root>
         <Dropdown.Toggle class="rounded-end-0" colorVariant="outline-secondary">Dropdown</Dropdown.Toggle>
         <Dropdown.Menu>
-            <Dropdown.Item href="#!">Action</Dropdown.Item>
-            <Dropdown.Item href="#!">Another action</Dropdown.Item>
-            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+            <Dropdown.Item>Action</Dropdown.Item>
+            <Dropdown.Item>Another action</Dropdown.Item>
+            <Dropdown.Item>Something else here</Dropdown.Item>
             <Dropdown.Divider />
-            <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+            <Dropdown.Item>Separated link</Dropdown.Item>
         </Dropdown.Menu>
     </Dropdown.Root>
     <Form.TextInput aria-label="Text input with 2 dropdown buttons" />
     <Dropdown.Root>
         <Dropdown.Toggle class="rounded-start-0" colorVariant="outline-secondary">Dropdown</Dropdown.Toggle>
         <Dropdown.Menu>
-            <Dropdown.Item href="#!">Action</Dropdown.Item>
-            <Dropdown.Item href="#!">Another action</Dropdown.Item>
-            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+            <Dropdown.Item>Action</Dropdown.Item>
+            <Dropdown.Item>Another action</Dropdown.Item>
+            <Dropdown.Item>Something else here</Dropdown.Item>
             <Dropdown.Divider />
-            <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+            <Dropdown.Item>Separated link</Dropdown.Item>
         </Dropdown.Menu>
     </Dropdown.Root>
 </Form.InputGroup>`} />
@@ -416,11 +416,11 @@
                             <Button colorVariant="outline-secondary">Action</Button>
                             <Dropdown.Toggle class="rounded-end-0" colorVariant="outline-secondary" isSplit={true}></Dropdown.Toggle>
                             <Dropdown.Menu>
-                                <Dropdown.Item href="#!">Action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Another action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+                                <Dropdown.Item>Action</Dropdown.Item>
+                                <Dropdown.Item>Another action</Dropdown.Item>
+                                <Dropdown.Item>Something else here</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+                                <Dropdown.Item>Separated link</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown.Root>
                         <Form.TextInput aria-label="Text input with segmented dropdown button" />
@@ -432,11 +432,11 @@
                             <Button class="rounded-start-0" colorVariant="outline-secondary">Action</Button>
                             <Dropdown.Toggle colorVariant="outline-secondary" isSplit={true}></Dropdown.Toggle>
                             <Dropdown.Menu>
-                                <Dropdown.Item href="#!">Action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Another action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+                                <Dropdown.Item>Action</Dropdown.Item>
+                                <Dropdown.Item>Another action</Dropdown.Item>
+                                <Dropdown.Item>Something else here</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+                                <Dropdown.Item>Separated link</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown.Root>
                     </Form.InputGroup>
@@ -447,11 +447,11 @@
         <Button colorVariant="outline-secondary">Action</Button>
         <Dropdown.Toggle class="rounded-end-0" colorVariant="outline-secondary" isSplit={true}></Dropdown.Toggle>
         <Dropdown.Menu>
-            <Dropdown.Item href="#!">Action</Dropdown.Item>
-            <Dropdown.Item href="#!">Another action</Dropdown.Item>
-            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+            <Dropdown.Item>Action</Dropdown.Item>
+            <Dropdown.Item>Another action</Dropdown.Item>
+            <Dropdown.Item>Something else here</Dropdown.Item>
             <Dropdown.Divider />
-            <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+            <Dropdown.Item>Separated link</Dropdown.Item>
         </Dropdown.Menu>
     </Dropdown.Root>
     <Form.TextInput aria-label="Text input with segmented dropdown button" />
@@ -463,11 +463,11 @@
         <Button class="rounded-start-0" colorVariant="outline-secondary">Action</Button>
         <Dropdown.Toggle colorVariant="outline-secondary" isSplit={true}></Dropdown.Toggle>
         <Dropdown.Menu>
-            <Dropdown.Item href="#!">Action</Dropdown.Item>
-            <Dropdown.Item href="#!">Another action</Dropdown.Item>
-            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+            <Dropdown.Item>Action</Dropdown.Item>
+            <Dropdown.Item>Another action</Dropdown.Item>
+            <Dropdown.Item>Something else here</Dropdown.Item>
             <Dropdown.Divider />
-            <Dropdown.Item href="#!">Separated link</Dropdown.Item>
+            <Dropdown.Item>Separated link</Dropdown.Item>
         </Dropdown.Menu>
     </Dropdown.Root>
 </Form.InputGroup>`} />

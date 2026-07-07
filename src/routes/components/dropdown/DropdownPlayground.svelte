@@ -74,9 +74,9 @@
         if (isEnd) code += ` isEnd={true}`;
 
         code += `>`;
-        code += `\n    <Dropdown.Item href="#!">Action</Dropdown.Item>`;
-        code += `\n    <Dropdown.Item href="#!">Another action</Dropdown.Item>`;
-        code += `\n    <Dropdown.Item href="#!">Something else here</Dropdown.Item>`;
+        code += `\n    <Dropdown.Item>Action</Dropdown.Item>`;
+        code += `\n    <Dropdown.Item>Another action</Dropdown.Item>`;
+        code += `\n    <Dropdown.Item>Something else here</Dropdown.Item>`;
         code += `\n  </Dropdown.Menu>`;
         code += `\n</Dropdown.Root>`;
 
@@ -196,9 +196,9 @@
                                 <Dropdown.Toggle {colorVariant}>{buttonText}</Dropdown.Toggle>
                             {/if}
                             <Dropdown.Menu {isDark} {isEnd}>
-                                <Dropdown.Item href="#!">Action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Another action</Dropdown.Item>
-                                <Dropdown.Item href="#!">Something else here</Dropdown.Item>
+                                <Dropdown.Item>Action</Dropdown.Item>
+                                <Dropdown.Item>Another action</Dropdown.Item>
+                                <Dropdown.Item>Something else here</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown.Root>
                     </div>
