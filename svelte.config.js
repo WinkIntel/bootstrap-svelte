@@ -13,7 +13,7 @@ const config = {
         adapter: adapter(),
         prerender: {
             handleMissingId: ({ id, message }) => {
-                if (id === '!') return;
+                if (id === '!' || /^nav-link-\d+$/.test(id)) return;
                 throw new Error(message);
             }
         }

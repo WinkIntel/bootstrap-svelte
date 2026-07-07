@@ -186,7 +186,7 @@
 
     function handleWindowClick(event: MouseEvent): void {
         const target = event.target as HTMLElement;
-        const placeholderLink = target.closest('a[href="#!"]');
+        const placeholderLink = target.closest('a[href="#!"], a[href^="#nav-link-"]');
         if (placeholderLink) {
             event.preventDefault();
         }

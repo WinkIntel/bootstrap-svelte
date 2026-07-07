@@ -137,10 +137,10 @@
 <!-- Internal Active State Management -->
 <Nav.Root>
     <Nav.Item>
-        <Nav.Link href="#!">Click to Activate</Nav.Link>
+        <Nav.Link href="#nav-link-1">Click to Activate</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#!">Another Link</Nav.Link>
+        <Nav.Link href="#nav-link-2">Another Link</Nav.Link>
     </Nav.Item>
 </Nav.Root>`;
 </script>
@@ -460,13 +460,13 @@
                 <div class="mb-3">
                     <Nav.Root>
                         <Nav.Item>
-                            <Nav.Link href="#!">Click to Activate</Nav.Link>
+                            <Nav.Link href="#nav-link-1">Click to Activate</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#!">Another Link</Nav.Link>
+                            <Nav.Link href="#nav-link-2">Another Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#!">Third Link</Nav.Link>
+                            <Nav.Link href="#nav-link-3">Third Link</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>
