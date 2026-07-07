@@ -72,8 +72,9 @@ export class CarouselRootState {
             document.addEventListener('visibilitychange', this.#visibilityListener);
         }
 
-        // Start autoplay immediately if ride='carousel', otherwise wait for user interaction
-        if (this.#ride === 'carousel' && !this.#timeoutId) {
+        // Start autoplay immediately in the browser if ride='carousel', otherwise wait for user interaction.
+        // During static prerendering there is no browser timer API, so autoplay starts during hydration instead.
+        if (typeof window !== 'undefined' && this.#ride === 'carousel' && !this.#timeoutId) {
             this.cycle();
         }
     }
@@ -324,7 +325,6 @@ export class CarouselRootState {
      */
     cycle(): void {
         if (typeof window === 'undefined') {
-            console.warn('[Carousel] Cycle called in non-browser environment, ignoring.');
             return;
         }
 
@@ -359,7 +359,6 @@ export class CarouselRootState {
 
     pause(): void {
         if (typeof window === 'undefined') {
-            console.warn('[Carousel] Pause called in non-browser environment, ignoring.');
             return;
         }
 

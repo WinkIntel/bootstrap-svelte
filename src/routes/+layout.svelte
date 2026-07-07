@@ -186,6 +186,11 @@
 
     function handleWindowClick(event: MouseEvent): void {
         const target = event.target as HTMLElement;
+        const placeholderLink = target.closest('a[href="#!"], a[href^="#nav-link-"]');
+        if (placeholderLink) {
+            event.preventDefault();
+        }
+
         if (target.closest('#sidebarToggle')) return;
         if (sidebarIsShown && sidebarElement && !sidebarElement.contains(target) && sidebarToggleElement && !sidebarToggleElement.contains(target)) {
             closeSidebar();

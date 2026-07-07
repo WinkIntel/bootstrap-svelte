@@ -151,7 +151,7 @@
 </ListGroup.Root>`;
 
     const customContentCode = `<ListGroup.Root>
-    <ListGroup.ItemAction href="#" isActive={true}>
+    <ListGroup.ItemAction href="#!" isActive={true}>
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">List group item heading</h5>
             <small>3 days ago</small>
@@ -159,7 +159,7 @@
         <p class="mb-1">Some placeholder content in a paragraph.</p>
         <small>And some small print.</small>
     </ListGroup.ItemAction>
-    <ListGroup.ItemAction href="#">
+    <ListGroup.ItemAction href="#!">
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">List group item heading</h5>
             <small class="text-body-secondary">3 days ago</small>
@@ -167,7 +167,7 @@
         <p class="mb-1">Some placeholder content in a paragraph.</p>
         <small class="text-body-secondary">And some muted small print.</small>
     </ListGroup.ItemAction>
-    <ListGroup.ItemAction href="#">
+    <ListGroup.ItemAction href="#!">
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">List group item heading</h5>
             <small class="text-body-secondary">3 days ago</small>
@@ -459,7 +459,7 @@
 
             <div class="wk-list-group-example p-4 border rounded">
                 <ListGroup.Root>
-                    <ListGroup.ItemAction href="#" isActive={true}>
+                    <ListGroup.ItemAction href="#!" isActive={true}>
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">List group item heading</h5>
                             <small>3 days ago</small>
@@ -467,7 +467,7 @@
                         <p class="mb-1">Some placeholder content in a paragraph.</p>
                         <small>And some small print.</small>
                     </ListGroup.ItemAction>
-                    <ListGroup.ItemAction href="#">
+                    <ListGroup.ItemAction href="#!">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">List group item heading</h5>
                             <small class="text-body-secondary">3 days ago</small>
@@ -475,7 +475,7 @@
                         <p class="mb-1">Some placeholder content in a paragraph.</p>
                         <small class="text-body-secondary">And some muted small print.</small>
                     </ListGroup.ItemAction>
-                    <ListGroup.ItemAction href="#">
+                    <ListGroup.ItemAction href="#!">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">List group item heading</h5>
                             <small class="text-body-secondary">3 days ago</small>
