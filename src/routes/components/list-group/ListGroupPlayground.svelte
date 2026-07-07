@@ -64,7 +64,7 @@
                 if (itemColorVariant) code += `\n    colorVariant="${itemColorVariant}"`;
                 if (isActive) code += `\n    isActive={true}`;
                 if (isDisabled) code += `\n    isDisabled={true}`;
-                code += `\n    href="#list-group-demo-link"`;
+                code += `\n    href="#!"`;
 
                 code += `>${label}</ListGroup.ItemAction>`;
             } else {
@@ -194,7 +194,7 @@
                                         colorVariant={itemColorVariant || undefined}
                                         isActive={hasActiveItem && itemIndex === activeItemIndex}
                                         isDisabled={hasDisabledItem && itemIndex === disabledItemIndex}
-                                        href="#list-group-demo-link">
+                                        href="#!">
                                         {item}
                                     </ListGroup.ItemAction>
                                 {:else}

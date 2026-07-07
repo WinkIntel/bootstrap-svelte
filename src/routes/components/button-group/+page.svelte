@@ -11,9 +11,9 @@
 </ButtonGroup>`;
 
     const buttonLinksExampleCode = `<ButtonGroup>
-    <Button id="link1" aria-current="page" class="active" colorVariant="primary" href="#link1">Active Link 1</Button>
-    <Button id="link2" colorVariant="primary" href="#link2">Link 2</Button>
-    <Button id="link3" colorVariant="primary" href="#link3">Link 3</Button>
+    <Button aria-current="page" class="active" colorVariant="primary" href="#!">Active Link 1</Button>
+    <Button colorVariant="primary" href="#!">Link 2</Button>
+    <Button colorVariant="primary" href="#!">Link 3</Button>
 </ButtonGroup>`;
 
     const mixedStylesExampleCode = `<ButtonGroup>
@@ -132,9 +132,9 @@
             <div class="card-body">
                 <div class="mb-3">
                     <ButtonGroup>
-                        <Button id="link1" aria-current="page" class="active" colorVariant="primary" href="#link1">Active Link 1</Button>
-                        <Button id="link2" colorVariant="primary" href="#link2">Link 2</Button>
-                        <Button id="link3" colorVariant="primary" href="#link3">Link 3</Button>
+                        <Button aria-current="page" class="active" colorVariant="primary" href="#!">Active Link 1</Button>
+                        <Button colorVariant="primary" href="#!">Link 2</Button>
+                        <Button colorVariant="primary" href="#!">Link 3</Button>
                     </ButtonGroup>
                 </div>
 

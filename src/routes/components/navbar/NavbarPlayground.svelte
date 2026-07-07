@@ -70,7 +70,7 @@
         }
 
         if (hasBrand) {
-            code += '    <Navbar.Brand href="#navbar-demo-link">Navbar</Navbar.Brand>\n';
+            code += '    <Navbar.Brand href="#!">Navbar</Navbar.Brand>\n';
         }
 
         code += '    <Navbar.Toggler ariaLabel="Toggle navigation">\n';
@@ -79,16 +79,16 @@
         code += '    <Navbar.Collapse id="navbarContent">\n';
         code += '      <Navbar.Nav class="me-auto mb-2 mb-lg-0">\n';
         code += '        <Nav.Item>\n';
-        code += '          <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>\n';
+        code += '          <Nav.Link isActive={true} href="#!">Home</Nav.Link>\n';
         code += '        </Nav.Item>\n';
         code += '        <Nav.Item>\n';
-        code += '          <Nav.Link href="#navbar-demo-link">Features</Nav.Link>\n';
+        code += '          <Nav.Link href="#!">Features</Nav.Link>\n';
         code += '        </Nav.Item>\n';
         code += '        <Nav.Item>\n';
-        code += '          <Nav.Link href="#navbar-demo-link">Pricing</Nav.Link>\n';
+        code += '          <Nav.Link href="#!">Pricing</Nav.Link>\n';
         code += '        </Nav.Item>\n';
         code += '        <Nav.Item>\n';
-        code += '          <Nav.Link href="#navbar-demo-link" isDisabled={true}>Disabled</Nav.Link>\n';
+        code += '          <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>\n';
         code += '        </Nav.Item>\n';
         code += '      </Navbar.Nav>\n';
 
@@ -205,7 +205,7 @@
                             {#if useContainer}
                                 <Container isFluid={isContainerFluid}>
                                     {#if hasBrand}
-                                        <Navbar.Brand href="#navbar-demo-link">Navbar</Navbar.Brand>
+                                        <Navbar.Brand href="#!">Navbar</Navbar.Brand>
                                     {/if}
                                     <Navbar.Toggler ariaLabel="Toggle navigation">
                                         <Navbar.TogglerIcon />
@@ -213,16 +213,16 @@
                                     <Navbar.Collapse id="navbarPlaygroundContent">
                                         <Navbar.Nav class="me-auto mb-2 mb-lg-0">
                                             <Nav.Item>
-                                                <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+                                                <Nav.Link isActive={true} href="#!">Home</Nav.Link>
                                             </Nav.Item>
                                             <Nav.Item>
-                                                <Nav.Link href="#navbar-demo-link">Features</Nav.Link>
+                                                <Nav.Link href="#!">Features</Nav.Link>
                                             </Nav.Item>
                                             <Nav.Item>
-                                                <Nav.Link href="#navbar-demo-link">Pricing</Nav.Link>
+                                                <Nav.Link href="#!">Pricing</Nav.Link>
                                             </Nav.Item>
                                             <Nav.Item>
-                                                <Nav.Link href="#navbar-demo-link" isDisabled={true}>Disabled</Nav.Link>
+                                                <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
                                             </Nav.Item>
                                         </Navbar.Nav>
 
@@ -240,7 +240,7 @@
                                 </Container>
                             {:else}
                                 {#if hasBrand}
-                                    <Navbar.Brand href="#navbar-demo-link">Navbar</Navbar.Brand>
+                                    <Navbar.Brand href="#!">Navbar</Navbar.Brand>
                                 {/if}
                                 <Navbar.Toggler ariaLabel="Toggle navigation">
                                     <Navbar.TogglerIcon />
@@ -248,16 +248,16 @@
                                 <Navbar.Collapse id="navbarPlaygroundContent">
                                     <Navbar.Nav class="me-auto mb-2 mb-lg-0">
                                         <Nav.Item>
-                                            <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+                                            <Nav.Link isActive={true} href="#!">Home</Nav.Link>
                                         </Nav.Item>
                                         <Nav.Item>
-                                            <Nav.Link href="#navbar-demo-link">Features</Nav.Link>
+                                            <Nav.Link href="#!">Features</Nav.Link>
                                         </Nav.Item>
                                         <Nav.Item>
-                                            <Nav.Link href="#navbar-demo-link">Pricing</Nav.Link>
+                                            <Nav.Link href="#!">Pricing</Nav.Link>
                                         </Nav.Item>
                                         <Nav.Item>
-                                            <Nav.Link href="#navbar-demo-link" isDisabled={true}>Disabled</Nav.Link>
+                                            <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
                                         </Nav.Item>
                                     </Navbar.Nav>
 

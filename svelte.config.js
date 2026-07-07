@@ -10,7 +10,13 @@ const config = {
     },
     kit: {
         // adapter-static's zero-config mode detects Vercel and writes .vercel/output/static plus config.json.
-        adapter: adapter()
+        adapter: adapter(),
+        prerender: {
+            handleMissingId: ({ id, message }) => {
+                if (id === '!') return;
+                throw new Error(message);
+            }
+        }
     },
     preprocess: sveltePreprocess({
         sourceMap: process.env.NODE_ENV === 'development',

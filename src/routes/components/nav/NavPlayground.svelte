@@ -77,10 +77,10 @@
             // Handle isActive based on mode
             if (activeStateMode === 'explicit') {
                 const isActiveAttr = index === explicitActiveIndex ? ' isActive={true}' : ' isActive={false}';
-                code += `\n    <Nav.Link id="playground-nav-link-${index}" href="#playground-nav-link-${index}"${isActiveAttr}>${label}</Nav.Link>`;
+                code += `\n    <Nav.Link href="#!"${isActiveAttr}>${label}</Nav.Link>`;
             } else {
                 // Internal management - no isActive prop
-                code += `\n    <Nav.Link id="playground-nav-link-${index}" href="#playground-nav-link-${index}">${label}</Nav.Link>`;
+                code += `\n    <Nav.Link href="#!">${label}</Nav.Link>`;
             }
 
             code += `\n  </Nav.Item>`;
@@ -196,13 +196,9 @@
                             {#each navItems as navItem2, navItem2Index (`navItem2-${navItem2Index}`)}
                                 <Nav.Item>
                                     {#if activeStateMode === 'explicit'}
-                                        <Nav.Link
-                                            href="#playground-nav-link-{navItem2Index}"
-                                            id="playground-nav-link-{navItem2Index}"
-                                            isActive={navItem2Index === explicitActiveIndex}>{navItem2}</Nav.Link>
+                                        <Nav.Link href="#!" isActive={navItem2Index === explicitActiveIndex}>{navItem2}</Nav.Link>
                                     {:else}
-                                        <Nav.Link href="#playground-nav-link-{navItem2Index}" id="playground-nav-link-{navItem2Index}"
-                                            >{navItem2}</Nav.Link>
+                                        <Nav.Link href="#!">{navItem2}</Nav.Link>
                                     {/if}
                                 </Nav.Item>
                             {/each}

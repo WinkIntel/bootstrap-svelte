@@ -6,20 +6,20 @@
     // Sample code examples for demonstration
     const basicExampleCode = `<Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Navbar</Navbar.Brand>
+    <Navbar.Brand href="#!">Navbar</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
     <Navbar.Collapse id="navbarSupportedContent">
       <Navbar.Nav class="me-auto mb-2 mb-lg-0">
         <Nav.Item>
-          <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+          <Nav.Link isActive={true} href="#!">Home</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Link</Nav.Link>
+          <Nav.Link href="#!">Link</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link isDisabled={true} href="#navbar-demo-link">Disabled</Nav.Link>
+          <Nav.Link isDisabled={true} href="#!">Disabled</Nav.Link>
         </Nav.Item>
       </Navbar.Nav>
       <form class="d-flex" role="search">
@@ -33,17 +33,17 @@
     const colorSchemesCode = `<!-- Dark theme navbar (dark background with light text) -->
 <Navbar.Root expandOnBreakpoint="lg" class="bg-dark" data-bs-theme="dark">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Dark Navbar</Navbar.Brand>
+    <Navbar.Brand href="#!">Dark Navbar</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
     <Navbar.Collapse id="navbarDarkContent">
       <Navbar.Nav class="me-auto mb-2 mb-lg-0">
         <Nav.Item>
-          <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+          <Nav.Link isActive={true} href="#!">Home</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Link</Nav.Link>
+          <Nav.Link href="#!">Link</Nav.Link>
         </Nav.Item>
       </Navbar.Nav>
     </Navbar.Collapse>
@@ -53,7 +53,7 @@
 <!-- Primary color navbar using class and data-bs-theme (legacy approach) -->
 <Navbar.Root expandOnBreakpoint="lg" class="bg-primary" data-bs-theme="dark">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Primary Navbar</Navbar.Brand>
+    <Navbar.Brand href="#!">Primary Navbar</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
@@ -63,7 +63,7 @@
 <!-- Primary color navbar using variant (recommended approach) -->
 <Navbar.Root expandOnBreakpoint="lg" colorVariant="primary">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Primary Navbar with Variant</Navbar.Brand>
+    <Navbar.Brand href="#!">Primary Navbar with Variant</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
@@ -73,7 +73,7 @@
     const containersCode = `<!-- Default container (responsive fixed width) -->
 <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
   <Container>
-    <Navbar.Brand href="#navbar-demo-link">Default Container</Navbar.Brand>
+    <Navbar.Brand href="#!">Default Container</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
@@ -83,7 +83,7 @@
 <!-- Fluid container (full width) -->
 <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Fluid Container</Navbar.Brand>
+    <Navbar.Brand href="#!">Fluid Container</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
@@ -92,7 +92,7 @@
 
 <!-- No container -->
 <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
-  <Navbar.Brand href="#navbar-demo-link" class="ms-3">No Container</Navbar.Brand>
+  <Navbar.Brand href="#!" class="ms-3">No Container</Navbar.Brand>
   <Navbar.Toggler ariaLabel="Toggle navigation" class="me-3">
     <Navbar.TogglerIcon />
   </Navbar.Toggler>
@@ -101,7 +101,7 @@
     const placementCode = `<!-- Fixed top navbar -->
 <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary" placement="fixed-top">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Fixed Top</Navbar.Brand>
+    <Navbar.Brand href="#!">Fixed Top</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
@@ -111,7 +111,7 @@
 <!-- Fixed bottom navbar -->
 <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary" placement="fixed-bottom">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Fixed Bottom</Navbar.Brand>
+    <Navbar.Brand href="#!">Fixed Bottom</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
@@ -121,7 +121,7 @@
 <!-- Sticky top navbar -->
 <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary" placement="sticky-top">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Sticky Top</Navbar.Brand>
+    <Navbar.Brand href="#!">Sticky Top</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
@@ -130,32 +130,32 @@
 
     const scrollingCode = `<Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Navbar Scroll</Navbar.Brand>
+    <Navbar.Brand href="#!">Navbar Scroll</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
     <Navbar.Collapse id="navbarScroll">
       <Navbar.Nav class="me-auto mb-2 mb-lg-0" isVerticalScrolling={true} style="--bs-scroll-height: 100px;">
         <Nav.Item>
-          <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+          <Nav.Link isActive={true} href="#!">Home</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Link 1</Nav.Link>
+          <Nav.Link href="#!">Link 1</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Link 2</Nav.Link>
+          <Nav.Link href="#!">Link 2</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Link 3</Nav.Link>
+          <Nav.Link href="#!">Link 3</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Link 4</Nav.Link>
+          <Nav.Link href="#!">Link 4</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Link 5</Nav.Link>
+          <Nav.Link href="#!">Link 5</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Link 6</Nav.Link>
+          <Nav.Link href="#!">Link 6</Nav.Link>
         </Nav.Item>
       </Navbar.Nav>
     </Navbar.Collapse>
@@ -164,7 +164,7 @@
 
     const offcanvasCode = `<Navbar.Root expandOnBreakpoint="xl" class="bg-body-tertiary">
     <Container isFluid={true}>
-        <Navbar.Brand href="#navbar-demo-link">Navbar</Navbar.Brand>
+        <Navbar.Brand href="#!">Navbar</Navbar.Brand>
         <Navbar.Toggler ariaLabel="Toggle navigation">
             <Navbar.TogglerIcon />
         </Navbar.Toggler>
@@ -175,10 +175,10 @@
             <Offcanvas.Body>
                 <Navbar.Nav class="justify-content-end flex-grow-1 pe-3">
                     <Nav.Item>
-                        <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+                        <Nav.Link isActive={true} href="#!">Home</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link href="#navbar-demo-link">Link</Nav.Link>
+                        <Nav.Link href="#!">Link</Nav.Link>
                     </Nav.Item>
                 </Navbar.Nav>
                 <form class="d-flex mt-3" role="search">
@@ -192,7 +192,7 @@
 
     const textCode = `<Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Navbar</Navbar.Brand>
+    <Navbar.Brand href="#!">Navbar</Navbar.Brand>
     <Navbar.Text>
       Navbar text with an inline element
     </Navbar.Text>
@@ -202,17 +202,17 @@
     <Navbar.Collapse id="navbarText">
       <Navbar.Nav class="me-auto mb-2 mb-lg-0">
         <Nav.Item>
-          <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+          <Nav.Link isActive={true} href="#!">Home</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Features</Nav.Link>
+          <Nav.Link href="#!">Features</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Pricing</Nav.Link>
+          <Nav.Link href="#!">Pricing</Nav.Link>
         </Nav.Item>
       </Navbar.Nav>
       <Navbar.Text>
-        Signed in as: <a href="#navbar-demo-link">Mark Otto</a>
+        Signed in as: <a href="#!">Mark Otto</a>
       </Navbar.Text>
     </Navbar.Collapse>
   </Container>
@@ -221,17 +221,17 @@
     const variantExampleCode = `<!-- Using variant prop for automatic theme handling -->
 <Navbar.Root expandOnBreakpoint="lg" colorVariant="primary">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Primary Navbar</Navbar.Brand>
+    <Navbar.Brand href="#!">Primary Navbar</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
     <Navbar.Collapse id="navbarVariantContent">
       <Navbar.Nav class="me-auto mb-2 mb-lg-0">
         <Nav.Item>
-          <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+          <Nav.Link isActive={true} href="#!">Home</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link href="#navbar-demo-link">Link</Nav.Link>
+          <Nav.Link href="#!">Link</Nav.Link>
         </Nav.Item>
       </Navbar.Nav>
     </Navbar.Collapse>
@@ -241,7 +241,7 @@
 <!-- Using variant prop with other colors -->
 <Navbar.Root expandOnBreakpoint="lg" colorVariant="success">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Success Navbar</Navbar.Brand>
+    <Navbar.Brand href="#!">Success Navbar</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
@@ -251,7 +251,7 @@
 <!-- Light colored navbar with variant -->
 <Navbar.Root expandOnBreakpoint="lg" colorVariant="light">
   <Container isFluid={true}>
-    <Navbar.Brand href="#navbar-demo-link">Light Navbar</Navbar.Brand>
+    <Navbar.Brand href="#!">Light Navbar</Navbar.Brand>
     <Navbar.Toggler ariaLabel="Toggle navigation">
       <Navbar.TogglerIcon />
     </Navbar.Toggler>
@@ -262,7 +262,6 @@
 <div>
     <div class="mb-5">
         <h1>Navbar</h1>
-        <span id="navbar-demo-link" class="visually-hidden">Navbar demo link target</span>
         <p class="lead">Bootstrap's powerful, responsive navigation header that includes support for branding, navigation, and more.</p>
         <hr />
     </div>
@@ -281,20 +280,20 @@
                 <div class="mb-3">
                     <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#navbar-demo-link">Navbar</Navbar.Brand>
+                            <Navbar.Brand href="#!">Navbar</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
                             <Navbar.Collapse id="navbarBasicExample">
                                 <Navbar.Nav class="me-auto mb-2 mb-lg-0">
                                     <Nav.Item>
-                                        <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+                                        <Nav.Link isActive={true} href="#!">Home</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Link</Nav.Link>
+                                        <Nav.Link href="#!">Link</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link isDisabled={true} href="#navbar-demo-link">Disabled</Nav.Link>
+                                        <Nav.Link isDisabled={true} href="#!">Disabled</Nav.Link>
                                     </Nav.Item>
                                 </Navbar.Nav>
                                 <form class="d-flex" role="search">
@@ -327,17 +326,17 @@
                 <div class="mb-3 d-flex flex-column gap-3">
                     <Navbar.Root expandOnBreakpoint="lg" class="bg-dark" data-bs-theme="dark">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#navbar-demo-link">Dark Navbar</Navbar.Brand>
+                            <Navbar.Brand href="#!">Dark Navbar</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
                             <Navbar.Collapse id="navbarDarkExample">
                                 <Navbar.Nav class="me-auto mb-2 mb-lg-0">
                                     <Nav.Item>
-                                        <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+                                        <Nav.Link isActive={true} href="#!">Home</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Link</Nav.Link>
+                                        <Nav.Link href="#!">Link</Nav.Link>
                                     </Nav.Item>
                                 </Navbar.Nav>
                             </Navbar.Collapse>
@@ -346,7 +345,7 @@
 
                     <Navbar.Root expandOnBreakpoint="lg" class="bg-primary" data-bs-theme="dark">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#navbar-demo-link">Primary Navbar</Navbar.Brand>
+                            <Navbar.Brand href="#!">Primary Navbar</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
@@ -373,7 +372,7 @@
                         <small class="text-muted">Default container (responsive fixed width):</small>
                         <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
                             <Container>
-                                <Navbar.Brand href="#navbar-demo-link">Default Container</Navbar.Brand>
+                                <Navbar.Brand href="#!">Default Container</Navbar.Brand>
                                 <Navbar.Toggler ariaLabel="Toggle navigation">
                                     <Navbar.TogglerIcon />
                                 </Navbar.Toggler>
@@ -385,7 +384,7 @@
                         <small class="text-muted">Fluid container (full width):</small>
                         <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
                             <Container isFluid={true}>
-                                <Navbar.Brand href="#navbar-demo-link">Fluid Container</Navbar.Brand>
+                                <Navbar.Brand href="#!">Fluid Container</Navbar.Brand>
                                 <Navbar.Toggler ariaLabel="Toggle navigation">
                                     <Navbar.TogglerIcon />
                                 </Navbar.Toggler>
@@ -396,7 +395,7 @@
                     <div>
                         <small class="text-muted">No container:</small>
                         <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
-                            <Navbar.Brand href="#navbar-demo-link" class="ms-3">No Container</Navbar.Brand>
+                            <Navbar.Brand href="#!" class="ms-3">No Container</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation" class="me-3">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
@@ -444,32 +443,32 @@
                 <div class="mb-3">
                     <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#navbar-demo-link">Navbar Scroll</Navbar.Brand>
+                            <Navbar.Brand href="#!">Navbar Scroll</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
                             <Navbar.Collapse id="navbarScrollExample">
                                 <Navbar.Nav class="me-auto mb-2 mb-lg-0" isVerticalScrolling={true} style="--bs-scroll-height: 100px;">
                                     <Nav.Item>
-                                        <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+                                        <Nav.Link isActive={true} href="#!">Home</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Link 1</Nav.Link>
+                                        <Nav.Link href="#!">Link 1</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Link 2</Nav.Link>
+                                        <Nav.Link href="#!">Link 2</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Link 3</Nav.Link>
+                                        <Nav.Link href="#!">Link 3</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Link 4</Nav.Link>
+                                        <Nav.Link href="#!">Link 4</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Link 5</Nav.Link>
+                                        <Nav.Link href="#!">Link 5</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Link 6</Nav.Link>
+                                        <Nav.Link href="#!">Link 6</Nav.Link>
                                     </Nav.Item>
                                 </Navbar.Nav>
                             </Navbar.Collapse>
@@ -493,7 +492,7 @@
                 <div class="mb-3">
                     <Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#navbar-demo-link">Navbar</Navbar.Brand>
+                            <Navbar.Brand href="#!">Navbar</Navbar.Brand>
                             <Navbar.Text>Navbar text with an inline element</Navbar.Text>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
@@ -501,17 +500,17 @@
                             <Navbar.Collapse id="navbarTextExample">
                                 <Navbar.Nav class="me-auto mb-2 mb-lg-0">
                                     <Nav.Item>
-                                        <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+                                        <Nav.Link isActive={true} href="#!">Home</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Features</Nav.Link>
+                                        <Nav.Link href="#!">Features</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Pricing</Nav.Link>
+                                        <Nav.Link href="#!">Pricing</Nav.Link>
                                     </Nav.Item>
                                 </Navbar.Nav>
                                 <Navbar.Text>
-                                    Signed in as: <a href="#navbar-demo-link">Mark Otto</a>
+                                    Signed in as: <a href="#!">Mark Otto</a>
                                 </Navbar.Text>
                             </Navbar.Collapse>
                         </Container>
@@ -535,17 +534,17 @@
                 <div class="mb-3 d-flex flex-column gap-3">
                     <Navbar.Root expandOnBreakpoint="lg" colorVariant="primary">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#navbar-demo-link">Primary Navbar</Navbar.Brand>
+                            <Navbar.Brand href="#!">Primary Navbar</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
                             <Navbar.Collapse id="navbarVariantExample">
                                 <Navbar.Nav class="me-auto mb-2 mb-lg-0">
                                     <Nav.Item>
-                                        <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+                                        <Nav.Link isActive={true} href="#!">Home</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link href="#navbar-demo-link">Link</Nav.Link>
+                                        <Nav.Link href="#!">Link</Nav.Link>
                                     </Nav.Item>
                                 </Navbar.Nav>
                             </Navbar.Collapse>
@@ -554,7 +553,7 @@
 
                     <Navbar.Root expandOnBreakpoint="lg" colorVariant="success">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#navbar-demo-link">Success Navbar</Navbar.Brand>
+                            <Navbar.Brand href="#!">Success Navbar</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
@@ -563,7 +562,7 @@
 
                     <Navbar.Root expandOnBreakpoint="lg" colorVariant="light">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#navbar-demo-link">Light Navbar</Navbar.Brand>
+                            <Navbar.Brand href="#!">Light Navbar</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
@@ -589,7 +588,7 @@
                 <div class="mb-3">
                     <Navbar.Root expandOnBreakpoint="xl" class="bg-body-tertiary">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#navbar-demo-link">Navbar</Navbar.Brand>
+                            <Navbar.Brand href="#!">Navbar</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
@@ -600,10 +599,10 @@
                                 <Offcanvas.Body>
                                     <Navbar.Nav class="justify-content-end flex-grow-1 pe-3">
                                         <Nav.Item>
-                                            <Nav.Link isActive={true} href="#navbar-demo-link">Home</Nav.Link>
+                                            <Nav.Link isActive={true} href="#!">Home</Nav.Link>
                                         </Nav.Item>
                                         <Nav.Item>
-                                            <Nav.Link href="#navbar-demo-link">Link</Nav.Link>
+                                            <Nav.Link href="#!">Link</Nav.Link>
                                         </Nav.Item>
                                     </Navbar.Nav>
                                     <form class="d-flex mt-3" role="search">

@@ -6,21 +6,21 @@
     // Sample code examples for demonstration
     const basicExampleCode = `<Pagination.Root>
     <Pagination.Item isDisabled={true}>
-        <Pagination.Link href="#pagination-demo-link" aria-label="Previous">
+        <Pagination.Link href="#!" aria-label="Previous">
             <span aria-hidden="true">&laquo;</span>
         </Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+        <Pagination.Link href="#!">1</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item isActive={true}>
-        <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+        <Pagination.Link href="#!">2</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+        <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link" aria-label="Next">
+        <Pagination.Link href="#!" aria-label="Next">
             <span aria-hidden="true">&raquo;</span>
         </Pagination.Link>
     </Pagination.Item>
@@ -29,90 +29,90 @@
     const sizesExampleCode = `<!-- Small pagination -->
 <Pagination.Root size="sm">
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+        <Pagination.Link href="#!">1</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item isActive={true}>
-        <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+        <Pagination.Link href="#!">2</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+        <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
 </Pagination.Root>
 
 <!-- Default pagination -->
 <Pagination.Root>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+        <Pagination.Link href="#!">1</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item isActive={true}>
-        <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+        <Pagination.Link href="#!">2</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+        <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
 </Pagination.Root>
 
 <!-- Large pagination -->
 <Pagination.Root size="lg">
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+        <Pagination.Link href="#!">1</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item isActive={true}>
-        <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+        <Pagination.Link href="#!">2</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+        <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
 </Pagination.Root>`;
 
     const alignmentExampleCode = `<!-- Default (start) alignment -->
 <Pagination.Root>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+        <Pagination.Link href="#!">1</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item isActive={true}>
-        <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+        <Pagination.Link href="#!">2</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+        <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
 </Pagination.Root>
 
 <!-- Center alignment -->
 <Pagination.Root alignment="center">
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+        <Pagination.Link href="#!">1</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item isActive={true}>
-        <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+        <Pagination.Link href="#!">2</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+        <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
 </Pagination.Root>
 
 <!-- End alignment -->
 <Pagination.Root alignment="end">
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+        <Pagination.Link href="#!">1</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item isActive={true}>
-        <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+        <Pagination.Link href="#!">2</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+        <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
 </Pagination.Root>`;
 
     const disabledExampleCode = `<Pagination.Root>
     <Pagination.Item isDisabled={true}>
-        <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+        <Pagination.Link href="#!">1</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item isActive={true}>
-        <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+        <Pagination.Link href="#!">2</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
-        <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+        <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
 </Pagination.Root>`;
 </script>
@@ -120,7 +120,6 @@
 <div>
     <div class="mb-5">
         <h1>Pagination</h1>
-        <span id="pagination-demo-link" class="visually-hidden">Pagination demo link target</span>
         <p class="lead">Pagination component for indicating a series of related content exists across multiple pages.</p>
         <hr />
     </div>
@@ -141,21 +140,21 @@
                 <div class="mb-3">
                     <Pagination.Root>
                         <Pagination.Item isDisabled={true}>
-                            <Pagination.Link href="#pagination-demo-link" aria-label="Previous">
+                            <Pagination.Link href="#!" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </Pagination.Link>
                         </Pagination.Item>
                         <Pagination.Item>
-                            <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+                            <Pagination.Link href="#!">1</Pagination.Link>
                         </Pagination.Item>
                         <Pagination.Item isActive={true}>
-                            <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+                            <Pagination.Link href="#!">2</Pagination.Link>
                         </Pagination.Item>
                         <Pagination.Item>
-                            <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+                            <Pagination.Link href="#!">3</Pagination.Link>
                         </Pagination.Item>
                         <Pagination.Item>
-                            <Pagination.Link href="#pagination-demo-link" aria-label="Next">
+                            <Pagination.Link href="#!" aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </Pagination.Link>
                         </Pagination.Item>
@@ -181,13 +180,13 @@
                         <small class="text-muted">Small pagination</small>
                         <Pagination.Root size="sm">
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+                                <Pagination.Link href="#!">1</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item isActive={true}>
-                                <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+                                <Pagination.Link href="#!">2</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+                                <Pagination.Link href="#!">3</Pagination.Link>
                             </Pagination.Item>
                         </Pagination.Root>
                     </div>
@@ -196,13 +195,13 @@
                         <small class="text-muted">Default pagination</small>
                         <Pagination.Root>
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+                                <Pagination.Link href="#!">1</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item isActive={true}>
-                                <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+                                <Pagination.Link href="#!">2</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+                                <Pagination.Link href="#!">3</Pagination.Link>
                             </Pagination.Item>
                         </Pagination.Root>
                     </div>
@@ -211,13 +210,13 @@
                         <small class="text-muted">Large pagination</small>
                         <Pagination.Root size="lg">
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+                                <Pagination.Link href="#!">1</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item isActive={true}>
-                                <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+                                <Pagination.Link href="#!">2</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+                                <Pagination.Link href="#!">3</Pagination.Link>
                             </Pagination.Item>
                         </Pagination.Root>
                     </div>
@@ -244,13 +243,13 @@
                         <small class="text-muted">Default (start) alignment</small>
                         <Pagination.Root>
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+                                <Pagination.Link href="#!">1</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item isActive={true}>
-                                <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+                                <Pagination.Link href="#!">2</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+                                <Pagination.Link href="#!">3</Pagination.Link>
                             </Pagination.Item>
                         </Pagination.Root>
                     </div>
@@ -259,13 +258,13 @@
                         <small class="text-muted">Center alignment</small>
                         <Pagination.Root alignment="center">
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+                                <Pagination.Link href="#!">1</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item isActive={true}>
-                                <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+                                <Pagination.Link href="#!">2</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+                                <Pagination.Link href="#!">3</Pagination.Link>
                             </Pagination.Item>
                         </Pagination.Root>
                     </div>
@@ -274,13 +273,13 @@
                         <small class="text-muted">End alignment</small>
                         <Pagination.Root alignment="end">
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+                                <Pagination.Link href="#!">1</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item isActive={true}>
-                                <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+                                <Pagination.Link href="#!">2</Pagination.Link>
                             </Pagination.Item>
                             <Pagination.Item>
-                                <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+                                <Pagination.Link href="#!">3</Pagination.Link>
                             </Pagination.Item>
                         </Pagination.Root>
                     </div>
@@ -304,13 +303,13 @@
                 <div class="mb-3">
                     <Pagination.Root>
                         <Pagination.Item isDisabled={true}>
-                            <Pagination.Link href="#pagination-demo-link">1</Pagination.Link>
+                            <Pagination.Link href="#!">1</Pagination.Link>
                         </Pagination.Item>
                         <Pagination.Item isActive={true}>
-                            <Pagination.Link href="#pagination-demo-link">2</Pagination.Link>
+                            <Pagination.Link href="#!">2</Pagination.Link>
                         </Pagination.Item>
                         <Pagination.Item>
-                            <Pagination.Link href="#pagination-demo-link">3</Pagination.Link>
+                            <Pagination.Link href="#!">3</Pagination.Link>
                         </Pagination.Item>
                     </Pagination.Root>
                 </div>

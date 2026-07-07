@@ -55,17 +55,17 @@ describe('/components/button-group/+page.svelte', () => {
 
             const activeButton = buttonGroup?.querySelector('.btn.active');
             expect(activeButton).toBeInTheDocument();
-            expect(activeButton).toHaveAttribute('href', '#link1');
+            expect(activeButton).toHaveAttribute('href', '#!');
             expect(activeButton).toHaveAttribute('aria-current', 'page');
             expect(activeButton).toHaveTextContent('Active Link 1');
 
             const link2 = Array.from(buttons || []).find((btn) => btn.textContent === 'Link 2');
             expect(link2).toBeInTheDocument();
-            expect(link2).toHaveAttribute('href', '#link2');
+            expect(link2).toHaveAttribute('href', '#!');
 
             const link3 = Array.from(buttons || []).find((btn) => btn.textContent === 'Link 3');
             expect(link3).toBeInTheDocument();
-            expect(link3).toHaveAttribute('href', '#link3');
+            expect(link3).toHaveAttribute('href', '#!');
         });
     });
 

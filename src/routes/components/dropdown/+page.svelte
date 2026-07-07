@@ -7,27 +7,27 @@
     const basicExampleCode = `<Dropdown.Root>
     <Dropdown.Toggle colorVariant="secondary">Dropdown button</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`;
 
     const dropdownWithLinksCode = `<Dropdown.Root>
-    <Dropdown.Toggle colorVariant="secondary" href="#dropdown-demo-link">Dropdown button</Dropdown.Toggle>
+    <Dropdown.Toggle colorVariant="secondary" href="#!">Dropdown button</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`;
 
     const colorVariantCode = `<Dropdown.Root isButtonGroup={true}>
     <Dropdown.Toggle colorVariant="primary">Primary</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`;
 
@@ -35,33 +35,33 @@
     <Button colorVariant="primary">Primary</Button>
     <Dropdown.Toggle colorVariant="primary" isSplit={true}></Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`;
 
     const sizingCode = `<Dropdown.Root isButtonGroup={true}>
     <Dropdown.Toggle colorVariant="primary" size="sm">Small</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`;
 
     const darkDropdownCode = `<Dropdown.Root isButtonGroup={true}>
     <Dropdown.Toggle colorVariant="dark">Dark Dropdown</Dropdown.Toggle>
     <Dropdown.Menu isDark={true}>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`;
 
     const navbarExampleCode = `<Navbar.Root colorVariant="dark" expandOnBreakpoint="lg" class="bg-dark">
     <Container isFluid={true}>
-        <Navbar.Brand href="#dropdown-demo-link">Navbar</Navbar.Brand>
+        <Navbar.Brand href="#!">Navbar</Navbar.Brand>
         <Navbar.Toggler ariaLabel="Toggle navigation">
             <Navbar.TogglerIcon />
         </Navbar.Toggler>
@@ -70,9 +70,9 @@
                 <Dropdown.Root direction="dropdown">
                     <Dropdown.Toggle colorVariant="dark">Dropdown</Dropdown.Toggle>
                     <Dropdown.Menu isDark={true}>
-                        <Dropdown.Item>Action</Dropdown.Item>
-                        <Dropdown.Item>Another action</Dropdown.Item>
-                        <Dropdown.Item>Something else here</Dropdown.Item>
+                        <Dropdown.Item href="#!">Action</Dropdown.Item>
+                        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown.Root>
             </Navbar.Nav>
@@ -83,47 +83,47 @@
     const directionsCode = `<Dropdown.Root direction="dropdown" isButtonGroup={true}>
     <Dropdown.Toggle colorVariant="primary">Dropdown</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>
 
 <Dropdown.Root direction="dropup" isButtonGroup={true}>
     <Dropdown.Toggle colorVariant="secondary">Dropup</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>
 
 <Dropdown.Root direction="dropend" isButtonGroup={true}>
     <Dropdown.Toggle colorVariant="success">Dropend</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>
 
 <Dropdown.Root direction="dropstart" isButtonGroup={true}>
     <Dropdown.Toggle colorVariant="info">Dropstart</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`;
 
     const keyboardNavigationCode = `<Dropdown.Root>
     <Dropdown.Toggle colorVariant="primary">Navigate with Arrow Keys</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>First Item</Dropdown.Item>
-        <Dropdown.Item>Second Item</Dropdown.Item>
-        <Dropdown.Item>Third Item</Dropdown.Item>
-        <Dropdown.Item isDisabled={true}>Disabled Item</Dropdown.Item>
-        <Dropdown.Item>Fifth Item</Dropdown.Item>
+        <Dropdown.Item href="#!">First Item</Dropdown.Item>
+        <Dropdown.Item href="#!">Second Item</Dropdown.Item>
+        <Dropdown.Item href="#!">Third Item</Dropdown.Item>
+        <Dropdown.Item href="#!" isDisabled={true}>Disabled Item</Dropdown.Item>
+        <Dropdown.Item href="#!">Fifth Item</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>
 
@@ -141,7 +141,6 @@
 <div>
     <div class="mb-5">
         <h1>Dropdown</h1>
-        <span id="dropdown-demo-link" class="visually-hidden">Dropdown demo link target</span>
         <p class="lead">
             Bootstrap's dropdown component built with Svelte 5. Use it to toggle contextual overlays for displaying lists, links, and more.
         </p>
@@ -167,9 +166,9 @@
                     <Dropdown.Root>
                         <Dropdown.Toggle colorVariant="secondary">Dropdown button</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -187,11 +186,11 @@
             <div class="card-body">
                 <div class="mb-3">
                     <Dropdown.Root>
-                        <Dropdown.Toggle colorVariant="secondary" href="#dropdown-demo-link">Dropdown button</Dropdown.Toggle>
+                        <Dropdown.Toggle colorVariant="secondary" href="#!">Dropdown button</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -211,49 +210,49 @@
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="primary">Primary</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="secondary">Secondary</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="success">Success</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="info">Info</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="warning">Warning</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="danger">Danger</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -277,27 +276,27 @@
                         <Button colorVariant="primary">Primary</Button>
                         <Dropdown.Toggle colorVariant="primary" isSplit={true}></Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true}>
                         <Button colorVariant="secondary">Secondary</Button>
                         <Dropdown.Toggle colorVariant="secondary" isSplit={true}></Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true}>
                         <Button colorVariant="success">Success</Button>
                         <Dropdown.Toggle colorVariant="success" isSplit={true}></Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -319,25 +318,25 @@
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="primary" size="sm">Small</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="secondary">Default</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="success" size="lg">Large</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -359,9 +358,9 @@
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="dark">Dark Dropdown</Dropdown.Toggle>
                         <Dropdown.Menu isDark={true}>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -379,7 +378,7 @@
                 <div class="mb-3">
                     <Navbar.Root colorVariant="dark" expandOnBreakpoint="lg" class="bg-dark">
                         <Container isFluid={true}>
-                            <Navbar.Brand href="#dropdown-demo-link">Navbar</Navbar.Brand>
+                            <Navbar.Brand href="#!">Navbar</Navbar.Brand>
                             <Navbar.Toggler ariaLabel="Toggle navigation">
                                 <Navbar.TogglerIcon />
                             </Navbar.Toggler>
@@ -388,9 +387,9 @@
                                     <Dropdown.Root direction="dropdown">
                                         <Dropdown.Toggle colorVariant="dark">Dropdown</Dropdown.Toggle>
                                         <Dropdown.Menu isDark={true}>
-                                            <Dropdown.Item>Action</Dropdown.Item>
-                                            <Dropdown.Item>Another action</Dropdown.Item>
-                                            <Dropdown.Item>Something else here</Dropdown.Item>
+                                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown.Root>
                                 </Navbar.Nav>
@@ -417,33 +416,33 @@
                     <Dropdown.Root direction="dropdown" isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="primary">Dropdown</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root direction="dropup" isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="secondary">Dropup</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root direction="dropend" isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="success">Dropend</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root direction="dropstart" isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="info">Dropstart</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -488,11 +487,11 @@
                     <Dropdown.Root>
                         <Dropdown.Toggle colorVariant="primary">Navigate with Arrow Keys</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>First Item</Dropdown.Item>
-                            <Dropdown.Item>Second Item</Dropdown.Item>
-                            <Dropdown.Item>Third Item</Dropdown.Item>
-                            <Dropdown.Item isDisabled={true}>Disabled Item</Dropdown.Item>
-                            <Dropdown.Item>Fifth Item</Dropdown.Item>
+                            <Dropdown.Item href="#!">First Item</Dropdown.Item>
+                            <Dropdown.Item href="#!">Second Item</Dropdown.Item>
+                            <Dropdown.Item href="#!">Third Item</Dropdown.Item>
+                            <Dropdown.Item href="#!" isDisabled={true}>Disabled Item</Dropdown.Item>
+                            <Dropdown.Item href="#!">Fifth Item</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
 
@@ -583,9 +582,9 @@
                     <Dropdown.Root>
                         <Dropdown.Toggle colorVariant="secondary">Dropdown with Links</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -593,9 +592,9 @@
                     code={`<Dropdown.Root>
     <Dropdown.Toggle colorVariant="secondary">Dropdown with Links</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`} />
             </div>
@@ -613,7 +612,7 @@
                         <Dropdown.Menu>
                             <Dropdown.ItemText>Dropdown item text</Dropdown.ItemText>
                             <Dropdown.ItemText>Another dropdown item text</Dropdown.ItemText>
-                            <Dropdown.Item>Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -623,7 +622,7 @@
     <Dropdown.Menu>
         <Dropdown.ItemText>Dropdown item text</Dropdown.ItemText>
         <Dropdown.ItemText>Another dropdown item text</Dropdown.ItemText>
-        <Dropdown.Item>Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`} />
             </div>
@@ -665,8 +664,8 @@
                     <Dropdown.Root>
                         <Dropdown.Toggle colorVariant="secondary">Disabled Item</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item isDisabled={true}>Disabled item</Dropdown.Item>
-                            <Dropdown.Item>Another item</Dropdown.Item>
+                            <Dropdown.Item href="#!" isDisabled={true}>Disabled item</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another item</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -674,8 +673,8 @@
                     code={`<Dropdown.Root>
     <Dropdown.Toggle colorVariant="secondary">Disabled Item</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item isDisabled={true}>Disabled item</Dropdown.Item>
-        <Dropdown.Item>Another item</Dropdown.Item>
+        <Dropdown.Item href="#!" isDisabled={true}>Disabled item</Dropdown.Item>
+        <Dropdown.Item href="#!">Another item</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`} />
             </div>
@@ -697,8 +696,8 @@
                         <Dropdown.Toggle colorVariant="secondary">Dropdown with Header</Dropdown.Toggle>
                         <Dropdown.Menu>
                             <Dropdown.Header>Header</Dropdown.Header>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -707,8 +706,8 @@
     <Dropdown.Toggle colorVariant="secondary">Dropdown with Header</Dropdown.Toggle>
     <Dropdown.Menu>
         <Dropdown.Header>Header</Dropdown.Header>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`} />
             </div>
@@ -724,10 +723,10 @@
                     <Dropdown.Root>
                         <Dropdown.Toggle colorVariant="secondary">Dropdown with Divider</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
                             <Dropdown.Divider />
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -735,10 +734,10 @@
                     code={`<Dropdown.Root>
     <Dropdown.Toggle colorVariant="secondary">Dropdown with Divider</Dropdown.Toggle>
     <Dropdown.Menu>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
         <Dropdown.Divider />
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`} />
             </div>
@@ -760,9 +759,9 @@
                     <Dropdown.Root isButtonGroup={true}>
                         <Dropdown.Toggle colorVariant="secondary">Right-aligned Menu using the isEnd property</Dropdown.Toggle>
                         <Dropdown.Menu isEnd={true}>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -770,9 +769,9 @@
                     code={`<Dropdown.Root isButtonGroup={true}>
     <Dropdown.Toggle colorVariant="secondary">Right-aligned Menu</Dropdown.Toggle>
     <Dropdown.Menu isEnd={true}>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`} />
             </div>
@@ -848,8 +847,8 @@
                                 <button type="submit" class="btn btn-primary">Sign in</button>
                             </form>
                             <Dropdown.Divider />
-                            <Dropdown.Item>New around here? Sign-up</Dropdown.Item>
-                            <Dropdown.Item>Forgot password?</Dropdown.Item>
+                            <Dropdown.Item href="#!">New around here? Sign-up</Dropdown.Item>
+                            <Dropdown.Item href="#!">Forgot password?</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -875,8 +874,8 @@
             <button type="submit" class="btn btn-primary">Sign in</button>
         </form>
         <Dropdown.Divider />
-        <Dropdown.Item>New around here? Sign-up</Dropdown.Item>
-        <Dropdown.Item>Forgot password?</Dropdown.Item>
+        <Dropdown.Item href="#!">New around here? Sign-up</Dropdown.Item>
+        <Dropdown.Item href="#!">Forgot password?</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`} />
             </div>
@@ -898,9 +897,9 @@
                     <Dropdown.Root>
                         <Dropdown.Toggle colorVariant="secondary">Dropdown with Offset</Dropdown.Toggle>
                         <Dropdown.Menu offset={[10, 20]}>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>
@@ -908,9 +907,9 @@
                     code={`<Dropdown.Root>
     <Dropdown.Toggle colorVariant="secondary">Dropdown with Offset</Dropdown.Toggle>
     <Dropdown.Menu offset={[10, 20]}>
-        <Dropdown.Item>Action</Dropdown.Item>
-        <Dropdown.Item>Another action</Dropdown.Item>
-        <Dropdown.Item>Something else here</Dropdown.Item>
+        <Dropdown.Item href="#!">Action</Dropdown.Item>
+        <Dropdown.Item href="#!">Another action</Dropdown.Item>
+        <Dropdown.Item href="#!">Something else here</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>`} />
             </div>
@@ -928,33 +927,33 @@
                     <Dropdown.Root isButtonGroup={true} autoClose={true}>
                         <Dropdown.Toggle colorVariant="secondary">Default (true)</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true} autoClose="inside">
                         <Dropdown.Toggle colorVariant="secondary">Inside Only</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true} autoClose="outside">
                         <Dropdown.Toggle colorVariant="secondary">Outside Only</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                     <Dropdown.Root isButtonGroup={true} autoClose={false}>
                         <Dropdown.Toggle colorVariant="secondary">Manual (false)</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item>Action</Dropdown.Item>
-                            <Dropdown.Item>Another action</Dropdown.Item>
-                            <Dropdown.Item>Something else here</Dropdown.Item>
+                            <Dropdown.Item href="#!">Action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Another action</Dropdown.Item>
+                            <Dropdown.Item href="#!">Something else here</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown.Root>
                 </div>

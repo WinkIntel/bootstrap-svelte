@@ -6,141 +6,141 @@
     // Sample code examples for demonstration
     const basicExampleCode = `<Nav.Root>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+        <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+        <Nav.Link href="#!">Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+        <Nav.Link href="#!">Another Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+        <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
     </Nav.Item>
 </Nav.Root>`;
 
     const pillsExampleCode = `<Nav.Root itemStyle="pills">
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+        <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+        <Nav.Link href="#!">Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+        <Nav.Link href="#!">Another Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+        <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
     </Nav.Item>
 </Nav.Root>`;
 
     const tabsExampleCode = `<Nav.Root itemStyle="tabs">
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+        <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+        <Nav.Link href="#!">Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+        <Nav.Link href="#!">Another Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+        <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
     </Nav.Item>
 </Nav.Root>`;
 
     const verticalNavExampleCode = `<Nav.Root verticalBreakpoint="xs">
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+        <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+        <Nav.Link href="#!">Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+        <Nav.Link href="#!">Another Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+        <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
     </Nav.Item>
 </Nav.Root>`;
 
     const fillExampleCode = `<Nav.Root itemLayout="fill">
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+        <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+        <Nav.Link href="#!">Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+        <Nav.Link href="#!">Another Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+        <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
     </Nav.Item>
 </Nav.Root>`;
 
     const justifiedExampleCode = `<Nav.Root itemLayout="justified">
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+        <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+        <Nav.Link href="#!">Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+        <Nav.Link href="#!">Another Link</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+        <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
     </Nav.Item>
 </Nav.Root>`;
 
     const alignmentExampleCode = `<!-- Default (start) -->
 <Nav.Root>
-    <Nav.Item><Nav.Link href="#nav-demo-link">Default</Nav.Link></Nav.Item>
+    <Nav.Item><Nav.Link href="#!">Default</Nav.Link></Nav.Item>
 </Nav.Root>
 
 <!-- Center aligned -->
 <Nav.Root horizontalAlignment="center">
-    <Nav.Item><Nav.Link href="#nav-demo-link">Center</Nav.Link></Nav.Item>
+    <Nav.Item><Nav.Link href="#!">Center</Nav.Link></Nav.Item>
 </Nav.Root>
 
 <!-- End aligned -->
 <Nav.Root horizontalAlignment="end">
-    <Nav.Item><Nav.Link href="#nav-demo-link">End</Nav.Link></Nav.Item>
+    <Nav.Item><Nav.Link href="#!">End</Nav.Link></Nav.Item>
 </Nav.Root>`;
 
     const differentElementsExampleCode = `<!-- Default (UL) -->
 <Nav.Root>
-    <Nav.Item><Nav.Link href="#nav-demo-link">Link</Nav.Link></Nav.Item>
+    <Nav.Item><Nav.Link href="#!">Link</Nav.Link></Nav.Item>
 </Nav.Root>
 
 <!-- As OL -->
 <Nav.Root elementType="ol">
-    <Nav.Item><Nav.Link href="#nav-demo-link">Link</Nav.Link></Nav.Item>
+    <Nav.Item><Nav.Link href="#!">Link</Nav.Link></Nav.Item>
 </Nav.Root>
 
 <!-- As NAV -->
 <Nav.Root elementType="nav">
-    <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+    <Nav.Link href="#!">Link</Nav.Link>
 </Nav.Root>`;
 
     const activeStateExampleCode = `<!-- Explicit Active State Control -->
 <Nav.Root>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isActive={true}>Explicitly Active</Nav.Link>
+        <Nav.Link href="#!" isActive={true}>Explicitly Active</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-demo-link" isActive={false}>Explicitly Inactive</Nav.Link>
+        <Nav.Link href="#!" isActive={false}>Explicitly Inactive</Nav.Link>
     </Nav.Item>
 </Nav.Root>
 
 <!-- Internal Active State Management -->
 <Nav.Root>
     <Nav.Item>
-        <Nav.Link href="#nav-link-1" id="nav-link-1">Click to Activate</Nav.Link>
+        <Nav.Link href="#!">Click to Activate</Nav.Link>
     </Nav.Item>
     <Nav.Item>
-        <Nav.Link href="#nav-link-2" id="nav-link-2">Another Link</Nav.Link>
+        <Nav.Link href="#!">Another Link</Nav.Link>
     </Nav.Item>
 </Nav.Root>`;
 </script>
@@ -148,7 +148,6 @@
 <div>
     <div class="mb-5">
         <h1>Nav</h1>
-        <span id="nav-demo-link" class="visually-hidden">Nav demo link target</span>
         <p class="lead">Navigation components for building various types of navigation interfaces, including tabs and pills.</p>
         <hr />
     </div>
@@ -174,16 +173,16 @@
                 <div class="mb-3">
                     <Nav.Root>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+                            <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+                            <Nav.Link href="#!">Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+                            <Nav.Link href="#!">Another Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+                            <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>
@@ -202,16 +201,16 @@
                 <div class="mb-3">
                     <Nav.Root itemStyle="pills">
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+                            <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+                            <Nav.Link href="#!">Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+                            <Nav.Link href="#!">Another Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+                            <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>
@@ -231,16 +230,16 @@
                 <div class="mb-3">
                     <Nav.Root itemStyle="tabs">
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+                            <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+                            <Nav.Link href="#!">Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+                            <Nav.Link href="#!">Another Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+                            <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>
@@ -262,16 +261,16 @@
                 <div class="mb-3">
                     <Nav.Root verticalBreakpoint="xs">
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+                            <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+                            <Nav.Link href="#!">Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+                            <Nav.Link href="#!">Another Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+                            <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>
@@ -295,16 +294,16 @@
                 <div class="mb-3">
                     <Nav.Root itemLayout="fill">
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+                            <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+                            <Nav.Link href="#!">Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+                            <Nav.Link href="#!">Another Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+                            <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>
@@ -320,16 +319,16 @@
                 <div class="mb-3">
                     <Nav.Root itemLayout="justified">
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isActive={true}>Active</Nav.Link>
+                            <Nav.Link href="#!" isActive={true}>Active</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Link</Nav.Link>
+                            <Nav.Link href="#!">Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Another Link</Nav.Link>
+                            <Nav.Link href="#!">Another Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+                            <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>
@@ -352,19 +351,19 @@
                 <div class="mb-3 d-flex flex-column gap-2">
                     <Nav.Root>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Default (start)</Nav.Link>
+                            <Nav.Link href="#!">Default (start)</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
 
                     <Nav.Root horizontalAlignment="center">
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">Center aligned</Nav.Link>
+                            <Nav.Link href="#!">Center aligned</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
 
                     <Nav.Root horizontalAlignment="end">
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link">End aligned</Nav.Link>
+                            <Nav.Link href="#!">End aligned</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>
@@ -389,7 +388,7 @@
                         <small class="text-muted">Default (UL):</small>
                         <Nav.Root>
                             <Nav.Item>
-                                <Nav.Link href="#nav-demo-link">Link in UL</Nav.Link>
+                                <Nav.Link href="#!">Link in UL</Nav.Link>
                             </Nav.Item>
                         </Nav.Root>
                     </div>
@@ -398,7 +397,7 @@
                         <small class="text-muted">As OL:</small>
                         <Nav.Root elementType="ol">
                             <Nav.Item>
-                                <Nav.Link href="#nav-demo-link">Link in OL</Nav.Link>
+                                <Nav.Link href="#!">Link in OL</Nav.Link>
                             </Nav.Item>
                         </Nav.Root>
                     </div>
@@ -406,7 +405,7 @@
                     <div>
                         <small class="text-muted">As NAV:</small>
                         <Nav.Root elementType="nav">
-                            <Nav.Link href="#nav-demo-link">Link directly in NAV</Nav.Link>
+                            <Nav.Link href="#!">Link directly in NAV</Nav.Link>
                         </Nav.Root>
                     </div>
                 </div>
@@ -432,13 +431,13 @@
                 <div class="mb-3">
                     <Nav.Root>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isActive={true}>Explicitly Active</Nav.Link>
+                            <Nav.Link href="#!" isActive={true}>Explicitly Active</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isActive={false}>Explicitly Inactive</Nav.Link>
+                            <Nav.Link href="#!" isActive={false}>Explicitly Inactive</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-demo-link" isDisabled={true}>Disabled</Nav.Link>
+                            <Nav.Link href="#!" isDisabled={true}>Disabled</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>
@@ -461,13 +460,13 @@
                 <div class="mb-3">
                     <Nav.Root>
                         <Nav.Item>
-                            <Nav.Link href="#nav-link-1" id="nav-link-1">Click to Activate</Nav.Link>
+                            <Nav.Link href="#!">Click to Activate</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-link-2" id="nav-link-2">Another Link</Nav.Link>
+                            <Nav.Link href="#!">Another Link</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link href="#nav-link-3" id="nav-link-3">Third Link</Nav.Link>
+                            <Nav.Link href="#!">Third Link</Nav.Link>
                         </Nav.Item>
                     </Nav.Root>
                 </div>

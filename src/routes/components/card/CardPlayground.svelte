@@ -85,8 +85,8 @@
             }
 
             if (includeLinks) {
-                code += `\n    <Card.Link href="#card-demo-link">Card Link</Card.Link>`;
-                code += `\n    <Card.Link href="#card-demo-link">Another Link</Card.Link>`;
+                code += `\n    <Card.Link href="#!">Card Link</Card.Link>`;
+                code += `\n    <Card.Link href="#!">Another Link</Card.Link>`;
             }
 
             code += `\n  </Card.ImgOverlay>`;
@@ -103,8 +103,8 @@
             }
 
             if (includeLinks) {
-                code += `\n    <Card.Link href="#card-demo-link">Card Link</Card.Link>`;
-                code += `\n    <Card.Link href="#card-demo-link">Another Link</Card.Link>`;
+                code += `\n    <Card.Link href="#!">Card Link</Card.Link>`;
+                code += `\n    <Card.Link href="#!">Another Link</Card.Link>`;
             }
 
             code += `\n  </Card.Body>`;
@@ -282,8 +282,8 @@
                                     {/if}
                                     <Card.Text>{bodyText}</Card.Text>
                                     {#if includeLinks}
-                                        <Card.Link href="#card-demo-link">Card Link</Card.Link>
-                                        <Card.Link href="#card-demo-link">Another Link</Card.Link>
+                                        <Card.Link href="#!">Card Link</Card.Link>
+                                        <Card.Link href="#!">Another Link</Card.Link>
                                     {/if}
                                 </Card.ImgOverlay>
                             {:else}
@@ -294,8 +294,8 @@
                                     {/if}
                                     <Card.Text>{bodyText}</Card.Text>
                                     {#if includeLinks}
-                                        <Card.Link href="#card-demo-link">Card Link</Card.Link>
-                                        <Card.Link href="#card-demo-link">Another Link</Card.Link>
+                                        <Card.Link href="#!">Card Link</Card.Link>
+                                        <Card.Link href="#!">Another Link</Card.Link>
                                     {/if}
                                 </Card.Body>
                             {/if}

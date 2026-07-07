@@ -6,7 +6,6 @@
 <div>
     <div class="mb-4">
         <h1>Table</h1>
-        <span id="table-pagination-demo" class="visually-hidden">Table pagination demo target</span>
         <p class="lead">Documentation and examples for opt-in styling of tables.</p>
         <hr />
     </div>
@@ -1748,21 +1747,21 @@
                                 <div class="text-muted">Showing 1 to 3 of 3 entries</div>
                                 <Pagination.Root size="sm">
                                     <Pagination.Item isDisabled={true}>
-                                        <Pagination.Link href="#table-pagination-demo" aria-label="Previous">
+                                        <Pagination.Link href="#!" aria-label="Previous">
                                             <span aria-hidden="true">&laquo;</span>
                                         </Pagination.Link>
                                     </Pagination.Item>
                                     <Pagination.Item isActive={true}>
-                                        <Pagination.Link href="#table-pagination-demo">1</Pagination.Link>
+                                        <Pagination.Link href="#!">1</Pagination.Link>
                                     </Pagination.Item>
                                     <Pagination.Item>
-                                        <Pagination.Link href="#table-pagination-demo">2</Pagination.Link>
+                                        <Pagination.Link href="#!">2</Pagination.Link>
                                     </Pagination.Item>
                                     <Pagination.Item>
-                                        <Pagination.Link href="#table-pagination-demo">3</Pagination.Link>
+                                        <Pagination.Link href="#!">3</Pagination.Link>
                                     </Pagination.Item>
                                     <Pagination.Item>
-                                        <Pagination.Link href="#table-pagination-demo" aria-label="Next">
+                                        <Pagination.Link href="#!" aria-label="Next">
                                             <span aria-hidden="true">&raquo;</span>
                                         </Pagination.Link>
                                     </Pagination.Item>
@@ -1808,21 +1807,21 @@
             </div>
             <Pagination.Root size="sm">
                 <Pagination.Item isDisabled={true}>
-                    <Pagination.Link href="#table-pagination-demo" aria-label="Previous">
+                    <Pagination.Link href="#!" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </Pagination.Link>
                 </Pagination.Item>
                 <Pagination.Item isActive={true}>
-                    <Pagination.Link href="#table-pagination-demo">1</Pagination.Link>
+                    <Pagination.Link href="#!">1</Pagination.Link>
                 </Pagination.Item>
                 <Pagination.Item>
-                    <Pagination.Link href="#table-pagination-demo">2</Pagination.Link>
+                    <Pagination.Link href="#!">2</Pagination.Link>
                 </Pagination.Item>
                 <Pagination.Item>
-                    <Pagination.Link href="#table-pagination-demo">3</Pagination.Link>
+                    <Pagination.Link href="#!">3</Pagination.Link>
                 </Pagination.Item>
                 <Pagination.Item>
-                    <Pagination.Link href="#table-pagination-demo" aria-label="Next">
+                    <Pagination.Link href="#!" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </Pagination.Link>
                 </Pagination.Item>
