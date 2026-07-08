@@ -303,7 +303,7 @@ describe('Modal Component', () => {
 
             expect(onHide).not.toHaveBeenCalled();
             expect(onHidden).not.toHaveBeenCalled();
-            expect(onShow.mock.invocationCallOrder[0]).toBeLessThan(onShown.mock.invocationCallOrder[0]);
+            expect(onShow.mock.invocationCallOrder[0]!).toBeLessThan(onShown.mock.invocationCallOrder[0]!);
         });
 
         it('should call onHide before onHidden, exactly once each, when closing', async () => {
@@ -324,7 +324,7 @@ describe('Modal Component', () => {
                 expect(onHidden).toHaveBeenCalledTimes(1);
             });
 
-            expect(onHide.mock.invocationCallOrder[0]).toBeLessThan(onHidden.mock.invocationCallOrder[0]);
+            expect(onHide.mock.invocationCallOrder[0]!).toBeLessThan(onHidden.mock.invocationCallOrder[0]!);
         });
 
         it('should not throw when closed before its show transition finishes, and should settle hidden', async () => {
