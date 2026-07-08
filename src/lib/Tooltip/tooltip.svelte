@@ -176,7 +176,7 @@ Add small overlay content to any element for housing secondary information or in
         }
         // accommodate the id containing a hash or not...
         const elementId = referenceElementId.startsWith('#') ? referenceElementId.substring(1) : referenceElementId;
-        referenceElement = document.querySelector(`#${elementId}`);
+        referenceElement = document.getElementById(elementId);
         addEventListeners();
 
         return () => {

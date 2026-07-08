@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 import { Tooltip } from '../index.js';
 import TooltipBasicTest from './tooltip-basic-test.svelte';
+import TooltipSpecialIdTest from './tooltip-special-id-test.svelte';
 
 describe('Tooltip Component', () => {
     it('should render basic tooltip with inner content', () => {
@@ -105,5 +106,24 @@ describe('Tooltip Component', () => {
 
     it('should create an Inner component with expected properties', () => {
         expect(Tooltip.Inner).toBeDefined();
+    });
+});
+
+describe('Tooltip Reference Element With Special-Character Id', () => {
+    it('should bind to the reference element and show on trigger when its id contains a dot', async () => {
+        render(TooltipSpecialIdTest);
+
+        // Before any interaction, the tooltip should not be in the DOM (isShown defaults to false).
+        expect(screen.queryByTestId('dotted-id-tooltip')).not.toBeInTheDocument();
+
+        const trigger = screen.getByTestId('dotted-id-trigger');
+        await fireEvent.click(trigger);
+
+        // If the reference element lookup had silently failed (the old `querySelector`
+        // behavior for a dotted id), no click listener would ever have been attached and
+        // the tooltip would never show.
+        const tooltip = screen.getByTestId('dotted-id-tooltip');
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveClass('show');
     });
 });
