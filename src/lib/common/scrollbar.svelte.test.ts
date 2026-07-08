@@ -2,7 +2,7 @@
 import '@testing-library/jest-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as domModule from './dom.js';
-import { disableBodyScrolling, getScrollbarWidth, resetBodyScrolling } from './scrollbar.js';
+import { acquireBodyScrollLock, disableBodyScrolling, getScrollbarWidth, releaseBodyScrollLock, resetBodyScrolling } from './scrollbar.js';
 
 describe('scrollbar.ts', () => {
     let originalBody: HTMLElement;
@@ -189,6 +189,96 @@ describe('scrollbar.ts', () => {
             // Data attributes should be removed
             expect(body.hasAttribute('data-scrollbar-initial-overflow-value')).toBe(false);
             expect(body.hasAttribute('data-scrollbar-initial-padding-value')).toBe(false);
+        });
+    });
+
+    describe('body scroll lock counting', () => {
+        it('should lock on a single acquire and restore on the matching release', () => {
+            const body = document.body;
+
+            const acquireCount = acquireBodyScrollLock(body);
+
+            expect(acquireCount).toBe(1);
+            expect(body.style.overflow).toBe('hidden');
+            expect(body.getAttribute('data-scrollbar-lock-count')).toBe('1');
+
+            const releaseCount = releaseBodyScrollLock(body);
+
+            expect(releaseCount).toBe(0);
+            expect(body.style.overflow).toBe('');
+            expect(body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+        });
+
+        it('should stay locked after the first of two releases and only restore after the second (regression case)', () => {
+            const body = document.body;
+
+            acquireBodyScrollLock(body);
+            const secondAcquireCount = acquireBodyScrollLock(body);
+
+            expect(secondAcquireCount).toBe(2);
+            expect(body.style.overflow).toBe('hidden');
+            expect(body.getAttribute('data-scrollbar-lock-count')).toBe('2');
+
+            const firstReleaseCount = releaseBodyScrollLock(body);
+
+            expect(firstReleaseCount).toBe(1);
+            expect(body.style.overflow).toBe('hidden');
+            expect(body.getAttribute('data-scrollbar-lock-count')).toBe('1');
+
+            const secondReleaseCount = releaseBodyScrollLock(body);
+
+            expect(secondReleaseCount).toBe(0);
+            expect(body.style.overflow).toBe('');
+            expect(body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+        });
+
+        it('should only capture the initial overflow value on the first acquire', () => {
+            const body = document.body;
+            body.style.overflow = 'scroll';
+
+            acquireBodyScrollLock(body);
+            acquireBodyScrollLock(body);
+
+            expect(body.style.overflow).toBe('hidden');
+
+            releaseBodyScrollLock(body);
+            expect(body.style.overflow).toBe('hidden');
+
+            releaseBodyScrollLock(body);
+            expect(body.style.overflow).toBe('scroll');
+        });
+
+        it('should no-op when releasing with no lock held', () => {
+            const body = document.body;
+
+            const releaseCount = releaseBodyScrollLock(body);
+
+            expect(releaseCount).toBe(0);
+            expect(body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+            expect(body.style.overflow).toBe('');
+        });
+
+        it('should restore only after the final release among three interleaved holders', () => {
+            const body = document.body;
+
+            acquireBodyScrollLock(body); // A
+            acquireBodyScrollLock(body); // B
+            acquireBodyScrollLock(body); // C
+
+            expect(body.style.overflow).toBe('hidden');
+            expect(body.getAttribute('data-scrollbar-lock-count')).toBe('3');
+
+            releaseBodyScrollLock(body); // B releases
+            expect(body.style.overflow).toBe('hidden');
+            expect(body.getAttribute('data-scrollbar-lock-count')).toBe('2');
+
+            releaseBodyScrollLock(body); // A releases
+            expect(body.style.overflow).toBe('hidden');
+            expect(body.getAttribute('data-scrollbar-lock-count')).toBe('1');
+
+            releaseBodyScrollLock(body); // C releases
+            expect(body.style.overflow).toBe('');
+            expect(body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
         });
     });
 });
