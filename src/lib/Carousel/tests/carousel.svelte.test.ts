@@ -266,6 +266,55 @@ describe('Carousel navigation and autoplay', () => {
         expect(screen.queryByTestId('autoplay-carousel-item-1')).not.toBeInTheDocument();
     });
 
+    it('should atomically swap the active class between items when the slide transition commits', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        await fireEvent.click(screen.getByTestId('slide-carousel-control-next'));
+
+        // Mid-transition (Bootstrap contract): the outgoing item still owns 'active'
+        // plus its directional class; the incoming item is positioned via
+        // carousel-item-next/-start but must NOT be 'active' yet.
+        const outgoing = screen.getByTestId('slide-carousel-item-1');
+        const incoming = screen.getByTestId('slide-carousel-item-2');
+        expect(outgoing).toHaveClass('active');
+        expect(outgoing).toHaveClass('carousel-item-start');
+        expect(incoming).not.toHaveClass('active');
+        expect(incoming).toHaveClass('carousel-item-next');
+        expect(incoming).toHaveClass('carousel-item-start');
+
+        // Advance past the default 600ms transition so the commit callback fires.
+        await vi.advanceTimersByTimeAsync(700);
+
+        // The incoming item now owns 'active' with no leftover directional classes...
+        expect(incoming).toHaveClass('active');
+        expect(incoming).not.toHaveClass('carousel-item-next');
+        expect(incoming).not.toHaveClass('carousel-item-start');
+
+        // ...and the outgoing item left the DOM at the same moment (Bootstrap hides it
+        // synchronously at transition end). Pre-fix it lingered through a no-op exit
+        // transition with a frozen 'carousel-item active carousel-item-start' class list,
+        // leaving TWO simultaneously-active items.
+        expect(screen.queryByTestId('slide-carousel-item-1')).not.toBeInTheDocument();
+        expect(screen.getByTestId('slide-carousel-inner').querySelectorAll('.carousel-item.active')).toHaveLength(1);
+    });
+
+    it('should atomically swap the active class between items when the crossfade transition commits', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        await fireEvent.click(screen.getByTestId('crossfade-carousel-control-next'));
+
+        await vi.advanceTimersByTimeAsync(700);
+
+        const incoming = screen.getByTestId('crossfade-carousel-item-2');
+        expect(incoming).toHaveClass('active');
+        expect(incoming).not.toHaveClass('carousel-item-next');
+        expect(incoming).not.toHaveClass('carousel-item-start');
+        expect(screen.queryByTestId('crossfade-carousel-item-1')).not.toBeInTheDocument();
+        expect(screen.getByTestId('crossfade-carousel-inner').querySelectorAll('.carousel-item.active')).toHaveLength(1);
+    });
+
     it('should ignore a second next click received while a transition is animating', async () => {
         vi.useFakeTimers({ shouldAdvanceTime: false });
         render(CarouselBasicTest);

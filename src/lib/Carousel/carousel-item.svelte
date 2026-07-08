@@ -88,6 +88,12 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
     );
 </script>
 
+<!--
+    The slide and crossfade branches use in: (never transition:) — their exit visuals are
+    driven by the carousel-item-start/-end CSS classes during the transition window, and
+    Svelte freezes class bindings inside an outroing block, so an outro would hold the
+    outgoing item in the DOM with a stale 'active' class after the commit.
+-->
 {#if itemState.doSlideItem}
     <div
         bind:this={elementRef}
@@ -96,7 +102,7 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         onintrostart={onSlide}
         onintroend={onSlid}
         style={styles}
-        transition:fly={{
+        in:fly={{
             duration: itemState.root.transitionDuration,
             x: flyX,
             y: undefined,
@@ -135,7 +141,7 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         {id}
         onintrostart={onSlide}
         onintroend={onSlid}
-        transition:fly={{
+        in:fly={{
             duration: itemState.root.transitionDuration,
             x: '0%',
             y: undefined,
