@@ -2,6 +2,21 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.3
+
+- Fixed stacked overlay body scroll restoration by refcounting Modal and Offcanvas scroll locks.
+- Fixed slide and crossfade Carousel transitions so outgoing items no longer retain a stale `.active` class through the transition window.
+- Hardened Dropdown and Tooltip DOM lookups for special-character and digit-leading element IDs.
+- Cancelled Carousel transition/resume timers during disposal to avoid post-destroy autoplay work.
+- Raised the Svelte peer dependency floor to `^5.29.0` to match the package's `svelte/attachments` usage.
+- Expanded regression coverage for scroll locking, Carousel transitions/timers, Accordion behavior, Modal lifecycle/focus, Dropdown IDs, Tooltip IDs, and the Web Animations test mock.
+
+## 1.0.2
+
+- Deployed the docs/showcase site as static SvelteKit output on Vercel.
+- Preserved no-op demo link behavior for placeholder and nav demo links.
+- Kept package build/publish validation passing for `@winkintel/bootstrap-svelte`.
+
 ## 1.0.1
 
 - Corrected `BreakpointListener` documentation examples to close with `</BreakpointListener>` instead of `</BreakpointMonitor>`.
