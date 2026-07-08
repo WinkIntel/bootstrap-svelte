@@ -342,6 +342,33 @@ describe('Modal Component', () => {
             await waitFor(() => expect(onHidden).toHaveBeenCalledTimes(1));
             expect(screen.queryByTestId('lifecycle-modal')).not.toBeInTheDocument();
         });
+
+        it('should not leak the body scroll lock when reopened during its own outro transition', async () => {
+            const onShown = vi.fn();
+            const onHidden = vi.fn();
+
+            render(ModalLifecycleTest, { props: { onShown, onHidden } });
+
+            await fireEvent.click(screen.getByTestId('lifecycle-open'));
+            await waitFor(() => expect(onShown).toHaveBeenCalledTimes(1));
+            expect(document.body.style.overflow).toBe('hidden');
+
+            // Start closing, but reopen before the outro transition (and its
+            // outroend event) has a chance to complete. This re-fires
+            // introstart without an intervening outroend, which previously
+            // acquired a second, unmatched scroll lock.
+            await fireEvent.click(screen.getByTestId('lifecycle-close'));
+            await fireEvent.click(screen.getByTestId('lifecycle-open'));
+
+            await waitFor(() => expect(onShown).toHaveBeenCalledTimes(2));
+            expect(document.body.getAttribute('data-scrollbar-lock-count')).toBe('1');
+
+            await fireEvent.click(screen.getByTestId('lifecycle-close'));
+            await waitFor(() => expect(onHidden).toHaveBeenCalledTimes(1));
+
+            expect(document.body.style.overflow).toBe('');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+        });
     });
 
     describe('Modal focus management', () => {

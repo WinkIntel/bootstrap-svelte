@@ -184,7 +184,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 
     // Listen to the transition events to properly manage the body scrollbar...
     const handleOnShow: EventListener = (event: Event) => {
-        if (bodyElement && !isBodyScrollable && !rootState.isMediaQueryMatched) {
+        if (bodyElement && !isBodyScrollable && !rootState.isMediaQueryMatched && !holdsScrollLock) {
             acquireBodyScrollLock(bodyElement);
             holdsScrollLock = true;
         }

@@ -148,15 +148,17 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
     const handleOnShow: EventListener = (event: Event) => {
         if (bodyElement) {
-            acquireBodyScrollLock(bodyElement);
-            holdsScrollLock = true;
+            if (!holdsScrollLock) {
+                acquireBodyScrollLock(bodyElement);
+                holdsScrollLock = true;
+            }
             bodyElement.classList.add('modal-open');
         }
         onShow(event);
     };
 
     const handleOnHidden: EventListener = (event: Event) => {
-        if (bodyElement) {
+        if (bodyElement && holdsScrollLock) {
             const remainingLocks = releaseBodyScrollLock(bodyElement);
             holdsScrollLock = false;
             if (remainingLocks === 0) {
