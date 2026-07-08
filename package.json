@@ -54,7 +54,7 @@
         }
     },
     "peerDependencies": {
-        "svelte": "^5.0.0"
+        "svelte": "^5.29.0"
     },
     "dependencies": {
         "@popperjs/core": "~2.11.8",

@@ -48,6 +48,7 @@
             </div>
         </Carousel.Item>
     </Carousel.Inner>
+    <Carousel.ControlNext data-testid="slide-carousel-control-next" />
 </Carousel.Root>
 
 <!-- Carousel with fade animation -->
@@ -80,6 +81,7 @@
             </div>
         </Carousel.Item>
     </Carousel.Inner>
+    <Carousel.ControlNext data-testid="crossfade-carousel-control-next" />
 </Carousel.Root>
 
 <!-- Carousel with custom interval -->

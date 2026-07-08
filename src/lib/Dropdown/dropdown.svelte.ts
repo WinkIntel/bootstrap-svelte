@@ -237,10 +237,13 @@ export class DropdownMenuState {
         if (!this.isShown) {
             return;
         }
+        if (!this.root.props.id) {
+            return;
+        }
         const target = event.target as HTMLElement;
         // Check if the click occurred within this specific dropdown instance.
         // This prevents closing if a click happens inside the dropdown menu or on its toggle.
-        const nearestDropdown = target.closest(`#${this.root.props.id}`);
+        const nearestDropdown = target.closest(`#${CSS.escape(this.root.props.id)}`);
         if (nearestDropdown && nearestDropdown.id === this.root.props.id) {
             // The click is within the current dropdown, so do nothing.
             return;

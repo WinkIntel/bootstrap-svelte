@@ -1,9 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
-import { describe, expect, it } from 'vitest';
+import { userEvent } from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { Modal } from '../index.js';
 import ModalAccessibilityTest from './modal-accessibility-test.svelte';
 import ModalBasicTest from './modal-basic-test.svelte';
+import ModalLifecycleTest from './modal-lifecycle-test.svelte';
+import ModalStackedTest from './modal-stacked-test.svelte';
 
 describe('Modal Component', () => {
     it('should render basic modal with all sub-components', () => {
@@ -208,5 +211,232 @@ describe('Modal Component', () => {
 
         await fireEvent.keyDown(window, { key: 'Escape' });
         await waitFor(() => expect(opener).toHaveFocus());
+    });
+
+    describe('stacked modals', () => {
+        it('should restore body scroll only after both modals are closed, closing B before A', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument());
+            expect(document.body.style.overflow).toBe('hidden');
+
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+            expect(document.body.style.overflow).toBe('hidden');
+
+            await fireEvent.click(screen.getByTestId('close-b'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+
+            // A is still open, so scrolling must remain locked (the regression case).
+            expect(document.body.style.overflow).toBe('hidden');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(true);
+
+            await fireEvent.click(screen.getByTestId('close-a'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-a')).not.toBeInTheDocument());
+
+            expect(document.body.style.overflow).toBe('');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+        });
+
+        it('should restore body scroll only after both modals are closed, closing A before B', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+
+            expect(document.body.style.overflow).toBe('hidden');
+
+            await fireEvent.click(screen.getByTestId('close-a'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-a')).not.toBeInTheDocument());
+
+            // B is still open, so scrolling must remain locked regardless of close order.
+            expect(document.body.style.overflow).toBe('hidden');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(true);
+
+            await fireEvent.click(screen.getByTestId('close-b'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+
+            expect(document.body.style.overflow).toBe('');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+        });
+
+        it('should keep overflow hidden while the first modal remains open after the second closes', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('close-b'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+
+            expect(document.body.style.overflow).toBe('hidden');
+            expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument();
+
+            // Clean up so this test doesn't leak a locked body into the next one.
+            await fireEvent.click(screen.getByTestId('close-a'));
+            await waitFor(() => expect(document.body.style.overflow).toBe(''));
+        });
+    });
+
+    describe('Modal lifecycle callbacks', () => {
+        it('should call onShow before onShown, exactly once each, when opening', async () => {
+            const onShow = vi.fn();
+            const onShown = vi.fn();
+            const onHide = vi.fn();
+            const onHidden = vi.fn();
+
+            render(ModalLifecycleTest, { props: { onShow, onShown, onHide, onHidden } });
+
+            await fireEvent.click(screen.getByTestId('lifecycle-open'));
+
+            await waitFor(() => {
+                expect(onShow).toHaveBeenCalledTimes(1);
+                expect(onShown).toHaveBeenCalledTimes(1);
+            });
+
+            expect(onHide).not.toHaveBeenCalled();
+            expect(onHidden).not.toHaveBeenCalled();
+            expect(onShow.mock.invocationCallOrder[0]!).toBeLessThan(onShown.mock.invocationCallOrder[0]!);
+        });
+
+        it('should call onHide before onHidden, exactly once each, when closing', async () => {
+            const onShow = vi.fn();
+            const onShown = vi.fn();
+            const onHide = vi.fn();
+            const onHidden = vi.fn();
+
+            render(ModalLifecycleTest, { props: { onShow, onShown, onHide, onHidden } });
+
+            await fireEvent.click(screen.getByTestId('lifecycle-open'));
+            await waitFor(() => expect(onShown).toHaveBeenCalledTimes(1));
+
+            await fireEvent.click(screen.getByTestId('lifecycle-close'));
+
+            await waitFor(() => {
+                expect(onHide).toHaveBeenCalledTimes(1);
+                expect(onHidden).toHaveBeenCalledTimes(1);
+            });
+
+            expect(onHide.mock.invocationCallOrder[0]!).toBeLessThan(onHidden.mock.invocationCallOrder[0]!);
+        });
+
+        it('should not throw when closed before its show transition finishes, and should settle hidden', async () => {
+            const onShow = vi.fn();
+            const onHidden = vi.fn();
+
+            render(ModalLifecycleTest, { props: { onShow, onHidden } });
+
+            await fireEvent.click(screen.getByTestId('lifecycle-open'));
+            await waitFor(() => expect(onShow).toHaveBeenCalledTimes(1));
+
+            // Close immediately, without waiting for the intro transition (300ms) to finish.
+            expect(() => fireEvent.click(screen.getByTestId('lifecycle-close'))).not.toThrow();
+
+            await waitFor(() => expect(onHidden).toHaveBeenCalledTimes(1));
+            expect(screen.queryByTestId('lifecycle-modal')).not.toBeInTheDocument();
+        });
+
+        it('should not leak the body scroll lock when reopened during its own outro transition', async () => {
+            const onShown = vi.fn();
+            const onHidden = vi.fn();
+
+            render(ModalLifecycleTest, { props: { onShown, onHidden } });
+
+            await fireEvent.click(screen.getByTestId('lifecycle-open'));
+            await waitFor(() => expect(onShown).toHaveBeenCalledTimes(1));
+            expect(document.body.style.overflow).toBe('hidden');
+
+            // Start closing, but reopen before the outro transition (and its
+            // outroend event) has a chance to complete. This re-fires
+            // introstart without an intervening outroend, which previously
+            // acquired a second, unmatched scroll lock.
+            await fireEvent.click(screen.getByTestId('lifecycle-close'));
+            await fireEvent.click(screen.getByTestId('lifecycle-open'));
+
+            await waitFor(() => expect(onShown).toHaveBeenCalledTimes(2));
+            expect(document.body.getAttribute('data-scrollbar-lock-count')).toBe('1');
+
+            await fireEvent.click(screen.getByTestId('lifecycle-close'));
+            await waitFor(() => expect(onHidden).toHaveBeenCalledTimes(1));
+
+            expect(document.body.style.overflow).toBe('');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+        });
+    });
+
+    describe('Modal focus management', () => {
+        it('should move focus into the modal when it opens', async () => {
+            render(ModalAccessibilityTest);
+
+            const opener = screen.getByTestId('modal-opener');
+            opener.focus();
+            await fireEvent.click(opener);
+
+            const modal = await screen.findByRole('dialog', { name: 'Accessible modal' });
+
+            await waitFor(() => expect(modal.contains(document.activeElement)).toBe(true));
+            expect(document.activeElement).not.toBe(opener);
+            expect(document.activeElement).toBe(screen.getByLabelText('Close'));
+        });
+
+        it('should wrap focus from the last to the first focusable element when tabbing forward', async () => {
+            const user = userEvent.setup();
+            render(ModalAccessibilityTest);
+
+            await fireEvent.click(screen.getByTestId('modal-opener'));
+            await screen.findByRole('dialog', { name: 'Accessible modal' });
+
+            const closeButton = screen.getByLabelText('Close');
+            const actionButton = screen.getByTestId('modal-action');
+
+            await waitFor(() => expect(closeButton).toHaveFocus());
+
+            actionButton.focus();
+            expect(actionButton).toHaveFocus();
+
+            await user.tab();
+
+            expect(document.activeElement).toBe(closeButton);
+        });
+
+        it('should wrap focus from the first to the last focusable element when tabbing backward', async () => {
+            const user = userEvent.setup();
+            render(ModalAccessibilityTest);
+
+            await fireEvent.click(screen.getByTestId('modal-opener'));
+            await screen.findByRole('dialog', { name: 'Accessible modal' });
+
+            const closeButton = screen.getByLabelText('Close');
+            const actionButton = screen.getByTestId('modal-action');
+
+            await waitFor(() => expect(closeButton).toHaveFocus());
+
+            await user.tab({ shift: true });
+
+            expect(document.activeElement).toBe(actionButton);
+        });
+
+        it('should restore focus to the trigger element after the modal is closed', async () => {
+            render(ModalAccessibilityTest);
+
+            const opener = screen.getByTestId('modal-opener');
+            opener.focus();
+            await fireEvent.click(opener);
+
+            await screen.findByRole('dialog', { name: 'Accessible modal' });
+            await waitFor(() => expect(screen.getByLabelText('Close')).toHaveFocus());
+
+            await fireEvent.click(screen.getByTestId('modal-action'));
+
+            await waitFor(() => expect(opener).toHaveFocus());
+            expect(screen.queryByRole('dialog', { name: 'Accessible modal' })).not.toBeInTheDocument();
+        });
     });
 });

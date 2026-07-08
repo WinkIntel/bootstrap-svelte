@@ -54,7 +54,7 @@ yarn add @winkintel/bootstrap-svelte bootstrap
 This package requires Svelte 5:
 
 ```bash
-pnpm add svelte@^5.0.0
+pnpm add svelte@^5.29.0
 ```
 
 ## Bootstrap CSS

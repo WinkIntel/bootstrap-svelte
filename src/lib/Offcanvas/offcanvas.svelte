@@ -59,8 +59,8 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 <script lang="ts">
     import { noop, uniqueClsx } from '$lib/common/index.js';
     import { initOffcanvasRootState, OffcanvasRootState } from '$lib/common/navbar-offcanvas.svelte.js';
-    import { disableBodyScrolling, resetBodyScrolling } from '$lib/common/scrollbar.js';
-    import { onMount, tick } from 'svelte';
+    import { acquireBodyScrollLock, releaseBodyScrollLock } from '$lib/common/scrollbar.js';
+    import { onDestroy, onMount, tick } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import type { Offcanvas } from './index.js';
 
@@ -89,6 +89,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 
     // Initialize the root state of the offcanvas component...
     let bodyElement: HTMLElement | null = $state(null);
+    let holdsScrollLock = false;
     const unset = Symbol('unset');
     let previousIsShown: Offcanvas.RootProps['isShown'] | typeof unset = unset;
     let previousShowOnBreakpoint: Offcanvas.RootProps['showOnBreakpoint'] | typeof unset = unset;
@@ -183,19 +184,31 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 
     // Listen to the transition events to properly manage the body scrollbar...
     const handleOnShow: EventListener = (event: Event) => {
-        if (bodyElement && !isBodyScrollable && !rootState.isMediaQueryMatched) {
-            disableBodyScrolling(bodyElement);
+        if (bodyElement && !isBodyScrollable && !rootState.isMediaQueryMatched && !holdsScrollLock) {
+            acquireBodyScrollLock(bodyElement);
+            holdsScrollLock = true;
         }
         onShow(event);
     };
 
     // Listen to the transition events to properly manage the body scrollbar...
     const handleOnHidden: EventListener = (event: Event) => {
-        if (bodyElement && !isBodyScrollable && !rootState.isMediaQueryMatched) {
-            resetBodyScrolling(bodyElement);
+        if (holdsScrollLock && bodyElement) {
+            releaseBodyScrollLock(bodyElement);
+            holdsScrollLock = false;
         }
         onHidden(event);
     };
+
+    // Release a held scroll lock if the offcanvas is destroyed while shown,
+    // so a removed-while-open offcanvas doesn't permanently disable body
+    // scrolling...
+    onDestroy(() => {
+        if (holdsScrollLock && bodyElement) {
+            releaseBodyScrollLock(bodyElement);
+            holdsScrollLock = false;
+        }
+    });
 
     // Dismiss the offcanvas when the backdrop is clicked...
     const handleBackdropMouseDown: EventListener = (event: Event) => {

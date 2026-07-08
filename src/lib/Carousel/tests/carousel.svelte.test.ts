@@ -1,8 +1,9 @@
-import { cleanup, render, screen } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Carousel } from '../index.js';
 import CarouselAutoplayTest from './carousel-autoplay-test.svelte';
 import CarouselBasicTest from './carousel-basic-test.svelte';
+import CarouselTimerTest from './carousel-timer-test.svelte';
 
 describe('Carousel Component', () => {
     afterEach(() => {
@@ -180,5 +181,157 @@ describe('Carousel Component', () => {
 
     it('should create an IndicatorButton component with expected properties', () => {
         expect(Carousel.IndicatorButton).toBeDefined();
+    });
+});
+
+describe('Carousel Timer Cleanup On Dispose', () => {
+    afterEach(() => {
+        cleanup();
+        vi.useRealTimers();
+    });
+
+    it('should cancel pending transition/resume timers on unmount so they cannot re-arm autoplay', () => {
+        vi.useFakeTimers();
+
+        const { unmount } = render(CarouselTimerTest);
+
+        // No timers should be pending before any interaction (this carousel does not
+        // autoplay immediately since ride={true} without 'carousel' only starts cycling
+        // after the first user interaction).
+        const baselineTimerCount = vi.getTimerCount();
+
+        const nextControl = screen.getByTestId('timer-carousel-control-next');
+        fireEvent.click(nextControl);
+
+        // Clicking next starts a slide transition (an untracked setTimeout pre-fix) and,
+        // because ride={true} + user interaction, immediately arms the autoplay timer too.
+        expect(vi.getTimerCount()).toBeGreaterThan(baselineTimerCount);
+
+        // Unmount mid-transition, before the transition-commit timeout has fired.
+        unmount();
+
+        // Advancing time must not throw (no orphaned callback touching disposed state)
+        // and must not leave any timer armed -- pre-fix, the orphaned transition-commit
+        // callback mutated state and called cycle(), re-arming autoplay on a destroyed
+        // instance forever.
+        expect(() => vi.advanceTimersByTime(60_000)).not.toThrow();
+        expect(vi.getTimerCount()).toBe(0);
+    });
+});
+
+describe('Carousel navigation and autoplay', () => {
+    afterEach(() => {
+        cleanup();
+        vi.useRealTimers();
+    });
+
+    it('should activate the next item and deactivate the current one after clicking next', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        await fireEvent.click(screen.getByTestId('carousel-control-next'));
+
+        // The default (animation="none") carousel commits activeItemIndex on a
+        // microtask once its internal tick() resolves; advanceTimersByTimeAsync
+        // flushes that microtask queue as it processes due timers.
+        await vi.advanceTimersByTimeAsync(700);
+
+        expect(screen.getByTestId('carousel-item-2')).toHaveClass('active');
+        expect(screen.queryByTestId('carousel-item-1')).not.toBeInTheDocument();
+    });
+
+    it('should wrap to the last item when clicking prev from the first item', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        await fireEvent.click(screen.getByTestId('carousel-control-prev'));
+
+        await vi.advanceTimersByTimeAsync(700);
+
+        expect(screen.getByTestId('carousel-item-3')).toHaveClass('active');
+        expect(screen.queryByTestId('carousel-item-1')).not.toBeInTheDocument();
+    });
+
+    it('should advance the active slide on its own once the autoplay interval elapses', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselAutoplayTest);
+
+        expect(screen.getByTestId('autoplay-carousel-item-1')).toHaveClass('active');
+
+        // Default interval is 5000ms; the 'none' animation commits on a microtask
+        // once its setTimeout fires, which advanceTimersByTimeAsync flushes too.
+        await vi.advanceTimersByTimeAsync(5100);
+
+        expect(screen.getByTestId('autoplay-carousel-item-2')).toHaveClass('active');
+        expect(screen.queryByTestId('autoplay-carousel-item-1')).not.toBeInTheDocument();
+    });
+
+    it('should atomically swap the active class between items when the slide transition commits', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        await fireEvent.click(screen.getByTestId('slide-carousel-control-next'));
+
+        // Mid-transition (Bootstrap contract): the outgoing item still owns 'active'
+        // plus its directional class; the incoming item is positioned via
+        // carousel-item-next/-start but must NOT be 'active' yet.
+        const outgoing = screen.getByTestId('slide-carousel-item-1');
+        const incoming = screen.getByTestId('slide-carousel-item-2');
+        expect(outgoing).toHaveClass('active');
+        expect(outgoing).toHaveClass('carousel-item-start');
+        expect(incoming).not.toHaveClass('active');
+        expect(incoming).toHaveClass('carousel-item-next');
+        expect(incoming).toHaveClass('carousel-item-start');
+
+        // Advance past the default 600ms transition so the commit callback fires.
+        await vi.advanceTimersByTimeAsync(700);
+
+        // The incoming item now owns 'active' with no leftover directional classes...
+        expect(incoming).toHaveClass('active');
+        expect(incoming).not.toHaveClass('carousel-item-next');
+        expect(incoming).not.toHaveClass('carousel-item-start');
+
+        // ...and the outgoing item left the DOM at the same moment (Bootstrap hides it
+        // synchronously at transition end). Pre-fix it lingered through a no-op exit
+        // transition with a frozen 'carousel-item active carousel-item-start' class list,
+        // leaving TWO simultaneously-active items.
+        expect(screen.queryByTestId('slide-carousel-item-1')).not.toBeInTheDocument();
+        expect(screen.getByTestId('slide-carousel-inner').querySelectorAll('.carousel-item.active')).toHaveLength(1);
+    });
+
+    it('should atomically swap the active class between items when the crossfade transition commits', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        await fireEvent.click(screen.getByTestId('crossfade-carousel-control-next'));
+
+        await vi.advanceTimersByTimeAsync(700);
+
+        const incoming = screen.getByTestId('crossfade-carousel-item-2');
+        expect(incoming).toHaveClass('active');
+        expect(incoming).not.toHaveClass('carousel-item-next');
+        expect(incoming).not.toHaveClass('carousel-item-start');
+        expect(screen.queryByTestId('crossfade-carousel-item-1')).not.toBeInTheDocument();
+        expect(screen.getByTestId('crossfade-carousel-inner').querySelectorAll('.carousel-item.active')).toHaveLength(1);
+    });
+
+    it('should ignore a second next click received while a transition is animating', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        const nextControl = screen.getByTestId('carousel-control-next');
+
+        // Two synchronous clicks with no await in between: next() sets
+        // isAnimating=true synchronously before its commit microtask ever runs,
+        // so the second call must observe it still true and be a no-op.
+        fireEvent.click(nextControl);
+        fireEvent.click(nextControl);
+
+        await vi.advanceTimersByTimeAsync(700);
+
+        // Exactly one slide advanced: item 2 is active, item 3 was never touched.
+        expect(screen.getByTestId('carousel-item-2')).toHaveClass('active');
+        expect(screen.queryByTestId('carousel-item-3')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('carousel-item-1')).not.toBeInTheDocument();
     });
 });

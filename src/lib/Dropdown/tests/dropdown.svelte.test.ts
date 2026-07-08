@@ -4,6 +4,7 @@ import { Dropdown } from '../index.js';
 import DropdownBasicTest from './dropdown-basic-test.svelte';
 import DropdownContainerTest from './dropdown-container-test.svelte';
 import DropdownKeyboardTest from './dropdown-keyboard-test.svelte';
+import DropdownSpecialIdTest from './dropdown-special-id-test.svelte';
 
 describe('Dropdown Component', () => {
     it('should render basic dropdown with toggle and menu', () => {
@@ -297,6 +298,30 @@ describe('Dropdown Component', () => {
         const item = screen.getByTestId('navbar-dropdown');
         expect(item).toHaveClass('nav-item');
         expect(item.tagName.toLowerCase()).toBe('li');
+    });
+});
+
+describe('Dropdown Outside-Click With Special-Character Id', () => {
+    it('should close on outside click without throwing when id contains CSS-special characters', async () => {
+        render(DropdownSpecialIdTest);
+
+        const toggle = screen.getByTestId('special-id-toggle');
+
+        // Open the dropdown.
+        await fireEvent.click(toggle);
+        await waitFor(() => {
+            expect(toggle).toHaveAttribute('aria-expanded', 'true');
+        });
+
+        // A click on body used to throw `SyntaxError: '#1-dropdown' is not a valid
+        // selector` because the id was interpolated into a CSS selector unescaped
+        // (ids starting with a digit are not valid CSS identifiers). It should now
+        // close the dropdown without throwing.
+        await expect(fireEvent.click(document.body)).resolves.not.toThrow();
+
+        await waitFor(() => {
+            expect(toggle).toHaveAttribute('aria-expanded', 'false');
+        });
     });
 });
 

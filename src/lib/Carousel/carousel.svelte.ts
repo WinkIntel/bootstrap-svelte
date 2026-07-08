@@ -22,6 +22,8 @@ export class CarouselRootState {
     #indicators: CarouselIndicatorButtonState[] = [];
     #interval: number = $state(0);
     #timeoutId: number | null = $state(null);
+    #pendingTimeoutIds: number[] = [];
+    #isDisposed = false;
     #isAnimating: boolean = $state(false);
     #isHovered: boolean = $state(false);
     #isPaused: boolean = $state(true);
@@ -96,6 +98,17 @@ export class CarouselRootState {
     // Determines if the carousel should auto-cycle based on configuration and user interaction state
     private shouldCycle(): boolean {
         return this.#ride === 'carousel' || (this.#ride === true && this.#hasUserInteraction);
+    }
+
+    // Schedules a setTimeout whose id is tracked so dispose() can cancel it if the
+    // instance is torn down before the callback fires. The id de-registers itself
+    // once the callback runs, keeping #pendingTimeoutIds from growing unbounded.
+    #schedule(callback: () => void, delay: number): void {
+        const timeoutId = window.setTimeout(() => {
+            this.#pendingTimeoutIds = this.#pendingTimeoutIds.filter((id) => id !== timeoutId);
+            callback();
+        }, delay);
+        this.#pendingTimeoutIds.push(timeoutId);
     }
 
     get animation(): CarouselAnimation {
@@ -267,7 +280,7 @@ export class CarouselRootState {
                 toItem.direction = 'end';
                 toItem.order = 'prev';
             }
-            setTimeout(() => {
+            this.#schedule(() => {
                 fromItem.order = undefined;
                 fromItem.direction = undefined;
                 toItem.order = undefined;
@@ -291,7 +304,7 @@ export class CarouselRootState {
                 toItem.order = 'prev';
             }
 
-            setTimeout(() => {
+            this.#schedule(() => {
                 toItem.order = undefined;
                 this.#isAnimating = false;
             }, this.#transitionDuration / 2);
@@ -325,6 +338,9 @@ export class CarouselRootState {
      */
     cycle(): void {
         if (typeof window === 'undefined') {
+            return;
+        }
+        if (this.#isDisposed) {
             return;
         }
 
@@ -433,17 +449,24 @@ export class CarouselRootState {
 
         // Resume cycling after touch with a delay to prevent immediate transition
         if (this.shouldCycle()) {
-            setTimeout(() => {
+            this.#schedule(() => {
                 this.cycle();
             }, 1000);
         }
     }
 
     dispose(): void {
+        this.#isDisposed = true;
+
         if (this.#timeoutId) {
             window.clearTimeout(this.#timeoutId);
             this.#timeoutId = null;
         }
+
+        for (const id of this.#pendingTimeoutIds) {
+            window.clearTimeout(id);
+        }
+        this.#pendingTimeoutIds = [];
 
         // Remove visibility change listener
         if (typeof document !== 'undefined' && this.#visibilityListener) {
