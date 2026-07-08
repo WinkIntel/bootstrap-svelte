@@ -1,8 +1,9 @@
-import { cleanup, render, screen } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Carousel } from '../index.js';
 import CarouselAutoplayTest from './carousel-autoplay-test.svelte';
 import CarouselBasicTest from './carousel-basic-test.svelte';
+import CarouselTimerTest from './carousel-timer-test.svelte';
 
 describe('Carousel Component', () => {
     afterEach(() => {
@@ -180,5 +181,40 @@ describe('Carousel Component', () => {
 
     it('should create an IndicatorButton component with expected properties', () => {
         expect(Carousel.IndicatorButton).toBeDefined();
+    });
+});
+
+describe('Carousel Timer Cleanup On Dispose', () => {
+    afterEach(() => {
+        cleanup();
+        vi.useRealTimers();
+    });
+
+    it('should cancel pending transition/resume timers on unmount so they cannot re-arm autoplay', () => {
+        vi.useFakeTimers();
+
+        const { unmount } = render(CarouselTimerTest);
+
+        // No timers should be pending before any interaction (this carousel does not
+        // autoplay immediately since ride={true} without 'carousel' only starts cycling
+        // after the first user interaction).
+        const baselineTimerCount = vi.getTimerCount();
+
+        const nextControl = screen.getByTestId('timer-carousel-control-next');
+        fireEvent.click(nextControl);
+
+        // Clicking next starts a slide transition (an untracked setTimeout pre-fix) and,
+        // because ride={true} + user interaction, immediately arms the autoplay timer too.
+        expect(vi.getTimerCount()).toBeGreaterThan(baselineTimerCount);
+
+        // Unmount mid-transition, before the transition-commit timeout has fired.
+        unmount();
+
+        // Advancing time must not throw (no orphaned callback touching disposed state)
+        // and must not leave any timer armed -- pre-fix, the orphaned transition-commit
+        // callback mutated state and called cycle(), re-arming autoplay on a destroyed
+        // instance forever.
+        expect(() => vi.advanceTimersByTime(60_000)).not.toThrow();
+        expect(vi.getTimerCount()).toBe(0);
     });
 });
