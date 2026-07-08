@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { Modal } from '../index.js';
 import ModalAccessibilityTest from './modal-accessibility-test.svelte';
 import ModalBasicTest from './modal-basic-test.svelte';
+import ModalStackedTest from './modal-stacked-test.svelte';
 
 describe('Modal Component', () => {
     it('should render basic modal with all sub-components', () => {
@@ -208,5 +209,77 @@ describe('Modal Component', () => {
 
         await fireEvent.keyDown(window, { key: 'Escape' });
         await waitFor(() => expect(opener).toHaveFocus());
+    });
+
+    describe('stacked modals', () => {
+        it('should restore body scroll only after both modals are closed, closing B before A', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument());
+            expect(document.body.style.overflow).toBe('hidden');
+
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+            expect(document.body.style.overflow).toBe('hidden');
+
+            await fireEvent.click(screen.getByTestId('close-b'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+
+            // A is still open, so scrolling must remain locked (the regression case).
+            expect(document.body.style.overflow).toBe('hidden');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(true);
+
+            await fireEvent.click(screen.getByTestId('close-a'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-a')).not.toBeInTheDocument());
+
+            expect(document.body.style.overflow).toBe('');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+        });
+
+        it('should restore body scroll only after both modals are closed, closing A before B', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+
+            expect(document.body.style.overflow).toBe('hidden');
+
+            await fireEvent.click(screen.getByTestId('close-a'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-a')).not.toBeInTheDocument());
+
+            // B is still open, so scrolling must remain locked regardless of close order.
+            expect(document.body.style.overflow).toBe('hidden');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(true);
+
+            await fireEvent.click(screen.getByTestId('close-b'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+
+            expect(document.body.style.overflow).toBe('');
+            expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+        });
+
+        it('should keep overflow hidden while the first modal remains open after the second closes', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('close-b'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+
+            expect(document.body.style.overflow).toBe('hidden');
+            expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument();
+
+            // Clean up so this test doesn't leak a locked body into the next one.
+            await fireEvent.click(screen.getByTestId('close-a'));
+            await waitFor(() => expect(document.body.style.overflow).toBe(''));
+        });
     });
 });

@@ -48,9 +48,9 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 - `useFade` (boolean): Optional. Controls whether the modal uses a fade transition.
 -->
 <script lang="ts">
-    import { disableBodyScrolling, noop, resetBodyScrolling, uniqueClsx } from '$lib/common/index.js';
+    import { acquireBodyScrollLock, noop, releaseBodyScrollLock, uniqueClsx } from '$lib/common/index.js';
     import { Portal } from '$lib/index.js';
-    import { onMount, tick } from 'svelte';
+    import { onDestroy, onMount, tick } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import type { Modal } from './index.js';
     import { initModalRootState, ModalRootState } from './modal.svelte.js';
@@ -78,6 +78,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
     // Initialize the root state of the modal component...
     let bodyElement: HTMLElement | null = $state(null);
+    let holdsScrollLock = false;
     let previouslyFocusedElement: HTMLElement | null = null;
     const unset = Symbol('unset');
     let previousIsShown: Modal.RootProps['isShown'] | typeof unset = unset;
@@ -147,7 +148,8 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
     const handleOnShow: EventListener = (event: Event) => {
         if (bodyElement) {
-            disableBodyScrolling(bodyElement);
+            acquireBodyScrollLock(bodyElement);
+            holdsScrollLock = true;
             bodyElement.classList.add('modal-open');
         }
         onShow(event);
@@ -155,8 +157,11 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
     const handleOnHidden: EventListener = (event: Event) => {
         if (bodyElement) {
-            resetBodyScrolling(bodyElement);
-            bodyElement.classList.remove('modal-open');
+            const remainingLocks = releaseBodyScrollLock(bodyElement);
+            holdsScrollLock = false;
+            if (remainingLocks === 0) {
+                bodyElement.classList.remove('modal-open');
+            }
         }
         onHidden(event);
     };
@@ -207,6 +212,18 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
     onMount(() => {
         if (typeof window !== 'undefined') {
             bodyElement = document.querySelector('body');
+        }
+    });
+
+    // Release a held scroll lock if the modal is destroyed while shown, so a
+    // removed-while-open modal doesn't permanently disable body scrolling...
+    onDestroy(() => {
+        if (holdsScrollLock && bodyElement) {
+            const remainingLocks = releaseBodyScrollLock(bodyElement);
+            holdsScrollLock = false;
+            if (remainingLocks === 0) {
+                bodyElement.classList.remove('modal-open');
+            }
         }
     });
 
