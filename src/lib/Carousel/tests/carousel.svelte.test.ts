@@ -218,3 +218,71 @@ describe('Carousel Timer Cleanup On Dispose', () => {
         expect(vi.getTimerCount()).toBe(0);
     });
 });
+
+describe('Carousel navigation and autoplay', () => {
+    afterEach(() => {
+        cleanup();
+        vi.useRealTimers();
+    });
+
+    it('should activate the next item and deactivate the current one after clicking next', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        await fireEvent.click(screen.getByTestId('carousel-control-next'));
+
+        // The default (animation="none") carousel commits activeItemIndex on a
+        // microtask once its internal tick() resolves; advanceTimersByTimeAsync
+        // flushes that microtask queue as it processes due timers.
+        await vi.advanceTimersByTimeAsync(700);
+
+        expect(screen.getByTestId('carousel-item-2')).toHaveClass('active');
+        expect(screen.queryByTestId('carousel-item-1')).not.toBeInTheDocument();
+    });
+
+    it('should wrap to the last item when clicking prev from the first item', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        await fireEvent.click(screen.getByTestId('carousel-control-prev'));
+
+        await vi.advanceTimersByTimeAsync(700);
+
+        expect(screen.getByTestId('carousel-item-3')).toHaveClass('active');
+        expect(screen.queryByTestId('carousel-item-1')).not.toBeInTheDocument();
+    });
+
+    it('should advance the active slide on its own once the autoplay interval elapses', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselAutoplayTest);
+
+        expect(screen.getByTestId('autoplay-carousel-item-1')).toHaveClass('active');
+
+        // Default interval is 5000ms; the 'none' animation commits on a microtask
+        // once its setTimeout fires, which advanceTimersByTimeAsync flushes too.
+        await vi.advanceTimersByTimeAsync(5100);
+
+        expect(screen.getByTestId('autoplay-carousel-item-2')).toHaveClass('active');
+        expect(screen.queryByTestId('autoplay-carousel-item-1')).not.toBeInTheDocument();
+    });
+
+    it('should ignore a second next click received while a transition is animating', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselBasicTest);
+
+        const nextControl = screen.getByTestId('carousel-control-next');
+
+        // Two synchronous clicks with no await in between: next() sets
+        // isAnimating=true synchronously before its commit microtask ever runs,
+        // so the second call must observe it still true and be a no-op.
+        fireEvent.click(nextControl);
+        fireEvent.click(nextControl);
+
+        await vi.advanceTimersByTimeAsync(700);
+
+        // Exactly one slide advanced: item 2 is active, item 3 was never touched.
+        expect(screen.getByTestId('carousel-item-2')).toHaveClass('active');
+        expect(screen.queryByTestId('carousel-item-3')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('carousel-item-1')).not.toBeInTheDocument();
+    });
+});
