@@ -174,7 +174,7 @@ Interactive components are implemented as Svelte components rather than requirin
 
 ## Status and feedback
 
-This package is published as `1.0.3`, but feedback from Svelte developers is still very welcome. Useful feedback includes:
+This package is published as `1.0.4`, but feedback from Svelte developers is still very welcome. Useful feedback includes:
 
 - Component API ergonomics
 - Svelte 5 idioms and runes compatibility
