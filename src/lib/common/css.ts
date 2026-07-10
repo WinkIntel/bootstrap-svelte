@@ -1,5 +1,63 @@
 import BezierEasing, { type EasingFunction } from 'bezier-easing';
-import clsx from 'clsx';
+import type clsx from 'clsx';
+
+type ClassValue = Parameters<typeof clsx>[number];
+
+const whitespacePattern = /\s/;
+const classTokenPattern = /\S+/g;
+
+function appendClassTokens(result: string[], value: string | number): void {
+    const classValue = typeof value === 'string' ? value : String(value);
+
+    if (!classValue) {
+        return;
+    }
+
+    if (!whitespacePattern.test(classValue)) {
+        if (result.indexOf(classValue) === -1) {
+            result.push(classValue);
+        }
+        return;
+    }
+
+    const tokens = classValue.match(classTokenPattern);
+    if (!tokens) {
+        return;
+    }
+
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i]!;
+        if (result.indexOf(token) === -1) {
+            result.push(token);
+        }
+    }
+}
+
+function appendClassValue(result: string[], value: ClassValue): void {
+    if (typeof value === 'string' || typeof value === 'number') {
+        appendClassTokens(result, value);
+        return;
+    }
+
+    if (!value || typeof value !== 'object') {
+        return;
+    }
+
+    if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+            if (value[i]) {
+                appendClassValue(result, value[i]);
+            }
+        }
+        return;
+    }
+
+    for (const key in value) {
+        if (value[key]) {
+            appendClassTokens(result, key);
+        }
+    }
+}
 
 /**
  * This easing function will match the CSS `ease-in-out` easing function using a cubic Bezier curve defined by the points (0.25, 0.1, 0.25, 1).
@@ -48,23 +106,18 @@ export const cubicBezier = (x1: number, y1: number, x2: number, y2: number): Eas
  * @returns A string containing unique class names.
  */
 export function uniqueClsx(...args: Parameters<typeof clsx>): string {
-    const classString = clsx(...args);
-
-    // Early return for empty strings
-    if (!classString) {
-        return '';
-    }
-
-    // Using a regex split will normalize whitespace and split simultaneously...
-    const classes = classString.split(/\s+/);
-    const seen = new Set<string>();
     const result: string[] = [];
 
-    for (let i = 0; i < classes.length; i++) {
-        const cls = classes[i];
-        if (cls && !seen.has(cls)) {
-            seen.add(cls);
-            result.push(cls);
+    for (let i = 0; i < args.length; i++) {
+        const value = args[i];
+        if (!value) {
+            continue;
+        }
+
+        if (typeof value === 'string' || typeof value === 'number') {
+            appendClassTokens(result, value);
+        } else {
+            appendClassValue(result, value);
         }
     }
 
