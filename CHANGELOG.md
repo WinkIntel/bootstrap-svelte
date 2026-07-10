@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.4
+
+- Improved `uniqueClsx` performance by flattening and deduplicating class inputs directly while preserving clsx-compatible numeric, nested-array, object-key, and ECMAScript-whitespace behavior.
+- Hardened the Vitest Web Animations mock by clearing pending animation timers after each test and pinning events to the correct jsdom realm.
+- Added regression coverage for numeric class inputs, whitespace-delimited object keys, ECMAScript whitespace, and nested class structures.
+
 ## 1.0.3
 
 - Fixed stacked overlay body scroll restoration by refcounting Modal and Offcanvas scroll locks.
