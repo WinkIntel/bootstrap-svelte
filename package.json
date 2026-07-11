@@ -88,6 +88,7 @@
         "sass": "1.77.6",
         "svelte": "~5.56.1",
         "svelte-check": "~4.5.0",
+        "svelte-doctor": "~0.3.1",
         "svelte-highlight": "~7.9.0",
         "svelte-preprocess": "~6.0.5",
         "typescript": "~6.0.3",

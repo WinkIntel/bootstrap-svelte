@@ -268,7 +268,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
     };
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 {#if rootState.isShown}
     <div
