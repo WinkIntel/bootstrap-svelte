@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.5
+
+- Fixed dynamic Modal title ID registration so `aria-labelledby` updates when the title ID changes and stale IDs are unregistered.
+- Updated the Modal keyboard listener to Svelte's current event-handler syntax.
+- Added `svelte-doctor` tooling and regression coverage for dynamic Modal title IDs.
+
 ## 1.0.4
 
 - Improved `uniqueClsx` performance by flattening and deduplicating class inputs directly while preserving clsx-compatible numeric, nested-array, object-key, and ECMAScript-whitespace behavior.

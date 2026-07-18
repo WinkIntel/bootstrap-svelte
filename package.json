@@ -1,7 +1,7 @@
 {
     "author": "Wink, Inc.",
     "name": "@winkintel/bootstrap-svelte",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Bootstrap components for Svelte 5 with TypeScript support.",
     "license": "Apache-2.0",
     "repository": {
@@ -23,6 +23,7 @@
         "check-types:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
         "clean": "rimraf --glob --max-retries=10 --retry-delay=250 '{.svelte-kit,.turbo,.vercel,build,dist,node_modules,playwright-mcp,test-results}'",
         "dev": "vite dev --port 5176",
+        "doctor": "svelte-doctor check",
         "format": "prettier --write --ignore-path=.prettierignore $(git diff --name-only --diff-filter d --relative . && git ls-files --others --exclude-standard | sed \"s|^$(git rev-parse --show-prefix)||\")",
         "format-all": "prettier --write --ignore-path=.prettierignore ./src",
         "lint": "prettier --check ./src && eslint ./src",
@@ -88,6 +89,7 @@
         "sass": "1.77.6",
         "svelte": "~5.56.1",
         "svelte-check": "~4.5.0",
+        "svelte-doctor": "~0.3.1",
         "svelte-highlight": "~7.9.0",
         "svelte-preprocess": "~6.0.5",
         "typescript": "~6.0.3",

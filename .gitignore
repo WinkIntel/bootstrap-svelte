@@ -39,3 +39,4 @@ coverage
 
 # Improve skill
 plans/*
+.svelte-doctor/*

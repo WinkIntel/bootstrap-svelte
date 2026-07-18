@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { Modal } from '../index.js';
 import ModalAccessibilityTest from './modal-accessibility-test.svelte';
 import ModalBasicTest from './modal-basic-test.svelte';
+import ModalDynamicTitleIdTest from './modal-dynamic-title-id-test.svelte';
 import ModalLifecycleTest from './modal-lifecycle-test.svelte';
 import ModalStackedTest from './modal-stacked-test.svelte';
 
@@ -211,6 +212,20 @@ describe('Modal Component', () => {
 
         await fireEvent.keyDown(window, { key: 'Escape' });
         await waitFor(() => expect(opener).toHaveFocus());
+    });
+
+    it('should update the dialog label when the title id changes', async () => {
+        render(ModalDynamicTitleIdTest);
+
+        const modal = screen.getByRole('dialog', { name: 'Dynamic modal title' });
+        expect(modal).toHaveAttribute('aria-labelledby', 'initial-modal-title');
+
+        await fireEvent.click(screen.getByTestId('change-title-id'));
+
+        await waitFor(() => {
+            expect(screen.getByText('Dynamic modal title')).toHaveAttribute('id', 'updated-modal-title');
+            expect(modal).toHaveAttribute('aria-labelledby', 'updated-modal-title');
+        });
     });
 
     describe('stacked modals', () => {
