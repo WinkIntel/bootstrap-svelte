@@ -227,6 +227,22 @@ describe('css.js', () => {
             );
             expect(result).toBe('base extra active duplicate');
         });
+
+        test('should preserve clsx numeric input behavior', () => {
+            expect(uniqueClsx(1, 2, 1, 0)).toBe('1 2');
+        });
+
+        test('should split whitespace-delimited object keys', () => {
+            expect(uniqueClsx({ 'first\tsecond third': true, ignored: false }, 'second')).toBe('first second third');
+        });
+
+        test('should normalize ECMAScript whitespace characters', () => {
+            expect(uniqueClsx('first\u00a0second\u2003third\ufefffourth', 'third')).toBe('first second third fourth');
+        });
+
+        test('should deduplicate values across nested arrays and objects', () => {
+            expect(uniqueClsx(['first', ['second third', { first: true, fourth: true }]], 'second')).toBe('first second third fourth');
+        });
     });
 
     describe('toStyle function', () => {

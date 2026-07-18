@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { beforeAll, vi } from 'vitest';
+import { afterEach, beforeAll, vi } from 'vitest';
 
 // required for svelte5 + jsdom as jsdom does not support matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -15,8 +15,24 @@ Object.defineProperty(window, 'matchMedia', {
     }))
 });
 
+// Timer-clear thunks for animations whose auto-finish timer is still pending.
+// A timer that outlives its test file fires after the jsdom environment is
+// torn down, where `Event` resolves to a different realm and dispatchEvent
+// throws — Vitest reports that as an unhandled error and fails the run.
+const pendingAnimationTimers = new Set<() => void>();
+
+afterEach(() => {
+    for (const clearTimer of pendingAnimationTimers) {
+        clearTimer();
+    }
+    pendingAnimationTimers.clear();
+});
+
 // add more mocks here if you need them
 beforeAll(() => {
+    // Pin the realm's Event constructor so a late finish()/cancel() always
+    // dispatches an Event from the same realm as this class's EventTarget.
+    const RealmEvent = Event;
     const runningAnimations = new WeakMap<Element, Set<Animation>>();
 
     class MockAnimation extends EventTarget {
@@ -31,6 +47,12 @@ beforeAll(() => {
         #duration: number;
         #timer: ReturnType<typeof setTimeout> | null = null;
         #element: Element;
+        #clearTimer = () => {
+            if (this.#timer !== null) {
+                clearTimeout(this.#timer);
+                this.#timer = null;
+            }
+        };
 
         constructor(element: Element, keyframes: Keyframe[] | PropertyIndexedKeyframes | null, options?: number | KeyframeEffectOptions) {
             super();
@@ -50,6 +72,7 @@ beforeAll(() => {
             // Auto-finish after the declared duration so both real and fake
             // timers drive animations to completion.
             this.#timer = setTimeout(() => this.finish(), this.#duration);
+            pendingAnimationTimers.add(this.#clearTimer);
         }
 
         play() {
@@ -64,7 +87,7 @@ beforeAll(() => {
             this.#clear();
             this.playState = 'finished';
             this.currentTime = this.#duration;
-            const event = new Event('finish') as AnimationPlaybackEvent;
+            const event = new RealmEvent('finish') as AnimationPlaybackEvent;
             this.onfinish?.(event);
             this.dispatchEvent(event);
             this.#resolveFinished(this as unknown as Animation);
@@ -75,7 +98,7 @@ beforeAll(() => {
             this.#clear();
             this.playState = 'idle';
             this.currentTime = null;
-            const event = new Event('cancel') as AnimationPlaybackEvent;
+            const event = new RealmEvent('cancel') as AnimationPlaybackEvent;
             this.oncancel?.(event);
             this.dispatchEvent(event);
             // Resolve (not reject) to avoid unhandled rejections in code that
@@ -84,8 +107,8 @@ beforeAll(() => {
         }
 
         #clear() {
-            if (this.#timer) clearTimeout(this.#timer);
-            this.#timer = null;
+            this.#clearTimer();
+            pendingAnimationTimers.delete(this.#clearTimer);
             runningAnimations.get(this.#element)?.delete(this as unknown as Animation);
         }
     }
