@@ -31,6 +31,7 @@
 
 <button data-testid="remove-one" onclick={() => remove('one')}>Remove one</button>
 <button data-testid="remove-two" onclick={() => remove('two')}>Remove two</button>
+<button data-testid="remove-three" onclick={() => remove('three')}>Remove three</button>
 
 <Carousel.Root {animation} {interval} pause={false} {ride} {transitionDuration} data-testid="regression-carousel">
     <Carousel.Indicators data-testid="regression-indicators">

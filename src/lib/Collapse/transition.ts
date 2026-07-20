@@ -1,10 +1,11 @@
 import type { TransitionConfig } from 'svelte/transition';
 import type { CollapseTransitionParams, CollapseTransitionStylePropName } from './types.js';
 
+const hasValidTransitionDuration = (transitionDuration: number | undefined): transitionDuration is number =>
+    transitionDuration !== undefined && Number.isFinite(transitionDuration) && transitionDuration >= 0;
+
 const resolveTransitionDuration = (node: HTMLElement, transitionDuration: number | undefined): number =>
-    transitionDuration !== undefined && Number.isFinite(transitionDuration) && transitionDuration >= 0
-        ? transitionDuration
-        : getTransitionDuration(node);
+    hasValidTransitionDuration(transitionDuration) ? transitionDuration : getTransitionDuration(node);
 
 type InlineStyleSnapshot = {
     value: string;
@@ -70,7 +71,7 @@ export function collapseIn(node: HTMLElement, params: CollapseTransitionParams):
     node.classList.remove('collapse', 'show');
     node.style[stylePropName] = '0';
     const duration = resolveTransitionDuration(node, params.transitionDuration);
-    const restoreTransitionTiming = applyTransitionTiming(node, duration);
+    const restoreTransitionTiming = hasValidTransitionDuration(params.transitionDuration) ? applyTransitionTiming(node, duration) : () => undefined;
 
     // Svelte skips transition ticks when duration is zero, so complete the
     // Bootstrap class state ourselves for explicit no-animation transitions.
@@ -113,7 +114,7 @@ export function collapseOut(node: HTMLElement, params: CollapseTransitionParams)
     node.classList.add('collapsing');
     node.classList.remove('collapse', 'show');
     const duration = resolveTransitionDuration(node, params.transitionDuration);
-    const restoreTransitionTiming = applyTransitionTiming(node, duration);
+    const restoreTransitionTiming = hasValidTransitionDuration(params.transitionDuration) ? applyTransitionTiming(node, duration) : () => undefined;
 
     // See collapseIn: a zero-duration transition does not receive a final tick.
     if (duration === 0) {

@@ -42,6 +42,7 @@ export class CarouselRootState {
     #nextActiveItemIndex: number = $state(-1); // Tracks the index of the slide that will become active (-1 when no transition is pending)
     #pauseInteraction: CarouselPause = $state(CarouselRootState.PAUSE_DEFAULT);
     #pointerStartX: number = $state(0);
+    #registrationOrderScheduled = false;
     #resumeTimeoutId: number | null = null;
     #ride: CarouselRide = $state(false);
     #transitionDuration: number = $state(CarouselRootState.TRANSITION_DURATION_DEFAULT);
@@ -193,7 +194,9 @@ export class CarouselRootState {
             return;
         }
 
-        this.#invalidateTransition();
+        if (removedIndex === this.#activeItemIndex || removedIndex === this.#nextActiveItemIndex) {
+            this.#invalidateTransition();
+        }
         this.#items.splice(removedIndex, 1);
         if (this.#items.length === 0) {
             this.#activeItemIndex = 0;
@@ -220,6 +223,17 @@ export class CarouselRootState {
         this.#indicators.push(indicator);
     }
 
+    scheduleRegistrationOrder(): void {
+        if (this.#registrationOrderScheduled) return;
+
+        this.#registrationOrderScheduled = true;
+        queueMicrotask(() => {
+            this.#registrationOrderScheduled = false;
+            if (this.#isDisposed) return;
+            this.#reorderRegistrations();
+        });
+    }
+
     unregisterIndicator(indicator: CarouselIndicatorButtonState): void {
         const index = this.#indicators.indexOf(indicator);
         if (index !== -1) {
@@ -233,6 +247,29 @@ export class CarouselRootState {
 
     getIndicatorIndex(indicator: CarouselIndicatorButtonState): number {
         return this.#indicators.indexOf(indicator);
+    }
+
+    #reorderRegistrations(): void {
+        const activeItem = this.#items[this.#activeItemIndex];
+        const nextActiveItem = this.#items[this.#nextActiveItemIndex];
+        const compareElementOrder = (
+            first: { props: { elementRef?: HTMLElement | null; orderElementRef?: HTMLElement | null } },
+            second: { props: { elementRef?: HTMLElement | null; orderElementRef?: HTMLElement | null } }
+        ): number => {
+            const firstElement = first.props.orderElementRef ?? first.props.elementRef;
+            const secondElement = second.props.orderElementRef ?? second.props.elementRef;
+            if (!firstElement || !secondElement || firstElement === secondElement) {
+                return firstElement ? -1 : secondElement ? 1 : 0;
+            }
+
+            const position = firstElement.compareDocumentPosition(secondElement);
+            return position & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : position & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
+        };
+
+        this.#items.sort(compareElementOrder);
+        this.#indicators.sort(compareElementOrder);
+        this.#activeItemIndex = activeItem ? this.#items.indexOf(activeItem) : Math.min(this.#activeItemIndex, this.#items.length - 1);
+        this.#nextActiveItemIndex = nextActiveItem ? this.#items.indexOf(nextActiveItem) : -1;
     }
 
     isItemActive(index: number): boolean {
@@ -347,7 +384,7 @@ export class CarouselRootState {
                 fromItem.direction = undefined;
                 toItem.order = undefined;
                 toItem.direction = undefined;
-                this.#activeItemIndex = index;
+                this.#activeItemIndex = this.#items.indexOf(toItem);
                 this.#nextActiveItemIndex = -1;
                 this.#isAnimating = false;
 
@@ -389,7 +426,7 @@ export class CarouselRootState {
                 if (generation !== this.#transitionGeneration || !this.#items.includes(fromItem) || !this.#items.includes(toItem)) {
                     return;
                 }
-                this.#activeItemIndex = index;
+                this.#activeItemIndex = this.#items.indexOf(toItem);
                 this.#nextActiveItemIndex = -1;
                 this.#isAnimating = false;
 
@@ -642,7 +679,7 @@ export class CarouselItemState {
     readonly doShowImmediatelyItem = $derived.by(() => this.isNoneAnimation && this.isActiveOrWillBeActive);
 
     constructor(
-        readonly props: Carousel.ItemProps,
+        readonly props: Carousel.ItemProps & { orderElementRef?: HTMLElement | null },
         readonly root: CarouselRootState
     ) {}
 
@@ -743,7 +780,7 @@ export function initCarouselRootState(props: Carousel.RootProps): CarouselRootSt
  * @param index - The index of the item in the carousel.
  * @returns The created CarouselItemState instance.
  */
-export function initCarouselItemState(props: Carousel.ItemProps): CarouselItemState {
+export function initCarouselItemState(props: Carousel.ItemProps & { orderElementRef?: HTMLElement | null }): CarouselItemState {
     if (!CarouselRootContext.exists()) {
         throw new Error('Carousel.Item requires Carousel.Root context. Please ensure Carousel.Root is initialized before Carousel.Item.');
     }

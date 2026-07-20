@@ -7,6 +7,8 @@
 <button data-testid="set-tooltip-focus-trigger" onclick={() => (tooltipTrigger = 'focus')}>Use focus only</button>
 <button data-testid="set-tooltip-hover-trigger" onclick={() => (tooltipTrigger = 'hover')}>Use hover only</button>
 <button data-testid="add-tooltip-focus-trigger" onclick={() => (tooltipTrigger = 'hover focus')}>Add focus</button>
+<button data-testid="set-tooltip-click-hover-trigger" onclick={() => (tooltipTrigger = 'click hover')}>Use click and hover</button>
+<button data-testid="set-tooltip-click-trigger" onclick={() => (tooltipTrigger = 'click')}>Use click only</button>
 
 <Button id="default-tooltip-trigger" data-testid="default-tooltip-trigger">Default tooltip trigger</Button>
 <Tooltip.Root id="default-tooltip" referenceElementId="default-tooltip-trigger" data-testid="default-tooltip" useFade={false}>

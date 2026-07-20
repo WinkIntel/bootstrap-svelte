@@ -229,6 +229,18 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         ).filter((element) => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true');
     }
 
+    function triggerHidePrevented(event: Event): void {
+        onHidePrevented(event);
+        isHidePrevented = true;
+        if (hidePreventedTimeout) {
+            clearTimeout(hidePreventedTimeout);
+        }
+        hidePreventedTimeout = setTimeout(() => {
+            isHidePrevented = false;
+            hidePreventedTimeout = undefined;
+        }, 300);
+    }
+
     function trapFocus(event: KeyboardEvent): void {
         const focusableElements = getFocusableElements();
         const firstElement = focusableElements[0] ?? elementRef;
@@ -292,15 +304,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         }
         if (rootState.isShown && useBackdrop === 'static') {
             event.stopPropagation();
-            onHidePrevented(event);
-            isHidePrevented = true;
-            if (hidePreventedTimeout) {
-                clearTimeout(hidePreventedTimeout);
-            }
-            hidePreventedTimeout = setTimeout(() => {
-                isHidePrevented = false;
-                hidePreventedTimeout = undefined;
-            }, 300);
+            triggerHidePrevented(event);
             return;
         }
         if (rootState.isShown && useBackdrop !== 'static') {
@@ -322,7 +326,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
             if (isKeyboardDismissible) {
                 rootState.toggleIsShown();
             } else {
-                onHidePrevented(event);
+                triggerHidePrevented(event);
             }
         }
     }

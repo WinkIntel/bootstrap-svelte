@@ -57,6 +57,11 @@ Bootstrap-styled radio input component for single selection options.
     }: Form.RadioInputProps = $props();
 
     let controlsChecked = $derived(checked !== undefined);
+    const unset = Symbol('unset');
+    const controlledSnapshot: {
+        checked: boolean | null | undefined | typeof unset;
+        group: unknown | typeof unset;
+    } = { checked: unset, group: unset };
 
     let classes: string = $derived(
         uniqueClsx(
@@ -70,10 +75,34 @@ Bootstrap-styled radio input component for single selection options.
     );
 
     $effect(() => {
-        if (controlsChecked) {
-            const nextGroup = checked ? value : undefined;
-            if (group !== nextGroup) {
+        const currentChecked = checked;
+        const currentGroup = group;
+
+        if (!controlsChecked) {
+            controlledSnapshot.checked = unset;
+            controlledSnapshot.group = unset;
+            return;
+        }
+
+        const isInitialSync = controlledSnapshot.checked === unset;
+        const checkedChanged = !isInitialSync && controlledSnapshot.checked !== currentChecked;
+        const groupChanged = !isInitialSync && controlledSnapshot.group !== currentGroup;
+
+        controlledSnapshot.checked = currentChecked;
+        controlledSnapshot.group = currentGroup;
+
+        // `checked` establishes the initial selection and drives later explicit
+        // checked updates. Group updates are authoritative otherwise so sibling
+        // radios and parent assignments can clear this radio without ping-ponging.
+        if (isInitialSync || (checkedChanged && !groupChanged)) {
+            const nextGroup = currentChecked ? value : currentGroup === value ? undefined : currentGroup;
+            if (currentGroup !== nextGroup) {
                 group = nextGroup;
+            }
+        } else if (groupChanged) {
+            const nextChecked = currentGroup === value;
+            if (currentChecked !== nextChecked) {
+                checked = nextChecked;
             }
         }
     });

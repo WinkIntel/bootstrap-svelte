@@ -182,6 +182,27 @@ describe('scrollspy-attachment.ts', () => {
             cleanup?.();
         });
 
+        it('does not observe or hijack hash targets outside the attached container', () => {
+            const outsideAnchor = document.createElement('a');
+            outsideAnchor.href = '#outside-section';
+            outsideAnchor.textContent = 'Outside section';
+            _targetContainer.append(outsideAnchor);
+
+            const outsideSection = document.createElement('section');
+            outsideSection.id = 'outside-section';
+            document.body.append(outsideSection);
+
+            const cleanup = scrollspy({ targetSelector: '#nav-container', callback: vi.fn() })(container);
+            const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+            outsideAnchor.dispatchEvent(click);
+
+            expect(lastMockObserver.observedElements).not.toContain(outsideSection);
+            expect(click.defaultPrevented).toBe(false);
+            expect(container.scrollTo).not.toHaveBeenCalled();
+
+            cleanup?.();
+        });
+
         it('should disconnect observer when cleanup function is called', () => {
             const callback = vi.fn();
             const options: ScrollspyOptions = {

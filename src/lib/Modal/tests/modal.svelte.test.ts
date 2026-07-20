@@ -406,6 +406,42 @@ describe('Modal Component', () => {
     });
 
     describe('mixed overlay ownership', () => {
+        it('preserves a closing offcanvas layer until its outro completes', async () => {
+            render(ModalOffcanvasStackTest);
+
+            await fireEvent.click(screen.getByTestId('open-mixed-modal'));
+            await fireEvent.click(screen.getByTestId('open-mixed-offcanvas'));
+            const offcanvas = await screen.findByTestId('mixed-offcanvas');
+            const modal = screen.getByTestId('mixed-modal');
+            const closingLayer = offcanvas.style.zIndex;
+
+            await fireEvent.click(screen.getByTestId('close-mixed-offcanvas'));
+            await tick();
+
+            expect(offcanvas).toBeInTheDocument();
+            expect(offcanvas.style.zIndex).toBe(closingLayer);
+            expect(Number(closingLayer)).toBeGreaterThan(Number(modal.style.zIndex));
+            await waitFor(() => expect(screen.queryByTestId('mixed-offcanvas')).not.toBeInTheDocument());
+        });
+
+        it('preserves a closing modal layer until its outro completes', async () => {
+            render(ModalOffcanvasStackTest);
+
+            await fireEvent.click(screen.getByTestId('open-mixed-offcanvas'));
+            await fireEvent.click(screen.getByTestId('open-mixed-modal'));
+            const modal = await screen.findByTestId('mixed-modal');
+            const offcanvas = screen.getByTestId('mixed-offcanvas');
+            const closingLayer = modal.style.zIndex;
+
+            await fireEvent.click(screen.getByTestId('close-mixed-modal'));
+            await tick();
+
+            expect(modal).toBeInTheDocument();
+            expect(modal.style.zIndex).toBe(closingLayer);
+            expect(Number(closingLayer)).toBeGreaterThan(Number(offcanvas.style.zIndex));
+            await waitFor(() => expect(screen.queryByTestId('mixed-modal')).not.toBeInTheDocument());
+        });
+
         it('closes only an offcanvas opened above a modal on one Escape', async () => {
             render(ModalOffcanvasStackTest);
 
@@ -519,12 +555,14 @@ describe('Modal Component', () => {
 
         it('notifies onHidePrevented when Escape cannot dismiss the modal', async () => {
             const onHidePrevented = vi.fn();
-            render(Modal.Root, { props: { isShown: true, isKeyboardDismissible: false, onHidePrevented, useFade: false } });
+            render(Modal.Root, {
+                props: { isShown: true, isKeyboardDismissible: false, onHidePrevented, useBackdrop: 'static', useFade: false }
+            });
 
             await fireEvent.keyDown(window, { key: 'Escape' });
 
             expect(onHidePrevented).toHaveBeenCalledTimes(1);
-            expect(screen.getByRole('dialog')).toBeInTheDocument();
+            expect(screen.getByRole('dialog')).toHaveClass('modal-static');
         });
 
         it('should call onShow before onShown, exactly once each, when opening', async () => {

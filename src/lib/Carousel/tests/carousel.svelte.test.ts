@@ -278,6 +278,34 @@ describe('Carousel navigation and autoplay', () => {
         expect(inner.querySelectorAll('.carousel-item.active')).toHaveLength(1);
     });
 
+    it('reconciles dynamically inserted items and indicators to DOM order', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselAdversarialTest);
+
+        await fireEvent.click(screen.getByTestId('insert-middle'));
+        await vi.advanceTimersByTimeAsync(0);
+
+        expect(screen.getByTestId('inserted-indicator')).toHaveAttribute('aria-label', 'Slide 2');
+
+        await fireEvent.click(screen.getByTestId('removal-next'));
+        await vi.advanceTimersByTimeAsync(0);
+
+        expect(screen.getByTestId('inserted-item')).toHaveClass('active');
+        expect(screen.queryByTestId('removal-item-2')).not.toBeInTheDocument();
+    });
+
+    it('keeps an active transition running when an uninvolved item is removed', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselRegressionTest, { props: { animation: 'slide', transitionDuration: 1000 } });
+
+        await fireEvent.click(screen.getByTestId('regression-next'));
+        await fireEvent.click(screen.getByTestId('remove-three'));
+        await vi.advanceTimersByTimeAsync(1000);
+
+        expect(screen.getByTestId('item-two')).toHaveClass('active');
+        expect(screen.queryByTestId('item-three')).not.toBeInTheDocument();
+    });
+
     it.each([
         ['first', 'one', 'two', 'Slide 1'],
         ['middle', 'two', 'three', 'Slide 2']

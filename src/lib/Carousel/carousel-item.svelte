@@ -27,7 +27,7 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
     import { easeInOut, uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
     import { linear } from 'svelte/easing';
-    import { onDestroy } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import { CarouselItemState, initCarouselItemState } from './carousel.svelte.js';
     import type { Carousel } from './index.js';
@@ -49,20 +49,28 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         style,
         ...restOfProps
     }: Carousel.ItemProps = $props();
+    let orderElementRef: HTMLSpanElement | null = $state(null);
 
     // Get the item state after the component is mounted
     const itemState: CarouselItemState = initCarouselItemState({
         get id() {
             return id;
         },
+        get elementRef() {
+            return elementRef;
+        },
         get isActive() {
             return isActive;
         },
         get interval() {
             return interval;
+        },
+        get orderElementRef() {
+            return orderElementRef;
         }
     });
 
+    onMount(() => itemState.root.scheduleRegistrationOrder());
     onDestroy(() => itemState.root.unregisterItem(itemState));
 
     function handleMouseEnter(event: MouseEvent) {
@@ -102,6 +110,8 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         `transition: transform ${itemState.root.transitionDuration / 1000}s ease-in-out !important;` + (style ? style : '')
     );
 </script>
+
+<span aria-hidden="true" bind:this={orderElementRef} hidden></span>
 
 <!--
     The slide and crossfade branches use in: (never transition:) — their exit visuals are

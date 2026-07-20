@@ -23,6 +23,7 @@
             <Navbar.TogglerIcon data-testid="navbar-toggler-icon" />
         </Navbar.Toggler>
         <Navbar.Collapse
+            id="consumer-controls"
             transitionDuration={0}
             onExpand={() => (expanding += 1)}
             onExpanded={() => (expanded += 1)}

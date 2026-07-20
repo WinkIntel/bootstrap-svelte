@@ -89,6 +89,7 @@ Add small overlay content to any element for housing secondary information or in
     let popperInstance: Instance | null = null;
     let popperPlacement: string = $state('');
     let referenceElement: HTMLElement | null = $state(null);
+    let isClickActive = $state(false);
     let isHovering = $state(false);
     let isFocusing = $state(false);
     let currentPopperPlacement: string = $derived(popperPlacement || effectivePlacement || 'top');
@@ -115,7 +116,7 @@ Add small overlay content to any element for housing secondary information or in
     const show = () => (isShown = true);
     const hide = () => (isShown = false);
     const hideWhenInactive = () => {
-        if (!isHovering && !isFocusing) {
+        if (!isClickActive && !isHovering && !isFocusing) {
             hide();
         }
     };
@@ -124,7 +125,12 @@ Add small overlay content to any element for housing secondary information or in
             // If the reference element is focused, we don't want to toggle the tooltip
             return;
         }
-        isShown = !isShown;
+        isClickActive = !isClickActive;
+        if (isClickActive) {
+            show();
+        } else {
+            hideWhenInactive();
+        }
     };
     const handleMouseEnter = () => {
         isHovering = true;
@@ -183,13 +189,14 @@ Add small overlay content to any element for housing secondary information or in
     };
 
     const reconcileTriggerActivity = () => {
+        isClickActive = triggers.includes('click') && isClickActive;
         isHovering = triggers.includes('hover') && !!referenceElement?.matches(':hover');
         if (triggers.includes('focus')) {
             isFocusing = hasFocus(referenceElement);
         } else {
             isFocusing = false;
         }
-        if (isHovering || isFocusing) {
+        if (isClickActive || isHovering || isFocusing) {
             show();
         } else {
             hide();

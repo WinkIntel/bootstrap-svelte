@@ -175,6 +175,19 @@ describe('Tooltip mixed triggers', () => {
         await fireEvent.click(screen.getByTestId('add-tooltip-focus-trigger'));
         expect(screen.getByTestId('mixed-tooltip')).toBeInTheDocument();
     });
+
+    it('preserves click activity when other configured triggers are removed', async () => {
+        render(TooltipMixedTriggerTest);
+
+        const trigger = screen.getByTestId('mixed-tooltip-trigger');
+        await fireEvent.click(screen.getByTestId('set-tooltip-click-hover-trigger'));
+        await fireEvent.click(trigger);
+        expect(screen.getByTestId('mixed-tooltip')).toBeInTheDocument();
+
+        await fireEvent.click(screen.getByTestId('set-tooltip-click-trigger'));
+
+        expect(screen.getByTestId('mixed-tooltip')).toBeInTheDocument();
+    });
 });
 
 describe('Tooltip Reference Element With Special-Character Id', () => {

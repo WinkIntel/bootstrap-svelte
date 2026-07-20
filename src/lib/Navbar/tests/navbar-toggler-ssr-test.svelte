@@ -2,6 +2,7 @@
     import { Navbar } from '$lib/Navbar/index.js';
 </script>
 
+<div id="consumer-collapse"></div>
 <Navbar.Root>
     <Navbar.Toggler aria-controls="consumer-collapse">Menu</Navbar.Toggler>
     <Navbar.Collapse id="generated-collapse">Content</Navbar.Collapse>

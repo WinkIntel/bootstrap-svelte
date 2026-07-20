@@ -60,7 +60,7 @@ export class PaginationRootState {
  * Initializes its active and disabled states based on the `isActive` and `isDisabled` props.
  */
 export class PaginationItemState {
-    isActive = $derived.by(() => this.root.isPaginationItemActive(this.props.id || ''));
+    isActive = $derived.by(() => this.props.isActive || this.root.isPaginationItemActive(this.props.id || ''));
     isDisabled = $derived.by(() => this.props.isDisabled || this.root.isPaginationItemDisabled(this.props.id || ''));
 
     constructor(

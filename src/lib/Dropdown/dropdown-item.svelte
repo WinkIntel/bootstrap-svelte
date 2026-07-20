@@ -60,7 +60,7 @@ A clickable item within a dropdown menu.
         }
     });
 
-    onMount(() => itemState.root.reorderItems());
+    onMount(() => itemState.root.scheduleReorderItems());
     onDestroy(() => itemState.root.unregisterItem(itemState));
 
     let isAnchor: boolean = $derived(Boolean(href));

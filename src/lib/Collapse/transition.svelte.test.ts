@@ -118,12 +118,30 @@ describe('collapseIn', () => {
         expect(element.style.transitionDelay).toBe('40ms');
     });
 
+    it('preserves per-property CSS timing when no explicit duration is provided', () => {
+        element.style.transitionDuration = '350ms, 800ms';
+        element.style.transitionDelay = '0ms, 50ms';
+        window.getComputedStyle = vi.fn(
+            () =>
+                ({
+                    transitionDuration: '350ms, 800ms',
+                    transitionDelay: '0ms, 50ms'
+                }) as CSSStyleDeclaration
+        );
+
+        const transition = collapseIn(element, { isHorizontal: false });
+
+        expect(transition.duration).toBe(350);
+        expect(element.style.transitionDuration).toBe('350ms, 800ms');
+        expect(element.style.transitionDelay).toBe('0ms, 50ms');
+    });
+
     it.each([Number.NaN, Number.POSITIVE_INFINITY, -1])('falls back to CSS timing for an invalid explicit duration (%s)', (transitionDuration) => {
         const transition = collapseIn(element, { isHorizontal: false, transitionDuration });
 
         expect(transition.duration).toBe(350);
-        expect(element.style.transitionDuration).toBe('350ms');
-        expect(element.style.transitionDelay).toBe('0ms');
+        expect(element.style.transitionDuration).toBe('');
+        expect(element.style.transitionDelay).toBe('');
     });
 
     it('finishes immediately when the explicit transition duration is zero', () => {

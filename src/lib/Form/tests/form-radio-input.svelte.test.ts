@@ -97,6 +97,25 @@ describe('Form.RadioInput', () => {
         expect(firstRadio.checked).toBe(false);
     });
 
+    test('converges when multiple controlled radios share a group and honors parent group changes', async () => {
+        render(RadioInputBindingTest);
+
+        const firstRadio = screen.getByTestId('controlled-one') as HTMLInputElement;
+        const secondRadio = screen.getByTestId('controlled-two') as HTMLInputElement;
+
+        expect(screen.getByTestId('controlled-group-value')).toHaveTextContent('one');
+        expect(screen.getByTestId('controlled-checked-values')).toHaveTextContent('true:false');
+        expect(firstRadio.checked).toBe(true);
+        expect(secondRadio.checked).toBe(false);
+
+        await fireEvent.click(screen.getByTestId('select-controlled-other'));
+
+        expect(screen.getByTestId('controlled-group-value')).toHaveTextContent('other');
+        expect(screen.getByTestId('controlled-checked-values')).toHaveTextContent('false:false');
+        expect(firstRadio.checked).toBe(false);
+        expect(secondRadio.checked).toBe(false);
+    });
+
     test('keeps standalone checked binding independent from group selection', async () => {
         render(RadioInputBindingTest);
         const standaloneRadio = screen.getByTestId('standalone-radio') as HTMLInputElement;

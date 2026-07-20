@@ -4,6 +4,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## 1.0.5
 
+- **Breaking:** Specialized Form input components now accept only their matching `type` literal; mismatched types that were previously accepted but overridden no longer type-check.
 - Fixed dynamic Modal title ID registration so `aria-labelledby` updates when the title ID changes and stale IDs are unregistered.
 - Updated the Modal keyboard listener to Svelte's current event-handler syntax.
 - Added `svelte-doctor` tooling and regression coverage for dynamic Modal title IDs.

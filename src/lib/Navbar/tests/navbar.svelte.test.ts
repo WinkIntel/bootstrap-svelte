@@ -24,6 +24,14 @@ describe('Navbar Component', () => {
         await expect(fireEvent.click(screen.getByTestId('null-handler-toggler'))).resolves.toBe(true);
     });
 
+    it('preserves explicit aria-controls after a collapse sibling registers', async () => {
+        render(NavbarTogglerTest);
+        await tick();
+
+        expect(screen.getByTestId('explicit-controls-toggler')).toHaveAttribute('aria-controls', 'external-navbar-target');
+        expect(document.getElementById('external-navbar-target')).toBeInTheDocument();
+    });
+
     it('should render basic navbar with all sub-components in collapsed state', () => {
         render(NavbarBasicTest);
 
@@ -79,7 +87,7 @@ describe('Navbar Component', () => {
         expect(screen.queryByTestId('nav-item-active')).not.toBeInTheDocument();
         expect(toggler).toHaveClass('collapsed');
         expect(toggler).toHaveAttribute('aria-expanded', 'false');
-        expect(toggler).toHaveAttribute('aria-controls', `${screen.getByTestId('navbar').id}-collapse`);
+        expect(toggler).toHaveAttribute('aria-controls', 'consumer-controls');
         expect(toggler).toHaveAttribute('type', 'button');
 
         // Click the toggler to expand

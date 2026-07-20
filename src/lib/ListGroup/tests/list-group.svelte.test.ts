@@ -205,7 +205,7 @@ describe('ListGroup Component', () => {
         expect(radio).toHaveClass('form-check-input');
     });
 
-    it('keeps disabled anchors inert and renders an empty href as an anchor', () => {
+    it('keeps disabled empty-href anchors inert without a navigable href', () => {
         const onclick = vi.fn();
         const { container } = render(ListGroup.ItemAction, {
             props: {
@@ -225,7 +225,7 @@ describe('ListGroup Component', () => {
         action?.dispatchEvent(event);
 
         expect(action?.tagName).toBe('A');
-        expect(action).toHaveAttribute('href', '');
+        expect(action).not.toHaveAttribute('href');
         expect(action).toHaveAttribute('aria-disabled', 'true');
         expect(action).toHaveAttribute('tabindex', '-1');
         expect(action).toHaveAttribute('type', 'text/html');

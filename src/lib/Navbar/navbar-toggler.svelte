@@ -71,7 +71,7 @@ Toggle button for collapsible navbar content. Controls the expansion/collapse of
         }
     });
 
-    let ariaControls = $derived(togglerState.root.ariaControls ?? consumerAriaControls ?? togglerState.root.defaultCollapseId);
+    let ariaControls = $derived(consumerAriaControls ?? togglerState.root.ariaControls ?? togglerState.root.defaultCollapseId);
     let resolvedAriaLabel = $derived(ariaLabel ?? nativeAriaLabel ?? 'Toggle navigation');
     let isExpanded = $derived(togglerState.isExpanded);
     let classes = $derived(uniqueClsx('navbar-toggler', { collapsed: !isExpanded }, classValues));

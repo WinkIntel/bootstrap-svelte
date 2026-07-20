@@ -14,12 +14,12 @@ export type ButtonCheckRootProps = Omit<HTMLInputAttributes, 'class' | 'size' | 
     type?: ButtonCheckType;
 };
 
-export type ButtonGroupRootProps = DivElement & {
+export type ButtonGroupRootProps = Omit<DivElement, 'role'> & {
     ariaLabel?: string;
     isVertical?: boolean;
     size?: ButtonGroupSize;
 };
 
-export type ButtonToolbarRootProps = DivElement & {
+export type ButtonToolbarRootProps = Omit<DivElement, 'role'> & {
     ariaLabel?: string;
 };

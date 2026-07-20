@@ -11,7 +11,7 @@
 <button data-testid="close-mixed-modal" onclick={() => (isModalShown = false)}>Close modal</button>
 <button data-testid="close-mixed-offcanvas" onclick={() => (isOffcanvasShown = false)}>Close offcanvas</button>
 
-<Modal.Root id="mixed-modal" data-testid="mixed-modal" isShown={isModalShown} useBackdrop={false} useFade={false}>
+<Modal.Root id="mixed-modal" data-testid="mixed-modal" isShown={isModalShown} useBackdrop={false} useFade={true}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Body>Mixed modal</Modal.Body>

@@ -78,7 +78,7 @@ An action item within a list group, typically used for navigation or triggering 
     aria-disabled={isDisabled ? 'true' : ariaDisabled}
     bind:this={elementRef}
     class={classes}
-    href={isAnchor ? href : undefined}
+    href={isAnchor && !isDisabled ? href : undefined}
     {id}
     disabled={isAnchor ? undefined : isDisabled}
     onclick={handleClick}

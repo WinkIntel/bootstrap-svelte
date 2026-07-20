@@ -12,7 +12,7 @@ import type {
 } from '$lib/common/types.js';
 
 type FixedInputType<Type extends string> = {
-    /** Retained for compatibility; each specialized input always renders its matching type. */
+    /** The matching literal remains accepted; mismatched input types are rejected because specialized inputs own this attribute. */
     type?: Type;
 };
 

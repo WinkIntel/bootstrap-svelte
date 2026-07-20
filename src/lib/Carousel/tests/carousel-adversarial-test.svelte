@@ -2,6 +2,7 @@
     import { Carousel } from '$lib/index.js';
 
     let ride = $state(true);
+    let showInserted = $state(false);
     let showMiddle = $state(true);
     let pointerCalls = $state(0);
     let hoverCalls = $state(0);
@@ -48,13 +49,27 @@
 </Carousel.Root>
 
 <button data-testid="remove-middle" onclick={() => (showMiddle = false)}>Remove middle</button>
+<button data-testid="insert-middle" onclick={() => (showInserted = true)}>Insert middle</button>
 <Carousel.Root animation="none" transitionDuration={0} data-testid="removal-carousel">
-    <Carousel.Inner data-testid="removal-inner">
-        <Carousel.Item isActive={true} data-testid="removal-item-1">One</Carousel.Item>
-        {#if showMiddle}
-            <Carousel.Item data-testid="removal-item-2">Two</Carousel.Item>
+    <Carousel.Indicators>
+        <Carousel.IndicatorButton data-testid="removal-indicator-1" />
+        {#if showInserted}
+            <Carousel.IndicatorButton data-testid="inserted-indicator" />
         {/if}
-        <Carousel.Item data-testid="removal-item-3">Three</Carousel.Item>
+        {#if showMiddle}
+            <Carousel.IndicatorButton data-testid="removal-indicator-2" />
+        {/if}
+        <Carousel.IndicatorButton data-testid="removal-indicator-3" />
+    </Carousel.Indicators>
+    <Carousel.Inner data-testid="removal-inner">
+        <Carousel.Item id="removal-item-id-1" isActive={true} data-testid="removal-item-1">One</Carousel.Item>
+        {#if showInserted}
+            <Carousel.Item id="inserted-item-id" data-testid="inserted-item">Inserted</Carousel.Item>
+        {/if}
+        {#if showMiddle}
+            <Carousel.Item id="removal-item-id-2" data-testid="removal-item-2">Two</Carousel.Item>
+        {/if}
+        <Carousel.Item id="removal-item-id-3" data-testid="removal-item-3">Three</Carousel.Item>
     </Carousel.Inner>
     <Carousel.ControlNext data-testid="removal-next" />
 </Carousel.Root>

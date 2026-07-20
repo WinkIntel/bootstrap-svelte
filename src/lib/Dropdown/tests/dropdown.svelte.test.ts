@@ -3,9 +3,19 @@ import { describe, expect, it, vi } from 'vitest';
 import DropdownBasicTest from './dropdown-basic-test.svelte';
 import DropdownContainerTest from './dropdown-container-test.svelte';
 import DropdownKeyboardTest from './dropdown-keyboard-test.svelte';
+import DropdownReorderTest from './dropdown-reorder-test.svelte';
 import DropdownSpecialIdTest from './dropdown-special-id-test.svelte';
 
 describe('Dropdown Component', () => {
+    it('coalesces initial item registration into one DOM-order reconciliation', async () => {
+        const compareDocumentPosition = vi.spyOn(Node.prototype, 'compareDocumentPosition');
+
+        render(DropdownReorderTest);
+        await Promise.resolve();
+
+        expect(compareDocumentPosition).toHaveBeenCalledTimes(7);
+    });
+
     it('should render basic dropdown with toggle and menu', () => {
         render(DropdownBasicTest);
 

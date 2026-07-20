@@ -77,6 +77,15 @@
     {/if}
 </Pagination.Root>
 
+<Pagination.Root>
+    <Pagination.Item data-testid="declarative-active-one" id="declarative-active-one" isActive={true}>
+        <Pagination.Link href="#declarative-one">Declarative one</Pagination.Link>
+    </Pagination.Item>
+    <Pagination.Item data-testid="declarative-active-two" id="declarative-active-two" isActive={true}>
+        <Pagination.Link href="#declarative-two">Declarative two</Pagination.Link>
+    </Pagination.Item>
+</Pagination.Root>
+
 <Pagination.Root isStateful={true}>
     {#if showStateful}
         <Pagination.Item data-testid="stateful-item" id={statefulId}>

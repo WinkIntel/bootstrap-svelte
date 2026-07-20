@@ -22,7 +22,7 @@ describe('Form.FileInput', () => {
         expect(screen.getByTestId('callback-file-name')).toHaveTextContent('photo.png');
     });
 
-    test('syncs parent-driven file replacement and clearing to the DOM files property', async () => {
+    test('syncs parent-driven file replacement and clears the native selection', async () => {
         render(FileInputBindingTest);
         const input = screen.getByTestId('file-input') as HTMLInputElement;
         const replacementSource = screen.getByTestId('replacement-file-source') as HTMLInputElement;
@@ -41,7 +41,28 @@ describe('Form.FileInput', () => {
         await fireEvent.click(screen.getByTestId('clear-files'));
 
         expect(screen.getByTestId('bound-file-name')).toHaveTextContent('none');
-        expect(input.files).toBeNull();
+        expect(input.value).toBe('');
+    });
+
+    test('clears the native selection when the browser silently ignores files = null', async () => {
+        render(FileInputBindingTest);
+        const input = screen.getByTestId('file-input') as HTMLInputElement;
+        const user = userEvent.setup();
+
+        await user.upload(input, new File(['photo'], 'photo.png', { type: 'image/png' }));
+        let platformFiles = input.files;
+        Object.defineProperty(input, 'files', {
+            configurable: true,
+            get: () => platformFiles,
+            set: (next: FileList | null) => {
+                if (next !== null) platformFiles = next;
+            }
+        });
+
+        await fireEvent.click(screen.getByTestId('clear-files'));
+
+        expect(screen.getByTestId('bound-file-name')).toHaveTextContent('none');
+        expect(input.value).toBe('');
     });
 
     test('normalizes malformed parent files without throwing and clears the native selection', async () => {

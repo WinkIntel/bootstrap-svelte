@@ -74,7 +74,7 @@ export function scrollspy(options: ScrollspyOptions): Attachment<HTMLElement> {
             // Find the target element that corresponds to the clicked link's hash
             const targetElement = resolveHashTarget(anchor.hash);
 
-            if (targetElement) {
+            if (targetElement && element.contains(targetElement)) {
                 event.preventDefault();
 
                 // A null observer root represents the viewport/window.
@@ -130,7 +130,7 @@ export function scrollspy(options: ScrollspyOptions): Attachment<HTMLElement> {
 
             const observableSection = resolveHashTarget(anchor.hash);
 
-            if (observableSection !== null) {
+            if (observableSection !== null && element.contains(observableSection)) {
                 targetLinks.add(anchor);
                 observableSections.set(anchor.hash, observableSection);
                 // attach the click handler to the anchor

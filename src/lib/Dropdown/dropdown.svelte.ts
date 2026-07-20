@@ -16,6 +16,7 @@ export class DropdownRootState {
     #isNavItem: boolean = $state(false);
     #isShown: boolean = $state(false);
     #items: DropdownItemState[] = $state([]);
+    #reorderScheduled = false;
 
     ariaLabelledBy: string | undefined = $state(undefined); // Used for accessibility, linking the dropdown to a label.
 
@@ -30,6 +31,7 @@ export class DropdownRootState {
         this.focusOnPreviousItem = this.focusOnPreviousItem.bind(this);
         this.registerItem = this.registerItem.bind(this);
         this.reorderItems = this.reorderItems.bind(this);
+        this.scheduleReorderItems = this.scheduleReorderItems.bind(this);
         this.toggleIsShown = this.toggleIsShown.bind(this);
         this.unregisterItem = this.unregisterItem.bind(this);
     }
@@ -135,6 +137,18 @@ export class DropdownRootState {
         orderedItems.forEach((item, index) => (item.itemIndex = index));
         this.#items = orderedItems;
         this.#activeItemIndex = activeItem ? orderedItems.indexOf(activeItem) : -1;
+    }
+
+    scheduleReorderItems(): void {
+        if (this.#reorderScheduled) {
+            return;
+        }
+
+        this.#reorderScheduled = true;
+        queueMicrotask(() => {
+            this.#reorderScheduled = false;
+            this.reorderItems();
+        });
     }
 
     toggleIsShown(event: Event) {

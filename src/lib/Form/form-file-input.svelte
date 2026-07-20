@@ -71,6 +71,15 @@ Bootstrap-styled file input component for file uploads.
                 files = null;
             }
         }
+        if (input && files === null) {
+            if (input.value !== '') {
+                input.value = '';
+                if (value !== '') {
+                    value = '';
+                }
+            }
+            return;
+        }
         if (input && input.files !== files) {
             try {
                 // Let the platform setter validate FileList identity so genuine
