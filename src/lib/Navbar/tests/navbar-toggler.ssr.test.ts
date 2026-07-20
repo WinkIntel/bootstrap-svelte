@@ -9,9 +9,17 @@ describe('Navbar.Toggler SSR', () => {
         expect(body).toContain('aria-controls="consumer-collapse"');
     });
 
-    it('uses a root-derived collapse id when neither sibling has an explicit relationship', () => {
+    it('does not emit a speculative default target before a collapse registers', () => {
         const { body } = render(NavbarTogglerSsrTest);
 
-        expect(body).toContain('aria-controls="default-navbar-collapse"');
+        expect(body).not.toContain('aria-controls="default-navbar-collapse"');
+        expect(body).toMatch(/<button(?=[^>]*id="no-collapse-toggler")(?![^>]*aria-controls)[^>]*>/);
+    });
+
+    it('does not emit a stale default target before a custom-id collapse registers', () => {
+        const { body } = render(NavbarTogglerSsrTest);
+
+        expect(body).toMatch(/<button(?=[^>]*id="custom-collapse-toggler")(?![^>]*aria-controls)[^>]*>/);
+        expect(body).not.toContain('aria-controls="custom-collapse-navbar-collapse"');
     });
 });

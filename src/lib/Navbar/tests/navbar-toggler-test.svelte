@@ -9,6 +9,11 @@
     <Navbar.Toggler onclick={null} data-testid="null-handler-toggler" />
 </Navbar.Root>
 
+<Navbar.Root>
+    <Navbar.Toggler data-testid="registered-controls-toggler" />
+    <Navbar.Collapse id="registered-navbar-collapse">Registered collapse</Navbar.Collapse>
+</Navbar.Root>
+
 <div id="external-navbar-target"></div>
 <Navbar.Root>
     <Navbar.Toggler aria-controls="external-navbar-target" data-testid="explicit-controls-toggler" />

@@ -24,6 +24,19 @@ describe('Navbar Component', () => {
         await expect(fireEvent.click(screen.getByTestId('null-handler-toggler'))).resolves.toBe(true);
     });
 
+    it('omits aria-controls when no collapse or explicit target exists', () => {
+        render(NavbarTogglerTest);
+
+        expect(screen.getByTestId('default-toggler')).not.toHaveAttribute('aria-controls');
+    });
+
+    it('uses the registered collapse id after the collapse mounts', async () => {
+        render(NavbarTogglerTest);
+        await tick();
+
+        expect(screen.getByTestId('registered-controls-toggler')).toHaveAttribute('aria-controls', 'registered-navbar-collapse');
+    });
+
     it('preserves explicit aria-controls after a collapse sibling registers', async () => {
         render(NavbarTogglerTest);
         await tick();

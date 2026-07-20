@@ -470,7 +470,7 @@
                 <strong>Cyclical Navigation:</strong> When you reach the last item and press <kbd>↓</kbd>, focus wraps to the first item. Similarly,
                 when at the first item and pressing <kbd>↑</kbd>, focus wraps to the last item.
             </li>
-            <li><strong>Disabled Items:</strong> Navigation includes disabled items (they receive focus but cannot be activated).</li>
+            <li><strong>Disabled Items:</strong> Navigation skips disabled items so focus only moves among available actions.</li>
         </ul>
 
         <div class="alert alert-info">
