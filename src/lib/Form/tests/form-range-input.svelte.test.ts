@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import RangeInput from '../form-range-input.svelte';
 
 describe('Form.RangeInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(RangeInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type range and base class', () => {
         const { container } = render(RangeInput);
         const input = container.querySelector('input[type="range"]') as HTMLInputElement;
@@ -123,13 +118,5 @@ describe('Form.RangeInput', () => {
         expect(input).toHaveAttribute('list', 'tickmarks');
         expect(input).toHaveAttribute('data-testid', 'range-test');
         expect(input).toHaveAttribute('data-custom', 'custom-value');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(RangeInput);
-        const input = container.querySelector('input[type="range"]') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 });

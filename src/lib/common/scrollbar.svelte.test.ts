@@ -54,6 +54,15 @@ describe('scrollbar.ts', () => {
     });
 
     describe('disableBodyScrolling', () => {
+        it('preserves fractional padding while applying the scrollbar width', () => {
+            const body = document.body;
+            body.style.paddingRight = '10.5px';
+
+            disableBodyScrolling(body);
+
+            expect(body.style.paddingRight).toBe('34.5px');
+        });
+
         it('should set overflow to hidden', () => {
             const body = document.body;
             disableBodyScrolling(body);
@@ -190,9 +199,84 @@ describe('scrollbar.ts', () => {
             expect(body.hasAttribute('data-scrollbar-initial-overflow-value')).toBe(false);
             expect(body.hasAttribute('data-scrollbar-initial-padding-value')).toBe(false);
         });
+
+        it.each([
+            ['data-scrollbar-initial-overflow-value', '', '5px'],
+            ['data-scrollbar-initial-padding-value', 'auto', '']
+        ])('best-effort unlocks after acquired state loses %s', (missingAttribute, expectedOverflow, expectedPadding) => {
+            const body = document.body;
+            body.style.overflow = 'auto';
+            body.style.paddingRight = '5px';
+
+            acquireBodyScrollLock(body);
+            body.removeAttribute(missingAttribute);
+
+            expect(releaseBodyScrollLock(body)).toBe(0);
+
+            expect(body.style.overflow).toBe(expectedOverflow);
+            expect(body.style.paddingRight).toBe(expectedPadding);
+            expect(body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+            expect(body.hasAttribute('data-scrollbar-initial-overflow-value')).toBe(false);
+            expect(body.hasAttribute('data-scrollbar-initial-padding-value')).toBe(false);
+            expect(body.hasAttribute('data-scrollbar-initial-padding-side')).toBe(false);
+        });
     });
 
     describe('body scroll lock counting', () => {
+        it('restores the acquired padding side after direction changes while nested locks release', () => {
+            const body = document.body;
+            body.style.paddingRight = '10.5px';
+
+            isRTLMock.mockReturnValue(false);
+            acquireBodyScrollLock(body);
+            acquireBodyScrollLock(body);
+            expect(body.style.paddingRight).toBe('34.5px');
+
+            isRTLMock.mockReturnValue(true);
+            expect(releaseBodyScrollLock(body)).toBe(1);
+            expect(body.style.paddingRight).toBe('34.5px');
+            expect(releaseBodyScrollLock(body)).toBe(0);
+            expect(body.style.paddingRight).toBe('10.5px');
+            expect(body.style.paddingLeft).toBe('');
+        });
+
+        it.each(['not-a-number', '-2', '1.5'])('restores a real lock after its count is corrupted to %s', (lockCount) => {
+            const body = document.body;
+            body.style.overflow = 'auto';
+            body.style.paddingRight = '5px';
+            acquireBodyScrollLock(body);
+            body.setAttribute('data-scrollbar-lock-count', lockCount);
+
+            expect(releaseBodyScrollLock(body)).toBe(0);
+            expect(body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+            expect(body.style.overflow).toBe('auto');
+            expect(body.style.paddingRight).toBe('5px');
+            expect(body.hasAttribute('data-scrollbar-initial-overflow-value')).toBe(false);
+            expect(body.hasAttribute('data-scrollbar-initial-padding-value')).toBe(false);
+            expect(body.hasAttribute('data-scrollbar-initial-padding-side')).toBe(false);
+
+            expect(acquireBodyScrollLock(body)).toBe(1);
+            expect(releaseBodyScrollLock(body)).toBe(0);
+            expect(body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
+        });
+
+        it('keeps a recoverable held lock when acquisition sees malformed count metadata', () => {
+            const body = document.body;
+            body.style.overflow = 'scroll';
+            body.style.paddingRight = '7px';
+            acquireBodyScrollLock(body);
+            body.setAttribute('data-scrollbar-lock-count', 'not-a-number');
+
+            expect(acquireBodyScrollLock(body)).toBe(2);
+            expect(body.style.overflow).toBe('hidden');
+            expect(body.style.paddingRight).toBe('31px');
+            expect(releaseBodyScrollLock(body)).toBe(1);
+            expect(body.style.overflow).toBe('hidden');
+            expect(releaseBodyScrollLock(body)).toBe(0);
+            expect(body.style.overflow).toBe('scroll');
+            expect(body.style.paddingRight).toBe('7px');
+        });
+
         it('should lock on a single acquire and restore on the matching release', () => {
             const body = document.body;
 

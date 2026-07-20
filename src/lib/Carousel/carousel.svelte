@@ -43,7 +43,7 @@ The main container for a carousel component.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
-    import { onMount } from 'svelte';
+    import { onMount, tick } from 'svelte';
     import { CarouselRootState, initCarouselRootState } from './carousel.svelte.js';
     import type { Carousel } from './index.js';
 
@@ -57,6 +57,9 @@ The main container for a carousel component.
         elementRef = $bindable(null),
         id = `carousel-${uid}`,
         interval = CarouselRootState.INTERNAL_DEFAULT,
+        onpointercancel: onPointerCancel,
+        onpointerdown: onPointerDown,
+        onpointerup: onPointerUp,
         pause = CarouselRootState.PAUSE_DEFAULT,
         ride = CarouselRootState.RIDE_DEFAULT,
         style,
@@ -99,6 +102,7 @@ The main container for a carousel component.
     // Handle touch events for swipe gestures
     function handlePointerDown(pointerEvent: PointerEvent) {
         rootState.handlePointerDown(pointerEvent);
+        onPointerDown?.(pointerEvent as never);
     }
 
     function handlePointerMove(pointerEvent: PointerEvent) {
@@ -107,9 +111,16 @@ The main container for a carousel component.
 
     function handlePointerUp(pointerEvent: PointerEvent) {
         rootState.handlePointerUp(pointerEvent);
+        onPointerUp?.(pointerEvent as never);
+    }
+
+    function handlePointerCancel(pointerEvent: PointerEvent) {
+        rootState.handlePointerCancel();
+        onPointerCancel?.(pointerEvent as never);
     }
 
     onMount(() => {
+        tick().then(() => rootState.start());
         // Cleanup when component is destroyed
         return () => {
             rootState.dispose();
@@ -134,7 +145,7 @@ The main container for a carousel component.
 
     $effect(() => {
         if (previousInterval !== unset && previousInterval !== interval) {
-            rootState.interval = interval || CarouselRootState.INTERNAL_DEFAULT;
+            rootState.interval = interval;
         }
 
         previousInterval = interval;
@@ -158,7 +169,7 @@ The main container for a carousel component.
 
     $effect(() => {
         if (previousTransitionDuration !== unset && previousTransitionDuration !== transitionDuration) {
-            rootState.transitionDuration = transitionDuration || CarouselRootState.TRANSITION_DURATION_DEFAULT;
+            rootState.transitionDuration = transitionDuration;
         }
 
         previousTransitionDuration = transitionDuration;
@@ -172,7 +183,7 @@ The main container for a carousel component.
     onpointerdown={handlePointerDown}
     onpointermove={handlePointerMove}
     onpointerup={handlePointerUp}
-    onpointercancel={handlePointerUp}
+    onpointercancel={handlePointerCancel}
     style={styles}
     {...restOfProps}>
     {@render children?.()}

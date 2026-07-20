@@ -16,6 +16,7 @@ export class DropdownRootState {
     #isNavItem: boolean = $state(false);
     #isShown: boolean = $state(false);
     #items: DropdownItemState[] = $state([]);
+    #reorderScheduled = false;
 
     ariaLabelledBy: string | undefined = $state(undefined); // Used for accessibility, linking the dropdown to a label.
 
@@ -29,7 +30,10 @@ export class DropdownRootState {
         this.focusOnNextItem = this.focusOnNextItem.bind(this);
         this.focusOnPreviousItem = this.focusOnPreviousItem.bind(this);
         this.registerItem = this.registerItem.bind(this);
+        this.reorderItems = this.reorderItems.bind(this);
+        this.scheduleReorderItems = this.scheduleReorderItems.bind(this);
         this.toggleIsShown = this.toggleIsShown.bind(this);
+        this.unregisterItem = this.unregisterItem.bind(this);
     }
 
     get activeItemIndex(): number {
@@ -93,24 +97,58 @@ export class DropdownRootState {
     }
 
     focusOnNextItem(): void {
-        if (this.#items.length === 0) {
-            return;
-        }
-        this.#activeItemIndex = (this.#activeItemIndex + 1) % this.#items.length;
-        this.#items[this.#activeItemIndex]?.props.elementRef?.focus();
+        this.focusOnItemInDirection(1);
     }
 
     focusOnPreviousItem(): void {
-        if (this.#items.length === 0) {
-            return;
-        }
-        this.#activeItemIndex = (this.#activeItemIndex - 1 + this.#items.length) % this.#items.length;
-        this.#items[this.#activeItemIndex]?.props.elementRef?.focus();
+        this.focusOnItemInDirection(-1);
     }
 
     registerItem(item: DropdownItemState): void {
         item.itemIndex = this.#items.length; // Set the item's index based on current length.
-        this.#items.push(item);
+        this.#items = [...this.#items, item];
+    }
+
+    unregisterItem(item: DropdownItemState): void {
+        const removedIndex = this.#items.indexOf(item);
+        if (removedIndex === -1) {
+            return;
+        }
+
+        const activeItem = this.#items[this.#activeItemIndex];
+        const remainingItems = this.#items.filter((registeredItem) => registeredItem !== item);
+        remainingItems.forEach((registeredItem, index) => (registeredItem.itemIndex = index));
+        this.#items = remainingItems;
+        this.#activeItemIndex = activeItem && activeItem !== item ? remainingItems.indexOf(activeItem) : -1;
+    }
+
+    reorderItems(): void {
+        const activeItem = this.#items[this.#activeItemIndex];
+        const orderedItems = [...this.#items].sort((first, second) => {
+            const firstElement = first.props.elementRef;
+            const secondElement = second.props.elementRef;
+            if (!firstElement || !secondElement || firstElement === secondElement) {
+                return firstElement ? -1 : secondElement ? 1 : 0;
+            }
+
+            const position = firstElement.compareDocumentPosition(secondElement);
+            return position & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : position & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
+        });
+        orderedItems.forEach((item, index) => (item.itemIndex = index));
+        this.#items = orderedItems;
+        this.#activeItemIndex = activeItem ? orderedItems.indexOf(activeItem) : -1;
+    }
+
+    scheduleReorderItems(): void {
+        if (this.#reorderScheduled) {
+            return;
+        }
+
+        this.#reorderScheduled = true;
+        queueMicrotask(() => {
+            this.#reorderScheduled = false;
+            this.reorderItems();
+        });
     }
 
     toggleIsShown(event: Event) {
@@ -128,6 +166,28 @@ export class DropdownRootState {
         if (!this.#isShown) {
             this.props.onHidden?.(event);
         }
+    }
+
+    private focusOnItemInDirection(direction: 1 | -1): void {
+        this.reorderItems();
+        let itemIndex =
+            this.#activeItemIndex === -1
+                ? direction === 1
+                    ? 0
+                    : this.#items.length - 1
+                : (this.#activeItemIndex + direction + this.#items.length) % this.#items.length;
+
+        for (let count = 0; count < this.#items.length; count += 1) {
+            const item = this.#items[itemIndex];
+            if (item && !item.props.isDisabled) {
+                this.#activeItemIndex = itemIndex;
+                item.props.elementRef?.focus();
+                return;
+            }
+            itemIndex = (itemIndex + direction + this.#items.length) % this.#items.length;
+        }
+
+        this.#activeItemIndex = -1;
     }
 }
 
@@ -237,15 +297,9 @@ export class DropdownMenuState {
         if (!this.isShown) {
             return;
         }
-        if (!this.root.props.id) {
-            return;
-        }
         const target = event.target as HTMLElement;
-        // Check if the click occurred within this specific dropdown instance.
-        // This prevents closing if a click happens inside the dropdown menu or on its toggle.
-        const nearestDropdown = target.closest(`#${CSS.escape(this.root.props.id)}`);
-        if (nearestDropdown && nearestDropdown.id === this.root.props.id) {
-            // The click is within the current dropdown, so do nothing.
+        if (this.#elementRef?.contains(target) || this.#rootElementRef?.contains(target)) {
+            // The click is within this menu or its toggle/root, so do nothing.
             return;
         }
         // Only close on outside clicks if autoClose is true or 'outside'
@@ -397,6 +451,9 @@ export class DropdownItemState {
 
     // When a dropdown item is clicked, it should typically close the dropdown.
     onclick(event: Event) {
+        if (this.props.isDisabled) {
+            return;
+        }
         // Only close on item clicks if autoClose is true or 'inside'
         // false: only close on toggle click (ignore item clicks)
         // 'inside': close on item/toggle clicks (ignore body clicks)

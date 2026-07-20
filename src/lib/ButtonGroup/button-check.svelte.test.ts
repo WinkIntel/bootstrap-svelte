@@ -18,11 +18,6 @@ const renderButtonCheckWithText = (text: string = 'Toggle', props: ButtonCheckRo
 };
 
 describe('ButtonCheck.svelte', () => {
-    test('should render', () => {
-        const results = render(ButtonCheck);
-        expect(() => results.container.querySelector('input.btn-check')).not.toThrow();
-    });
-
     test('renders with default properties', () => {
         renderButtonCheckWithText();
 

@@ -6,12 +6,6 @@ import { describe, expect, test } from 'vitest';
 import { ProgressBar } from '../index.js';
 
 describe('ProgressBar.svelte', () => {
-    test('should render', () => {
-        const { container } = render(ProgressBar);
-        const progressElement = container.querySelector('div[role="progressbar"]');
-        expect(progressElement).toBeInTheDocument();
-    });
-
     test('renders with default properties', () => {
         const { container } = render(ProgressBar);
         const progressElement = container.querySelector('div[role="progressbar"]');
@@ -28,17 +22,25 @@ describe('ProgressBar.svelte', () => {
         expect(barElement).toHaveStyle('width: 0%');
     });
 
-    test('renders with custom progress value', () => {
-        const { container } = render(ProgressBar, {
-            props: {
-                valueNow: 60
-            }
-        });
+    test.each([
+        [60, 0, 100, 0, 100, 60, '60%'],
+        [15, 10, 20, 10, 20, 15, '50%'],
+        [-1, 0, 100, 0, 100, 0, '0%'],
+        [101, 0, 100, 0, 100, 100, '100%'],
+        [10, 10, 10, 0, 100, 0, '0%'],
+        [15, 20, 10, 0, 100, 0, '0%'],
+        [Number.NaN, 0, 100, 0, 100, 0, '0%'],
+        [10, Number.POSITIVE_INFINITY, 100, 0, 100, 0, '0%'],
+        [10, 0, Number.NEGATIVE_INFINITY, 0, 100, 0, '0%']
+    ])('normalizes now=%s, min=%s, max=%s into a finite accessible state', (valueNow, valueMin, valueMax, ariaMin, ariaMax, ariaNow, width) => {
+        const { container } = render(ProgressBar, { props: { valueNow, valueMin, valueMax } });
         const progressElement = container.querySelector('div[role="progressbar"]');
         const barElement = progressElement?.querySelector('div.progress-bar');
 
-        expect(progressElement).toHaveAttribute('aria-valuenow', '60');
-        expect(barElement).toHaveStyle('width: 60%');
+        expect(progressElement).toHaveAttribute('aria-valuenow', String(ariaNow));
+        expect(progressElement).toHaveAttribute('aria-valuemin', String(ariaMin));
+        expect(progressElement).toHaveAttribute('aria-valuemax', String(ariaMax));
+        expect(barElement).toHaveStyle(`width: ${width}`);
     });
 
     test('renders with background color variant', () => {
@@ -85,21 +87,6 @@ describe('ProgressBar.svelte', () => {
         expect(barElement).toHaveClass('progress-bar-animated');
     });
 
-    test('renders with custom min and max values', () => {
-        const { container } = render(ProgressBar, {
-            props: {
-                valueMin: 10,
-                valueMax: 200,
-                valueNow: 150
-            }
-        });
-        const progressElement = container.querySelector('div[role="progressbar"]');
-
-        expect(progressElement).toHaveAttribute('aria-valuemin', '10');
-        expect(progressElement).toHaveAttribute('aria-valuemax', '200');
-        expect(progressElement).toHaveAttribute('aria-valuenow', '150');
-    });
-
     test('renders with custom aria label', () => {
         const { container } = render(ProgressBar, {
             props: {
@@ -109,6 +96,41 @@ describe('ProgressBar.svelte', () => {
         const progressElement = container.querySelector('div[role="progressbar"]');
 
         expect(progressElement).toHaveAttribute('aria-label', 'Download Progress');
+    });
+
+    test('uses a native aria-label when ariaLabel is absent', () => {
+        const { container } = render(ProgressBar, {
+            props: {
+                'aria-label': 'Native progress label'
+            }
+        });
+        const progressElement = container.querySelector('div[role="progressbar"]');
+
+        expect(progressElement).toHaveAttribute('aria-label', 'Native progress label');
+    });
+
+    test('keeps owned accessibility semantics while preserving unrelated native attributes', () => {
+        const { container } = render(ProgressBar, {
+            props: {
+                ariaLabel: 'Custom progress label',
+                'aria-label': 'Native progress label',
+                'aria-valuemin': 99,
+                'aria-valuemax': 1,
+                'aria-valuenow': 50,
+                'data-testid': 'protected-progress',
+                role: 'status',
+                valueMax: 20,
+                valueMin: 10,
+                valueNow: 15
+            }
+        });
+        const progressElement = container.querySelector('[data-testid="protected-progress"]');
+
+        expect(progressElement).toHaveAttribute('aria-label', 'Custom progress label');
+        expect(progressElement).toHaveAttribute('aria-valuemin', '10');
+        expect(progressElement).toHaveAttribute('aria-valuemax', '20');
+        expect(progressElement).toHaveAttribute('aria-valuenow', '15');
+        expect(progressElement).toHaveAttribute('role', 'progressbar');
     });
 
     test('renders with children content', () => {
@@ -162,11 +184,5 @@ describe('ProgressBar.svelte', () => {
 
         expect(barElement).toHaveClass('progress-bar');
         expect(barElement).toHaveClass('custom-bar');
-    });
-
-    test('handles element reference binding', () => {
-        // This is mostly a TypeScript check, since we can't directly test binding in JSDOM
-        const { component } = render(ProgressBar);
-        expect(component).toBeDefined();
     });
 });

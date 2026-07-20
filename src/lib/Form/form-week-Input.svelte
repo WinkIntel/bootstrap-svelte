@@ -47,6 +47,7 @@ Bootstrap-styled week input component for selecting a specific week of a year.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         class: classValues,
         elementRef = $bindable(null),
         isInvalid,
@@ -72,9 +73,9 @@ Bootstrap-styled week input component for selecting a specific week of a year.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     bind:value
     class={classes}
-    type="week"
-    {...restOfProps} />
+    type="week" />

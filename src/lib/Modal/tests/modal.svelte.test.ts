@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
-import { createRawSnippet } from 'svelte';
+import { createRawSnippet, tick } from 'svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { Modal } from '../index.js';
@@ -7,7 +7,9 @@ import ModalAccessibilityTest from './modal-accessibility-test.svelte';
 import ModalBasicTest from './modal-basic-test.svelte';
 import ModalDynamicTitleIdTest from './modal-dynamic-title-id-test.svelte';
 import ModalLifecycleTest from './modal-lifecycle-test.svelte';
+import ModalOffcanvasStackTest from './modal-offcanvas-stack-test.svelte';
 import ModalStackedTest from './modal-stacked-test.svelte';
+import ModalStaticBackdropTest from './modal-static-backdrop-test.svelte';
 
 describe('Modal Component', () => {
     it('should render basic modal with all sub-components', () => {
@@ -229,6 +231,129 @@ describe('Modal Component', () => {
     });
 
     describe('stacked modals', () => {
+        it('does not restore focus from a lower modal while a higher modal remains shown', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+
+            const bLast = screen.getByTestId('b-last');
+            bLast.focus();
+            await fireEvent.click(screen.getByTestId('close-a'));
+
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-a')).not.toBeInTheDocument());
+            expect(bLast).toHaveFocus();
+        });
+
+        it('returns focus and Tab trapping to A after B closes or unmounts', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            screen.getByTestId('open-b').focus();
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('close-b'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+
+            const aFirst = screen.getByTestId('a-first');
+            await waitFor(() => expect(aFirst).toHaveFocus());
+            screen.getByTestId('open-b-inside-a').focus();
+            await fireEvent.keyDown(window, { key: 'Tab' });
+            expect(aFirst).toHaveFocus();
+
+            await fireEvent.click(screen.getByTestId('close-a'));
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+            await fireEvent.click(screen.getByTestId('unmount-b'));
+
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+            await waitFor(() => expect(screen.getByTestId('a-first')).toHaveFocus());
+        });
+
+        it("restores B's opener inside A without overriding it with A's first focusable element", async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument());
+
+            const bOpener = screen.getByTestId('open-b-inside-a');
+            bOpener.focus();
+            await fireEvent.click(bOpener);
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('close-b'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+            expect(bOpener).toHaveFocus();
+        });
+
+        it('lets only the top modal handle Escape and Tab, then cleans its stack entry on unmount', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+
+            const bFirst = screen.getByTestId('b-first');
+            const bLast = screen.getByTestId('b-last');
+            const aLast = screen.getByTestId('a-last');
+            aLast.focus();
+            await fireEvent.keyDown(window, { key: 'Tab' });
+            expect(bFirst).toHaveFocus();
+
+            aLast.focus();
+            await fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
+            expect(bLast).toHaveFocus();
+
+            bLast.focus();
+            await fireEvent.keyDown(window, { key: 'Tab' });
+            expect(bFirst).toHaveFocus();
+
+            await fireEvent.keyDown(window, { key: 'Escape' });
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+            expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument();
+
+            await fireEvent.keyDown(window, { key: 'Escape' });
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-a')).not.toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('close-a'));
+            await fireEvent.click(screen.getByTestId('close-b'));
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+            await fireEvent.click(screen.getByTestId('unmount-b'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+
+            await fireEvent.keyDown(window, { key: 'Escape' });
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-a')).not.toBeInTheDocument());
+        });
+
+        it('layers a reopened earlier DOM sibling above the modal that was previously on top', async () => {
+            render(ModalStackedTest);
+
+            await fireEvent.click(screen.getByTestId('open-a'));
+            await fireEvent.click(screen.getByTestId('open-b'));
+            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('close-a'));
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-a')).not.toBeInTheDocument());
+            await fireEvent.click(screen.getByTestId('open-a'));
+
+            const modalA = await screen.findByTestId('stacked-modal-a');
+            const modalB = screen.getByTestId('stacked-modal-b');
+            await waitFor(() => expect(Number(modalA.style.zIndex)).toBeGreaterThan(Number(modalB.style.zIndex)));
+
+            const backdropLayers = Array.from(document.querySelectorAll<HTMLElement>('.modal-backdrop'), (backdrop) => Number(backdrop.style.zIndex));
+            expect(Math.max(...backdropLayers)).toBeGreaterThan(Number(modalB.style.zIndex));
+            expect(Math.max(...backdropLayers)).toBeLessThan(Number(modalA.style.zIndex));
+
+            await fireEvent.keyDown(window, { key: 'Escape' });
+            await waitFor(() => expect(screen.queryByTestId('stacked-modal-a')).not.toBeInTheDocument());
+            expect(modalB).toBeInTheDocument();
+        });
+
         it('should restore body scroll only after both modals are closed, closing B before A', async () => {
             render(ModalStackedTest);
 
@@ -278,29 +403,168 @@ describe('Modal Component', () => {
             expect(document.body.style.overflow).toBe('');
             expect(document.body.hasAttribute('data-scrollbar-lock-count')).toBe(false);
         });
+    });
 
-        it('should keep overflow hidden while the first modal remains open after the second closes', async () => {
-            render(ModalStackedTest);
+    describe('mixed overlay ownership', () => {
+        it('preserves a closing offcanvas layer until its outro completes', async () => {
+            render(ModalOffcanvasStackTest);
 
-            await fireEvent.click(screen.getByTestId('open-a'));
-            await waitFor(() => expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument());
+            await fireEvent.click(screen.getByTestId('open-mixed-modal'));
+            await fireEvent.click(screen.getByTestId('open-mixed-offcanvas'));
+            const offcanvas = await screen.findByTestId('mixed-offcanvas');
+            const modal = screen.getByTestId('mixed-modal');
+            const closingLayer = offcanvas.style.zIndex;
 
-            await fireEvent.click(screen.getByTestId('open-b'));
-            await waitFor(() => expect(screen.getByTestId('stacked-modal-b')).toBeInTheDocument());
+            await fireEvent.click(screen.getByTestId('close-mixed-offcanvas'));
+            await tick();
 
-            await fireEvent.click(screen.getByTestId('close-b'));
-            await waitFor(() => expect(screen.queryByTestId('stacked-modal-b')).not.toBeInTheDocument());
+            expect(offcanvas).toBeInTheDocument();
+            expect(offcanvas.style.zIndex).toBe(closingLayer);
+            expect(Number(closingLayer)).toBeGreaterThan(Number(modal.style.zIndex));
+            await waitFor(() => expect(screen.queryByTestId('mixed-offcanvas')).not.toBeInTheDocument());
+        });
 
+        it('preserves a closing modal layer until its outro completes', async () => {
+            render(ModalOffcanvasStackTest);
+
+            await fireEvent.click(screen.getByTestId('open-mixed-offcanvas'));
+            await fireEvent.click(screen.getByTestId('open-mixed-modal'));
+            const modal = await screen.findByTestId('mixed-modal');
+            const offcanvas = screen.getByTestId('mixed-offcanvas');
+            const closingLayer = modal.style.zIndex;
+
+            await fireEvent.click(screen.getByTestId('close-mixed-modal'));
+            await tick();
+
+            expect(modal).toBeInTheDocument();
+            expect(modal.style.zIndex).toBe(closingLayer);
+            expect(Number(closingLayer)).toBeGreaterThan(Number(offcanvas.style.zIndex));
+            await waitFor(() => expect(screen.queryByTestId('mixed-modal')).not.toBeInTheDocument());
+        });
+
+        it('closes only an offcanvas opened above a modal on one Escape', async () => {
+            render(ModalOffcanvasStackTest);
+
+            await fireEvent.click(screen.getByTestId('open-mixed-modal'));
+            await waitFor(() => expect(screen.getByTestId('mixed-modal')).toBeInTheDocument());
+            await fireEvent.click(screen.getByTestId('open-mixed-offcanvas'));
+            const offcanvas = await screen.findByTestId('mixed-offcanvas');
+            const modal = screen.getByTestId('mixed-modal');
+            const offcanvasLayer = Number(offcanvas.style.zIndex);
+            const modalLayer = Number(modal.style.zIndex);
+
+            await fireEvent.keyDown(window, { key: 'Escape' });
+
+            await waitFor(() => expect(screen.queryByTestId('mixed-offcanvas')).not.toBeInTheDocument());
+            expect(modal).toBeInTheDocument();
+            expect(offcanvasLayer).toBeGreaterThan(modalLayer);
+        });
+
+        it('closes only a modal opened above an offcanvas on one Escape', async () => {
+            render(ModalOffcanvasStackTest);
+
+            await fireEvent.click(screen.getByTestId('open-mixed-offcanvas'));
+            await waitFor(() => expect(screen.getByTestId('mixed-offcanvas')).toBeInTheDocument());
+            await fireEvent.click(screen.getByTestId('open-mixed-modal'));
+            const modal = await screen.findByTestId('mixed-modal');
+            const offcanvas = screen.getByTestId('mixed-offcanvas');
+            const modalLayer = Number(modal.style.zIndex);
+            const offcanvasLayer = Number(offcanvas.style.zIndex);
+
+            await fireEvent.keyDown(window, { key: 'Escape' });
+
+            await waitFor(() => expect(screen.queryByTestId('mixed-modal')).not.toBeInTheDocument());
+            expect(offcanvas).toBeInTheDocument();
+            expect(modalLayer).toBeGreaterThan(offcanvasLayer);
+        });
+
+        it('removes modal-open when the last modal closes before an offcanvas', async () => {
+            render(ModalOffcanvasStackTest);
+            await fireEvent.click(screen.getByTestId('open-mixed-overlays'));
+            await waitFor(() => expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '2'));
+            expect(document.body).toHaveClass('modal-open');
+
+            await fireEvent.click(screen.getByTestId('close-mixed-modal'));
+            await waitFor(() => expect(screen.queryByTestId('mixed-modal')).not.toBeInTheDocument());
+
+            expect(document.body).not.toHaveClass('modal-open');
+            expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1');
             expect(document.body.style.overflow).toBe('hidden');
-            expect(screen.getByTestId('stacked-modal-a')).toBeInTheDocument();
 
-            // Clean up so this test doesn't leak a locked body into the next one.
-            await fireEvent.click(screen.getByTestId('close-a'));
-            await waitFor(() => expect(document.body.style.overflow).toBe(''));
+            await fireEvent.click(screen.getByTestId('close-mixed-offcanvas'));
+            await waitFor(() => expect(screen.queryByTestId('mixed-offcanvas')).not.toBeInTheDocument());
+            expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
+            expect(document.body.style.overflow).toBe('');
+        });
+
+        it('keeps modal-open when an offcanvas closes before the remaining modal', async () => {
+            render(ModalOffcanvasStackTest);
+            await fireEvent.click(screen.getByTestId('open-mixed-overlays'));
+            await waitFor(() => expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '2'));
+
+            await fireEvent.click(screen.getByTestId('close-mixed-offcanvas'));
+            await waitFor(() => expect(screen.queryByTestId('mixed-offcanvas')).not.toBeInTheDocument());
+
+            expect(document.body).toHaveClass('modal-open');
+            expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1');
+            expect(document.body.style.overflow).toBe('hidden');
+
+            await fireEvent.click(screen.getByTestId('close-mixed-modal'));
+            await waitFor(() => expect(screen.queryByTestId('mixed-modal')).not.toBeInTheDocument());
+            expect(document.body).not.toHaveClass('modal-open');
+            expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
+            expect(document.body.style.overflow).toBe('');
         });
     });
 
     describe('Modal lifecycle callbacks', () => {
+        it("restores a standalone modal's external opener when it unmounts", async () => {
+            render(ModalStaticBackdropTest);
+
+            const opener = screen.getByTestId('open-static-modal');
+            opener.focus();
+            await fireEvent.click(opener);
+            await waitFor(() => expect(screen.getByTestId('static-modal')).toBeInTheDocument());
+
+            await fireEvent.click(screen.getByTestId('unmount-static-modal'));
+            await waitFor(() => expect(screen.queryByTestId('static-modal')).not.toBeInTheDocument());
+            expect(opener).toHaveFocus();
+        });
+
+        it('clears repeated static-backdrop timers when the modal unmounts', async () => {
+            vi.useFakeTimers();
+
+            try {
+                render(ModalStaticBackdropTest);
+                await fireEvent.click(screen.getByTestId('open-static-modal'));
+                await tick();
+                const pendingTimersBeforeBackdrop = vi.getTimerCount();
+
+                const modal = screen.getByTestId('static-modal');
+                await fireEvent.mouseDown(modal);
+                await fireEvent.mouseDown(modal);
+                expect(vi.getTimerCount()).toBe(pendingTimersBeforeBackdrop + 1);
+
+                await fireEvent.click(screen.getByTestId('unmount-static-modal'));
+                expect(vi.getTimerCount()).toBe(pendingTimersBeforeBackdrop);
+            } finally {
+                vi.runOnlyPendingTimers();
+                vi.useRealTimers();
+            }
+        });
+
+        it('notifies onHidePrevented when Escape cannot dismiss the modal', async () => {
+            const onHidePrevented = vi.fn();
+            render(Modal.Root, {
+                props: { isShown: true, isKeyboardDismissible: false, onHidePrevented, useBackdrop: 'static', useFade: false }
+            });
+
+            await fireEvent.keyDown(window, { key: 'Escape' });
+
+            expect(onHidePrevented).toHaveBeenCalledTimes(1);
+            expect(screen.getByRole('dialog')).toHaveClass('modal-static');
+        });
+
         it('should call onShow before onShown, exactly once each, when opening', async () => {
             const onShow = vi.fn();
             const onShown = vi.fn();

@@ -45,6 +45,7 @@ Pagination item component to wrap Pagination.Link components.
         id = `page-item-${uid}`,
         isActive = false,
         isDisabled = false,
+        'aria-current': ariaCurrent,
         ...restOfProps
     }: Pagination.ItemProps = $props();
 
@@ -72,32 +73,43 @@ Pagination item component to wrap Pagination.Link components.
     );
 
     $effect(() => {
-        // Update the state when the isActive prop changes...
-        if (id && itemState.isActive !== isActive) {
-            const isItemActive = itemState.root.isPaginationItemActive(id);
+        const itemId = id;
+        const itemIsActive = isActive;
 
-            if (isActive && !isItemActive) {
-                itemState.root.setPaginationItemActive(id);
-            } else if (!isActive && isItemActive) {
-                itemState.root.setPaginationItemActive('');
-            }
+        if (!itemId) {
+            return;
         }
+
+        if (itemIsActive) {
+            itemState.root.setPaginationItemActive(itemId);
+        } else {
+            itemState.root.removePaginationItemActive(itemId);
+        }
+
+        return () => {
+            // The root may have activated this identity through a stateful link
+            // click even when the declarative isActive prop is false.
+            itemState.root.removePaginationItemActive(itemId);
+        };
     });
 
     $effect(() => {
-        // Update the state when the isDisabled prop changes...
-        if (id && itemState.isDisabled !== isDisabled) {
-            const isItemDisabled = itemState.root.isPaginationItemDisabled(id);
+        const itemId = id;
 
-            if (isDisabled && !isItemDisabled) {
-                itemState.root.setPaginationItemDisabled(id);
-            } else if (!isDisabled && isItemDisabled) {
-                itemState.root.setPaginationItemDisabled('');
-            }
+        if (!itemId) {
+            return;
         }
+
+        if (isDisabled) {
+            itemState.root.setPaginationItemDisabled(itemId);
+        } else {
+            itemState.root.removePaginationItemDisabled(itemId);
+        }
+
+        return () => itemState.root.removePaginationItemDisabled(itemId);
     });
 </script>
 
-<li aria-current={isActive ? 'page' : undefined} bind:this={elementRef} class={classes} {id} {...restOfProps}>
+<li {...restOfProps} aria-current={itemState.isActive ? 'page' : ariaCurrent} bind:this={elementRef} class={classes} {id}>
     {@render children?.()}
 </li>

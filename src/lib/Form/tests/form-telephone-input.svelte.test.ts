@@ -1,7 +1,7 @@
 /// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render } from '@testing-library/svelte';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import TelephoneInput from '../form-telephone-input.svelte';
 
 // Tests for Form.TelephoneInput covering all props and behaviors
@@ -134,13 +134,6 @@ describe('Form.TelephoneInput', () => {
         expect(input).toHaveAttribute('data-custom', 'x');
     });
 
-    test('binds elementRef to input element', () => {
-        const { container } = render(TelephoneInput);
-        const input = container.querySelector('input') as HTMLInputElement;
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
-    });
-
     test('handles a complete configuration', () => {
         const { container } = render(TelephoneInput, {
             props: {
@@ -228,6 +221,21 @@ describe('Form.TelephoneInput', () => {
         await fireEvent.input(input, { target: { value: '5555151212' } });
 
         expect(input.value).toBe('(555) 515-1212');
+    });
+
+    test('formats before calling one supplied input handler and accepts null', async () => {
+        const oninput = vi.fn((event: Event) => (event.currentTarget as HTMLInputElement).value);
+        const { container } = render(TelephoneInput, { props: { mask: '(###) ###-####', oninput } });
+        const input = container.querySelector('input') as HTMLInputElement;
+
+        await fireEvent.input(input, { target: { value: '5555151212' } });
+
+        expect(input.value).toBe('(555) 515-1212');
+        expect(oninput).toHaveBeenCalledTimes(1);
+        expect(oninput).toHaveReturnedWith('(555) 515-1212');
+
+        const nullHandler = render(TelephoneInput, { props: { oninput: null } });
+        await expect(fireEvent.input(nullHandler.container.querySelector('input') as HTMLInputElement)).resolves.toBe(true);
     });
 
     test('single mask formats progressively as digits are added', async () => {

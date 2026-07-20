@@ -40,8 +40,8 @@ A component that represents an individual placeholder element.
 - `colorVariant` (string): Optional. Color variant for the placeholder ('primary', 'success', etc.).
 - `elementRef` (HTMLSpanElement): Optional. Reference to the placeholder item DOM element.
 - `id` (string): Optional. ID for the placeholder item element.
+- `isAnimated` (boolean): Deprecated compatibility no-op. Set `type` on `Placeholder.Root` to animate a placeholder group.
 - `size` ('xs' | 'sm' | 'lg'): Optional. Size of the placeholder.
-- `isAnimated` (boolean): Optional. Whether the placeholder should animate, defaults to true.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
@@ -49,9 +49,15 @@ A component that represents an individual placeholder element.
 
     let { children, class: classValues, colorVariant, elementRef = $bindable(null), size, ...restOfProps }: Placeholder.ItemProps = $props();
 
+    let sanitizedRestOfProps = $derived.by(() => {
+        // Keep accepting the legacy no-op without forwarding it as an invalid DOM attribute.
+        const { isAnimated: _isAnimated, ...sanitizedProps } = restOfProps;
+        return sanitizedProps;
+    });
+
     let classes: string = $derived(uniqueClsx('placeholder', size && `placeholder-${size}`, colorVariant && `bg-${colorVariant}`, classValues));
 </script>
 
-<span bind:this={elementRef} class={classes} {...restOfProps}>
+<span bind:this={elementRef} class={classes} {...sanitizedRestOfProps}>
     {@render children?.()}
 </span>

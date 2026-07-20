@@ -139,13 +139,6 @@ describe('Form.TimeInput', () => {
         expect(input).toHaveAttribute('data-custom', 'x');
     });
 
-    test('binds elementRef to input element', () => {
-        const { container } = render(TimeInput);
-        const input = container.querySelector('input') as HTMLInputElement;
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
-    });
-
     test('handles a complete configuration', () => {
         const { container } = render(TimeInput, {
             props: {

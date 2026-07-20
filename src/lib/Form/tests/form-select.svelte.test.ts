@@ -18,11 +18,6 @@ const renderSelectWithOptions = (optionsHtml: string = '', props: Form.SelectPro
 };
 
 describe('Form.Select', () => {
-    test('renders without crashing', () => {
-        const { container } = render(Select);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders select element with base class', () => {
         const { container } = render(Select);
         const select = container.querySelector('select') as HTMLSelectElement;
@@ -142,13 +137,6 @@ describe('Form.Select', () => {
         const select = container.querySelector('select') as HTMLSelectElement;
         expect(select).toHaveAttribute('data-testid', 'select-test');
         expect(select).toHaveAttribute('data-custom', 'custom-value');
-    });
-
-    test('binds elementRef to the select element', () => {
-        const { container } = render(Select);
-        const select = container.querySelector('select') as HTMLSelectElement;
-        expect(select).toBeInstanceOf(HTMLSelectElement);
-        expect(select).toBeInTheDocument();
     });
 
     test('handles complete select configuration', () => {

@@ -1,15 +1,11 @@
 /// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom/vitest';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, test } from 'vitest';
 import Col from './col.svelte';
+import ColStateTest from './tests/col-state-test.svelte';
 
 describe('Col.svelte', () => {
-    test('should render', () => {
-        const { container } = render(Col);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders a column with default properties', () => {
         const { container } = render(Col);
         const col = container.firstChild as HTMLElement;
@@ -138,7 +134,8 @@ describe('Col.svelte', () => {
 
         const col = container.firstChild as HTMLElement;
         expect(col).toHaveClass('col');
-        expect(col).toHaveClass('offset-xs-1');
+        expect(col).toHaveClass('offset-1');
+        expect(col).not.toHaveClass('offset-xs-1');
         expect(col).toHaveClass('offset-md-3');
         expect(col).toHaveClass('offset-lg-5');
     });
@@ -177,7 +174,8 @@ describe('Col.svelte', () => {
 
         const col = container.firstChild as HTMLElement;
         expect(col).toHaveClass('col');
-        expect(col).toHaveClass('order-xs-first');
+        expect(col).toHaveClass('order-first');
+        expect(col).not.toHaveClass('order-xs-first');
         expect(col).toHaveClass('order-sm-0');
         expect(col).toHaveClass('order-lg-last');
     });
@@ -198,5 +196,35 @@ describe('Col.svelte', () => {
         expect(col).toHaveClass('col-md-6');
         expect(col).toHaveClass('offset-md-1');
         expect(col).toHaveClass('order-lg-first');
+    });
+
+    test('switches responsive xs classes without retaining sm classes', async () => {
+        render(ColStateTest);
+        const col = screen.getByTestId('responsive-col');
+
+        expect(col).toHaveClass('col-sm-6', 'offset-sm-3', 'order-sm-last');
+
+        await fireEvent.click(screen.getByTestId('toggle-xs'));
+        expect(col).toHaveClass('col', 'offset-2', 'order-first');
+        expect(col).not.toHaveClass('col-sm-6', 'offset-sm-3', 'order-sm-last', 'col-*', 'offset-xs-2', 'order-xs-first');
+
+        await fireEvent.click(screen.getByTestId('toggle-xs'));
+        expect(col).toHaveClass('col-sm-6', 'offset-sm-3', 'order-sm-last');
+        expect(col).not.toHaveClass('offset-2', 'order-first');
+    });
+
+    test.each([
+        ['sizing', { xs: 2.5 }],
+        ['sizing', { unknown: 2 }],
+        ['offset', { xs: Number.NaN }],
+        ['offset', { unknown: 2 }],
+        ['order', { xs: 1.5 }],
+        ['order', { unknown: 'first' }]
+    ])('rejects malformed %s maps without emitting invalid classes', (prop, value) => {
+        const { container } = render(Col, { props: { [prop]: value } as never });
+        const col = container.firstChild as HTMLElement;
+
+        expect(col).toHaveClass('col');
+        expect(col.className).not.toMatch(/(?:2\.5|1\.5|NaN|unknown)/);
     });
 });

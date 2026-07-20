@@ -37,6 +37,7 @@ Input field component for standard text values with Bootstrap styling.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         autocomplete = 'off',
         class: classValues,
         'data-form-type': dataFormType = undefined,
@@ -65,12 +66,12 @@ Input field component for standard text values with Bootstrap styling.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     {autocomplete}
     bind:this={elementRef}
     bind:value
     class={classes}
     data-form-type={autocomplete == 'off' ? 'other' : dataFormType}
     data-lpignore={autocomplete == 'off' ? 'true' : dataLpignore}
-    type="text"
-    {...restOfProps} />
+    type="text" />

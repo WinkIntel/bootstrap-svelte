@@ -31,4 +31,4 @@ Bootstrap-styled image input component that acts as a graphical submit button.
     let classes: string = $derived(uniqueClsx(classValues));
 </script>
 
-<input bind:this={elementRef} class={classes} type="image" {...restOfProps} />
+<input {...restOfProps} bind:this={elementRef} class={classes} type="image" />

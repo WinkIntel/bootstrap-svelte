@@ -44,7 +44,7 @@ Collapsible container for navbar content that toggles when the navbar toggler is
 - `children`: Optional. Content to render inside the collapsible container.
 - `class` (string): Optional. Additional CSS classes to apply to the container.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
-- `id` (string): Optional. Unique ID for the container. Defaults to `navbar-collapse-{uid}`.
+- `id` (string): Optional. Unique ID for the container. Defaults to `{navbar-id}-collapse`.
 - `onCollapse` (function): Optional. Handler called when the container starts collapsing.
 - `onCollapsed` (function): Optional. Handler called when the container has finished collapsing.
 - `onExpand` (function): Optional. Handler called when the container starts expanding.
@@ -56,30 +56,32 @@ Collapsible container for navbar content that toggles when the navbar toggler is
     import { Collapse } from '$lib/index.js';
     import type { Navbar } from './index.js';
 
-    // Generate a unique ID for the component, in case one is not provided...
-    const uid = $props.id();
-
     let {
         children,
         class: classValues,
         elementRef = $bindable(null),
-        id = `navbar-collapse-${uid}`,
-        onCollapse: _onCollapse = noop,
+        id: providedId,
+        onCollapse = noop,
         onCollapsed = noop,
-        onExpand: _onExpand = noop,
-        onExpanded: _onExpanded = noop,
+        onExpand = noop,
+        onExpanded = noop,
+        transitionDuration: transitionDurationOverride,
         ...restOfProps
     }: Navbar.CollapseProps = $props();
 
     const collapseState: NavbarCollapseState = initNavbarCollapseState({
         get id() {
-            return id;
+            return providedId;
         }
     });
 
     let classes = $derived(uniqueClsx('navbar-collapse', classValues));
-    let transitionDuration = $derived(collapseState.root.transitionDuration);
+    let transitionDuration = $derived(transitionDurationOverride ?? collapseState.root.transitionDuration);
     let isExpandedState = $derived(collapseState.isExpanded);
+
+    $effect(() => {
+        collapseState.root.ariaControls = collapseState.id;
+    });
 
     function handleOnCollapsed(event: Event) {
         // This will ensure that not transition animation will occur when the Navbar is expanded...
@@ -88,6 +90,16 @@ Collapsible container for navbar content that toggles when the navbar toggler is
     }
 </script>
 
-<Collapse bind:elementRef class={classes} {id} isExpanded={isExpandedState} {transitionDuration} onCollapsed={handleOnCollapsed} {...restOfProps}>
+<Collapse
+    {...restOfProps}
+    bind:elementRef
+    class={classes}
+    id={collapseState.id}
+    isExpanded={isExpandedState}
+    {transitionDuration}
+    {onCollapse}
+    onCollapsed={handleOnCollapsed}
+    {onExpand}
+    {onExpanded}>
     {@render children?.()}
 </Collapse>

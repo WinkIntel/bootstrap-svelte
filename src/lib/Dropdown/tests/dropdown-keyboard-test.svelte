@@ -1,5 +1,8 @@
 <script lang="ts">
     import { Dropdown } from '$lib/index.js';
+
+    let disabledActivations = $state(0);
+    let showDynamicSecond = $state(true);
 </script>
 
 <!-- Basic keyboard navigation test -->
@@ -9,8 +12,24 @@
         <Dropdown.Item href="#!" data-testid="keyboard-item-1">First Item</Dropdown.Item>
         <Dropdown.Item href="#!" data-testid="keyboard-item-2">Second Item</Dropdown.Item>
         <Dropdown.Item href="#!" data-testid="keyboard-item-3">Third Item</Dropdown.Item>
-        <Dropdown.Item href="#!" isDisabled={true} data-testid="keyboard-item-4">Disabled Item</Dropdown.Item>
+        <Dropdown.Item href="#!" isDisabled={true} data-testid="keyboard-item-4" onclick={() => (disabledActivations += 1)}
+            >Disabled Item</Dropdown.Item>
         <Dropdown.Item href="#!" data-testid="keyboard-item-5">Fifth Item</Dropdown.Item>
+    </Dropdown.Menu>
+</Dropdown.Root>
+
+<output data-testid="disabled-activation-count">{disabledActivations}</output>
+
+<button data-testid="remove-dynamic-item" onclick={() => (showDynamicSecond = false)}>Remove dynamic item</button>
+<button data-testid="restore-dynamic-item" onclick={() => (showDynamicSecond = true)}>Restore dynamic item</button>
+<Dropdown.Root autoClose={false} data-testid="keyboard-dynamic-dropdown">
+    <Dropdown.Toggle colorVariant="secondary" data-testid="keyboard-dynamic-toggle">Dynamic Items</Dropdown.Toggle>
+    <Dropdown.Menu data-testid="keyboard-dynamic-menu">
+        <Dropdown.Item href="#!" data-testid="keyboard-dynamic-item-1">First dynamic item</Dropdown.Item>
+        {#if showDynamicSecond}
+            <Dropdown.Item href="#!" data-testid="keyboard-dynamic-item-2">Second dynamic item</Dropdown.Item>
+        {/if}
+        <Dropdown.Item href="#!" data-testid="keyboard-dynamic-item-3">Third dynamic item</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>
 

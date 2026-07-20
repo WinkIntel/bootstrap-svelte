@@ -2,7 +2,7 @@
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import Button from './button.svelte';
 import type { ButtonRootProps } from './types.js';
 
@@ -18,10 +18,6 @@ const renderButtonWithText = (text: string, props: ButtonRootProps = {}) => {
 };
 
 describe('Button.svelte', () => {
-    test('should render', () => {
-        const results = render(Button);
-        expect(() => results.getByRole('button')).not.toThrow();
-    });
     test('renders a button with default properties', () => {
         renderButtonWithText('Click me');
         const button = screen.getByRole('button');
@@ -124,20 +120,83 @@ describe('Button.svelte', () => {
         expect(button).toHaveAttribute('tabindex', '-1');
     });
 
+    test('keeps disabled anchors inert without invoking their handlers', () => {
+        const onclick = vi.fn();
+        renderButtonWithText('Disabled Link', { href: '#disabled', disabled: true, onclick, 'aria-disabled': 'false', role: 'link', tabindex: 7 });
+
+        const button = screen.getByRole('button');
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+        button.dispatchEvent(event);
+
+        expect(button).not.toHaveAttribute('href');
+        expect(button).toHaveAttribute('aria-disabled', 'true');
+        expect(button).toHaveAttribute('role', 'button');
+        expect(button).toHaveAttribute('tabindex', '-1');
+        expect(event.defaultPrevented).toBe(true);
+        expect(onclick).not.toHaveBeenCalled();
+    });
+
+    test('uses native disabled behavior for button actions and preserves enabled handlers', () => {
+        const disabledOnclick = vi.fn();
+        const enabledOnclick = vi.fn();
+        const { unmount } = renderButtonWithText('Disabled Button', { disabled: true, onclick: disabledOnclick });
+
+        const disabledButton = screen.getByRole('button');
+        disabledButton.click();
+        expect(disabledButton).toBeDisabled();
+        expect(disabledOnclick).not.toHaveBeenCalled();
+
+        unmount();
+        renderButtonWithText('Enabled Button', { onclick: enabledOnclick });
+        screen.getByRole('button').click();
+        expect(enabledOnclick).toHaveBeenCalledTimes(1);
+    });
+
     // Test for input element
     test('renders as input element when value is provided', () => {
         render(Button, {
             props: {
                 value: 'Submit',
-                type: 'submit'
+                type: 'submit',
+                id: 'submit-input',
+                'aria-disabled': 'true',
+                role: 'menuitem'
             }
         });
 
-        const input = screen.getByRole('button');
+        const input = screen.getByRole('menuitem');
         expect(input.tagName).toBe('INPUT');
         expect(input).toHaveClass('btn');
         expect(input).toHaveAttribute('type', 'submit');
         expect(input).toHaveAttribute('value', 'Submit');
+        expect(input).toHaveAttribute('id', 'submit-input');
+        expect(input).toHaveAttribute('aria-disabled', 'true');
+        expect(input).toHaveAttribute('role', 'menuitem');
+    });
+
+    test('selects element type from prop presence and clears stale attributes on rerender', async () => {
+        const children = createRawSnippet(() => ({ render: () => 'Polymorphic Button' }));
+        const { container, rerender } = render(Button, { props: { children } });
+
+        expect(container.querySelector('[data-testid="polymorphic-button"]')).toBeNull();
+        expect(container.querySelector('button')).toHaveAttribute('type', 'button');
+
+        await rerender({ children, href: '' });
+        const anchor = container.querySelector('a');
+        expect(anchor).toHaveAttribute('href', '');
+        expect(anchor).not.toHaveAttribute('type');
+
+        await rerender({ children, href: undefined, value: '' });
+        const input = container.querySelector('input');
+        expect(input).toHaveValue('');
+        expect(input).toHaveAttribute('type', 'button');
+        expect(input).not.toHaveAttribute('href');
+
+        await rerender({ children, href: undefined, value: undefined });
+        const button = container.querySelector('button');
+        expect(button).toHaveAttribute('type', 'button');
+        expect(button).not.toHaveAttribute('href');
+        expect(button).not.toHaveAttribute('value');
     });
 
     // Test for custom class

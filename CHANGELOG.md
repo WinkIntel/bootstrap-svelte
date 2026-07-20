@@ -2,6 +2,14 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.6
+
+- **Breaking:** Specialized Form input components now accept only their matching `type` literal; mismatched types that were previously accepted but overridden no longer type-check.
+- Hardened stateful components against malformed inputs, disabled interactions, interrupted transitions, dynamic registration, and stacked-overlay races.
+- Corrected Form bindings, server-rendered accessibility relationships, Bootstrap class normalization, and shared CSS/scrollbar utility behavior.
+- Improved Carousel, Dropdown, Modal, Navbar, Offcanvas, Pagination, Scrollspy, and Tooltip lifecycle and interaction handling.
+- Consolidated weak tests and added focused regression coverage for the production issues fixed in this release.
+
 ## 1.0.5
 
 - Fixed dynamic Modal title ID registration so `aria-labelledby` updates when the title ID changes and stale IDs are unregistered.

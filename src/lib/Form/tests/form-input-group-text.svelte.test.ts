@@ -16,15 +16,6 @@ describe('FormInputGroupText', () => {
             const textElement = document.querySelector('.input-group-text');
             expect(textElement).toBeInTheDocument();
             expect(textElement?.tagName.toLowerCase()).toBe('span');
-        });
-
-        it('should render with default input-group-text class', () => {
-            const children = createRawSnippet(() => ({
-                render: () => `@`
-            }));
-            render(FormInputGroupText, { children });
-
-            const textElement = document.querySelector('.input-group-text');
             expect(textElement).toHaveClass('input-group-text');
         });
 

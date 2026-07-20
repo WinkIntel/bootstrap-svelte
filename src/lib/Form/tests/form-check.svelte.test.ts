@@ -18,11 +18,6 @@ const renderCheckWithContent = (content: string = '', props: Form.CheckProps = {
 };
 
 describe('Form.Check', () => {
-    test('renders without crashing', () => {
-        const { container } = render(Check);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders div element with base class', () => {
         const { container } = render(Check);
         const checkContainer = container.querySelector('div') as HTMLDivElement;
@@ -196,14 +191,6 @@ describe('Form.Check', () => {
         const checkContainer = container.querySelector('div') as HTMLDivElement;
 
         expect(checkContainer).toHaveAttribute('title', 'Check tooltip');
-    });
-
-    test('binds elementRef to the container element', () => {
-        const { container } = render(Check);
-        const checkContainer = container.querySelector('div') as HTMLDivElement;
-
-        expect(checkContainer).toBeInstanceOf(HTMLDivElement);
-        expect(checkContainer).toBeInTheDocument();
     });
 
     test('renders without children when none provided', () => {

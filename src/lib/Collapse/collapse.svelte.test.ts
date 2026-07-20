@@ -1,9 +1,10 @@
 /// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom/vitest';
-import { render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
-import { describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import Collapse from './collapse.svelte';
+import CollapseReversalTest from './tests/collapse-reversal-test.svelte';
 import type { CollapseRootProps } from './types.js';
 
 const renderCollapseWithContent = (content: string, props: CollapseRootProps = {}) => {
@@ -18,31 +19,18 @@ const renderCollapseWithContent = (content: string, props: CollapseRootProps = {
 };
 
 describe('Collapse.svelte', () => {
-    test('should render', () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    test('renders an expanded collapse with its default contract', () => {
         renderCollapseWithContent('Collapse content', { isExpanded: true });
         const collapse = screen.getByText('Collapse content');
 
         expect(collapse).toBeInTheDocument();
-        expect(collapse).toHaveClass('collapse');
-    });
-
-    test('renders a collapse with default properties', () => {
-        renderCollapseWithContent('Default Collapse', { isExpanded: true });
-        const collapse = screen.getByText('Default Collapse');
-
-        expect(collapse).toBeInTheDocument();
-        expect(collapse).toHaveClass('collapse');
-        expect(collapse).toHaveClass('show');
+        expect(collapse).toHaveClass('collapse', 'show');
         expect(collapse).not.toHaveClass('collapse-horizontal');
         expect(collapse).not.toHaveAttribute('aria-expanded');
-    });
-
-    test('renders with isExpanded=true', () => {
-        renderCollapseWithContent('Open Collapse', { isExpanded: true });
-        const collapse = screen.getByText('Open Collapse');
-
-        expect(collapse).toHaveClass('collapse');
-        expect(collapse).toHaveClass('show');
     });
 
     test('renders with isHorizontal=true', () => {
@@ -78,5 +66,26 @@ describe('Collapse.svelte', () => {
         expect(collapse).toHaveClass('show');
         expect(collapse).toHaveClass('test-class');
         expect(collapse).not.toHaveAttribute('aria-expanded');
+    });
+
+    test('restores consumer transition timing after a rapid expand-collapse-expand reversal', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CollapseReversalTest);
+        const toggle = screen.getByTestId('toggle-collapse');
+
+        await fireEvent.click(toggle);
+        await vi.advanceTimersByTimeAsync(0);
+        const collapse = screen.getByTestId('reversing-collapse');
+
+        await fireEvent.click(toggle);
+        await vi.advanceTimersByTimeAsync(0);
+        await fireEvent.click(toggle);
+        await vi.advanceTimersByTimeAsync(200);
+
+        expect(screen.getByTestId('reversing-collapse')).toBe(collapse);
+        expect(collapse.style.getPropertyValue('transition-duration')).toBe('2s');
+        expect(collapse.style.getPropertyPriority('transition-duration')).toBe('important');
+        expect(collapse.style.getPropertyValue('transition-delay')).toBe('40ms');
+        expect(collapse.style.getPropertyPriority('transition-delay')).toBe('important');
     });
 });

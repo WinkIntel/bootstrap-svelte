@@ -6,11 +6,6 @@ import ColorInput from '../form-color-input.svelte';
 import ColorInputBindingTest from './form-color-input-binding-test.svelte';
 
 describe('Form.ColorInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(ColorInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type color and base classes', () => {
         const { container } = render(ColorInput);
         const input = container.querySelector('input[type="color"]') as HTMLInputElement;
@@ -187,6 +182,23 @@ describe('Form.ColorInput', () => {
 
         expect(input.value).toBe('#123456');
         expect(screen.getByTestId('bound-value')).toHaveTextContent('#123456');
+        expect(screen.getByTestId('input-calls')).toHaveTextContent('1');
+        expect(screen.getByTestId('observed-color')).toHaveTextContent('#123456');
+    });
+
+    test('accepts a null input handler', async () => {
+        const { container } = render(ColorInput, { props: { oninput: null } as never });
+        const input = container.querySelector('input[type="color"]') as HTMLInputElement;
+
+        await expect(fireEvent.input(input, { target: { value: '#123456' } })).resolves.toBe(true);
+    });
+
+    test('does not allow rest props to replace color type or validation aria state', () => {
+        const { container } = render(ColorInput, { props: { isInvalid: true, type: 'text', 'aria-invalid': 'false' } as never });
+        const input = container.querySelector('input') as HTMLInputElement;
+
+        expect(input).toHaveAttribute('type', 'color');
+        expect(input).toHaveAttribute('aria-invalid', 'true');
     });
 
     test('syncs parent-driven bound value changes into the input property', async () => {
@@ -296,20 +308,12 @@ describe('Form.ColorInput', () => {
                 type: 'text',
                 'aria-invalid': 'false',
                 isInvalid: true
-            }
+            } as never
         });
         const input = container.querySelector('input') as HTMLInputElement;
 
         expect(input).toHaveAttribute('type', 'color');
         expect(input).toHaveAttribute('aria-invalid', 'true');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(ColorInput);
-        const input = container.querySelector('input[type="color"]') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 
     test('combines sizing with validation classes', () => {

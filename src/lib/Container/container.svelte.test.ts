@@ -18,12 +18,6 @@ const renderContainerWithContent = (content: string, props: ContainerRootProps =
 };
 
 describe('Container.svelte', () => {
-    test('should render', () => {
-        const results = renderContainerWithContent('Container Content');
-        const container = results.getByText('Container Content');
-        expect(container.parentElement).toBeInTheDocument();
-    });
-
     test('renders a container with default properties', () => {
         renderContainerWithContent('Default Container');
         const container = screen.getByText('Default Container');

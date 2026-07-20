@@ -50,7 +50,7 @@ Bootstrap-styled alert component for displaying messages.
 
     let {
         children,
-        class: classValues = 'alert-primary',
+        class: classValues,
         colorVariant,
         elementRef = $bindable(null),
         isDismissible = false,
@@ -61,10 +61,13 @@ Bootstrap-styled alert component for displaying messages.
         ...restOfProps
     }: AlertRootProps = $props();
 
+    let hasColorVariant = $derived(typeof colorVariant === 'string' && colorVariant.trim().length > 0);
+    let hasClassValues = $derived(typeof classValues === 'string' && classValues.trim().length > 0);
+
     let classes: string = $derived(
         uniqueClsx(
             'alert',
-            colorVariant && `alert-${colorVariant}`,
+            hasColorVariant ? `alert-${colorVariant}` : !hasClassValues && 'alert-primary',
             {
                 'alert-dismissible': isDismissible,
                 fade: isAnimated,

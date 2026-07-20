@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import MonthInput from '../form-month-input.svelte';
 
 describe('Form.MonthInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(MonthInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type month and base class', () => {
         const { container } = render(MonthInput);
         const input = container.querySelector('input[type="month"]') as HTMLInputElement;
@@ -248,14 +243,6 @@ describe('Form.MonthInput', () => {
 
         expect(input).toHaveAttribute('data-testid', 'month-test');
         expect(input).toHaveAttribute('data-custom', 'custom-value');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(MonthInput);
-        const input = container.querySelector('input[type="month"]') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 
     test('applies multiple conditional classes together', () => {

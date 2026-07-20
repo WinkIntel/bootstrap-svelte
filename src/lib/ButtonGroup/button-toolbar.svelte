@@ -31,7 +31,8 @@ Combine sets of button groups into button toolbars for more complex components.
     const uid: string = $props.id();
 
     let {
-        ariaLabel = 'Button toolbar ${uid}',
+        'aria-label': nativeAriaLabel,
+        ariaLabel,
         children,
         class: classValues,
         elementRef = $bindable(null),
@@ -40,8 +41,9 @@ Combine sets of button groups into button toolbars for more complex components.
     }: ButtonToolbarRootProps = $props();
 
     let classes: string = $derived(uniqueClsx('btn-toolbar', classValues));
+    let resolvedAriaLabel = $derived(ariaLabel ?? nativeAriaLabel ?? `Button toolbar ${uid}`);
 </script>
 
-<div aria-label={ariaLabel} bind:this={elementRef} class={classes} {id} role="toolbar" {...restOfProps}>
+<div {...restOfProps} aria-label={resolvedAriaLabel} bind:this={elementRef} class={classes} {id} role="toolbar">
     {@render children?.()}
 </div>

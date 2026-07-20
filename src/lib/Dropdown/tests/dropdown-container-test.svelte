@@ -66,3 +66,11 @@
         <Dropdown.Item href="#!" data-testid="disabled-container-item">Action Inline</Dropdown.Item>
     </Dropdown.Menu>
 </Dropdown.Root>
+
+<!-- Portaled menu with outside-only auto-close behavior -->
+<Dropdown.Root autoClose="outside" data-testid="outside-autoclose-container-dropdown">
+    <Dropdown.Toggle colorVariant="dark" data-testid="outside-autoclose-container-toggle">Outside Auto Close</Dropdown.Toggle>
+    <Dropdown.Menu container="body" data-testid="outside-autoclose-container-menu">
+        <Dropdown.Item href="#!" data-testid="outside-autoclose-container-item">Portaled action</Dropdown.Item>
+    </Dropdown.Menu>
+</Dropdown.Root>

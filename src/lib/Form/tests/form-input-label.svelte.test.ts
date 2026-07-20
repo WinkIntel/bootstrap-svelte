@@ -18,11 +18,6 @@ const renderInputLabelWithContent = (content: string = '', props: Form.InputLabe
 };
 
 describe('Form.InputLabel', () => {
-    test('renders without crashing', () => {
-        const { container } = render(InputLabel);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders label element with base class', () => {
         const { container } = render(InputLabel);
         const label = container.querySelector('label') as HTMLLabelElement;
@@ -134,14 +129,6 @@ describe('Form.InputLabel', () => {
 
         expect(label).toHaveAttribute('data-testid', 'input-label-test');
         expect(label).toHaveAttribute('data-custom', 'custom-value');
-    });
-
-    test('binds elementRef to the label element', () => {
-        const { container } = render(InputLabel);
-        const label = container.querySelector('label') as HTMLLabelElement;
-
-        expect(label).toBeInstanceOf(HTMLLabelElement);
-        expect(label).toBeInTheDocument();
     });
 
     test('renders children content', () => {

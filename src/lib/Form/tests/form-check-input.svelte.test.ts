@@ -7,11 +7,6 @@ import { describe, expect, test, vi } from 'vitest';
 import CheckInput from '../form-check-input.svelte';
 
 describe('Form.CheckInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(CheckInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type checkbox and base class', () => {
         const { container } = render(CheckInput);
         const input = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
@@ -145,6 +140,26 @@ describe('Form.CheckInput', () => {
         expect(input.indeterminate).toBe(false);
     });
 
+    test('clears and reapplies indeterminate state when the prop becomes undefined across rerenders', async () => {
+        const { container, rerender } = render(CheckInput, { props: { isIndeterminate: true } });
+        const input = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
+
+        await tick();
+        expect(input.indeterminate).toBe(true);
+        await rerender({ isIndeterminate: undefined });
+        expect(input.indeterminate).toBe(false);
+        await rerender({ isIndeterminate: true });
+        expect(input.indeterminate).toBe(true);
+    });
+
+    test('does not allow rest props to replace checkbox type or validation aria state', () => {
+        const { container } = render(CheckInput, { props: { isInvalid: true, type: 'radio', 'aria-invalid': 'false' } as never });
+        const input = container.querySelector('input') as HTMLInputElement;
+
+        expect(input).toHaveAttribute('type', 'checkbox');
+        expect(input).toHaveAttribute('aria-invalid', 'true');
+    });
+
     test('forwards id, name, and value props to input', () => {
         const { container } = render(CheckInput, {
             props: {
@@ -196,14 +211,6 @@ describe('Form.CheckInput', () => {
 
         expect(input).toHaveAttribute('data-testid', 'checkbox-test');
         expect(input).toHaveAttribute('data-custom', 'custom-value');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(CheckInput);
-        const input = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 
     describe('onchange callback', () => {

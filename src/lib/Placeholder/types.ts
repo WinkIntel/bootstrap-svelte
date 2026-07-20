@@ -10,6 +10,7 @@ export type PlaceholderRootProps = DivElement & {
 
 export type PlaceholderItemProps = SpanElement & {
     colorVariant?: PlaceholderItemColorVariant;
+    /** @deprecated Placeholder animation belongs on Placeholder.Root. Retained as a no-op for compatibility. */
     isAnimated?: boolean;
     size?: PlaceholderItemSize;
 };

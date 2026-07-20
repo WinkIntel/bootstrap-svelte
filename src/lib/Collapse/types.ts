@@ -4,6 +4,7 @@ export type CollapseTransitionStylePropName = 'width' | 'height';
 
 export type CollapseTransitionParams = {
     isHorizontal?: boolean;
+    transitionDuration?: number;
 };
 
 export type CollapseRootProps = DivElement & {

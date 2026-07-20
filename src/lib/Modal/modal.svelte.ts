@@ -69,6 +69,24 @@ export class ModalHeaderState {
 }
 
 const ModalRootContext = new Context<ModalRootState>('modal-root');
+const modalOpenCounts = new WeakMap<HTMLElement, number>();
+
+export function acquireModalOpenClass(bodyElement: HTMLElement): void {
+    const count = (modalOpenCounts.get(bodyElement) ?? 0) + 1;
+    modalOpenCounts.set(bodyElement, count);
+    bodyElement.classList.add('modal-open');
+}
+
+export function releaseModalOpenClass(bodyElement: HTMLElement): void {
+    const count = modalOpenCounts.get(bodyElement) ?? 0;
+    if (count <= 1) {
+        modalOpenCounts.delete(bodyElement);
+        bodyElement.classList.remove('modal-open');
+        return;
+    }
+
+    modalOpenCounts.set(bodyElement, count - 1);
+}
 
 /**
  * Creates a new ModalRootState and sets it in the ModalRootContext.

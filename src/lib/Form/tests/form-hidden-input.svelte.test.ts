@@ -10,22 +10,6 @@ describe('FormHiddenInput', () => {
             const hiddenInput = document.querySelector('input[type="hidden"]');
             expect(hiddenInput).toBeInTheDocument();
             expect(hiddenInput).toHaveAttribute('type', 'hidden');
-        });
-
-        it('should render without any visible content', () => {
-            render(FormHiddenInput);
-
-            const hiddenInput = document.querySelector('input[type="hidden"]');
-            expect(hiddenInput).toBeInTheDocument();
-            expect(hiddenInput).not.toBeVisible();
-        });
-
-        it('should not be focusable by default', () => {
-            render(FormHiddenInput);
-
-            const hiddenInput = document.querySelector('input[type="hidden"]') as HTMLInputElement;
-            expect(hiddenInput?.tabIndex).toBe(0);
-            // Hidden inputs are not visible and effectively not focusable in normal tab order
             expect(hiddenInput).not.toBeVisible();
         });
     });
@@ -85,20 +69,6 @@ describe('FormHiddenInput', () => {
 
             const hiddenInput = document.querySelector('input[type="hidden"]') as HTMLInputElement;
             expect(hiddenInput?.value).toBe('false');
-        });
-    });
-
-    describe('Element Reference', () => {
-        it('should handle elementRef prop without throwing', () => {
-            expect(() => {
-                render(FormHiddenInput, {});
-            }).not.toThrow();
-        });
-
-        it('should handle null elementRef gracefully', () => {
-            expect(() => {
-                render(FormHiddenInput, { elementRef: null });
-            }).not.toThrow();
         });
     });
 

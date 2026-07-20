@@ -11,7 +11,7 @@
     let dateInputValue: string = $state('2025-06-10');
     let datetimeLocalInputValue: string = $state('2025-06-10T19:30');
     let emailInputValue: string = $state('');
-    let fileInputValue: string | null = $state(null);
+    let fileInputValue: FileList | null = $state(null);
     let hiddenInputValue: string = $state('Nothing to see here as well');
     let monthInputValue: string = $state('2025-06');
     let numberInputValue: number = $state(1);
@@ -487,15 +487,15 @@
                             <Form.FileInput
                                 id="fileBound"
                                 accept=".png, .jpg, image/png, image/jpeg"
-                                bind:value={fileInputValue}
+                                bind:files={fileInputValue}
                                 name="newFileBound" />
-                            <span>Output:</span>&nbsp;<code>{fileInputValue ? fileInputValue : 'No file selected'}</code>
+                            <span>Output:</span>&nbsp;<code>{fileInputValue?.[0]?.name ?? 'No file selected'}</code>
                         </div>
                     </div>
                 </div>
                 <SyntaxHighlighter
                     code={`<script lang="ts">
-    let fileInputValue: string | null = $state(null);
+    let fileInputValue: FileList | null = $state(null);
 \u003c/script>
 <Form.InputLabel for="fileDefault">Upload image</Form.InputLabel>
 <Form.FileInput id="fileDefault" accept=".png, .jpg, image/png, image/jpeg" name="newFile" />
@@ -511,8 +511,8 @@
 <Form.FileInput id="fileLarge" accept=".png, .jpg, image/png, image/jpeg" name="newFileLarge" sizing="lg" />
 
 <Form.InputLabel for="fileBound">Bound upload</Form.InputLabel>
-<Form.FileInput id="fileBound" accept=".png, .jpg, image/png, image/jpeg" bind:value={fileInputValue} name="newFileBound" />
-<span>Output:</span>&nbsp;<code>{fileInputValue ? fileInputValue : 'No file selected'}</code>`} />
+<Form.FileInput id="fileBound" accept=".png, .jpg, image/png, image/jpeg" bind:files={fileInputValue} name="newFileBound" />
+<span>Output:</span>&nbsp;<code>{fileInputValue?.[0]?.name ?? 'No file selected'}</code>`} />
             </div>
         </div>
         <h2 class="wk-quick-link mb-3">Floating labels</h2>

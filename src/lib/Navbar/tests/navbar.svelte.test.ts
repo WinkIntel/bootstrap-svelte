@@ -1,10 +1,50 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- test uses partial/mock typings */
 import { fireEvent, render, screen } from '@testing-library/svelte';
-import { describe, expect, it, vi } from 'vitest';
+import { tick } from 'svelte';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Navbar } from '../index.js';
 import NavbarBasicTest from './navbar-basic-test.svelte';
+import NavbarTogglerTest from './navbar-toggler-test.svelte';
 
 describe('Navbar Component', () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('prefers ariaLabel, then native aria-label, then the default label', () => {
+        render(NavbarTogglerTest);
+
+        expect(screen.getByTestId('custom-toggler')).toHaveAttribute('aria-label', 'Custom label');
+        expect(screen.getByTestId('native-toggler')).toHaveAttribute('aria-label', 'Native label');
+        expect(screen.getByTestId('default-toggler')).toHaveAttribute('aria-label', 'Toggle navigation');
+    });
+
+    it('accepts a null toggler click handler', async () => {
+        render(NavbarTogglerTest);
+
+        await expect(fireEvent.click(screen.getByTestId('null-handler-toggler'))).resolves.toBe(true);
+    });
+
+    it('omits aria-controls when no collapse or explicit target exists', () => {
+        render(NavbarTogglerTest);
+
+        expect(screen.getByTestId('default-toggler')).not.toHaveAttribute('aria-controls');
+    });
+
+    it('uses the registered collapse id after the collapse mounts', async () => {
+        render(NavbarTogglerTest);
+        await tick();
+
+        expect(screen.getByTestId('registered-controls-toggler')).toHaveAttribute('aria-controls', 'registered-navbar-collapse');
+    });
+
+    it('preserves explicit aria-controls after a collapse sibling registers', async () => {
+        render(NavbarTogglerTest);
+        await tick();
+
+        expect(screen.getByTestId('explicit-controls-toggler')).toHaveAttribute('aria-controls', 'external-navbar-target');
+        expect(document.getElementById('external-navbar-target')).toBeInTheDocument();
+    });
+
     it('should render basic navbar with all sub-components in collapsed state', () => {
         render(NavbarBasicTest);
 
@@ -49,25 +89,8 @@ describe('Navbar Component', () => {
         expect(navItems).not.toBeInTheDocument();
     });
 
-    it('should toggle navbar collapse and render nav items when expanded', async () => {
-        // Mock getComputedStyle to return consistent transition duration for jsdom
-        const originalGetComputedStyle = window.getComputedStyle;
-        window.getComputedStyle = vi.fn(
-            () =>
-                ({
-                    transitionDuration: '0.35s',
-                    transitionDelay: '0s'
-                }) as CSSStyleDeclaration
-        );
-
-        // Mock HTMLElement properties that jsdom doesn't implement properly
-        const _originalDefineProperty = Object.defineProperty;
-        const mockScrollHeight = vi.fn(() => 200);
-        Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
-            configurable: true,
-            get: mockScrollHeight
-        });
-
+    it('toggles deterministically and forwards lifecycle callbacks once', async () => {
+        vi.useFakeTimers();
         render(NavbarBasicTest);
 
         // Get the toggler button
@@ -77,24 +100,25 @@ describe('Navbar Component', () => {
         expect(screen.queryByTestId('nav-item-active')).not.toBeInTheDocument();
         expect(toggler).toHaveClass('collapsed');
         expect(toggler).toHaveAttribute('aria-expanded', 'false');
+        expect(toggler).toHaveAttribute('aria-controls', 'consumer-controls');
+        expect(toggler).toHaveAttribute('type', 'button');
 
         // Click the toggler to expand
         await fireEvent.click(toggler);
+        await tick();
+        await vi.advanceTimersByTimeAsync(20);
+        await tick();
 
         // After clicking but before/during transition, element enters the DOM
         // In test environment, transitions may not complete fully, so we check for presence
         // and the "collapsing" intermediate state which indicates the transition started
         const collapseElement = screen.getByTestId('navbar-collapse');
         expect(collapseElement).toBeInTheDocument();
+        expect(collapseElement).toHaveAttribute('id', toggler.getAttribute('aria-controls'));
         expect(collapseElement).toHaveClass('navbar-collapse');
-        // During transition, element has 'collapsing' class (Bootstrap collapse behavior)
-        expect(collapseElement).toHaveClass('collapsing');
+        expect(collapseElement).toHaveClass('show');
 
-        // Wait for the transition to attempt completion (350ms + buffer)
-        await new Promise((resolve) => setTimeout(resolve, 450));
-
-        // After waiting, check the final state - in jsdom, transitions don't always complete
-        // so we verify the element is visible and toggler state is correct
+        // The fixture sets transitionDuration={0}; the expanded callback is immediate.
         const collapse = screen.getByTestId('navbar-collapse');
         expect(collapse).toBeInTheDocument();
 
@@ -102,10 +126,7 @@ describe('Navbar Component', () => {
         expect(toggler).not.toHaveClass('collapsed');
         expect(toggler).toHaveAttribute('aria-expanded', 'true');
 
-        //Note: In jsdom test environment, Svelte transitions may not complete the tick cycle
-        // that adds 'collapse' and 'show' classes. The transition starts (adds 'collapsing'),
-        // but the RAF-based tick to progress===1 may not fire reliably in jsdom.
-        // The actual browser behavior works correctly - this is a test environment limitation.
+        expect(screen.getByTestId('navbar-callback-counts')).toHaveTextContent('1:1:1:0:0');
 
         // Check if navbar nav is rendered
         const navbarNav = screen.getByTestId('navbar-nav');
@@ -146,17 +167,26 @@ describe('Navbar Component', () => {
 
         // Click the toggler again to collapse
         await fireEvent.click(toggler);
-
-        // Wait for the collapse transition
-        await new Promise((resolve) => setTimeout(resolve, 450));
+        await tick();
+        await vi.advanceTimersByTimeAsync(20);
+        await tick();
 
         // Should be collapsed again - test the reliable ARIA states
         expect(toggler).toHaveClass('collapsed');
         expect(toggler).toHaveAttribute('aria-expanded', 'false');
+        expect(screen.getByTestId('navbar-callback-counts')).toHaveTextContent('2:1:1:1:1');
+        expect(screen.queryByTestId('navbar-collapse')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('navbar-nav')).not.toBeInTheDocument();
+    });
 
-        // Restore mocks
-        window.getComputedStyle = originalGetComputedStyle;
-        delete (HTMLElement.prototype as any).scrollHeight;
+    it('uses the Bootstrap vertical-scroll class and removes it on rerender', async () => {
+        const { container, rerender } = render(Navbar.Nav, { props: { isVerticalScrolling: true } });
+        const nav = container.querySelector('ul') as HTMLUListElement;
+
+        expect(nav).toHaveClass('navbar-nav-scroll');
+        expect(nav).not.toHaveClass('navbar-scrolling');
+        await rerender({ isVerticalScrolling: false });
+        expect(nav).not.toHaveClass('navbar-nav-scroll');
     });
 
     it('should render with correct breakpoint class', () => {

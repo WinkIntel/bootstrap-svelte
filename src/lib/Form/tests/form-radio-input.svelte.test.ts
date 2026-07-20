@@ -1,18 +1,12 @@
 /// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom/vitest';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, test } from 'vitest';
 
 import RadioInput from '../form-radio-input.svelte';
+import RadioInputBindingTest from './form-radio-input-binding-test.svelte';
 
 describe('Form.RadioInput', () => {
-    test('renders', () => {
-        const { container } = render(RadioInput);
-        expect(container).toBeInTheDocument();
-        const input = container.querySelector('input[type="radio"]');
-        expect(input).toBeInTheDocument();
-    });
-
     test('type and base class', () => {
         const { container } = render(RadioInput);
         const input = container.querySelector('input[type="radio"]') as HTMLInputElement;
@@ -76,16 +70,98 @@ describe('Form.RadioInput', () => {
         expect(input.checked).toBe(false);
     });
 
-    test('group (checked when group equals value)', () => {
-        // When group equals value, radio should render as checked
-        const { container: c1 } = render(RadioInput, { props: { group: 'one', value: 'one' } });
-        const input1 = c1.querySelector('input[type="radio"]') as HTMLInputElement;
-        expect(input1.checked).toBe(true);
+    test('updates standalone checked state across rerenders without a group binding', async () => {
+        const { container, rerender } = render(RadioInput, { props: { checked: true } });
+        const input = container.querySelector('input[type="radio"]') as HTMLInputElement;
 
-        // When group differs from value, radio should render as not checked
-        const { container: c2 } = render(RadioInput, { props: { group: 'one', value: 'two' } });
-        const input2 = c2.querySelector('input[type="radio"]') as HTMLInputElement;
-        expect(input2.checked).toBe(false);
+        expect(input.checked).toBe(true);
+        await rerender({ checked: false });
+        expect(input.checked).toBe(false);
+    });
+
+    test('binds an explicitly provided group even when its initial value is undefined', async () => {
+        render(RadioInputBindingTest);
+        const firstRadio = screen.getByTestId('group-one') as HTMLInputElement;
+
+        expect(screen.getByTestId('group-value')).toHaveTextContent('unset');
+        expect(firstRadio.checked).toBe(false);
+
+        await fireEvent.click(firstRadio);
+
+        expect(screen.getByTestId('group-value')).toHaveTextContent('one');
+        expect(firstRadio.checked).toBe(true);
+
+        await fireEvent.click(screen.getByTestId('clear-group'));
+
+        expect(screen.getByTestId('group-value')).toHaveTextContent('unset');
+        expect(firstRadio.checked).toBe(false);
+    });
+
+    test('converges when multiple controlled radios share a group and honors parent group changes', async () => {
+        render(RadioInputBindingTest);
+
+        const firstRadio = screen.getByTestId('controlled-one') as HTMLInputElement;
+        const secondRadio = screen.getByTestId('controlled-two') as HTMLInputElement;
+
+        expect(screen.getByTestId('controlled-group-value')).toHaveTextContent('one');
+        expect(screen.getByTestId('controlled-checked-values')).toHaveTextContent('true:false');
+        expect(firstRadio.checked).toBe(true);
+        expect(secondRadio.checked).toBe(false);
+
+        await fireEvent.click(screen.getByTestId('select-controlled-other'));
+
+        expect(screen.getByTestId('controlled-group-value')).toHaveTextContent('other');
+        expect(screen.getByTestId('controlled-checked-values')).toHaveTextContent('false:false');
+        expect(firstRadio.checked).toBe(false);
+        expect(secondRadio.checked).toBe(false);
+    });
+
+    test('keeps standalone checked binding independent from group selection', async () => {
+        render(RadioInputBindingTest);
+        const standaloneRadio = screen.getByTestId('standalone-radio') as HTMLInputElement;
+
+        await fireEvent.click(standaloneRadio);
+
+        expect(screen.getByTestId('standalone-checked')).toHaveTextContent('true');
+        expect(standaloneRadio.checked).toBe(true);
+
+        await fireEvent.click(screen.getByTestId('clear-standalone'));
+
+        expect(screen.getByTestId('standalone-checked')).toHaveTextContent('false');
+        expect(standaloneRadio.checked).toBe(false);
+    });
+
+    test('adopts checked control when an initially undefined parent value becomes boolean', async () => {
+        render(RadioInputBindingTest);
+        const radio = screen.getByTestId('late-checked-radio') as HTMLInputElement;
+
+        expect(screen.getByTestId('late-checked')).toHaveTextContent('undefined');
+        expect(radio.checked).toBe(false);
+
+        await fireEvent.click(screen.getByTestId('set-late-checked-true'));
+        expect(radio.checked).toBe(true);
+
+        await fireEvent.click(screen.getByTestId('set-late-checked-false'));
+        expect(radio.checked).toBe(false);
+
+        await fireEvent.click(radio);
+        expect(screen.getByTestId('late-checked')).toHaveTextContent('true');
+        expect(radio.checked).toBe(true);
+    });
+
+    test('does not allow rest props to replace radio type or validation aria state', () => {
+        const { container } = render(RadioInput, { props: { isInvalid: true, type: 'text', 'aria-invalid': 'false' } as never });
+        const input = container.querySelector('input') as HTMLInputElement;
+
+        expect(input).toHaveAttribute('type', 'radio');
+        expect(input).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    test('accepts a null change handler', async () => {
+        const { container } = render(RadioInput, { props: { onchange: null } as never });
+        const input = container.querySelector('input[type="radio"]') as HTMLInputElement;
+
+        await expect(fireEvent.change(input)).resolves.toBe(true);
     });
 
     test('prop forwarding (id, name, value, disabled, aria-label)', () => {
@@ -103,12 +179,5 @@ describe('Form.RadioInput', () => {
         expect(input).toHaveAttribute('value', 'foo');
         expect(input).toBeDisabled();
         expect(input).toHaveAttribute('aria-label', 'Some label');
-    });
-
-    test('elementRef bound (input exists and is HTMLInputElement)', () => {
-        const { container } = render(RadioInput);
-        const input = container.querySelector('input[type="radio"]');
-        expect(input).toBeInTheDocument();
-        expect(input instanceof HTMLInputElement).toBe(true);
     });
 });

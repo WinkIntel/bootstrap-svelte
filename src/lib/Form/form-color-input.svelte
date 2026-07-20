@@ -27,13 +27,16 @@ Bootstrap-styled color picker input component.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
+    import { noop } from '$lib/common/noop.js';
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         class: classValues,
         elementRef = $bindable(null),
         isInvalid,
         isValid,
+        oninput = noop,
         sizing,
         value = $bindable('#000000'),
         ...restOfProps
@@ -63,12 +66,17 @@ Bootstrap-styled color picker input component.
             input.value = normalized;
         }
     });
+
+    const handleInput = (event: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
+        value = event.currentTarget.value;
+        (oninput as EventListener | null)?.(event);
+    };
 </script>
 
 <input
     {...restOfProps}
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     class={classes}
-    oninput={(event) => (value = event.currentTarget.value)}
+    oninput={handleInput}
     type="color" />

@@ -43,6 +43,10 @@ export class NavbarRootState {
         return this.#isExpanded || this.#mediaQuery?.current || false;
     }
 
+    get defaultCollapseId(): string {
+        return `${this.props.id || 'navbar'}-collapse`;
+    }
+
     toggleIsExpanded() {
         this.#isExpanded = !this.#isExpanded;
     }
@@ -83,15 +87,13 @@ export class NavbarTogglerState {
  */
 export class NavbarCollapseState {
     isExpanded = $derived.by(() => this.root.isExpanded);
+    id = $derived.by(() => this.props.id || this.root.defaultCollapseId);
 
     constructor(
         readonly props: Navbar.CollapseProps,
         readonly root: NavbarRootState
     ) {
-        if (!this.props.id) {
-            console.warn('props.id is required for the Navbar.Collapse to set accessibility correctly');
-        }
-        this.root.ariaControls = this.props.id || undefined;
+        this.root.ariaControls = this.props.id || this.root.defaultCollapseId;
     }
 }
 

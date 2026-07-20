@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import DatetimeLocalInput from '../form-datetime-local-input.svelte';
 
 describe('Form.DatetimeLocalInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(DatetimeLocalInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type datetime-local and default form-control class', () => {
         const { container } = render(DatetimeLocalInput);
         const input = container.querySelector('input[type="datetime-local"]') as HTMLInputElement;
@@ -283,14 +278,6 @@ describe('Form.DatetimeLocalInput', () => {
         const input = container.querySelector('input[type="datetime-local"]') as HTMLInputElement;
 
         expect(input).toHaveAttribute('title', 'Choose your datetime');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(DatetimeLocalInput);
-        const input = container.querySelector('input[type="datetime-local"]') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 
     test('combines plaintext with validation classes', () => {

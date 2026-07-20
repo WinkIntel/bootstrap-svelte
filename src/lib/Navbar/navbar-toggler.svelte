@@ -41,10 +41,10 @@ Toggle button for collapsible navbar content. Controls the expansion/collapse of
 - `class` (string): Optional. Additional CSS classes to apply to the toggle button.
 - `elementRef` (HTMLButtonElement): Optional. Reference to the DOM button element.
 - `id` (string): Optional. Unique ID for the toggle button. Defaults to `navbar-toggler-{uid}`.
-- `type` (string): Optional. Button type attribute.
+- `type` ('button'): Optional compatibility prop. The toggler always renders `type="button"`.
 -->
 <script lang="ts">
-    import { uniqueClsx } from '$lib/common/index.js';
+    import { noop, uniqueClsx } from '$lib/common/index.js';
     import { initNavbarTogglerState, NavbarTogglerState } from '$lib/common/navbar-offcanvas.svelte.js';
     import type { Navbar } from './index.js';
 
@@ -52,11 +52,15 @@ Toggle button for collapsible navbar content. Controls the expansion/collapse of
     const uid = $props.id();
 
     let {
-        ariaLabel = 'Toggle navigation',
+        'aria-controls': consumerAriaControls,
+        'aria-expanded': _consumerAriaExpanded,
+        'aria-label': nativeAriaLabel,
+        ariaLabel,
         children,
         class: classValues,
         elementRef = $bindable(null),
         id = `navbar-toggler-${uid}`,
+        onclick = noop,
         type: _type,
         ...restOfProps
     }: Navbar.TogglerProps = $props();
@@ -67,24 +71,26 @@ Toggle button for collapsible navbar content. Controls the expansion/collapse of
         }
     });
 
-    let ariaControls = $derived(togglerState.root.ariaControls);
+    let ariaControls = $derived(consumerAriaControls ?? togglerState.root.ariaControls);
+    let resolvedAriaLabel = $derived(ariaLabel ?? nativeAriaLabel ?? 'Toggle navigation');
     let isExpanded = $derived(togglerState.isExpanded);
     let classes = $derived(uniqueClsx('navbar-toggler', { collapsed: !isExpanded }, classValues));
 
     const handleClick: EventListener = (_event: Event) => {
         togglerState.onclick();
+        (onclick as EventListener | null)?.(_event);
     };
 </script>
 
 <button
+    {...restOfProps}
     aria-controls={ariaControls}
     aria-expanded={isExpanded}
-    aria-label={ariaLabel}
+    aria-label={resolvedAriaLabel}
     bind:this={elementRef}
     class={classes}
     {id}
     onclick={handleClick}
-    type="button"
-    {...restOfProps}>
+    type="button">
     {@render children?.()}
 </button>

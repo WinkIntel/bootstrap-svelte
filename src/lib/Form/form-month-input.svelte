@@ -48,6 +48,7 @@ Bootstrap-styled month input component for selecting a specific month and year.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         class: classValues,
         elementRef = $bindable(null),
         isInvalid,
@@ -73,9 +74,9 @@ Bootstrap-styled month input component for selecting a specific month and year.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     bind:value
     class={classes}
-    type="month"
-    {...restOfProps} />
+    type="month" />

@@ -18,16 +18,6 @@ describe('collapse-aria-attachment.ts', () => {
     });
 
     describe('collapseAria', () => {
-        it('should create an attachment function', () => {
-            const options: CollapseAriaOptions = {
-                ariaControls: 'collapse-target',
-                ariaExpanded: false
-            };
-
-            const attachment = collapseAria(options);
-            expect(attachment).toBeTypeOf('function');
-        });
-
         it('should set aria-expanded attribute based on options', () => {
             const options: CollapseAriaOptions = {
                 ariaControls: 'collapse-target',

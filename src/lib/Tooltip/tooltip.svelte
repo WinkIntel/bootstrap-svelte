@@ -89,6 +89,9 @@ Add small overlay content to any element for housing secondary information or in
     let popperInstance: Instance | null = null;
     let popperPlacement: string = $state('');
     let referenceElement: HTMLElement | null = $state(null);
+    let isClickActive = $state(false);
+    let isHovering = $state(false);
+    let isFocusing = $state(false);
     let currentPopperPlacement: string = $derived(popperPlacement || effectivePlacement || 'top');
     let triggers: string[] = $derived.by(() => effectiveTrigger.split(' ')); // support space-delimited list of triggers
 
@@ -110,14 +113,40 @@ Add small overlay content to any element for housing secondary information or in
 
     // Operations...
 
-    const hide = () => (isShown = false);
     const show = () => (isShown = true);
+    const hide = () => (isShown = false);
+    const hideWhenInactive = () => {
+        if (!isClickActive && !isHovering && !isFocusing) {
+            hide();
+        }
+    };
     const toggle = () => {
         if (triggers.includes('focus') && hasFocus(referenceElement)) {
             // If the reference element is focused, we don't want to toggle the tooltip
             return;
         }
-        isShown = !isShown;
+        isClickActive = !isClickActive;
+        if (isClickActive) {
+            show();
+        } else {
+            hideWhenInactive();
+        }
+    };
+    const handleMouseEnter = () => {
+        isHovering = true;
+        show();
+    };
+    const handleMouseLeave = () => {
+        isHovering = false;
+        hideWhenInactive();
+    };
+    const handleFocusIn = () => {
+        isFocusing = true;
+        show();
+    };
+    const handleFocusOut = () => {
+        isFocusing = false;
+        hideWhenInactive();
     };
 
     const addEventListeners = () => {
@@ -131,12 +160,12 @@ Add small overlay content to any element for housing secondary information or in
             referenceElement.addEventListener('click', toggle);
         }
         if (triggers.includes('hover')) {
-            referenceElement.addEventListener('mouseenter', show);
-            referenceElement.addEventListener('mouseleave', hide);
+            referenceElement.addEventListener('mouseenter', handleMouseEnter);
+            referenceElement.addEventListener('mouseleave', handleMouseLeave);
         }
         if (triggers.includes('focus')) {
-            referenceElement.addEventListener('focusin', show);
-            referenceElement.addEventListener('focusout', hide);
+            referenceElement.addEventListener('focusin', handleFocusIn);
+            referenceElement.addEventListener('focusout', handleFocusOut);
         }
     };
 
@@ -153,10 +182,25 @@ Add small overlay content to any element for housing secondary information or in
             return;
         }
         referenceElement.removeEventListener('click', toggle);
-        referenceElement.removeEventListener('mouseenter', show);
-        referenceElement.removeEventListener('mouseleave', hide);
-        referenceElement.removeEventListener('focusin', show);
-        referenceElement.removeEventListener('focusout', hide);
+        referenceElement.removeEventListener('mouseenter', handleMouseEnter);
+        referenceElement.removeEventListener('mouseleave', handleMouseLeave);
+        referenceElement.removeEventListener('focusin', handleFocusIn);
+        referenceElement.removeEventListener('focusout', handleFocusOut);
+    };
+
+    const reconcileTriggerActivity = () => {
+        isClickActive = triggers.includes('click') && isClickActive;
+        isHovering = triggers.includes('hover') && !!referenceElement?.matches(':hover');
+        if (triggers.includes('focus')) {
+            isFocusing = hasFocus(referenceElement);
+        } else {
+            isFocusing = false;
+        }
+        if (isClickActive || isHovering || isFocusing) {
+            show();
+        } else {
+            hide();
+        }
     };
 
     // Event listeners...
@@ -189,6 +233,7 @@ Add small overlay content to any element for housing secondary information or in
     $effect(() => {
         if (previousTrigger !== unset && previousTrigger !== effectiveTrigger) {
             removeEventListeners();
+            reconcileTriggerActivity();
             addEventListeners();
         }
 

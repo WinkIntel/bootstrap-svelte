@@ -18,13 +18,20 @@ Button for carousel indicators. Should be placed inside a Carousel.Indicators co
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
+    import { onDestroy, onMount } from 'svelte';
     import { CarouselIndicatorButtonState, initCarouselIndicatorButtonState } from './carousel.svelte.js';
     import type { Carousel } from './index.js';
 
     let { ariaLabel, class: classValues, elementRef = $bindable(null), ...restOfProps }: Carousel.IndicatorButtonProps = $props();
 
     // Initialize indicator button state
-    const indicatorState: CarouselIndicatorButtonState = initCarouselIndicatorButtonState({});
+    const indicatorState: CarouselIndicatorButtonState = initCarouselIndicatorButtonState({
+        get elementRef() {
+            return elementRef;
+        }
+    });
+    onMount(() => indicatorState.root.scheduleRegistrationOrder());
+    onDestroy(() => indicatorState.root.unregisterIndicator(indicatorState));
 
     let classes: string = $derived(
         uniqueClsx(

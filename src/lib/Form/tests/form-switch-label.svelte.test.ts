@@ -64,11 +64,4 @@ describe('Form.SwitchLabel', () => {
         expect(el).toBeInTheDocument();
         expect(el).toBeEmptyDOMElement();
     });
-
-    test('binds elementRef to the label element', () => {
-        const { container } = render(SwitchLabel);
-        const el = container.querySelector('label') as HTMLLabelElement;
-        expect(el).toBeInstanceOf(HTMLLabelElement);
-        expect(el).toBeInTheDocument();
-    });
 });

@@ -38,6 +38,7 @@ Bootstrap-styled textarea component for multi-line text input.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         class: classValues,
         elementRef = $bindable(null),
         isInvalid,
@@ -69,9 +70,9 @@ Bootstrap-styled textarea component for multi-line text input.
 </script>
 
 <textarea
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     bind:value
     class={classes}
-    style={styles}
-    {...restOfProps}></textarea>
+    style={styles}></textarea>

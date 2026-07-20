@@ -6,11 +6,6 @@ import { describe, expect, test } from 'vitest';
 import Floating from '../form-floating.svelte';
 
 describe('Form.Floating', () => {
-    test('renders without crashing', () => {
-        const { container } = render(Floating);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders as div element with form-floating class', () => {
         const { container } = render(Floating);
         const floating = container.querySelector('div');
@@ -91,14 +86,6 @@ describe('Form.Floating', () => {
         const floating = container.querySelector('div');
 
         expect(floating).toHaveAttribute('title', 'Floating label container');
-    });
-
-    test('binds elementRef to the div element', () => {
-        const { container } = render(Floating);
-        const floating = container.querySelector('div');
-
-        expect(floating).toBeInstanceOf(HTMLDivElement);
-        expect(floating).toBeInTheDocument();
     });
 
     test('renders with complex children content', () => {

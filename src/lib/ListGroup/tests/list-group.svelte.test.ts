@@ -1,5 +1,7 @@
 import { render, screen } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
+import { createRawSnippet } from 'svelte';
+import { describe, expect, it, vi } from 'vitest';
+import { ListGroup } from '../index.js';
 import ListGroupBasicTest from './list-group-basic-test.svelte';
 
 describe('ListGroup Component', () => {
@@ -201,5 +203,71 @@ describe('ListGroup Component', () => {
         const radio = screen.getByTestId('radio-input');
         expect(radio).toHaveAttribute('type', 'radio');
         expect(radio).toHaveClass('form-check-input');
+    });
+
+    it('keeps disabled empty-href anchors inert without a navigable href', () => {
+        const onclick = vi.fn();
+        const { container } = render(ListGroup.ItemAction, {
+            props: {
+                href: '',
+                isDisabled: true,
+                onclick,
+                'aria-disabled': 'false',
+                tabindex: 4,
+                type: 'text/html',
+                children: createRawSnippet(() => ({ render: () => 'Disabled action' }))
+            }
+        });
+
+        const action = container.querySelector<HTMLAnchorElement>('a');
+        expect(action).not.toBeNull();
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+        action?.dispatchEvent(event);
+
+        expect(action?.tagName).toBe('A');
+        expect(action).not.toHaveAttribute('href');
+        expect(action).toHaveAttribute('aria-disabled', 'true');
+        expect(action).toHaveAttribute('tabindex', '-1');
+        expect(action).toHaveAttribute('type', 'text/html');
+        expect(event.defaultPrevented).toBe(true);
+        expect(onclick).not.toHaveBeenCalled();
+    });
+
+    it('rerenders between button and empty-href anchor without stale attributes', async () => {
+        const children = createRawSnippet(() => ({ render: () => 'Polymorphic action' }));
+        const { container, rerender } = render(ListGroup.ItemAction, { props: { children } });
+
+        expect(container.querySelector('button')).toHaveAttribute('type', 'button');
+
+        await rerender({ children, href: '' });
+        const anchor = container.querySelector('a');
+        expect(anchor).toHaveAttribute('href', '');
+        expect(anchor).not.toHaveAttribute('type');
+
+        await rerender({ children, href: undefined });
+        const button = container.querySelector('button');
+        expect(button).toHaveAttribute('type', 'button');
+        expect(button).not.toHaveAttribute('href');
+    });
+
+    it('uses native disabled button behavior while enabled actions retain their handlers', () => {
+        const disabledOnclick = vi.fn();
+        const enabledOnclick = vi.fn();
+        const { unmount } = render(ListGroup.ItemAction, {
+            props: { isDisabled: true, onclick: disabledOnclick, role: 'menuitem', tabindex: 4, type: 'submit' }
+        });
+
+        const disabledAction = screen.getByRole('menuitem');
+        disabledAction.click();
+        expect(disabledAction).toBeDisabled();
+        expect(disabledAction).toHaveAttribute('type', 'button');
+        expect(disabledAction).toHaveAttribute('tabindex', '-1');
+        expect(disabledAction).toHaveAttribute('role', 'menuitem');
+        expect(disabledOnclick).not.toHaveBeenCalled();
+
+        unmount();
+        render(ListGroup.ItemAction, { props: { onclick: enabledOnclick } });
+        screen.getByRole('button').click();
+        expect(enabledOnclick).toHaveBeenCalledTimes(1);
     });
 });

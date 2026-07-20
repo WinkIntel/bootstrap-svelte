@@ -2,7 +2,23 @@ import { hasAttribute, isRTL, setAttribute } from './dom.js';
 
 const SCROLLBAR_INITIAL_OVERFLOW = 'data-scrollbar-initial-overflow-value';
 const SCROLLBAR_INITIAL_PADDING = 'data-scrollbar-initial-padding-value';
+const SCROLLBAR_INITIAL_PADDING_SIDE = 'data-scrollbar-initial-padding-side';
 const SCROLLBAR_LOCK_COUNT = 'data-scrollbar-lock-count';
+
+const getLockCount = (bodyElement: HTMLElement): number => {
+    const value = Number(bodyElement.getAttribute(SCROLLBAR_LOCK_COUNT));
+    return Number.isInteger(value) && value > 0 ? value : 0;
+};
+
+const hasSavedScrollState = (bodyElement: HTMLElement): boolean =>
+    hasAttribute(bodyElement, SCROLLBAR_INITIAL_OVERFLOW) ||
+    hasAttribute(bodyElement, SCROLLBAR_INITIAL_PADDING) ||
+    hasAttribute(bodyElement, SCROLLBAR_INITIAL_PADDING_SIDE);
+
+const getRecoverableLockCount = (bodyElement: HTMLElement): number => {
+    const count = getLockCount(bodyElement);
+    return count || (hasSavedScrollState(bodyElement) ? 1 : 0);
+};
 
 /**
  * Calculates the width of the browser's scrollbar
@@ -32,9 +48,11 @@ export const disableBodyScrolling = (bodyElement: HTMLElement): void => {
 
     setAttribute(bodyElement, SCROLLBAR_INITIAL_OVERFLOW, initialOverflow);
     setAttribute(bodyElement, SCROLLBAR_INITIAL_PADDING, initialPadding);
+    setAttribute(bodyElement, SCROLLBAR_INITIAL_PADDING_SIDE, paddingPropName);
 
     // Set the overflow to hidden and add padding-right to prevent layout shift
-    const newPaddingRight = parseInt(initialPadding || '0', 10) + scrollbarWidth;
+    const initialPaddingValue = Number.parseFloat(initialPadding);
+    const newPaddingRight = (Number.isFinite(initialPaddingValue) ? initialPaddingValue : 0) + scrollbarWidth;
     bodyElement.style.setProperty('overflow', 'hidden');
     bodyElement.style.setProperty(paddingPropName, `${newPaddingRight}px`);
 };
@@ -49,8 +67,7 @@ export const disableBodyScrolling = (bodyElement: HTMLElement): void => {
  * @param {HTMLElement} bodyElement - The body element to restore scrolling on
  */
 export const resetBodyScrolling = (bodyElement: HTMLElement): void => {
-    // Skip reset if data attributes aren't present (scrolling was never disabled)
-    if (!hasAttribute(bodyElement, SCROLLBAR_INITIAL_OVERFLOW) || !hasAttribute(bodyElement, SCROLLBAR_INITIAL_PADDING)) {
+    if (!hasSavedScrollState(bodyElement)) {
         return;
     }
 
@@ -59,13 +76,15 @@ export const resetBodyScrolling = (bodyElement: HTMLElement): void => {
     const initialPadding = bodyElement.getAttribute(SCROLLBAR_INITIAL_PADDING);
 
     // Reset the overflow and padding-right values to their initial values
-    const paddingPropName = isRTL() ? 'padding-left' : 'padding-right';
-    bodyElement.style.setProperty('overflow', initialOverflow || '');
-    bodyElement.style.setProperty(paddingPropName, initialPadding || '');
+    const savedPaddingSide = bodyElement.getAttribute(SCROLLBAR_INITIAL_PADDING_SIDE);
+    const paddingPropName = savedPaddingSide === 'padding-left' ? 'padding-left' : 'padding-right';
+    bodyElement.style.setProperty('overflow', initialOverflow ?? '');
+    bodyElement.style.setProperty(paddingPropName, initialPadding ?? '');
 
     // Remove the data attributes
     bodyElement.removeAttribute(SCROLLBAR_INITIAL_OVERFLOW);
     bodyElement.removeAttribute(SCROLLBAR_INITIAL_PADDING);
+    bodyElement.removeAttribute(SCROLLBAR_INITIAL_PADDING_SIDE);
 };
 
 /**
@@ -76,7 +95,7 @@ export const resetBodyScrolling = (bodyElement: HTMLElement): void => {
  * @returns {number} the lock count after acquiring
  */
 export const acquireBodyScrollLock = (bodyElement: HTMLElement): number => {
-    const count = parseInt(bodyElement.getAttribute(SCROLLBAR_LOCK_COUNT) ?? '0', 10) + 1;
+    const count = getRecoverableLockCount(bodyElement) + 1;
     bodyElement.setAttribute(SCROLLBAR_LOCK_COUNT, `${count}`);
     if (count === 1) {
         disableBodyScrolling(bodyElement);
@@ -92,8 +111,9 @@ export const acquireBodyScrollLock = (bodyElement: HTMLElement): number => {
  * @returns {number} the lock count after releasing
  */
 export const releaseBodyScrollLock = (bodyElement: HTMLElement): number => {
-    const current = parseInt(bodyElement.getAttribute(SCROLLBAR_LOCK_COUNT) ?? '0', 10);
+    const current = getRecoverableLockCount(bodyElement);
     if (current <= 0) {
+        bodyElement.removeAttribute(SCROLLBAR_LOCK_COUNT);
         return 0;
     }
     const count = current - 1;

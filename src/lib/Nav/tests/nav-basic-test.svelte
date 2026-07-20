@@ -2,6 +2,9 @@
     import { Nav } from '$lib/index.js';
 
     let { class: className, ...restOfProps }: Nav.RootProps = $props();
+    let hashClicks = $state(0);
+    let enabledClicks = $state(0);
+    let disabledClicks = $state(0);
 </script>
 
 <!-- Basic Nav Example -->
@@ -199,33 +202,31 @@
     </Nav.Root>
 </div>
 
-<!-- Test Examples for New Functionality -->
+<!-- Interaction contract examples -->
 <div class="mb-5">
-    <h4>New Functionality Test Examples</h4>
-
-    <!-- Hash Link Example -->
+    <h4>Interaction Contract Examples</h4>
     <Nav.Root class="mb-3">
         <Nav.Item>
-            <Nav.Link data-testid="hash-nav-link" href="#!">Hash Link</Nav.Link>
+            <Nav.Link data-testid="hash-nav-link" href="#!" onclick={() => (hashClicks += 1)}>Hash Link</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-            <Nav.Link data-testid="regular-nav-link" href="/page">Regular Link</Nav.Link>
+            <Nav.Link data-testid="enabled-nav-link" href="/page" aria-current="location" tabindex={5} onclick={() => (enabledClicks += 1)}>
+                Enabled Link
+            </Nav.Link>
         </Nav.Item>
-    </Nav.Root>
-
-    <!-- Conditional Active State Example -->
-    <Nav.Root class="mb-3">
         <Nav.Item>
-            <Nav.Link data-testid="conditional-active-link" href="#!" isActive={false}>Conditional Active</Nav.Link>
+            <Nav.Link
+                data-testid="disabled-interaction-nav-link"
+                href="/disabled"
+                isDisabled={true}
+                aria-disabled="false"
+                tabindex={8}
+                onclick={() => (disabledClicks += 1)}>
+                Disabled Link
+            </Nav.Link>
         </Nav.Item>
     </Nav.Root>
-
-    <!-- Custom onclick Handler Example -->
-    <Nav.Root class="mb-3">
-        <Nav.Item>
-            <Nav.Link data-testid="custom-onclick-link" href="#!" onclick={() => console.log('Custom click')}>Custom onclick</Nav.Link>
-        </Nav.Item>
-    </Nav.Root>
+    <output data-testid="nav-click-counts">{hashClicks}:{enabledClicks}:{disabledClicks}</output>
 
     <!-- Auto ID Generation Example -->
     <Nav.Root class="mb-3">

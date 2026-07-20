@@ -31,31 +31,50 @@ Pagination link component that is typically used inside a Pagination.Item.
 
     let {
         'aria-label': ariaLabel,
+        'aria-disabled': ariaDisabled,
         children,
         class: classValues,
         elementRef = $bindable(null),
         href = '#!',
         id = `page-link-${uid}`,
+        isDisabled = false,
         onclick = noop,
+        tabindex: consumerTabIndex,
         ...restOfProps
     }: Pagination.LinkProps = $props();
 
     const linkState: PaginationLinkState = initPaginationLinkState({
         get id() {
             return id;
+        },
+        get isDisabled() {
+            return isDisabled;
         }
     });
 
-    let classes = $derived(uniqueClsx('page-link', classValues));
-    let isDisabled: boolean = $derived(linkState.item.isDisabled);
-    let tabIndex: number = $derived(isDisabled ? -1 : 0);
+    let classes = $derived(uniqueClsx('page-link', { disabled: linkState.isDisabled }, classValues));
+    let tabIndex: number | undefined = $derived(linkState.isDisabled ? -1 : (consumerTabIndex ?? 0));
 
     const handleClick: EventListener = (event: Event) => {
+        if (linkState.isDisabled) {
+            event.preventDefault();
+            return;
+        }
+
         linkState.onclick();
         onclick(event);
     };
 </script>
 
-<a aria-label={ariaLabel} bind:this={elementRef} class={classes} {href} {id} onclick={handleClick} tabindex={tabIndex} {...restOfProps}>
+<a
+    {...restOfProps}
+    aria-label={ariaLabel}
+    aria-disabled={linkState.isDisabled ? 'true' : ariaDisabled}
+    bind:this={elementRef}
+    class={classes}
+    {href}
+    {id}
+    onclick={handleClick}
+    tabindex={tabIndex}>
     {@render children?.()}
 </a>

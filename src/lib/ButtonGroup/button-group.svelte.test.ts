@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import ButtonGroup from './button-group.svelte';
+import ButtonGroupBindingTest from './tests/button-group-binding-test.svelte';
 import type { ButtonGroupRootProps } from './types.js';
 
 const renderButtonGroupWithChildContent = (childContent: string = '<button/>', props: ButtonGroupRootProps = {}) => {
@@ -18,11 +19,6 @@ const renderButtonGroupWithChildContent = (childContent: string = '<button/>', p
 };
 
 describe('ButtonGroup.svelte', () => {
-    test('should render', () => {
-        const results = render(ButtonGroup);
-        expect(() => results.getByRole('group')).not.toThrow();
-    });
-
     test('renders with default properties', () => {
         renderButtonGroupWithChildContent('<button>Button 1</button><button>Button 2</button>');
         const buttonGroup = screen.getByRole('group');
@@ -102,9 +98,10 @@ describe('ButtonGroup.svelte', () => {
         expect(screen.getByText('Button 1')).toBeInTheDocument();
     });
 
-    test('handles element reference binding', () => {
-        // This is mostly a TypeScript check, since we can't directly test binding in JSDOM
-        const { component } = renderButtonGroupWithChildContent(undefined);
-        expect(component).toBeDefined();
+    test('binds group and toolbar element references to their DOM elements', () => {
+        const { getByTestId } = render(ButtonGroupBindingTest);
+        expect(getByTestId('group-ref')).toBeInstanceOf(HTMLDivElement);
+        expect(getByTestId('toolbar-ref')).toBeInstanceOf(HTMLDivElement);
+        expect(getByTestId('button-group-binding-state')).toHaveTextContent('group-ref:toolbar-ref');
     });
 });

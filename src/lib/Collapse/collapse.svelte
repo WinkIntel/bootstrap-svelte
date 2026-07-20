@@ -49,7 +49,7 @@ Supports both vertical and horizontal collapse directions.
     let {
         children,
         class: classValues,
-        transitionDuration: _transitionDuration = 350,
+        transitionDuration,
         elementRef = $bindable(null),
         isHorizontal = false,
         isExpanded = false,
@@ -71,8 +71,8 @@ Supports both vertical and horizontal collapse directions.
         onintroend={onExpanded}
         onoutrostart={onCollapse}
         onoutroend={onCollapsed}
-        in:collapseIn={{ isHorizontal }}
-        out:collapseOut={{ isHorizontal }}
+        in:collapseIn={{ isHorizontal, transitionDuration }}
+        out:collapseOut={{ isHorizontal, transitionDuration }}
         {...restOfProps}>
         {@render children?.()}
     </div>

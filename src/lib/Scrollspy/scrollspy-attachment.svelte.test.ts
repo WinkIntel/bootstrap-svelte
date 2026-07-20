@@ -72,7 +72,7 @@ describe('scrollspy-attachment.ts', () => {
 
         // Add scrollTo mock to elements
         container.scrollTo = vi.fn();
-        window.scrollTo = vi.fn();
+        vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
 
         // Reset the last mock observer reference
         lastMockObserver = null as unknown as MockIntersectionObserver;
@@ -88,38 +88,31 @@ describe('scrollspy-attachment.ts', () => {
     afterEach(() => {
         document.body.innerHTML = '';
         vi.unstubAllGlobals();
+        vi.restoreAllMocks();
         vi.clearAllMocks();
         global.IntersectionObserver = originalIntersectionObserver;
     });
 
     describe('scrollspy', () => {
-        it('should create an attachment function', () => {
-            const options: ScrollspyOptions = {
-                targetSelector: '#nav-container',
-                callback: vi.fn(),
-                observerOptions: {}
-            };
-
-            const attachment = scrollspy(options);
-            expect(attachment).toBeTypeOf('function');
-        });
-
-        it('should create IntersectionObserver with container as root', () => {
+        it('should use the container as its default observer root without changing supplied options', () => {
             const callback = vi.fn();
+            const observerOptions: IntersectionObserverInit = { threshold: 0.5 };
             const options: ScrollspyOptions = {
                 targetSelector: '#nav-container',
                 callback,
-                observerOptions: {}
+                observerOptions
             };
 
             const attachment = scrollspy(options);
             const cleanup = attachment(container);
 
-            expect(options.observerOptions?.root).toBe(container);
+            expect(lastMockObserver.root).toBe(container);
+            expect(options.observerOptions).toBe(observerOptions);
+            expect(options.observerOptions).toEqual({ threshold: 0.5 });
             expect(cleanup).toBeTypeOf('function');
         });
 
-        it('should create observerOptions if not provided', () => {
+        it('should apply defaults without creating observerOptions on the caller object', () => {
             const callback = vi.fn();
             const options: ScrollspyOptions = {
                 targetSelector: '#nav-container',
@@ -130,8 +123,8 @@ describe('scrollspy-attachment.ts', () => {
             const attachment = scrollspy(options);
             const cleanup = attachment(container);
 
-            expect(options.observerOptions).toBeDefined();
-            expect(options.observerOptions?.root).toBe(container);
+            expect(lastMockObserver.root).toBe(container);
+            expect(options.observerOptions).toBeUndefined();
             if (typeof cleanup === 'function') {
                 cleanup();
             }
@@ -162,6 +155,54 @@ describe('scrollspy-attachment.ts', () => {
             }
         });
 
+        it('resolves special-character and malformed-escape hashes by element id', () => {
+            const specialAnchor = document.createElement('a');
+            specialAnchor.href = '#section:1';
+            specialAnchor.textContent = 'Special section';
+            const malformedAnchor = document.createElement('a');
+            malformedAnchor.setAttribute('href', '#section%ZZ');
+            malformedAnchor.textContent = 'Malformed escape section';
+            _targetContainer.append(specialAnchor, malformedAnchor);
+
+            const specialSection = document.createElement('section');
+            specialSection.id = 'section:1';
+            const malformedSection = document.createElement('section');
+            malformedSection.id = 'section%ZZ';
+            container.append(specialSection, malformedSection);
+
+            const cleanup = scrollspy({ targetSelector: '#nav-container', callback: vi.fn() })(container);
+
+            expect(lastMockObserver.observedElements).toContain(specialSection);
+            expect(lastMockObserver.observedElements).toContain(malformedSection);
+
+            specialAnchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            malformedAnchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            expect(container.scrollTo).toHaveBeenCalledTimes(2);
+
+            cleanup?.();
+        });
+
+        it('does not observe or hijack hash targets outside the attached container', () => {
+            const outsideAnchor = document.createElement('a');
+            outsideAnchor.href = '#outside-section';
+            outsideAnchor.textContent = 'Outside section';
+            _targetContainer.append(outsideAnchor);
+
+            const outsideSection = document.createElement('section');
+            outsideSection.id = 'outside-section';
+            document.body.append(outsideSection);
+
+            const cleanup = scrollspy({ targetSelector: '#nav-container', callback: vi.fn() })(container);
+            const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+            outsideAnchor.dispatchEvent(click);
+
+            expect(lastMockObserver.observedElements).not.toContain(outsideSection);
+            expect(click.defaultPrevented).toBe(false);
+            expect(container.scrollTo).not.toHaveBeenCalled();
+
+            cleanup?.();
+        });
+
         it('should disconnect observer when cleanup function is called', () => {
             const callback = vi.fn();
             const options: ScrollspyOptions = {
@@ -189,6 +230,12 @@ describe('scrollspy-attachment.ts', () => {
         });
 
         // New tests for error handling
+        it.each([null, 42])('should reject non-object options (%s)', (invalidOptions) => {
+            const attachment = scrollspy(invalidOptions as never);
+
+            expect(() => attachment(container)).toThrow('options must be an object');
+        });
+
         it('should throw error when options are missing', () => {
             const attachment = scrollspy({} as ScrollspyOptions);
             expect(() => attachment(container)).toThrow('targetSelector is required');
@@ -216,6 +263,12 @@ describe('scrollspy-attachment.ts', () => {
             expect(() => attachment(container)).toThrow('target element not found');
         });
 
+        it('reports a malformed target selector without leaking a DOMException', () => {
+            const attachment = scrollspy({ targetSelector: '[', callback: vi.fn() });
+
+            expect(() => attachment(container)).toThrow('invalid target selector "["');
+        });
+
         it('should not handle clicks on links with empty hash', () => {
             const callback = vi.fn();
             const options: ScrollspyOptions = {
@@ -231,7 +284,7 @@ describe('scrollspy-attachment.ts', () => {
             const emptyHashAnchor = document.querySelector('a.empty-hash') as HTMLAnchorElement;
 
             // Simulate a click event
-            const clickEvent = new MouseEvent('click', { bubbles: true });
+            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
             const preventDefaultSpy = vi.spyOn(clickEvent, 'preventDefault');
             emptyHashAnchor.dispatchEvent(clickEvent);
 
@@ -259,12 +312,20 @@ describe('scrollspy-attachment.ts', () => {
             const externalAnchor = document.querySelector('a.external') as HTMLAnchorElement;
 
             // Simulate a click event
-            const clickEvent = new MouseEvent('click', { bubbles: true });
-            const preventDefaultSpy = vi.spyOn(clickEvent, 'preventDefault');
+            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+            let defaultPreventedBeforeNavigationGuard: boolean | undefined;
+            const preventNavigation = (event: Event) => {
+                defaultPreventedBeforeNavigationGuard = event.defaultPrevented;
+                event.preventDefault();
+            };
+
+            // Preserve the real external href and inspect the attachment's behavior
+            // before a test-only bubble guard suppresses jsdom navigation.
+            document.addEventListener('click', preventNavigation, { once: true });
             externalAnchor.dispatchEvent(clickEvent);
 
             // Verify preventDefault was not called
-            expect(preventDefaultSpy).not.toHaveBeenCalled();
+            expect(defaultPreventedBeforeNavigationGuard).toBe(false);
             expect(container.scrollTo).not.toHaveBeenCalled();
 
             if (typeof cleanup === 'function') {
@@ -303,7 +364,19 @@ describe('scrollspy-attachment.ts', () => {
             }
         });
 
-        it('should handle scrolling differently based on root element', () => {
+        it('handles clicks originating from SVG content inside a registered anchor', () => {
+            const anchor = document.querySelector('a[href="#section1"]') as HTMLAnchorElement;
+            anchor.innerHTML = '<svg><circle data-testid="nested-circle"></circle></svg>';
+            const cleanup = scrollspy({ targetSelector: '#nav-container', callback: vi.fn() })(container);
+            const circle = anchor.querySelector('circle') as SVGCircleElement;
+
+            circle.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+            expect(container.scrollTo).toHaveBeenCalledOnce();
+            cleanup?.();
+        });
+
+        it('should scroll the window when observer root is explicitly null', () => {
             const callback = vi.fn();
             const options: ScrollspyOptions = {
                 targetSelector: '#nav-container',
@@ -319,23 +392,67 @@ describe('scrollspy-attachment.ts', () => {
             const section = document.getElementById('section1') as HTMLElement;
 
             // Mock getBoundingClientRect for both elements
-            document.documentElement.getBoundingClientRect = vi.fn().mockReturnValue({ top: 0 });
+            vi.spyOn(document.documentElement, 'getBoundingClientRect').mockReturnValue({ top: 0 } as DOMRect);
             section.getBoundingClientRect = vi.fn().mockReturnValue({ top: 100 });
 
             // Mock window.pageYOffset
-            Object.defineProperty(window, 'pageYOffset', { value: 50, configurable: true });
+            vi.spyOn(window, 'pageYOffset', 'get').mockReturnValue(50);
 
             // Simulate a click event
-            const clickEvent = new MouseEvent('click', { bubbles: true });
+            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
             anchor.dispatchEvent(clickEvent);
 
-            // Verify container.scrollTo was called instead of container.scrollTo
-            expect(window.scrollTo).not.toHaveBeenCalledWith({ top: expect.any(Number), behavior: 'smooth' });
-            expect(container.scrollTo).toHaveBeenCalled();
+            expect(window.scrollTo).toHaveBeenCalledWith({ top: 150, behavior: 'smooth' });
+            expect(container.scrollTo).not.toHaveBeenCalled();
 
             if (typeof cleanup === 'function') {
                 cleanup();
             }
+        });
+
+        it('should not offset window scrolling by the document element rect', () => {
+            const callback = vi.fn();
+            const options: ScrollspyOptions = {
+                targetSelector: '#nav-container',
+                callback,
+                observerOptions: { root: null }
+            };
+            const attachment = scrollspy(options);
+            const cleanup = attachment(container);
+            const anchor = document.querySelector('a[href="#section1"]') as HTMLAnchorElement;
+            const section = document.getElementById('section1') as HTMLElement;
+
+            vi.spyOn(document.documentElement, 'getBoundingClientRect').mockReturnValue({ top: -40 } as DOMRect);
+            section.getBoundingClientRect = vi.fn().mockReturnValue({ top: 100 });
+            vi.spyOn(window, 'pageYOffset', 'get').mockReturnValue(50);
+
+            anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+            expect(window.scrollTo).toHaveBeenCalledWith({ top: 150, behavior: 'smooth' });
+
+            if (typeof cleanup === 'function') cleanup();
+        });
+
+        it('should derive fresh observer options for each attachment using the same options object', () => {
+            const callback = vi.fn();
+            const observerOptions: IntersectionObserverInit = { threshold: 0.5 };
+            const options: ScrollspyOptions = {
+                targetSelector: '#nav-container',
+                callback,
+                observerOptions
+            };
+            const attachment = scrollspy(options);
+            const secondContainer = document.createElement('div');
+
+            const firstCleanup = attachment(container);
+            const secondCleanup = attachment(secondContainer);
+
+            expect(lastMockObserver.root).toBe(secondContainer);
+            expect(options.observerOptions).toBe(observerOptions);
+            expect(options.observerOptions).toEqual({ threshold: 0.5 });
+
+            if (typeof firstCleanup === 'function') firstCleanup();
+            if (typeof secondCleanup === 'function') secondCleanup();
         });
 
         it('should remove event listeners when cleanup is called', () => {
@@ -360,6 +477,19 @@ describe('scrollspy-attachment.ts', () => {
 
             // Verify removeEventListener was called
             expect(removeEventListenerSpy).toHaveBeenCalled();
+        });
+
+        it('removes listeners from every duplicate link targeting the same section', () => {
+            const firstAnchor = document.querySelector('a[href="#section1"]') as HTMLAnchorElement;
+            const duplicateAnchor = firstAnchor.cloneNode(true) as HTMLAnchorElement;
+            _targetContainer.append(duplicateAnchor);
+            const cleanup = scrollspy({ targetSelector: '#nav-container', callback: vi.fn() })(container);
+
+            cleanup?.();
+            firstAnchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            duplicateAnchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+            expect(container.scrollTo).not.toHaveBeenCalled();
         });
     });
 });

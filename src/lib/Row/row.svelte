@@ -43,29 +43,30 @@ A component that implements Bootstrap's grid row functionality.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
-    import type { RowRootProps } from './types.js';
+    import type { RowColsValue, RowRootProps } from './types.js';
 
     let { children, class: classValues, cols, elementRef = $bindable(null), ...restOfProps }: RowRootProps = $props();
+
+    const breakpoints = new Set(['xs', 'sm', 'md', 'lg', 'xl', 'xxl']);
+    const isRowColsValue = (value: unknown): value is RowColsValue =>
+        value === 'auto' || (typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 6);
 
     // Generate cols classes based on the cols prop
     let colsClasses: string[] = $derived.by(() => {
         // If cols is  a string (e.g., 'auto'), return a single row-cols-auto class
-        if (typeof cols === 'string' && cols === 'auto') {
-            return [`row-cols-${cols}`];
-        }
-        // If cols is a number (OneToSix type), generate a simple row-cols-n class
-        if (typeof cols === 'number') {
+        if (isRowColsValue(cols)) {
             return [`row-cols-${cols}`];
         }
         // If cols is an object (RowColsMap type), generate breakpoint-specific classes
         else if (cols && typeof cols === 'object') {
-            return Object.entries(cols).map(([breakpoint, value]) => {
-                // If the breakpoint is 'xs', return 'row-col-{value}'
-                if (breakpoint === 'xs') {
-                    return `row-col-${value}`;
+            return Object.entries(cols).flatMap(([breakpoint, value]) => {
+                if (!breakpoints.has(breakpoint) || !isRowColsValue(value)) {
+                    return [];
                 }
-                // Otherwise, return 'row-cols-{breakpoint}-{value}'
-                return `row-cols-${breakpoint}-${value}`;
+                if (breakpoint === 'xs') {
+                    return [`row-cols-${value}`];
+                }
+                return [`row-cols-${breakpoint}-${value}`];
             });
         }
         // Default: no row-cols classes

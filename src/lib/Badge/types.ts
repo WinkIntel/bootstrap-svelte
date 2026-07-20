@@ -38,7 +38,9 @@ export type BadgeRootProps = SpanElement & {
  * @param position - The logical position descriptor for the badge
  * @returns - Bootstrap CSS classes that implement the requested position
  */
-export const transformBadgePosition = (position: BadgePosition) => {
+export function transformBadgePosition(position: BadgePosition): string;
+export function transformBadgePosition(position: string): string | undefined;
+export function transformBadgePosition(position: string): string | undefined {
     // Map logical position names to their corresponding Bootstrap utility classes
     const positionTypeToClassMap = {
         'top-start': 'top-0 start-0',
@@ -51,6 +53,6 @@ export const transformBadgePosition = (position: BadgePosition) => {
         'bottom-middle': 'top-100 start-50',
         'bottom-end': 'top-100 start-100'
     };
-    const positionClass = positionTypeToClassMap[position];
-    return `position-absolute ${positionClass} translate-middle`;
-};
+    const positionClass = positionTypeToClassMap[position as BadgePosition];
+    return positionClass ? `position-absolute ${positionClass} translate-middle` : undefined;
+}

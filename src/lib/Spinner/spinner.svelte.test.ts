@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import Spinner from './spinner.svelte';
 
 describe('Spinner.svelte', () => {
-    test('should render', () => {
-        const results = render(Spinner);
-        expect(() => results.getByRole('status')).not.toThrow();
-    });
-
     test('renders a spinner with default properties', () => {
         render(Spinner);
         const spinner = screen.getByRole('status');

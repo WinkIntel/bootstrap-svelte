@@ -21,14 +21,14 @@ A small count and labeling component that can be used to add context or notifica
 
 #### Positioned badges
 ```svelte
-<Badge position="top-right">99+</Badge>
+<Badge position="top-end">99+</Badge>
 ```
 
 ### Props
 - `class` (string): Optional. CSS classes for styling the badge (default: 'text-bg-primary')
 - `elementRef` (HTMLElement): Optional. Reference to the badge DOM element
 - `isPill` (boolean): Optional. Makes the badge more rounded with pill styling
-- `position` (string): Optional. Position of the badge when used as a notification ('top-right', 'top-left', etc.)
+- `position` (string): Optional logical position from `top-start` through `bottom-end`.
 - `colorVariant` (string): Optional. The badge variant style
 -->
 <script lang="ts">
@@ -37,7 +37,7 @@ A small count and labeling component that can be used to add context or notifica
 
     let {
         children,
-        class: classValues = 'text-bg-primary',
+        class: classValues,
         colorVariant,
         elementRef = $bindable(null),
         isPill = false,
@@ -45,8 +45,17 @@ A small count and labeling component that can be used to add context or notifica
         ...restOfProps
     }: BadgeRootProps = $props();
 
+    let hasColorVariant = $derived(typeof colorVariant === 'string' && colorVariant.trim().length > 0);
+    let hasClassValues = $derived(typeof classValues === 'string' && classValues.trim().length > 0);
+
     let classes: string = $derived(
-        uniqueClsx('badge', colorVariant, { 'rounded-pill': isPill }, position && transformBadgePosition(position), classValues)
+        uniqueClsx(
+            'badge',
+            hasColorVariant ? colorVariant : !hasClassValues && 'text-bg-primary',
+            { 'rounded-pill': isPill },
+            position && transformBadgePosition(position),
+            classValues
+        )
     );
 </script>
 

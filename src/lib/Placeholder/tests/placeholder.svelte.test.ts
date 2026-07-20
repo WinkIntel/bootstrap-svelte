@@ -5,6 +5,7 @@ import { createRawSnippet } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import type { Placeholder } from '../index.js';
 import PlaceholderRoot from '../placeholder.svelte';
+import PlaceholderBindingTest from './placeholder-binding-test.svelte';
 
 const renderPlaceholderWithChildren = (childContent: string = '', props: Placeholder.RootProps = {}) => {
     return render(PlaceholderRoot, {
@@ -18,11 +19,6 @@ const renderPlaceholderWithChildren = (childContent: string = '', props: Placeho
 };
 
 describe('Placeholder.Root.svelte', () => {
-    test('should render', () => {
-        const { container } = render(PlaceholderRoot);
-        expect(container.querySelector('div')).toBeInTheDocument();
-    });
-
     test('renders with default properties', () => {
         const { container } = renderPlaceholderWithChildren('<span class="placeholder col-12"></span>');
         const root = container.querySelector('div');
@@ -73,9 +69,10 @@ describe('Placeholder.Root.svelte', () => {
         expect(item).toHaveTextContent('Test Item');
     });
 
-    test('handles element reference binding', () => {
-        // This is mostly a TypeScript check, since we can't directly test binding in JSDOM
-        const { component } = renderPlaceholderWithChildren('&nbsp;');
-        expect(component).toBeDefined();
+    test('binds Root and Item element references to their DOM elements', () => {
+        const { getByTestId } = render(PlaceholderBindingTest);
+        expect(getByTestId('placeholder-root-ref')).toBeInstanceOf(HTMLDivElement);
+        expect(getByTestId('placeholder-item-ref')).toBeInstanceOf(HTMLSpanElement);
+        expect(getByTestId('placeholder-binding-state')).toHaveTextContent('placeholder-root-ref:placeholder-item-ref');
     });
 });
