@@ -71,7 +71,7 @@ Container for navigation items within a navbar, providing proper styling and spa
         }
     });
 
-    let classes = $derived(uniqueClsx('navbar-nav', { 'navbar-scrolling': isVerticalScrolling }, classValues));
+    let classes = $derived(uniqueClsx('navbar-nav', { 'navbar-nav-scroll': isVerticalScrolling }, classValues));
 </script>
 
 <ul bind:this={elementRef} class={classes} {id} {...restOfProps}>

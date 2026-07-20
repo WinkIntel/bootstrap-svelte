@@ -6,10 +6,6 @@ describe('css.js', () => {
     describe('easing functions', () => {
         // Test for ease function
         describe('ease function', () => {
-            test('should be a function', () => {
-                expect(typeof ease).toBe('function');
-            });
-
             test('should return 0 for input 0', () => {
                 expect(ease(0)).toBe(0);
             });
@@ -29,10 +25,6 @@ describe('css.js', () => {
 
         // Test for easeIn function
         describe('easeIn function', () => {
-            test('should be a function', () => {
-                expect(typeof easeIn).toBe('function');
-            });
-
             test('should return 0 for input 0', () => {
                 expect(easeIn(0)).toBe(0);
             });
@@ -50,10 +42,6 @@ describe('css.js', () => {
 
         // Test for easeOut function
         describe('easeOut function', () => {
-            test('should be a function', () => {
-                expect(typeof easeOut).toBe('function');
-            });
-
             test('should return 0 for input 0', () => {
                 expect(easeOut(0)).toBe(0);
             });
@@ -71,10 +59,6 @@ describe('css.js', () => {
 
         // Test for easeInOut function
         describe('easeInOut function', () => {
-            test('should be a function', () => {
-                expect(typeof easeInOut).toBe('function');
-            });
-
             test('should return 0 for input 0', () => {
                 expect(easeInOut(0)).toBe(0);
             });
@@ -95,11 +79,6 @@ describe('css.js', () => {
 
         // Test for cubicBezier function
         describe('cubicBezier function', () => {
-            test('should return a function', () => {
-                const customEasing = cubicBezier(0.1, 0.2, 0.3, 0.4);
-                expect(typeof customEasing).toBe('function');
-            });
-
             test('returned function should handle input values correctly', () => {
                 const customEasing = cubicBezier(0.1, 0.2, 0.3, 0.4);
                 expect(customEasing(0)).toBe(0);
@@ -242,6 +221,21 @@ describe('css.js', () => {
 
         test('should deduplicate values across nested arrays and objects', () => {
             expect(uniqueClsx(['first', ['second third', { first: true, fourth: true }]], 'second')).toBe('first second third fourth');
+        });
+
+        test('preserves clsx traversal semantics for inherited object keys and numeric nested values', () => {
+            const inherited = Object.create({ inherited: true }) as { inherited: boolean; own: boolean };
+            inherited.own = true;
+
+            expect(uniqueClsx(['first first', [2, { 'third fourth': true }]], inherited, 2)).toBe('first 2 third fourth own inherited');
+        });
+
+        test('handles large unique and duplicate inputs deterministically', () => {
+            const uniqueTokens = Array.from({ length: 10_000 }, (_, index) => `token-${index}`);
+            const duplicateTokens = Array.from({ length: 25_000 }, () => 'duplicate');
+
+            expect(uniqueClsx(uniqueTokens)).toBe(uniqueTokens.join(' '));
+            expect(uniqueClsx(duplicateTokens)).toBe('duplicate');
         });
     });
 
@@ -411,6 +405,44 @@ describe('css.js', () => {
             const convertedBack = fromStyle(cssString);
 
             expect(convertedBack).toEqual(originalStyle);
+        });
+
+        test.each([
+            [
+                'background-image: url("data:image/svg+xml;utf8,<svg viewBox=\'0:0\'></svg>");content: "semi;colon: value"',
+                {
+                    backgroundImage: 'url("data:image/svg+xml;utf8,<svg viewBox=\'0:0\'></svg>")',
+                    content: '"semi;colon: value"'
+                }
+            ],
+            [
+                'content: "escaped \\" quote; still:value";--Theme-Token: 2;opacity: .5',
+                { content: '"escaped \\" quote; still:value"', '--Theme-Token': 2, opacity: 0.5 }
+            ],
+            [
+                'filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50;Style=1);color: blue',
+                { filter: 'progid:DXImageTransform.Microsoft.Alpha(Opacity=50;Style=1)', color: 'blue' }
+            ],
+            ['--x: foo\\;bar;color:red', { '--x': 'foo\\;bar', color: 'red' }],
+            ['filter: fn(foo\\));color:red', { filter: 'fn(foo\\))', color: 'red' }],
+            ['content: escaped\\:colon;color:red', { content: 'escaped\\:colon', color: 'red' }],
+            ['color: red', { color: 'red' }],
+            [';invalid; color: ; : nope; margin: 0;', { margin: 0 }]
+        ])('parses adversarial declarations without splitting protected values', (cssString, expected) => {
+            expect(fromStyle(cssString)).toEqual(expected);
+        });
+
+        test('ignores an unterminated protected declaration instead of splitting it', () => {
+            expect(fromStyle('content: "unterminated;color: red')).toEqual({});
+        });
+
+        test('round-trips custom property spelling and quoted function values', () => {
+            const originalStyle = {
+                '--Theme-Token': 'url("data:text/plain;a:b")',
+                content: '"semi;colon"'
+            };
+
+            expect(fromStyle(toStyle(originalStyle))).toEqual(originalStyle);
         });
     });
 });

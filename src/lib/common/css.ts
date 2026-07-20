@@ -6,7 +6,7 @@ type ClassValue = Parameters<typeof clsx>[number];
 const whitespacePattern = /\s/;
 const classTokenPattern = /\S+/g;
 
-function appendClassTokens(result: string[], value: string | number): void {
+function appendClassTokens(result: string[], seenTokens: Set<string>, value: string | number): void {
     const classValue = typeof value === 'string' ? value : String(value);
 
     if (!classValue) {
@@ -14,28 +14,30 @@ function appendClassTokens(result: string[], value: string | number): void {
     }
 
     if (!whitespacePattern.test(classValue)) {
-        if (result.indexOf(classValue) === -1) {
+        if (!seenTokens.has(classValue)) {
+            seenTokens.add(classValue);
             result.push(classValue);
         }
         return;
     }
 
-    const tokens = classValue.match(classTokenPattern);
-    if (!tokens) {
+    const classTokens = classValue.match(classTokenPattern);
+    if (!classTokens) {
         return;
     }
 
-    for (let i = 0; i < tokens.length; i++) {
-        const token = tokens[i]!;
-        if (result.indexOf(token) === -1) {
+    for (let i = 0; i < classTokens.length; i++) {
+        const token = classTokens[i]!;
+        if (!seenTokens.has(token)) {
+            seenTokens.add(token);
             result.push(token);
         }
     }
 }
 
-function appendClassValue(result: string[], value: ClassValue): void {
+function appendClassValue(result: string[], tokens: Set<string>, value: ClassValue): void {
     if (typeof value === 'string' || typeof value === 'number') {
-        appendClassTokens(result, value);
+        appendClassTokens(result, tokens, value);
         return;
     }
 
@@ -46,7 +48,7 @@ function appendClassValue(result: string[], value: ClassValue): void {
     if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
             if (value[i]) {
-                appendClassValue(result, value[i]);
+                appendClassValue(result, tokens, value[i]);
             }
         }
         return;
@@ -54,7 +56,7 @@ function appendClassValue(result: string[], value: ClassValue): void {
 
     for (const key in value) {
         if (value[key]) {
-            appendClassTokens(result, key);
+            appendClassTokens(result, tokens, key);
         }
     }
 }
@@ -107,6 +109,7 @@ export const cubicBezier = (x1: number, y1: number, x2: number, y2: number): Eas
  */
 export function uniqueClsx(...args: Parameters<typeof clsx>): string {
     const result: string[] = [];
+    const tokens = new Set<string>();
 
     for (let i = 0; i < args.length; i++) {
         const value = args[i];
@@ -115,9 +118,9 @@ export function uniqueClsx(...args: Parameters<typeof clsx>): string {
         }
 
         if (typeof value === 'string' || typeof value === 'number') {
-            appendClassTokens(result, value);
+            appendClassTokens(result, tokens, value);
         } else {
-            appendClassValue(result, value);
+            appendClassValue(result, tokens, value);
         }
     }
 
@@ -150,7 +153,7 @@ export function toStyle(styleObj: CSSProperties): string {
     return Object.entries(styleObj)
         .map(([key, value]) => {
             // Convert camelCase to kebab-case (e.g., flexDirection to flex-direction)
-            const kebabKey = key.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`);
+            const kebabKey = key.startsWith('--') ? key : key.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`);
             return `${kebabKey}: ${value}`;
         })
         .join(';');
@@ -173,19 +176,49 @@ export function fromStyle(cssString: string | null | undefined): CSSProperties {
 
     const styleObj: CSSProperties = {};
 
-    // Split the string by semicolons and process each style declaration
-    cssString.split(';').forEach((declaration) => {
-        // Skip empty declarations
-        if (!declaration.trim()) {
+    const appendDeclaration = (declaration: string): void => {
+        let quote: '"' | "'" | undefined;
+        let parentheses = 0;
+        let escaped = false;
+        let separator = -1;
+
+        for (let index = 0; index < declaration.length; index++) {
+            const character = declaration[index]!;
+
+            if (escaped) {
+                escaped = false;
+                continue;
+            }
+
+            if (quote) {
+                if (character === '\\') {
+                    escaped = true;
+                } else if (character === quote) {
+                    quote = undefined;
+                }
+                continue;
+            }
+
+            if (character === '\\') {
+                escaped = true;
+            } else if (character === '"' || character === "'") {
+                quote = character;
+            } else if (character === '(') {
+                parentheses++;
+            } else if (character === ')' && parentheses > 0) {
+                parentheses--;
+            } else if (character === ':' && parentheses === 0) {
+                separator = index;
+                break;
+            }
+        }
+
+        if (separator === -1) {
             return;
         }
 
-        // Split the declaration into property and value
-        const [property, ...valueParts] = declaration.split(':');
-
-        // Handle case where there might be colons in the value (like in data URLs)
-        const value = valueParts.join(':').trim();
-        const trimmedProperty = property?.trim();
+        const trimmedProperty = declaration.slice(0, separator).trim();
+        const value = declaration.slice(separator + 1).trim();
 
         if (!trimmedProperty || !value) {
             return;
@@ -206,7 +239,45 @@ export function fromStyle(cssString: string | null | undefined): CSSProperties {
         const parsedValue = !isNaN(Number(value)) && value.trim() !== '' && !value.includes('var(') ? Number(value) : value;
 
         styleObj[camelProperty] = parsedValue;
-    });
+    };
+
+    let declarationStart = 0;
+    let quote: '"' | "'" | undefined;
+    let parentheses = 0;
+    let escaped = false;
+
+    for (let index = 0; index <= cssString.length; index++) {
+        const character = cssString[index];
+
+        if (escaped) {
+            escaped = false;
+            continue;
+        }
+
+        if (quote) {
+            if (character === '\\') {
+                escaped = true;
+            } else if (character === quote) {
+                quote = undefined;
+            }
+            continue;
+        }
+
+        if (character === '\\') {
+            escaped = true;
+        } else if (character === '"' || character === "'") {
+            quote = character;
+        } else if (character === '(') {
+            parentheses++;
+        } else if (character === ')' && parentheses > 0) {
+            parentheses--;
+        } else if (character === ';' || index === cssString.length) {
+            if (parentheses === 0) {
+                appendDeclaration(cssString.slice(declarationStart, index));
+                declarationStart = index + 1;
+            }
+        }
+    }
 
     return styleObj;
 }

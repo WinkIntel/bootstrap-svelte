@@ -40,7 +40,8 @@ Supports percentage-based progress visualization with customizable styling, them
     import { initProgressState, ProgressState } from './progress.svelte.js';
 
     let {
-        ariaLabel = 'Progress Bar',
+        'aria-label': nativeAriaLabel,
+        ariaLabel,
         backgroundColorVariant,
         children,
         class: classValues,
@@ -64,6 +65,20 @@ Supports percentage-based progress visualization with customizable styling, them
     // Determine where to apply width - when in a stacked layout, width is on the root element,
     // otherwise it's applied to the inner bar element
     let widthPlacement = $derived(barState.isStacked ? 'root' : 'bar');
+    let resolvedAriaLabel = $derived(ariaLabel ?? nativeAriaLabel ?? 'Progress Bar');
+    let normalizedProgress = $derived.by(() => {
+        if (!Number.isFinite(valueNow) || !Number.isFinite(valueMin) || !Number.isFinite(valueMax) || valueMax <= valueMin) {
+            return { max: 100, min: 0, now: 0, width: 0 };
+        }
+
+        const now = Math.min(Math.max(valueNow, valueMin), valueMax);
+        return {
+            max: valueMax,
+            min: valueMin,
+            now,
+            width: ((now - valueMin) / (valueMax - valueMin)) * 100
+        };
+    });
 
     // Root element...
     let classes: string = $derived(uniqueClsx('progress', classValues));
@@ -74,7 +89,7 @@ Supports percentage-based progress visualization with customizable styling, them
             let cssProps: CSSProperties = fromStyle(style);
             return toStyle({
                 ...cssProps,
-                width: `${valueNow}%`
+                width: `${normalizedProgress.width}%`
             });
         }
         return style;
@@ -100,7 +115,7 @@ Supports percentage-based progress visualization with customizable styling, them
             let cssProps: CSSProperties = fromStyle(barStyle);
             return toStyle({
                 ...cssProps,
-                width: `${valueNow}%`
+                width: `${normalizedProgress.width}%`
             });
         }
         return barStyle;
@@ -115,15 +130,15 @@ Supports percentage-based progress visualization with customizable styling, them
 </script>
 
 <div
-    aria-label={ariaLabel}
-    aria-valuemax={valueMax}
-    aria-valuemin={valueMin}
-    aria-valuenow={valueNow}
+    {...restOfProps}
+    aria-label={resolvedAriaLabel}
+    aria-valuemax={normalizedProgress.max}
+    aria-valuemin={normalizedProgress.min}
+    aria-valuenow={normalizedProgress.now}
     bind:this={elementRef}
     class={classes}
     role="progressbar"
-    style={styles}
-    {...restOfProps}>
+    style={styles}>
     <div class={barClasses} data-bs-theme={theme} style={barStyles} {...restOfBarProps}>
         {@render children?.()}
     </div>

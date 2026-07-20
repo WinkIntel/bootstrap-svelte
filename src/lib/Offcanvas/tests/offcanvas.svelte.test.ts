@@ -1,8 +1,23 @@
-import { render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Offcanvas } from '../index.js';
 import OffcanvasBasicTest from './offcanvas-basic-test.svelte';
+import OffcanvasStackedTest from './offcanvas-stacked-test.svelte';
+
+async function openStackedOffcanvas(): Promise<void> {
+    await fireEvent.click(screen.getByTestId('open-offcanvas-a'));
+    await screen.findByTestId('stacked-offcanvas-a');
+    await fireEvent.click(screen.getByTestId('open-offcanvas-b'));
+    await screen.findByTestId('stacked-offcanvas-b');
+}
+
+function getTopOffcanvasBackdrop(): HTMLElement {
+    const backdrops = Array.from(document.querySelectorAll<HTMLElement>('.offcanvas-backdrop'));
+    const topBackdrop = backdrops.sort((a, b) => Number(a.style.zIndex) - Number(b.style.zIndex)).at(-1);
+    if (!topBackdrop) throw new Error('Expected a rendered offcanvas backdrop');
+    return topBackdrop;
+}
 
 describe('Offcanvas Component', () => {
     it('should render basic offcanvas with all sub-components', () => {
@@ -160,5 +175,67 @@ describe('Offcanvas Component', () => {
         expect(offcanvas).toHaveAttribute('aria-modal', 'true');
         expect(offcanvas).toHaveAttribute('role', 'dialog');
         expect(offcanvas).toHaveAttribute('tabindex', '-1');
+    });
+
+    it('only reports a prevented static non-keyboard dismissal for Escape', async () => {
+        const onHidePrevented = vi.fn();
+        render(Offcanvas.Root, {
+            props: { isShown: true, isKeyboardDismissible: false, onHidePrevented, useBackdrop: 'static' }
+        });
+
+        await fireEvent.keyDown(window, { key: 'a' });
+        expect(onHidePrevented).not.toHaveBeenCalled();
+
+        await fireEvent.keyDown(window, { key: 'Escape' });
+        expect(onHidePrevented).toHaveBeenCalledTimes(1);
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    describe('stacked pointer ownership', () => {
+        it('does not dismiss an underlying offcanvas when pointer activity is inside the top offcanvas', async () => {
+            render(OffcanvasStackedTest);
+            await openStackedOffcanvas();
+
+            await fireEvent.mouseDown(screen.getByTestId('offcanvas-b-content'));
+
+            expect(screen.getByTestId('stacked-offcanvas-a')).toHaveClass('show');
+            expect(screen.getByTestId('stacked-offcanvas-b')).toHaveClass('show');
+        });
+
+        it('dismisses only the top offcanvas backdrop, then transfers pointer ownership to the remaining offcanvas', async () => {
+            render(OffcanvasStackedTest);
+            await openStackedOffcanvas();
+
+            await fireEvent.mouseDown(getTopOffcanvasBackdrop());
+
+            await waitFor(() => expect(screen.queryByTestId('stacked-offcanvas-b')).not.toBeInTheDocument());
+            expect(screen.getByTestId('stacked-offcanvas-a')).toHaveClass('show');
+
+            await fireEvent.mouseDown(getTopOffcanvasBackdrop());
+            await waitFor(() => expect(screen.queryByTestId('stacked-offcanvas-a')).not.toBeInTheDocument());
+        });
+
+        it('lets only the top dismissible offcanvas react to an outside body pointer event', async () => {
+            render(OffcanvasStackedTest);
+            await openStackedOffcanvas();
+
+            await fireEvent.mouseDown(document.body);
+
+            expect(screen.getByTestId('stacked-offcanvas-a')).toHaveClass('show');
+            await waitFor(() => expect(screen.queryByTestId('stacked-offcanvas-b')).not.toBeInTheDocument());
+        });
+
+        it('lets only the top static offcanvas report a prevented outside pointer dismissal', async () => {
+            render(OffcanvasStackedTest);
+            await fireEvent.click(screen.getByTestId('make-offcanvas-b-static'));
+            await openStackedOffcanvas();
+
+            await fireEvent.mouseDown(document.body);
+
+            expect(screen.getByTestId('stacked-offcanvas-a')).toHaveClass('show');
+            expect(screen.getByTestId('stacked-offcanvas-b')).toHaveClass('show');
+            expect(screen.getByTestId('offcanvas-a-prevented-count')).toHaveTextContent('0');
+            expect(screen.getByTestId('offcanvas-b-prevented-count')).toHaveTextContent('1');
+        });
     });
 });

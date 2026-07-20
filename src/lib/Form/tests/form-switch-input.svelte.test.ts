@@ -115,13 +115,6 @@ describe('Form.SwitchInput', () => {
         expect(input).toHaveAttribute('data-x', '1');
     });
 
-    test('binds elementRef to the input element', () => {
-        const { container } = render(SwitchInput);
-        const input = container.querySelector('input') as HTMLInputElement;
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
-    });
-
     // aria-invalid attribute tests
     test('sets aria-invalid to true when isInvalid is true', () => {
         const { container } = render(SwitchInput, {

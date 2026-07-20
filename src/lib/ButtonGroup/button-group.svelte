@@ -46,7 +46,8 @@ A component that groups a series of buttons together on a single line or stacked
     const uid: string = $props.id();
 
     let {
-        ariaLabel = `Button group ${uid}`,
+        'aria-label': nativeAriaLabel,
+        ariaLabel,
         children,
         class: classValues,
         elementRef = $bindable(null),
@@ -59,8 +60,9 @@ A component that groups a series of buttons together on a single line or stacked
     let classes: string = $derived(
         uniqueClsx({ 'btn-group-vertical': isVertical }, { 'btn-group': !isVertical }, size && `btn-group-${size}`, classValues)
     );
+    let resolvedAriaLabel = $derived(ariaLabel ?? nativeAriaLabel ?? `Button group ${uid}`);
 </script>
 
-<div aria-label={ariaLabel} bind:this={elementRef} class={classes} {id} role="group" {...restOfProps}>
+<div {...restOfProps} aria-label={resolvedAriaLabel} bind:this={elementRef} class={classes} {id} role="group">
     {@render children?.()}
 </div>

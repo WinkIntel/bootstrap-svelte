@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
-import { Popover } from '../index.js';
 import PopoverBasicTest from './popover-basic-test.svelte';
+import PopoverDelegationTest from './popover-delegation-test.svelte';
 
 describe('Popover Component', () => {
     it('should render basic popover with header and body', () => {
@@ -106,22 +106,17 @@ describe('Popover Component', () => {
         expect(containerBody).toHaveTextContent('This popover is rendered in a custom container.');
 
         // Check that the popover is inside the custom container
-        const customContainer = screen.getByTestId('custom-container');
-        expect(customContainer).toBeDefined();
         expect(containerPopover.closest('#custom-container')).toBeTruthy();
     });
 
-    // Additional tests for programmatic API (these would require Jest mocks and DOM events)
+    it('uses Tooltip trigger handling for popover references', async () => {
+        render(PopoverDelegationTest);
 
-    it('should create a Root component with expected properties', () => {
-        expect(Popover.Root).toBeDefined();
-    });
+        const trigger = screen.getByTestId('popover-delegation-trigger');
+        await fireEvent.mouseEnter(trigger);
+        expect(screen.getByTestId('popover-delegation')).toBeInTheDocument();
 
-    it('should create a Header component with expected properties', () => {
-        expect(Popover.Header).toBeDefined();
-    });
-
-    it('should create a Body component with expected properties', () => {
-        expect(Popover.Body).toBeDefined();
+        await fireEvent.mouseLeave(trigger);
+        expect(screen.queryByTestId('popover-delegation')).not.toBeInTheDocument();
     });
 });

@@ -12,12 +12,8 @@ describe('getTransitionDuration', () => {
         window.getComputedStyle = originalGetComputedStyle;
     });
 
-    it('returns 0 when element is null', () => {
-        expect(getTransitionDuration(null)).toBe(0);
-    });
-
-    it('returns 0 when element is undefined', () => {
-        expect(getTransitionDuration(undefined)).toBe(0);
+    it.each([null, undefined])('returns 0 when element is %s', (element) => {
+        expect(getTransitionDuration(element)).toBe(0);
     });
 
     it('returns 0 when both transitionDuration and transitionDelay are zero', () => {
@@ -58,6 +54,18 @@ describe('getTransitionDuration', () => {
 
         expect(getTransitionDuration(element)).toBe(350);
     });
+
+    it.each([
+        ['150ms', '25ms', 175],
+        ['invalid', '0.1s', 100],
+        ['0.2s', '', 200],
+        ['-1s', 'Infinitys', 0]
+    ])('normalizes malformed and millisecond timing values (%s, %s)', (transitionDuration, transitionDelay, expected) => {
+        const element = document.createElement('div');
+        window.getComputedStyle = vi.fn(() => ({ transitionDuration, transitionDelay }) as CSSStyleDeclaration);
+
+        expect(getTransitionDuration(element)).toBe(expected);
+    });
 });
 
 describe('collapseIn', () => {
@@ -92,6 +100,40 @@ describe('collapseIn', () => {
         expect(element.classList.contains('show')).toBe(false);
         expect(element.style.height).toBe('0px');
         expect(transition.duration).toBe(350);
+    });
+
+    it('keeps the rendered CSS timing aligned with an explicit duration and restores the prior timing', () => {
+        element.style.transitionDuration = '2s';
+        element.style.transitionDelay = '40ms';
+
+        const transition = collapseIn(element, { isHorizontal: false, transitionDuration: 125 });
+
+        expect(transition.duration).toBe(125);
+        expect(element.style.transitionDuration).toBe('125ms');
+        expect(element.style.transitionDelay).toBe('0ms');
+
+        transition.tick?.(1, 0);
+
+        expect(element.style.transitionDuration).toBe('2s');
+        expect(element.style.transitionDelay).toBe('40ms');
+    });
+
+    it.each([Number.NaN, Number.POSITIVE_INFINITY, -1])('falls back to CSS timing for an invalid explicit duration (%s)', (transitionDuration) => {
+        const transition = collapseIn(element, { isHorizontal: false, transitionDuration });
+
+        expect(transition.duration).toBe(350);
+        expect(element.style.transitionDuration).toBe('350ms');
+        expect(element.style.transitionDelay).toBe('0ms');
+    });
+
+    it('finishes immediately when the explicit transition duration is zero', () => {
+        const transition = collapseIn(element, { isHorizontal: false, transitionDuration: 0 });
+
+        expect(transition.duration).toBe(0);
+        expect(element).toHaveClass('collapse', 'show');
+        expect(element).not.toHaveClass('collapsing');
+        expect(element.style.transitionDuration).toBe('');
+        expect(element.style.transitionDelay).toBe('');
     });
 
     it('updates height during transition tick (t < 1)', () => {
@@ -176,6 +218,38 @@ describe('collapseOut', () => {
         expect(element.classList.contains('collapse')).toBe(false);
         expect(element.classList.contains('show')).toBe(false);
         expect(transition.duration).toBe(350);
+    });
+
+    it('keeps horizontal rendered CSS timing aligned with an explicit duration and restores it at completion', () => {
+        element.style.transitionDuration = '2s';
+        element.style.transitionDelay = '40ms';
+        element.getBoundingClientRect = vi.fn(() => ({ width: 200 }) as DOMRect);
+
+        const transition = collapseOut(element, { isHorizontal: true, transitionDuration: 125 });
+
+        expect(transition.duration).toBe(125);
+        expect(element.style.transitionDuration).toBe('125ms');
+        expect(element.style.transitionDelay).toBe('0ms');
+
+        transition.tick?.(0, 1);
+
+        expect(element.style.transitionDuration).toBe('2s');
+        expect(element.style.transitionDelay).toBe('40ms');
+    });
+
+    it.each([Number.NaN, Number.POSITIVE_INFINITY, -1])('falls back to CSS timing for an invalid explicit duration (%s)', (transitionDuration) => {
+        expect(collapseOut(element, { isHorizontal: false, transitionDuration }).duration).toBe(350);
+    });
+
+    it('finishes immediately when the explicit transition duration is zero', () => {
+        element.getBoundingClientRect = vi.fn(() => ({ height: 100 }) as DOMRect);
+        const transition = collapseOut(element, { isHorizontal: false, transitionDuration: 0 });
+
+        expect(transition.duration).toBe(0);
+        expect(element).toHaveClass('collapse');
+        expect(element).not.toHaveClass('collapsing', 'show');
+        expect(element.style.transitionDuration).toBe('');
+        expect(element.style.transitionDelay).toBe('');
     });
 
     it('clears dimension during transition (t > 0)', () => {

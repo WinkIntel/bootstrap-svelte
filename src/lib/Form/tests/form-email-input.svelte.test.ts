@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import EmailInput from '../form-email-input.svelte';
 
 describe('Form.EmailInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(EmailInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type email and default form-control class', () => {
         const { container } = render(EmailInput);
         const input = container.querySelector('input[type="email"]') as HTMLInputElement;
@@ -310,14 +305,6 @@ describe('Form.EmailInput', () => {
         const input = container.querySelector('input[type="email"]') as HTMLInputElement;
 
         expect(input).toHaveAttribute('title', 'Enter your email address');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(EmailInput);
-        const input = container.querySelector('input[type="email"]') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 
     test('combines plaintext with validation classes', () => {

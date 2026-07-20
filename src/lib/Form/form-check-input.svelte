@@ -49,6 +49,7 @@ Bootstrap-styled checkbox input component for boolean selections.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         checked = $bindable(false),
         class: classValues,
         elementRef = $bindable(null),
@@ -93,8 +94,8 @@ Bootstrap-styled checkbox input component for boolean selections.
     };
 
     $effect(() => {
-        if (elementRef && isIndeterminate !== undefined) {
-            (elementRef as HTMLInputElement).indeterminate = isIndeterminate;
+        if (elementRef) {
+            (elementRef as HTMLInputElement).indeterminate = isIndeterminate === true;
         }
     });
 
@@ -106,11 +107,11 @@ Bootstrap-styled checkbox input component for boolean selections.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     bind:checked
     class={classes}
     onchange={handleChange}
-    type="checkbox"
     {value}
-    {...restOfProps} />
+    type="checkbox" />

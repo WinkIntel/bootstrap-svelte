@@ -1,6 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
-import { Dropdown } from '../index.js';
 import DropdownBasicTest from './dropdown-basic-test.svelte';
 import DropdownContainerTest from './dropdown-container-test.svelte';
 import DropdownKeyboardTest from './dropdown-keyboard-test.svelte';
@@ -238,35 +237,6 @@ describe('Dropdown Component', () => {
         expect(linkToggle).toHaveTextContent('Link Toggle');
     });
 
-    // Test for component composition API
-    it('should create Root component with expected properties', () => {
-        expect(Dropdown.Root).toBeDefined();
-    });
-
-    it('should create Toggle component with expected properties', () => {
-        expect(Dropdown.Toggle).toBeDefined();
-    });
-
-    it('should create Menu component with expected properties', () => {
-        expect(Dropdown.Menu).toBeDefined();
-    });
-
-    it('should create Item component with expected properties', () => {
-        expect(Dropdown.Item).toBeDefined();
-    });
-
-    it('should create ItemText component with expected properties', () => {
-        expect(Dropdown.ItemText).toBeDefined();
-    });
-
-    it('should create Header component with expected properties', () => {
-        expect(Dropdown.Header).toBeDefined();
-    });
-
-    it('should create Divider component with expected properties', () => {
-        expect(Dropdown.Divider).toBeDefined();
-    });
-
     // Additional tests for Bootstrap-specific classes and behaviors
     it('should apply correct Bootstrap classes for button groups', () => {
         render(DropdownBasicTest);
@@ -348,12 +318,18 @@ describe('Dropdown Item Click Behavior', () => {
         expect(item).toHaveAttribute('href', 'https://example.com');
 
         const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
-        const preventDefaultSpy = vi.spyOn(clickEvent, 'preventDefault');
+        let defaultPreventedBeforeNavigationGuard: boolean | undefined;
+        const preventNavigation = (event: Event) => {
+            defaultPreventedBeforeNavigationGuard = event.defaultPrevented;
+            event.preventDefault();
+        };
 
+        // Preserve the real external href and inspect the component's behavior before
+        // a test-only bubble guard suppresses jsdom navigation.
+        document.addEventListener('click', preventNavigation, { once: true });
         item.dispatchEvent(clickEvent);
 
-        expect(preventDefaultSpy).not.toHaveBeenCalled();
-        expect(clickEvent.defaultPrevented).toBe(false);
+        expect(defaultPreventedBeforeNavigationGuard).toBe(false);
     });
 
     it('should not call preventDefault on click when item is rendered as a button (no href)', () => {
@@ -466,6 +442,22 @@ describe('Dropdown Container (Portal) Functionality', () => {
         const elementToggle = screen.getByTestId('element-container-toggle');
         expect(elementMenu).toHaveClass('dropdown-menu');
         expect(elementToggle).toHaveClass('dropdown-toggle');
+    });
+
+    it('keeps an outside-only portaled menu open for menu clicks and closes it for outside clicks', async () => {
+        render(DropdownContainerTest);
+
+        const toggle = screen.getByTestId('outside-autoclose-container-toggle');
+        const item = screen.getByTestId('outside-autoclose-container-item');
+
+        await fireEvent.click(toggle);
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        await fireEvent.click(item);
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        await fireEvent.click(document.body);
+        expect(toggle).toHaveAttribute('aria-expanded', 'false');
     });
 
     it('should render dropdown items correctly regardless of container type', () => {
@@ -603,13 +595,66 @@ describe('Dropdown Keyboard Navigation', () => {
             expect(toggle).toHaveAttribute('aria-expanded', 'true');
         });
 
-        // When opening with ArrowUp, it should focus the 4th item (disabled item)
-        // This is because focusOnPreviousItem() with activeItemIndex = -1
-        // calculates (-1 - 1 + 5) % 5 = 3 (0-based index for 4th item)
+        // When opening with ArrowUp, it should focus the last enabled item.
         await waitFor(() => {
-            const disabledItem = screen.getByTestId('keyboard-item-4');
-            expect(disabledItem).toHaveFocus();
+            const lastItem = screen.getByTestId('keyboard-item-5');
+            expect(lastItem).toHaveFocus();
         });
+    });
+
+    it('skips disabled items while navigating with arrow keys', async () => {
+        render(DropdownKeyboardTest);
+
+        const toggle = screen.getByTestId('keyboard-toggle');
+        fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+
+        await waitFor(() => {
+            expect(screen.getByTestId('keyboard-item-1')).toHaveFocus();
+        });
+
+        fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+        fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+        fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+
+        await waitFor(() => {
+            expect(screen.getByTestId('keyboard-item-5')).toHaveFocus();
+        });
+        expect(screen.getByTestId('keyboard-item-4')).not.toHaveFocus();
+    });
+
+    it('removes stale item registrations and restores DOM keyboard order after remount', async () => {
+        render(DropdownKeyboardTest);
+        const toggle = screen.getByTestId('keyboard-dynamic-toggle');
+        const first = screen.getByTestId('keyboard-dynamic-item-1');
+
+        fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+        await waitFor(() => expect(first).toHaveFocus());
+
+        await fireEvent.click(screen.getByTestId('remove-dynamic-item'));
+        first.focus();
+        fireEvent.keyDown(first, { key: 'ArrowDown' });
+        await waitFor(() => expect(screen.getByTestId('keyboard-dynamic-item-3')).toHaveFocus());
+
+        await fireEvent.click(screen.getByTestId('restore-dynamic-item'));
+        first.focus();
+        fireEvent.keyDown(first, { key: 'ArrowDown' });
+        await waitFor(() => expect(screen.getByTestId('keyboard-dynamic-item-2')).toHaveFocus());
+        fireEvent.keyDown(screen.getByTestId('keyboard-dynamic-item-2'), { key: 'ArrowDown' });
+        await waitFor(() => expect(screen.getByTestId('keyboard-dynamic-item-3')).toHaveFocus());
+    });
+
+    it('does not activate or close for disabled menu item clicks', async () => {
+        render(DropdownKeyboardTest);
+
+        const toggle = screen.getByTestId('keyboard-toggle');
+        const disabledItem = screen.getByTestId('keyboard-item-4');
+
+        await fireEvent.click(toggle);
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        await fireEvent.click(disabledItem);
+        expect(screen.getByTestId('disabled-activation-count')).toHaveTextContent('0');
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
     });
 
     it('should navigate through items with ArrowDown when dropdown is open', async () => {
@@ -689,7 +734,7 @@ describe('Dropdown Keyboard Navigation', () => {
         });
 
         // Navigate to last item (5 items total)
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 3; i++) {
             fireEvent.keyDown(toggle, { key: 'ArrowDown' });
         }
 

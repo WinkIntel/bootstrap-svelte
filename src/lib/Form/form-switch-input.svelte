@@ -41,6 +41,7 @@ Bootstrap-styled switch input component for toggling between two states.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         checked = $bindable(undefined),
         class: classValues,
         elementRef = $bindable(null),
@@ -62,10 +63,10 @@ Bootstrap-styled switch input component for toggling between two states.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     bind:checked
     class={classes}
     role="switch"
-    type="checkbox"
-    {...restOfProps} />
+    type="checkbox" />

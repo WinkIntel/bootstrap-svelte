@@ -15,11 +15,20 @@ export class CarouselRootState {
     static readonly RIDE_DEFAULT: CarouselRide = false;
     static readonly TRANSITION_DURATION_DEFAULT: number = 600;
 
+    static normalizeInterval(value: unknown): number {
+        return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : CarouselRootState.INTERNAL_DEFAULT;
+    }
+
+    static normalizeTransitionDuration(value: unknown): number {
+        return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : CarouselRootState.TRANSITION_DURATION_DEFAULT;
+    }
+
     // Private state properties...
     #activeItemIndex: number = $state(0); // Zero-based index for active item
     #animation: CarouselAnimation = $state(CarouselRootState.ANIMATION_DEFAULT);
     #hasUserInteraction: boolean = $state(false); // Used to delay autoplay until user interacts when ride=true
-    #indicators: CarouselIndicatorButtonState[] = [];
+    #indicators: CarouselIndicatorButtonState[] = $state([]);
+    #hasStarted = false;
     #interval: number = $state(0);
     #timeoutId: number | null = $state(null);
     #pendingTimeoutIds: number[] = [];
@@ -28,12 +37,16 @@ export class CarouselRootState {
     #isHovered: boolean = $state(false);
     #isPaused: boolean = $state(true);
     #isPointerDown: boolean = $state(false);
-    #items: CarouselItemState[] = [];
+    #isTouchGesture = false;
+    #items: CarouselItemState[] = $state([]);
     #nextActiveItemIndex: number = $state(-1); // Tracks the index of the slide that will become active (-1 when no transition is pending)
     #pauseInteraction: CarouselPause = $state(CarouselRootState.PAUSE_DEFAULT);
     #pointerStartX: number = $state(0);
+    #resumeTimeoutId: number | null = null;
     #ride: CarouselRide = $state(false);
     #transitionDuration: number = $state(CarouselRootState.TRANSITION_DURATION_DEFAULT);
+    #transitionGeneration = 0;
+    #transitionTimeoutId: number | null = null;
     #visibilityListener: (() => void) | null = null;
 
     // Public readonly properties...
@@ -44,12 +57,14 @@ export class CarouselRootState {
 
     constructor(readonly props: Carousel.RootProps) {
         this.#animation = this.props.animation || CarouselRootState.ANIMATION_DEFAULT;
-        this.#interval = this.props.interval || CarouselRootState.INTERNAL_DEFAULT;
+        this.#interval = CarouselRootState.normalizeInterval(this.props.interval);
         this.#pauseInteraction = this.props.pause !== undefined ? this.props.pause : CarouselRootState.PAUSE_DEFAULT;
         this.#ride = this.props.ride || CarouselRootState.RIDE_DEFAULT;
-        this.#transitionDuration = this.props.transitionDuration || CarouselRootState.TRANSITION_DURATION_DEFAULT;
+        this.#transitionDuration = CarouselRootState.normalizeTransitionDuration(this.props.transitionDuration);
 
         this.registerItem = this.registerItem.bind(this);
+        this.unregisterItem = this.unregisterItem.bind(this);
+        this.unregisterIndicator = this.unregisterIndicator.bind(this);
         this.isItemActive = this.isItemActive.bind(this);
         this.next = this.next.bind(this);
         this.prev = this.prev.bind(this);
@@ -61,6 +76,7 @@ export class CarouselRootState {
         this.handlePointerDown = this.handlePointerDown.bind(this);
         this.handlePointerMove = this.handlePointerMove.bind(this);
         this.handlePointerUp = this.handlePointerUp.bind(this);
+        this.handlePointerCancel = this.handlePointerCancel.bind(this);
 
         // Setup Page Visibility API listener
         if (typeof document !== 'undefined' && 'hidden' in document) {
@@ -73,12 +89,6 @@ export class CarouselRootState {
             };
             document.addEventListener('visibilitychange', this.#visibilityListener);
         }
-
-        // Start autoplay immediately in the browser if ride='carousel', otherwise wait for user interaction.
-        // During static prerendering there is no browser timer API, so autoplay starts during hydration instead.
-        if (typeof window !== 'undefined' && this.#ride === 'carousel' && !this.#timeoutId) {
-            this.cycle();
-        }
     }
 
     // Determines the appropriate interval duration, prioritizing the active item's specific interval
@@ -88,8 +98,10 @@ export class CarouselRootState {
         }
 
         const activeItem = this.#items[this.#activeItemIndex];
-        if (activeItem && activeItem.interval) {
-            return activeItem.interval;
+        if (activeItem?.interval !== undefined) {
+            return typeof activeItem.interval === 'number' && Number.isFinite(activeItem.interval) && activeItem.interval > 0
+                ? activeItem.interval
+                : this.#interval;
         }
 
         return this.#interval;
@@ -103,12 +115,13 @@ export class CarouselRootState {
     // Schedules a setTimeout whose id is tracked so dispose() can cancel it if the
     // instance is torn down before the callback fires. The id de-registers itself
     // once the callback runs, keeping #pendingTimeoutIds from growing unbounded.
-    #schedule(callback: () => void, delay: number): void {
+    #schedule(callback: () => void, delay: number): number {
         const timeoutId = window.setTimeout(() => {
             this.#pendingTimeoutIds = this.#pendingTimeoutIds.filter((id) => id !== timeoutId);
             callback();
         }, delay);
         this.#pendingTimeoutIds.push(timeoutId);
+        return timeoutId;
     }
 
     get animation(): CarouselAnimation {
@@ -132,7 +145,7 @@ export class CarouselRootState {
     }
 
     set interval(interval: number) {
-        this.#interval = interval;
+        this.#interval = CarouselRootState.normalizeInterval(interval);
         if (this.shouldCycle()) {
             this.cycle();
         }
@@ -156,7 +169,7 @@ export class CarouselRootState {
     }
 
     set transitionDuration(duration: number) {
-        this.#transitionDuration = duration;
+        this.#transitionDuration = CarouselRootState.normalizeTransitionDuration(duration);
     }
 
     get isAnimating(): boolean {
@@ -169,10 +182,57 @@ export class CarouselRootState {
         if (item.props.isActive && !this.#isAnimating) {
             this.#activeItemIndex = item.index;
         }
+        if (this.#hasStarted && this.#items.length === 2 && this.shouldCycle()) {
+            this.cycle();
+        }
+    }
+
+    unregisterItem(item: CarouselItemState): void {
+        const removedIndex = this.#items.indexOf(item);
+        if (removedIndex === -1) {
+            return;
+        }
+
+        this.#invalidateTransition();
+        this.#items.splice(removedIndex, 1);
+        if (this.#items.length === 0) {
+            this.#activeItemIndex = 0;
+            this.#nextActiveItemIndex = -1;
+            this.#isAnimating = false;
+            this.pause();
+            return;
+        }
+
+        if (removedIndex < this.#activeItemIndex) {
+            this.#activeItemIndex--;
+        } else if (removedIndex === this.#activeItemIndex) {
+            this.#activeItemIndex = Math.min(removedIndex, this.#items.length - 1);
+        }
+
+        if (removedIndex < this.#nextActiveItemIndex) {
+            this.#nextActiveItemIndex--;
+        } else if (removedIndex === this.#nextActiveItemIndex) {
+            this.#nextActiveItemIndex = -1;
+        }
     }
 
     registerIndicator(indicator: CarouselIndicatorButtonState): void {
         this.#indicators.push(indicator);
+    }
+
+    unregisterIndicator(indicator: CarouselIndicatorButtonState): void {
+        const index = this.#indicators.indexOf(indicator);
+        if (index !== -1) {
+            this.#indicators.splice(index, 1);
+        }
+    }
+
+    getItemIndex(item: CarouselItemState): number {
+        return this.#items.indexOf(item);
+    }
+
+    getIndicatorIndex(indicator: CarouselIndicatorButtonState): number {
+        return this.#indicators.indexOf(indicator);
     }
 
     isItemActive(index: number): boolean {
@@ -199,8 +259,15 @@ export class CarouselRootState {
         return this.#indicators.length;
     }
 
+    registerUserInteraction(): void {
+        this.#hasUserInteraction = true;
+        if (!this.#isTouchGesture && this.#ride === true && !this.#timeoutId) {
+            this.cycle();
+        }
+    }
+
     next(): void {
-        if (this.#isAnimating) {
+        if (this.#isAnimating || this.#items.length < 2) {
             return;
         }
 
@@ -208,16 +275,11 @@ export class CarouselRootState {
         this.to(nextIndex, 'next');
 
         // Mark that user interaction has occurred
-        this.#hasUserInteraction = true;
-
-        // Start cycling if ride is true and this is first interaction
-        if (this.#ride === true && !this.#timeoutId) {
-            this.cycle();
-        }
+        this.registerUserInteraction();
     }
 
     prev(): void {
-        if (this.#isAnimating) {
+        if (this.#isAnimating || this.#items.length < 2) {
             return;
         }
 
@@ -225,12 +287,7 @@ export class CarouselRootState {
         this.to(prevIndex, 'prev');
 
         // Mark that user interaction has occurred
-        this.#hasUserInteraction = true;
-
-        // Start cycling if ride is true and this is first interaction
-        if (this.#ride === true && !this.#timeoutId) {
-            this.cycle();
-        }
+        this.registerUserInteraction();
     }
 
     /**
@@ -267,6 +324,7 @@ export class CarouselRootState {
 
         this.#isAnimating = true;
         this.#nextActiveItemIndex = index;
+        const generation = ++this.#transitionGeneration;
 
         // For slide and crossfade animations, we set directional classes and clean up after transition
         if (this.#animation === 'slide' || this.#animation === 'crossfade') {
@@ -280,7 +338,11 @@ export class CarouselRootState {
                 toItem.direction = 'end';
                 toItem.order = 'prev';
             }
-            this.#schedule(() => {
+            this.#transitionTimeoutId = this.#schedule(() => {
+                this.#transitionTimeoutId = null;
+                if (generation !== this.#transitionGeneration || !this.#items.includes(fromItem) || !this.#items.includes(toItem)) {
+                    return;
+                }
                 fromItem.order = undefined;
                 fromItem.direction = undefined;
                 toItem.order = undefined;
@@ -304,10 +366,14 @@ export class CarouselRootState {
                 toItem.order = 'prev';
             }
 
-            this.#schedule(() => {
+            this.#transitionTimeoutId = this.#schedule(() => {
+                this.#transitionTimeoutId = null;
+                if (generation !== this.#transitionGeneration || !this.#items.includes(toItem)) {
+                    return;
+                }
                 toItem.order = undefined;
                 this.#isAnimating = false;
-            }, this.#transitionDuration / 2);
+            }, this.#transitionDuration);
 
             this.#activeItemIndex = index;
             this.#nextActiveItemIndex = -1;
@@ -320,6 +386,9 @@ export class CarouselRootState {
         // For no animation, we simply update the active index on the next tick
         if (this.#animation === 'none') {
             tick().then(() => {
+                if (generation !== this.#transitionGeneration || !this.#items.includes(fromItem) || !this.#items.includes(toItem)) {
+                    return;
+                }
                 this.#activeItemIndex = index;
                 this.#nextActiveItemIndex = -1;
                 this.#isAnimating = false;
@@ -340,7 +409,13 @@ export class CarouselRootState {
         if (typeof window === 'undefined') {
             return;
         }
-        if (this.#isDisposed) {
+        if (this.#isDisposed || !this.shouldCycle() || this.#items.length < 2) {
+            return;
+        }
+
+        // A mount/start or reactive ride update can race with an in-progress touch.
+        // Keep the carousel paused until the single delayed touch resume fires.
+        if (this.#isPointerDown || this.#resumeTimeoutId !== null) {
             return;
         }
 
@@ -364,6 +439,7 @@ export class CarouselRootState {
 
         // Schedule the next slide using setTimeout
         this.#timeoutId = window.setTimeout(() => {
+            this.#timeoutId = null;
             if (!this.#isPaused && !this.#isAnimating) {
                 this.next();
             } else if (!this.#isPaused) {
@@ -403,6 +479,7 @@ export class CarouselRootState {
     handlePointerDown(pointerEvent: PointerEvent): void {
         // Only track primary touch pointer
         if (pointerEvent.pointerType === 'touch' && pointerEvent.isPrimary) {
+            this.#cancelTouchResume();
             this.#isPointerDown = true;
             this.#pointerStartX = pointerEvent.clientX;
 
@@ -430,7 +507,13 @@ export class CarouselRootState {
      * Determines swipe direction based on horizontal movement distance.
      */
     handlePointerUp(pointerEvent: PointerEvent): void {
-        if (!this.#isPointerDown || pointerEvent.pointerType !== 'touch' || !pointerEvent.isPrimary) {
+        if (!this.#isPointerDown) {
+            return;
+        }
+
+        this.#isPointerDown = false;
+        if (pointerEvent.pointerType !== 'touch' || !pointerEvent.isPrimary) {
+            this.#scheduleTouchResume();
             return;
         }
 
@@ -438,25 +521,76 @@ export class CarouselRootState {
 
         // Consider it a swipe if movement exceeds threshold (50px)
         if (Math.abs(deltaX) > 50) {
+            this.#isTouchGesture = true;
             if (deltaX > 0) {
                 this.prev(); // Swipe right means go to previous
             } else {
                 this.next(); // Swipe left means go to next
             }
+            this.#isTouchGesture = false;
         }
 
-        this.#isPointerDown = false;
-
         // Resume cycling after touch with a delay to prevent immediate transition
-        if (this.shouldCycle()) {
-            this.#schedule(() => {
+        this.#scheduleTouchResume();
+    }
+
+    handlePointerCancel(): void {
+        if (!this.#isPointerDown) {
+            return;
+        }
+        this.#isPointerDown = false;
+        this.#scheduleTouchResume();
+    }
+
+    #invalidateTransition(): void {
+        this.#transitionGeneration++;
+        if (this.#transitionTimeoutId !== null) {
+            window.clearTimeout(this.#transitionTimeoutId);
+            this.#pendingTimeoutIds = this.#pendingTimeoutIds.filter((id) => id !== this.#transitionTimeoutId);
+            this.#transitionTimeoutId = null;
+        }
+        for (const item of this.#items) {
+            item.order = undefined;
+            item.direction = undefined;
+        }
+        this.#nextActiveItemIndex = -1;
+        this.#isAnimating = false;
+    }
+
+    #cancelTouchResume(): void {
+        if (this.#resumeTimeoutId === null) {
+            return;
+        }
+        window.clearTimeout(this.#resumeTimeoutId);
+        this.#pendingTimeoutIds = this.#pendingTimeoutIds.filter((id) => id !== this.#resumeTimeoutId);
+        this.#resumeTimeoutId = null;
+    }
+
+    #scheduleTouchResume(): void {
+        this.#cancelTouchResume();
+        if (!this.shouldCycle() || this.#isDisposed) {
+            return;
+        }
+        this.#schedule(() => {
+            this.#resumeTimeoutId = null;
+            if (!this.#isDisposed && this.shouldCycle()) {
                 this.cycle();
-            }, 1000);
+            }
+        }, 1000);
+        this.#resumeTimeoutId = this.#pendingTimeoutIds.at(-1) ?? null;
+    }
+
+    start(): void {
+        this.#hasStarted = true;
+        if (this.shouldCycle()) {
+            this.cycle();
         }
     }
 
     dispose(): void {
         this.#isDisposed = true;
+        this.#invalidateTransition();
+        this.#cancelTouchResume();
 
         if (this.#timeoutId) {
             window.clearTimeout(this.#timeoutId);
@@ -484,8 +618,12 @@ export class CarouselItemState {
     #order: CarouselItemOrder | undefined = $state(undefined);
     #direction: CarouselItemDirection | undefined = $state(undefined);
 
-    readonly index: number;
-    readonly interval: number;
+    get index(): number {
+        return this.root.getItemIndex(this);
+    }
+    get interval(): number | undefined {
+        return this.props.interval;
+    }
     readonly isActive = $derived.by(() => this.root.isItemActive(this.index));
     readonly isNext = $derived(this.#order === 'next');
     readonly isPrev = $derived(this.#order === 'prev');
@@ -506,10 +644,7 @@ export class CarouselItemState {
     constructor(
         readonly props: Carousel.ItemProps,
         readonly root: CarouselRootState
-    ) {
-        this.index = this.root.getItemCount();
-        this.interval = this.props.interval || 5000;
-    }
+    ) {}
 
     get order(): CarouselItemOrder | undefined {
         return this.#order;
@@ -569,18 +704,20 @@ export class CarouselIndicatorButtonState {
     isActive = $derived.by(() => this.root.isItemActive(this.index) && !this.root.isAnimating);
     isNextActive = $derived.by(() => this.root.isNextItemActive(this.index));
 
-    readonly index: number;
+    get index(): number {
+        return this.root.getIndicatorIndex(this);
+    }
 
     constructor(
         readonly props: Carousel.IndicatorButtonProps,
         readonly root: CarouselRootState
     ) {
-        this.index = this.root.getIndicatorCount();
         this.onclick = this.onclick.bind(this);
     }
 
     onclick(event: Event): void {
         event.preventDefault();
+        this.root.registerUserInteraction();
         const order = this.index > this.root.getActiveIndex() ? 'next' : 'prev';
         this.root.to(this.index, order);
     }

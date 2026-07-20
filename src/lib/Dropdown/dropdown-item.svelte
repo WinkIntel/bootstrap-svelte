@@ -23,6 +23,7 @@ A clickable item within a dropdown menu.
     /* eslint-disable @typescript-eslint/no-explicit-any -- restOfProps spread targets a union element type that is not spreadable without as any */
     import { uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
+    import { onDestroy, onMount } from 'svelte';
     import { DropdownItemState, initDropdownItemState } from './dropdown.svelte.js';
     import type { Dropdown } from './index.js';
 
@@ -59,6 +60,9 @@ A clickable item within a dropdown menu.
         }
     });
 
+    onMount(() => itemState.root.reorderItems());
+    onDestroy(() => itemState.root.unregisterItem(itemState));
+
     let isAnchor: boolean = $derived(Boolean(href));
     let elementType: string = $derived(isAnchor ? 'a' : 'button');
 
@@ -74,6 +78,10 @@ A clickable item within a dropdown menu.
     );
 
     const handleClick: EventListener = (event: Event): void => {
+        if (isDisabled) {
+            event.preventDefault();
+            return;
+        }
         if (href && href === '#!') {
             event.preventDefault();
         }

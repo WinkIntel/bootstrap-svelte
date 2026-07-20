@@ -57,6 +57,7 @@ Bootstrap-styled telephone input component for entering phone numbers.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         class: classValues,
         elementRef = $bindable(null),
         isInvalid,
@@ -146,10 +147,10 @@ Bootstrap-styled telephone input component for entering phone numbers.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     bind:value
     class={classes}
     oninput={handleInput}
-    type="tel"
-    {...restOfProps} />
+    type="tel" />

@@ -48,7 +48,11 @@ Render a component into a different part of the DOM tree.
         }
 
         if (typeof target === 'string') {
-            element = document.querySelector(target);
+            try {
+                element = document.querySelector(target);
+            } catch {
+                element = null;
+            }
         } else {
             element = target;
         }

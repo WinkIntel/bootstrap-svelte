@@ -44,4 +44,4 @@ Bootstrap-styled range slider input component for selecting a value within a ran
     let classes: string = $derived(uniqueClsx('form-range', classValues));
 </script>
 
-<input bind:this={elementRef} bind:value class={classes} type="range" {...restOfProps} />
+<input {...restOfProps} bind:this={elementRef} bind:value class={classes} type="range" />

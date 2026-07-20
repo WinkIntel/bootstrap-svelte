@@ -28,7 +28,8 @@ export type NavbarNavProps = UListElement & {
 };
 export type NavbarTextProps = DivElement;
 export type NavbarTogglerIconProps = SpanElement;
-export type NavbarTogglerProps = ButtonElement & {
+export type NavbarTogglerProps = Omit<ButtonElement, 'type'> & {
     ariaLabel?: string;
-    type?: HTMLButtonElement['type'];
+    /** Retained for compatibility; Navbar.Toggler always renders a non-submitting button. */
+    type?: 'button';
 };

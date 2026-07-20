@@ -45,6 +45,7 @@ Bootstrap-styled URL input component for entering website addresses.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         class: classValues,
         elementRef = $bindable(null),
         isInvalid,
@@ -70,9 +71,9 @@ Bootstrap-styled URL input component for entering website addresses.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     bind:value
     class={classes}
-    type="url"
-    {...restOfProps} />
+    type="url" />

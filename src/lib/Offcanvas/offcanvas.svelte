@@ -59,6 +59,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 <script lang="ts">
     import { noop, uniqueClsx } from '$lib/common/index.js';
     import { initOffcanvasRootState, OffcanvasRootState } from '$lib/common/navbar-offcanvas.svelte.js';
+    import { isTopOverlay, registerOverlay, unregisterOverlay, type OverlayStackEntry } from '$lib/common/overlay-stack.js';
     import { acquireBodyScrollLock, releaseBodyScrollLock } from '$lib/common/scrollbar.js';
     import { onDestroy, onMount, tick } from 'svelte';
     import { fade, fly } from 'svelte/transition';
@@ -90,8 +91,11 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     // Initialize the root state of the offcanvas component...
     let bodyElement: HTMLElement | null = $state(null);
     let holdsScrollLock = false;
+    let overlayZIndex: number | undefined = $state(undefined);
+    let backdropZIndex: number | undefined = $state(undefined);
     const unset = Symbol('unset');
     let previousIsShown: Offcanvas.RootProps['isShown'] | typeof unset = unset;
+    let previousRootIsOverlayShown = false;
     let previousShowOnBreakpoint: Offcanvas.RootProps['showOnBreakpoint'] | typeof unset = unset;
     let previousUseBackdrop: Offcanvas.RootProps['useBackdrop'] | typeof unset = unset;
     const rootState: OffcanvasRootState = initOffcanvasRootState({
@@ -108,6 +112,15 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
             return useBackdrop;
         }
     });
+    const overlayEntry: OverlayStackEntry = {
+        baseBackdropZIndex: 1040,
+        baseOverlayZIndex: 1045,
+        onKeydown: handleKeydown,
+        setLayers: (nextOverlayZIndex, nextBackdropZIndex) => {
+            overlayZIndex = nextOverlayZIndex;
+            backdropZIndex = nextBackdropZIndex;
+        }
+    };
 
     // Set up the derived state for the offcanvas component...
     let flyX: string | undefined = $derived.by(() => {
@@ -175,6 +188,17 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         previousShowOnBreakpoint = showOnBreakpoint;
     });
 
+    $effect(() => {
+        const isOverlayShown = rootState.isShown && !rootState.isMediaQueryMatched;
+        if (isOverlayShown && !previousRootIsOverlayShown) {
+            registerOverlay(overlayEntry);
+        } else if (!isOverlayShown && previousRootIsOverlayShown) {
+            unregisterOverlay(overlayEntry);
+        }
+
+        previousRootIsOverlayShown = isOverlayShown;
+    });
+
     // Get the body element when the component is mounted...
     onMount(() => {
         if (typeof window !== 'undefined') {
@@ -204,6 +228,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     // so a removed-while-open offcanvas doesn't permanently disable body
     // scrolling...
     onDestroy(() => {
+        unregisterOverlay(overlayEntry);
         if (holdsScrollLock && bodyElement) {
             releaseBodyScrollLock(bodyElement);
             holdsScrollLock = false;
@@ -212,6 +237,8 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 
     // Dismiss the offcanvas when the backdrop is clicked...
     const handleBackdropMouseDown: EventListener = (event: Event) => {
+        if (!isTopOverlay(overlayEntry)) return;
+
         const target = event.target as HTMLElement;
         const nearestOffcanvas = target.closest('.offcanvas');
         if (nearestOffcanvas && nearestOffcanvas.id === id) {
@@ -230,19 +257,17 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     };
 
     // Dismiss the offcanvas on Escape key press
-    const handleKeydown: EventListener = (event: Event) => {
-        const keyboardEvent = event as KeyboardEvent;
-        if (rootState.isShown && !isKeyboardDismissible && useBackdrop === 'static') {
+    function handleKeydown(event: KeyboardEvent): void {
+        if (rootState.isShown && !isKeyboardDismissible && useBackdrop === 'static' && event.key === 'Escape') {
             onHidePrevented(event);
             return;
         }
-        if (rootState.isShown && isKeyboardDismissible && keyboardEvent.key === 'Escape') {
+        if (rootState.isShown && isKeyboardDismissible && event.key === 'Escape') {
             rootState.toggleIsShown();
         }
-    };
+    }
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
 <svelte:body on:mousedown={handleBackdropMouseDown} />
 
 {#if rootState.isShown}
@@ -256,6 +281,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         onoutrostart={onHide}
         onoutroend={handleOnHidden}
         role={rootState.isShown ? 'dialog' : undefined}
+        style:z-index={overlayZIndex}
         tabindex="-1"
         transition:fly={{ duration: rootState.transitionDuration, x: flyX, y: flyY, opacity: 1 }}
         {...restOfProps}>
@@ -264,5 +290,11 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 {/if}
 
 {#if rootState.isBackdropShown}
-    <div class={backDropClasses} onmousedown={handleBackdropMouseDown} role="presentation" transition:fade={{ duration: 150 }}></div>
+    <div
+        class={backDropClasses}
+        onmousedown={handleBackdropMouseDown}
+        role="presentation"
+        style:z-index={backdropZIndex}
+        transition:fade={{ duration: 150 }}>
+    </div>
 {/if}

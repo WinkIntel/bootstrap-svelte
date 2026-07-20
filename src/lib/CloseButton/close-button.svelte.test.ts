@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import CloseButton from './close-button.svelte';
 
 describe('CloseButton.svelte', () => {
-    test('should render', () => {
-        const results = render(CloseButton);
-        expect(() => results.getByRole('button')).not.toThrow();
-    });
-
     test('renders a close button with default properties', () => {
         render(CloseButton);
         const button = screen.getByRole('button');

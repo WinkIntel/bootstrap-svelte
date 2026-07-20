@@ -162,13 +162,6 @@ describe('Form.TextArea', () => {
         expect(textarea).toHaveAttribute('data-custom', 'x');
     });
 
-    test('binds elementRef to textarea element', () => {
-        const { container } = render(TextArea);
-        const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
-        expect(textarea).toBeInstanceOf(HTMLTextAreaElement);
-        expect(textarea).toBeInTheDocument();
-    });
-
     test('handles a complete configuration', () => {
         const { container } = render(TextArea, {
             props: {

@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
-import { Toast } from '../index.js';
 import ToastBasicTest from './toast-basic-test.svelte';
 
 describe('Toast Component', () => {
@@ -91,23 +90,5 @@ describe('Toast Component', () => {
 
         const containerBody = screen.getByTestId('container-body');
         expect(containerBody).toHaveTextContent('This toast is rendered in a container at top-end');
-    });
-
-    // Test for component API existence
-
-    it('should create a Root component with expected properties', () => {
-        expect(Toast.Root).toBeDefined();
-    });
-
-    it('should create a Header component with expected properties', () => {
-        expect(Toast.Header).toBeDefined();
-    });
-
-    it('should create a Body component with expected properties', () => {
-        expect(Toast.Body).toBeDefined();
-    });
-
-    it('should create a Container component with expected properties', () => {
-        expect(Toast.Container).toBeDefined();
     });
 });

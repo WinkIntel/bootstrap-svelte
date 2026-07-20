@@ -27,6 +27,10 @@ Navigation link component typically used inside a Nav.Item.
     const uid: string = $props.id();
 
     let {
+        'aria-controls': ariaControls,
+        'aria-current': ariaCurrent,
+        'aria-disabled': ariaDisabled,
+        'aria-selected': ariaSelected,
         children,
         class: classValues,
         elementRef = $bindable(null),
@@ -36,6 +40,7 @@ Navigation link component typically used inside a Nav.Item.
         isDisabled = false,
         onclick = noop,
         role,
+        tabindex: consumerTabIndex,
         ...restOfProps
     }: Nav.LinkProps = $props();
 
@@ -58,6 +63,11 @@ Navigation link component typically used inside a Nav.Item.
     let classes: string = $derived(uniqueClsx('nav-link', { active: isActiveState, disabled: isDisabled }, classValues));
 
     const handleClick: EventListener = (event: Event) => {
+        if (isDisabled) {
+            event.preventDefault();
+            return;
+        }
+
         linkState.onclick(event);
         onclick(event);
     };
@@ -81,17 +91,17 @@ Navigation link component typically used inside a Nav.Item.
 </script>
 
 <a
-    aria-controls={linkState.ariaControls}
-    aria-current={isActiveState ? 'page' : undefined}
-    aria-disabled={isDisabled ? 'true' : undefined}
-    aria-selected={linkState.isTab ? isActiveState : undefined}
+    {...restOfProps}
+    aria-controls={linkState.ariaControls ?? ariaControls}
+    aria-current={isActiveState ? 'page' : ariaCurrent}
+    aria-disabled={isDisabled ? 'true' : ariaDisabled}
+    aria-selected={linkState.isTab ? isActiveState : ariaSelected}
     bind:this={elementRef}
     class={classes}
     {href}
     {id}
     onclick={handleClick}
-    tabindex={isDisabled ? -1 : undefined}
-    role={defaultRole}
-    {...restOfProps}>
+    tabindex={isDisabled ? -1 : consumerTabIndex}
+    role={defaultRole}>
     {@render children?.()}
 </a>

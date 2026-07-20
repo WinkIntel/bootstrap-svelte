@@ -46,6 +46,7 @@ Bootstrap-styled email input component for email address entry.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         autocomplete = 'off',
         class: classValues,
         'data-form-type': dataFormType = 'email',
@@ -74,12 +75,12 @@ Bootstrap-styled email input component for email address entry.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     {autocomplete}
     bind:this={elementRef}
     bind:value
     class={classes}
     data-form-type={autocomplete == 'off' ? 'other' : dataFormType}
     data-lpignore={autocomplete == 'off' ? 'true' : dataLpignore}
-    type="email"
-    {...restOfProps} />
+    type="email" />

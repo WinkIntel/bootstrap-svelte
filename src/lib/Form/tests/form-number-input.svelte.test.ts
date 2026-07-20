@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import NumberInput from '../form-number-input.svelte';
 
 describe('Form.NumberInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(NumberInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type number and base class', () => {
         const { container } = render(NumberInput);
         const input = container.querySelector('input[type="number"]') as HTMLInputElement;
@@ -317,14 +312,6 @@ describe('Form.NumberInput', () => {
 
         expect(input).toHaveAttribute('data-testid', 'number-test');
         expect(input).toHaveAttribute('data-custom', 'custom-value');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(NumberInput);
-        const input = container.querySelector('input[type="number"]') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 
     test('applies multiple conditional classes together', () => {

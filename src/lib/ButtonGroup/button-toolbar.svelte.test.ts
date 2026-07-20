@@ -18,11 +18,6 @@ const renderButtonToolbarWithChildContent = (childContent: string = '<div/>', pr
 };
 
 describe('ButtonToolbar.svelte', () => {
-    test('should render', () => {
-        const results = render(ButtonToolbar);
-        expect(() => results.getByRole('toolbar')).not.toThrow();
-    });
-
     test('renders with default properties', () => {
         renderButtonToolbarWithChildContent('<button>Button 1</button><button>Button 2</button>');
         const buttonToolbar = screen.getByRole('toolbar');
@@ -32,6 +27,7 @@ describe('ButtonToolbar.svelte', () => {
         expect(buttonToolbar).toHaveClass('btn-toolbar');
         expect(buttonToolbar.tagName).toBe('DIV');
         expect(buttonToolbar).toHaveAttribute('role', 'toolbar');
+        expect(buttonToolbar).toHaveAttribute('aria-label', expect.stringMatching(/^Button toolbar c\d+$/));
     });
 
     test('renders with custom ID', () => {
@@ -59,33 +55,6 @@ describe('ButtonToolbar.svelte', () => {
 
         // Check that the children are rendered
         expect(screen.getByText('Button 1')).toBeInTheDocument();
-    });
-
-    test('renders multiple button groups correctly', () => {
-        const groupsContent = `<span>
-            <div class="btn-group" role="group">
-                <button>1</button>
-                <button>2</button>
-            </div>
-            <div class="btn-group" role="group">
-                <button>3</button>
-                <button>4</button>
-            </div>
-        </span>
-        `;
-        renderButtonToolbarWithChildContent(groupsContent);
-
-        // Check that all buttons are rendered
-        expect(screen.getByText('1')).toBeInTheDocument();
-        expect(screen.getByText('2')).toBeInTheDocument();
-        expect(screen.getByText('3')).toBeInTheDocument();
-        expect(screen.getByText('4')).toBeInTheDocument();
-    });
-
-    test('handles element reference binding', () => {
-        // This is mostly a TypeScript check, since we can't directly test binding in JSDOM
-        const { component } = renderButtonToolbarWithChildContent(undefined);
-        expect(component).toBeDefined();
     });
 
     test('combines multiple props correctly', () => {

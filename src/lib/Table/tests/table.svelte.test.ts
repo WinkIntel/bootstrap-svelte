@@ -30,18 +30,6 @@ import TableTest from './table-test.svelte';
 
 describe('Table.svelte', () => {
     describe('Basic Rendering and Structure', () => {
-        test('should render a basic table with container wrapper', () => {
-            render(TableTest);
-            const table = screen.getByRole('table');
-
-            expect(table).toBeInTheDocument();
-            expect(table).toHaveClass('table');
-
-            // Table is always wrapped in a container div
-            const container = table.closest('.table-container');
-            expect(container).toBeInTheDocument();
-        });
-
         test('renders table with default properties', () => {
             render(TableTest);
             const table = screen.getByRole('table');
@@ -71,6 +59,7 @@ describe('Table.svelte', () => {
             expect(table).not.toHaveClass('table-borderless');
             expect(table).not.toHaveClass('table-hover');
             expect(table).not.toHaveClass('table-sm');
+            expect(table.closest('.table-container')).toBeInTheDocument();
         });
 
         test('binds elementRef correctly', () => {
@@ -741,14 +730,6 @@ describe('Table.svelte', () => {
             const table = screen.getByRole('table');
 
             expect(table).toHaveClass('table', 'class-1', 'class-2', 'class-3');
-        });
-
-        test('container wrapper is always present', () => {
-            render(TableTest);
-            const table = screen.getByRole('table');
-            const container = table.closest('.table-container');
-
-            expect(container).toBeInTheDocument();
         });
 
         test('responsive wrapper with xs breakpoint is ignored', () => {

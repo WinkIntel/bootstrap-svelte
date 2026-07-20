@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import SearchInput from '../form-search-input.svelte';
 
 describe('Form.SearchInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(SearchInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type search and base class', () => {
         const { container } = render(SearchInput);
         const input = container.querySelector('input[type="search"]') as HTMLInputElement;
@@ -156,13 +151,6 @@ describe('Form.SearchInput', () => {
         expect(input).toHaveAttribute('placeholder', 'Search here');
         expect(input).toHaveAttribute('data-testid', 'search-test');
         expect(input).toHaveAttribute('data-custom', 'custom-value');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(SearchInput);
-        const input = container.querySelector('input[type="search"]') as HTMLInputElement;
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 
     // aria-invalid attribute tests

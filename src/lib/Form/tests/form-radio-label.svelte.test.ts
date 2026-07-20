@@ -18,11 +18,6 @@ const renderRadioLabelWithContent = (content: string = '', props: Form.RadioLabe
 };
 
 describe('Form.RadioLabel', () => {
-    test('renders without crashing', () => {
-        const { container } = render(RadioLabel);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders label element with base class', () => {
         const { container } = render(RadioLabel);
         const label = container.querySelector('label') as HTMLLabelElement;
@@ -125,14 +120,6 @@ describe('Form.RadioLabel', () => {
         const label = container.querySelector('label') as HTMLLabelElement;
 
         expect(label).toBeEmptyDOMElement();
-    });
-
-    test('binds elementRef to the label element', () => {
-        const { container } = render(RadioLabel);
-        const label = container.querySelector('label') as HTMLLabelElement;
-
-        expect(label).toBeInstanceOf(HTMLLabelElement);
-        expect(label).toBeInTheDocument();
     });
 
     test('renders as form control with proper association', () => {

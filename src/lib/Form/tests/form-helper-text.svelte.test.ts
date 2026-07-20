@@ -11,13 +11,6 @@ describe('FormHelperText', () => {
             const helperText = document.querySelector('.form-text');
             expect(helperText).toBeInTheDocument();
             expect(helperText?.tagName).toBe('DIV');
-        });
-
-        it('should render with default Bootstrap form-text class', () => {
-            render(FormHelperText);
-
-            const helperText = document.querySelector('.form-text');
-            expect(helperText).toBeInTheDocument();
             expect(helperText).toHaveClass('form-text');
         });
 
@@ -76,20 +69,6 @@ describe('FormHelperText', () => {
             expect(helperText).toBeInTheDocument();
             expect(helperText).toHaveClass('form-text');
             expect(helperText?.className).toBe('form-text');
-        });
-    });
-
-    describe('Element Reference', () => {
-        it('should handle elementRef prop without throwing', () => {
-            expect(() => {
-                render(FormHelperText, {});
-            }).not.toThrow();
-        });
-
-        it('should handle null elementRef gracefully', () => {
-            expect(() => {
-                render(FormHelperText, { elementRef: null });
-            }).not.toThrow();
         });
     });
 
@@ -256,12 +235,6 @@ describe('FormHelperText', () => {
             const helperText = document.querySelector('.form-text');
             expect(helperText).toBeInTheDocument();
             expect(helperText?.textContent).toBe('');
-        });
-
-        it('should handle null elementRef', () => {
-            expect(() => {
-                render(FormHelperText, { elementRef: null });
-            }).not.toThrow();
         });
 
         it('should handle empty string children', () => {

@@ -18,11 +18,6 @@ const renderCheckLabelWithContent = (content: string = '', props: Form.CheckLabe
 };
 
 describe('Form.CheckLabel', () => {
-    test('renders without crashing', () => {
-        const { container } = render(CheckLabel);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders label element with base class', () => {
         const { container } = render(CheckLabel);
         const label = container.querySelector('label') as HTMLLabelElement;
@@ -127,14 +122,6 @@ describe('Form.CheckLabel', () => {
         // Svelte may insert a comment node when there's no slot content; assert there is no text and no element children instead
         expect(label).toHaveTextContent('');
         expect(label.childElementCount).toBe(0);
-    });
-
-    test('binds elementRef to the label element', () => {
-        const { container } = render(CheckLabel);
-        const label = container.querySelector('label') as HTMLLabelElement;
-
-        expect(label).toBeInstanceOf(HTMLLabelElement);
-        expect(label).toBeInTheDocument();
     });
 
     test('renders as form control with proper association', () => {

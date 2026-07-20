@@ -59,6 +59,7 @@ Bootstrap-styled select input component for dropdown selection.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         children,
         class: classValues,
         elementRef = $bindable(null),
@@ -85,21 +86,21 @@ Bootstrap-styled select input component for dropdown selection.
 
 {#if multiple}
     <select
-        aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+        {...restOfProps}
+        aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
         bind:this={elementRef}
         bind:value
         class={classes}
-        multiple
-        {...restOfProps}>
+        multiple>
         {@render children?.()}
     </select>
 {:else}
     <select
-        aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+        {...restOfProps}
+        aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
         bind:this={elementRef}
         bind:value
-        class={classes}
-        {...restOfProps}>
+        class={classes}>
         {@render children?.()}
     </select>
 {/if}

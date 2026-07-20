@@ -47,6 +47,7 @@ Bootstrap-styled numeric input component for entering numbers.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         class: classValues,
         elementRef = $bindable(null),
         isInvalid,
@@ -72,9 +73,9 @@ Bootstrap-styled numeric input component for entering numbers.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     bind:value
     class={classes}
-    type="number"
-    {...restOfProps} />
+    type="number" />

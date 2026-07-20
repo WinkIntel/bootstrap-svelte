@@ -6,13 +6,6 @@ import { describe, expect, test } from 'vitest';
 import PlaceholderItem from '../placeholder-item.svelte';
 
 describe('Placeholder.Item.svelte', () => {
-    test('should render', () => {
-        const { container } = render(PlaceholderItem);
-        const placeholderItem = container.querySelector('span');
-        expect(placeholderItem).toBeInTheDocument();
-        expect(placeholderItem).toHaveClass('placeholder');
-    });
-
     test('renders with default properties', () => {
         const { container } = render(PlaceholderItem, {
             props: {
@@ -101,9 +94,8 @@ describe('Placeholder.Item.svelte', () => {
         expect(placeholderItem).toHaveClass('test-class');
     });
 
-    test('handles element reference binding', () => {
-        // This is mostly a TypeScript check, since we can't directly test binding in JSDOM
-        const { component } = render(PlaceholderItem);
-        expect(component).toBeDefined();
+    test('does not leak the removed isAnimated prop to the DOM', () => {
+        const { container } = render(PlaceholderItem, { props: { isAnimated: false } as never });
+        expect(container.querySelector('span')).not.toHaveAttribute('isanimated');
     });
 });

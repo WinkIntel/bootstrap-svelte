@@ -28,6 +28,8 @@ An action item within a list group, typically used for navigation or triggering 
     const uid: string = $props.id();
 
     let {
+        'aria-current': ariaCurrent,
+        'aria-disabled': ariaDisabled,
         children,
         class: classValues,
         colorVariant,
@@ -37,10 +39,13 @@ An action item within a list group, typically used for navigation or triggering 
         isActive = false,
         isDisabled = false,
         onclick = noop,
+        role: consumerRole,
+        tabindex: consumerTabIndex,
+        type: consumerType,
         ...restOfProps
     }: ListGroup.ItemActionProps = $props();
 
-    const isAnchor: boolean = $derived(Boolean(href));
+    const isAnchor: boolean = $derived(href !== undefined);
     const elementType: string = $derived(isAnchor ? 'a' : 'button');
 
     let classes: string = $derived(
@@ -57,20 +62,28 @@ An action item within a list group, typically used for navigation or triggering 
     );
 
     const handleClick: EventListener = (event: Event): void => {
+        if (isDisabled) {
+            event.preventDefault();
+            return;
+        }
+
         onclick(event);
     };
 </script>
 
 <svelte:element
     this={elementType}
-    aria-current={isActive}
-    aria-disabled={isDisabled}
+    {...restOfProps as any}
+    aria-current={isActive ? 'page' : ariaCurrent}
+    aria-disabled={isDisabled ? 'true' : ariaDisabled}
     bind:this={elementRef}
     class={classes}
-    {href}
+    href={isAnchor ? href : undefined}
     {id}
+    disabled={isAnchor ? undefined : isDisabled}
     onclick={handleClick}
-    type={isAnchor ? undefined : 'button'}
-    {...restOfProps as any}>
+    role={consumerRole}
+    tabindex={isDisabled ? -1 : consumerTabIndex}
+    type={isAnchor ? consumerType : 'button'}>
     {@render children?.()}
 </svelte:element>

@@ -18,6 +18,7 @@ Button for carousel indicators. Should be placed inside a Carousel.Indicators co
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
+    import { onDestroy } from 'svelte';
     import { CarouselIndicatorButtonState, initCarouselIndicatorButtonState } from './carousel.svelte.js';
     import type { Carousel } from './index.js';
 
@@ -25,6 +26,7 @@ Button for carousel indicators. Should be placed inside a Carousel.Indicators co
 
     // Initialize indicator button state
     const indicatorState: CarouselIndicatorButtonState = initCarouselIndicatorButtonState({});
+    onDestroy(() => indicatorState.root.unregisterIndicator(indicatorState));
 
     let classes: string = $derived(
         uniqueClsx(

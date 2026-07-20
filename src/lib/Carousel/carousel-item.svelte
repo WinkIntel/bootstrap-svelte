@@ -27,6 +27,7 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
     import { easeInOut, uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
     import { linear } from 'svelte/easing';
+    import { onDestroy } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import { CarouselItemState, initCarouselItemState } from './carousel.svelte.js';
     import type { Carousel } from './index.js';
@@ -40,7 +41,9 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         elementRef = $bindable(null),
         id = `carousel-item-${uid}`,
         isActive = false,
-        interval = 5000,
+        interval,
+        onmouseenter: onMouseEnter,
+        onmouseleave: onMouseLeave,
         onSlide = noop,
         onSlid = noop,
         style,
@@ -59,6 +62,18 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
             return interval;
         }
     });
+
+    onDestroy(() => itemState.root.unregisterItem(itemState));
+
+    function handleMouseEnter(event: MouseEvent) {
+        itemState.root.handleMouseEnter();
+        onMouseEnter?.(event as never);
+    }
+
+    function handleMouseLeave(event: MouseEvent) {
+        itemState.root.handleMouseLeave();
+        onMouseLeave?.(event as never);
+    }
 
     let flyX: string | undefined = $derived.by(() => {
         if (itemState.isNext) {
@@ -109,8 +124,8 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
             opacity: 1,
             easing: easeInOut
         }}
-        onmouseenter={() => itemState.root.handleMouseEnter()}
-        onmouseleave={() => itemState.root.handleMouseLeave()}
+        onmouseenter={handleMouseEnter}
+        onmouseleave={handleMouseLeave}
         {...restOfProps}>
         {@render children?.()}
     </div>
@@ -128,8 +143,8 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
             duration: itemState.root.transitionDuration / 2,
             easing: linear
         }}
-        onmouseenter={() => itemState.root.handleMouseEnter()}
-        onmouseleave={() => itemState.root.handleMouseLeave()}
+        onmouseenter={handleMouseEnter}
+        onmouseleave={handleMouseLeave}
         {...restOfProps}>
         {@render children?.()}
     </div>
@@ -148,8 +163,8 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
             opacity: 0,
             easing: easeInOut
         }}
-        onmouseenter={() => itemState.root.handleMouseEnter()}
-        onmouseleave={() => itemState.root.handleMouseLeave()}
+        onmouseenter={handleMouseEnter}
+        onmouseleave={handleMouseLeave}
         {...restOfProps}>
         {@render children?.()}
     </div>
@@ -162,8 +177,8 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         onintrostart={onSlide}
         onintroend={onSlid}
         transition:fade={{ duration: 0 }}
-        onmouseenter={() => itemState.root.handleMouseEnter()}
-        onmouseleave={() => itemState.root.handleMouseLeave()}
+        onmouseenter={handleMouseEnter}
+        onmouseleave={handleMouseLeave}
         {...restOfProps}>
         {@render children?.()}
     </div>

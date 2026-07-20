@@ -145,13 +145,6 @@ describe('Form.UrlInput', () => {
         expect(input).toHaveAttribute('data-custom', 'x');
     });
 
-    test('binds elementRef to input element', () => {
-        const { container } = render(UrlInput);
-        const input = container.querySelector('input') as HTMLInputElement;
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
-    });
-
     test('handles a complete configuration', () => {
         const { container } = render(UrlInput, {
             props: {

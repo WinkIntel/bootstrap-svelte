@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/svelte';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/svelte';
+import { tick } from 'svelte';
+import { describe, expect, it } from 'vitest';
 import { Nav } from '../index.js';
 import NavBasicTest from './nav-basic-test.svelte';
 
@@ -157,60 +158,45 @@ describe('Nav Component', () => {
         expect(disabledLink).not.toHaveAttribute('aria-current');
     });
 
-    it('should handle onclick events properly for hash links', async () => {
-        const mockPreventDefault = vi.fn();
-        const mockStopImmediatePropagation = vi.fn();
-
+    it('prevents hash navigation while preserving consumer click handlers', async () => {
         render(NavBasicTest);
-
         const hashLink = screen.getByTestId('hash-nav-link');
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+        hashLink.dispatchEvent(event);
+        await tick();
 
-        // Create a mock event
-        const _mockEvent = {
-            preventDefault: mockPreventDefault,
-            stopImmediatePropagation: mockStopImmediatePropagation
-        } as unknown as Event;
-
-        // Simulate click event
-        await fireEvent.click(hashLink);
-
-        // For hash links (#!), preventDefault should be called
-        // We can't directly test the mock functions since they're internal,
-        // but we can verify the link behavior
-        expect(hashLink).toHaveAttribute('href', '#!');
+        expect(event.defaultPrevented).toBe(true);
+        expect(screen.getByTestId('nav-click-counts')).toHaveTextContent('1:0:0');
     });
 
-    it('should handle regular href links without preventing default', () => {
+    it('blocks disabled links before internal state or consumer handlers run', async () => {
         render(NavBasicTest);
+        const disabledLink = screen.getByTestId('disabled-interaction-nav-link');
+        const disabledEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+        disabledLink.dispatchEvent(disabledEvent);
+        await tick();
 
-        const regularLink = screen.getByTestId('regular-nav-link');
-        expect(regularLink).toHaveAttribute('href', '/page');
+        expect(disabledEvent.defaultPrevented).toBe(true);
+        expect(disabledLink).not.toHaveClass('active');
+        expect(screen.getByTestId('nav-click-counts')).toHaveTextContent('0:0:0');
 
-        // Regular links should not have aria-current unless explicitly active
-        expect(regularLink).not.toHaveAttribute('aria-current');
-    });
+        const enabledLink = screen.getByTestId('enabled-nav-link');
+        const enabledEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+        let defaultPreventedBeforeNavigationGuard: boolean | undefined;
+        const preventNavigation = (event: Event) => {
+            defaultPreventedBeforeNavigationGuard = event.defaultPrevented;
+            event.preventDefault();
+        };
 
-    it('should update active state when isActive prop changes', () => {
-        render(NavBasicTest);
+        document.addEventListener('click', preventNavigation, { once: true });
+        enabledLink.dispatchEvent(enabledEvent);
+        await tick();
 
-        const conditionalActiveLink = screen.getByTestId('conditional-active-link');
-
-        // Initially should not be active (isActive={false})
-        expect(conditionalActiveLink).not.toHaveClass('active');
-        expect(conditionalActiveLink).not.toHaveAttribute('aria-current');
-    });
-
-    it('should handle custom onclick handlers alongside internal logic', async () => {
-        render(NavBasicTest);
-
-        const customOnclickLink = screen.getByTestId('custom-onclick-link');
-
-        // Click the link
-        await fireEvent.click(customOnclickLink);
-
-        // Verify the link exists and has proper attributes
-        expect(customOnclickLink).toHaveClass('nav-link');
-        expect(customOnclickLink).toHaveAttribute('href', '#!');
+        expect(defaultPreventedBeforeNavigationGuard).toBe(false);
+        expect(enabledLink).toHaveClass('active');
+        expect(enabledLink).toHaveAttribute('aria-current', 'page');
+        expect(enabledLink).toHaveAttribute('tabindex', '5');
+        expect(screen.getByTestId('nav-click-counts')).toHaveTextContent('0:1:0');
     });
 
     it('should generate unique IDs when not provided', () => {

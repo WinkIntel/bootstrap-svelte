@@ -45,6 +45,7 @@ Bootstrap-styled search input component with search-specific features.
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         autocomplete = 'off',
         class: classValues,
         'data-form-type': dataFormType = 'search',
@@ -73,12 +74,12 @@ Bootstrap-styled search input component with search-specific features.
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     {autocomplete}
     bind:this={elementRef}
     bind:value
     class={classes}
     data-form-type={autocomplete == 'off' ? 'other' : dataFormType}
     data-lpignore={autocomplete == 'off' ? 'true' : dataLpignore}
-    type="search"
-    {...restOfProps} />
+    type="search" />

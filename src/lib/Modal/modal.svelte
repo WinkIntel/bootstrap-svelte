@@ -49,11 +49,19 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 -->
 <script lang="ts">
     import { acquireBodyScrollLock, noop, releaseBodyScrollLock, uniqueClsx } from '$lib/common/index.js';
+    import {
+        focusTopOverlay,
+        isFocusInTopOverlay,
+        isTopOverlay,
+        registerOverlay,
+        unregisterOverlay,
+        type OverlayStackEntry
+    } from '$lib/common/overlay-stack.js';
     import { Portal } from '$lib/index.js';
     import { onDestroy, onMount, tick } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import type { Modal } from './index.js';
-    import { initModalRootState, ModalRootState } from './modal.svelte.js';
+    import { acquireModalOpenClass, initModalRootState, ModalRootState, releaseModalOpenClass } from './modal.svelte.js';
 
     // Generate a unique ID for the modal element, in case one is not provided...
     const uid: string = $props.id();
@@ -78,7 +86,11 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
     // Initialize the root state of the modal component...
     let bodyElement: HTMLElement | null = $state(null);
+    let holdsModalOpenClass = false;
     let holdsScrollLock = false;
+    let hidePreventedTimeout: ReturnType<typeof setTimeout> | undefined;
+    let overlayZIndex: number | undefined = $state(undefined);
+    let backdropZIndex: number | undefined = $state(undefined);
     let previouslyFocusedElement: HTMLElement | null = null;
     const unset = Symbol('unset');
     let previousIsShown: Modal.RootProps['isShown'] | typeof unset = unset;
@@ -92,6 +104,17 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
             return useBackdrop;
         }
     });
+    const overlayEntry: OverlayStackEntry = {
+        baseBackdropZIndex: 1050,
+        baseOverlayZIndex: 1055,
+        containsActiveElement: () => !!elementRef?.contains(document.activeElement),
+        focus: focusModal,
+        onKeydown: handleKeydown,
+        setLayers: (nextOverlayZIndex, nextBackdropZIndex) => {
+            overlayZIndex = nextOverlayZIndex;
+            backdropZIndex = nextBackdropZIndex;
+        }
+    };
 
     // Derived classes for the modal component...
     let isHidePrevented: boolean = $state(false);
@@ -137,10 +160,18 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
     $effect(() => {
         if (rootState.isShown && !previousRootIsShown) {
+            registerOverlay(overlayEntry);
             previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
             focusModal();
         } else if (!rootState.isShown && previousRootIsShown) {
-            restoreFocus();
+            const wasTopOverlay = isTopOverlay(overlayEntry);
+            unregisterOverlay(overlayEntry);
+            if (wasTopOverlay) {
+                restoreFocus();
+                if (!isFocusInTopOverlay()) {
+                    focusTopOverlay();
+                }
+            }
         }
 
         previousRootIsShown = rootState.isShown;
@@ -152,18 +183,22 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
                 acquireBodyScrollLock(bodyElement);
                 holdsScrollLock = true;
             }
-            bodyElement.classList.add('modal-open');
+            if (!holdsModalOpenClass) {
+                acquireModalOpenClass(bodyElement);
+                holdsModalOpenClass = true;
+            }
         }
         onShow(event);
     };
 
     const handleOnHidden: EventListener = (event: Event) => {
+        if (bodyElement && holdsModalOpenClass) {
+            releaseModalOpenClass(bodyElement);
+            holdsModalOpenClass = false;
+        }
         if (bodyElement && holdsScrollLock) {
-            const remainingLocks = releaseBodyScrollLock(bodyElement);
+            releaseBodyScrollLock(bodyElement);
             holdsScrollLock = false;
-            if (remainingLocks === 0) {
-                bodyElement.classList.remove('modal-open');
-            }
         }
         onHidden(event);
     };
@@ -201,6 +236,12 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
         if (!firstElement || !lastElement) return;
 
+        if (!elementRef?.contains(document.activeElement)) {
+            event.preventDefault();
+            (event.shiftKey ? lastElement : firstElement).focus();
+            return;
+        }
+
         if (event.shiftKey && document.activeElement === firstElement) {
             event.preventDefault();
             lastElement.focus();
@@ -220,12 +261,24 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
     // Release a held scroll lock if the modal is destroyed while shown, so a
     // removed-while-open modal doesn't permanently disable body scrolling...
     onDestroy(() => {
-        if (holdsScrollLock && bodyElement) {
-            const remainingLocks = releaseBodyScrollLock(bodyElement);
-            holdsScrollLock = false;
-            if (remainingLocks === 0) {
-                bodyElement.classList.remove('modal-open');
+        const wasTopOverlay = isTopOverlay(overlayEntry);
+        unregisterOverlay(overlayEntry);
+        if (wasTopOverlay) {
+            restoreFocus();
+            if (!isFocusInTopOverlay()) {
+                focusTopOverlay();
             }
+        }
+        if (hidePreventedTimeout) {
+            clearTimeout(hidePreventedTimeout);
+        }
+        if (holdsModalOpenClass && bodyElement) {
+            releaseModalOpenClass(bodyElement);
+            holdsModalOpenClass = false;
+        }
+        if (holdsScrollLock && bodyElement) {
+            releaseBodyScrollLock(bodyElement);
+            holdsScrollLock = false;
         }
     });
 
@@ -241,8 +294,12 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
             event.stopPropagation();
             onHidePrevented(event);
             isHidePrevented = true;
-            setTimeout(() => {
+            if (hidePreventedTimeout) {
+                clearTimeout(hidePreventedTimeout);
+            }
+            hidePreventedTimeout = setTimeout(() => {
                 isHidePrevented = false;
+                hidePreventedTimeout = undefined;
             }, 300);
             return;
         }
@@ -253,22 +310,23 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
     };
 
     // Handle keyboard events to dismiss modal on Escape key press
-    const handleKeydown: EventListener = (event: Event) => {
-        const keyboardEvent = event as KeyboardEvent;
+    function handleKeydown(event: KeyboardEvent): void {
         if (!rootState.isShown) return;
 
-        if (keyboardEvent.key === 'Tab') {
-            trapFocus(keyboardEvent);
+        if (event.key === 'Tab') {
+            trapFocus(event);
             return;
         }
 
-        if (rootState.isShown && isKeyboardDismissible && keyboardEvent.key === 'Escape') {
-            rootState.toggleIsShown();
+        if (event.key === 'Escape') {
+            if (isKeyboardDismissible) {
+                rootState.toggleIsShown();
+            } else {
+                onHidePrevented(event);
+            }
         }
-    };
+    }
 </script>
-
-<svelte:window onkeydown={handleKeydown} />
 
 {#if rootState.isShown}
     <div
@@ -278,6 +336,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         class={classes}
         {id}
         role="dialog"
+        style:z-index={overlayZIndex}
         tabindex={isFocusable ? -1 : undefined}
         onmousedown={handleBackdropMouseDown}
         onintrostart={handleOnShow}
@@ -292,7 +351,12 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
 <Portal target="body">
     {#if rootState.isBackdropShown}
-        <div class={backDropClasses} onmousedown={handleBackdropMouseDown} role="presentation" transition:fade={{ duration: useFade ? 150 : 0 }}>
+        <div
+            class={backDropClasses}
+            onmousedown={handleBackdropMouseDown}
+            role="presentation"
+            style:z-index={backdropZIndex}
+            transition:fade={{ duration: useFade ? 150 : 0 }}>
         </div>
     {/if}
 </Portal>

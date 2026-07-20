@@ -1,4 +1,6 @@
 import { Context } from '$lib/common/index.js';
+import { untrack } from 'svelte';
+import { SvelteSet } from 'svelte/reactivity';
 import { Pagination } from './index.js';
 
 /**
@@ -8,13 +10,15 @@ import { Pagination } from './index.js';
  */
 export class PaginationRootState {
     #activePaginationItemId: string = $state('');
-    #disabledPaginationItemId: string = $state('');
+    #disabledPaginationItemIds = new SvelteSet<string>();
 
     constructor(readonly props: Pagination.RootProps) {
         this.isPaginationItemActive = this.isPaginationItemActive.bind(this);
         this.setPaginationItemActive = this.setPaginationItemActive.bind(this);
+        this.removePaginationItemActive = this.removePaginationItemActive.bind(this);
         this.isPaginationItemDisabled = this.isPaginationItemDisabled.bind(this);
         this.setPaginationItemDisabled = this.setPaginationItemDisabled.bind(this);
+        this.removePaginationItemDisabled = this.removePaginationItemDisabled.bind(this);
     }
 
     isPaginationItemActive(itemId: string): boolean {
@@ -23,12 +27,30 @@ export class PaginationRootState {
     setPaginationItemActive(itemId: string): void {
         this.#activePaginationItemId = itemId;
     }
+    removePaginationItemActive(itemId: string): void {
+        untrack(() => {
+            if (this.#activePaginationItemId === itemId) {
+                this.#activePaginationItemId = '';
+            }
+        });
+    }
 
     isPaginationItemDisabled(itemId: string): boolean {
-        return this.#disabledPaginationItemId === itemId;
+        return this.#disabledPaginationItemIds.has(itemId);
     }
     setPaginationItemDisabled(itemId: string): void {
-        this.#disabledPaginationItemId = itemId;
+        untrack(() => {
+            if (itemId && !this.#disabledPaginationItemIds.has(itemId)) {
+                this.#disabledPaginationItemIds.add(itemId);
+            }
+        });
+    }
+    removePaginationItemDisabled(itemId: string): void {
+        untrack(() => {
+            if (itemId && this.#disabledPaginationItemIds.has(itemId)) {
+                this.#disabledPaginationItemIds.delete(itemId);
+            }
+        });
     }
 }
 
@@ -39,7 +61,7 @@ export class PaginationRootState {
  */
 export class PaginationItemState {
     isActive = $derived.by(() => this.root.isPaginationItemActive(this.props.id || ''));
-    isDisabled = $derived.by(() => this.root.isPaginationItemDisabled(this.props.id || ''));
+    isDisabled = $derived.by(() => this.props.isDisabled || this.root.isPaginationItemDisabled(this.props.id || ''));
 
     constructor(
         readonly props: Pagination.ItemProps,
@@ -47,9 +69,6 @@ export class PaginationItemState {
     ) {
         if (this.props.isActive) {
             this.root.setPaginationItemActive(this.props.id || '');
-        }
-        if (this.props.isDisabled) {
-            this.root.setPaginationItemDisabled(this.props.id || '');
         }
     }
 }
@@ -60,6 +79,8 @@ export class PaginationItemState {
  * The click event sets the active state of the corresponding Pagination item.
  */
 export class PaginationLinkState {
+    isDisabled = $derived.by(() => this.item.isDisabled || this.props.isDisabled);
+
     constructor(
         readonly props: Pagination.LinkProps,
         readonly root: PaginationRootState,

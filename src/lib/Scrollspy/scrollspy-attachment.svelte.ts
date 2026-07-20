@@ -1,7 +1,24 @@
 import { isDisabled } from '$lib/common/dom.js';
 import type { Attachment } from 'svelte/attachments';
-import { SvelteMap } from 'svelte/reactivity';
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import type { ScrollspyOptions } from './types.js';
+
+function resolveHashTarget(hash: string): HTMLElement | null {
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    if (!rawId) {
+        return null;
+    }
+
+    let decodedId = rawId;
+    try {
+        decodedId = decodeURIComponent(rawId);
+    } catch {
+        // A literal percent sequence can be a valid element ID even when it is
+        // not a valid URI escape. Fall back to the exact fragment text.
+    }
+
+    return document.getElementById(decodedId) ?? (decodedId === rawId ? null : document.getElementById(rawId));
+}
 
 /**
  * Creates a scrollspy attachment that monitors elements matching a target selector
@@ -24,15 +41,27 @@ export function scrollspy(options: ScrollspyOptions): Attachment<HTMLElement> {
         }
 
         // Get the target element from options targetSelector...
-        const targetElement: HTMLElement | null = document.querySelector<HTMLElement>(options.targetSelector);
+        let targetElement: HTMLElement | null;
+        try {
+            targetElement = document.querySelector<HTMLElement>(options.targetSelector);
+        } catch {
+            throw new Error(`Scrollspy: invalid target selector "${options.targetSelector}"`);
+        }
         if (!targetElement) {
             throw new Error(`Scrollspy: target element not found for selector "${options.targetSelector}"`);
         }
 
+        const observerOptions: IntersectionObserverInit = {
+            root: element,
+            rootMargin: '0px 0px -25%',
+            threshold: [0.1, 0.5, 1],
+            ...options.observerOptions
+        };
+
         // Smooth scroll functionality
         const handleClick = (event: Event) => {
             const target: EventTarget | null = event.target;
-            if (!(target instanceof HTMLElement)) {
+            if (!(target instanceof Element)) {
                 return;
             }
 
@@ -43,36 +72,36 @@ export function scrollspy(options: ScrollspyOptions): Attachment<HTMLElement> {
             }
 
             // Find the target element that corresponds to the clicked link's hash
-            const targetElement: Element | null = element.querySelector(anchor.hash);
+            const targetElement = resolveHashTarget(anchor.hash);
 
             if (targetElement) {
                 event.preventDefault();
 
-                // Get the scroll container (root element or window)
-                const root = (options.observerOptions?.root as HTMLElement) || element;
+                // A null observer root represents the viewport/window.
+                const root = observerOptions.root;
+                const scrollContainer = root instanceof HTMLElement ? root : null;
 
                 // Calculate the scroll position
                 const elementRect = targetElement.getBoundingClientRect();
-                const containerRect = root.getBoundingClientRect();
 
                 let scrollTop: number;
 
-                if (root === element || root instanceof HTMLElement) {
+                if (scrollContainer) {
                     // Scrolling within a container element
                     // Cast targetElement to HTMLElement to use offsetTop
                     scrollTop = (targetElement as HTMLElement).offsetTop - element.offsetTop;
                 } else {
                     // Scrolling the window
-                    scrollTop = elementRect.top + window.pageYOffset - containerRect.top;
+                    scrollTop = elementRect.top + window.pageYOffset;
                 }
 
                 // Perform smooth scroll
-                if (root === element || root instanceof HTMLElement) {
-                    if (root.scrollTo) {
-                        root.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                if (scrollContainer) {
+                    if (scrollContainer.scrollTo) {
+                        scrollContainer.scrollTo({ top: scrollTop, behavior: 'smooth' });
                     } else {
                         // Fallback for older browsers
-                        root.scrollTop = scrollTop;
+                        scrollContainer.scrollTop = scrollTop;
                     }
                 } else {
                     // Scroll the window
@@ -88,7 +117,7 @@ export function scrollspy(options: ScrollspyOptions): Attachment<HTMLElement> {
         };
 
         // Maps to store links and their target sections
-        const targetLinks = new SvelteMap<string, HTMLAnchorElement>();
+        const targetLinks = new SvelteSet<HTMLAnchorElement>();
         const observableSections = new SvelteMap<string, Element>();
 
         // Find all the anchor links within the target element...
@@ -99,28 +128,18 @@ export function scrollspy(options: ScrollspyOptions): Attachment<HTMLElement> {
                 continue;
             }
 
-            const observableSection = document.querySelector(decodeURI(anchor.hash));
+            const observableSection = resolveHashTarget(anchor.hash);
 
             if (observableSection !== null) {
-                targetLinks.set(decodeURI(anchor.hash), anchor);
+                targetLinks.add(anchor);
                 observableSections.set(anchor.hash, observableSection);
                 // attach the click handler to the anchor
                 anchor.addEventListener('click', handleClick);
             }
         }
 
-        // Set default options for the IntersectionObserver...
-        const defaultBootstrapObserverOptions: IntersectionObserverInit = {
-            root: element,
-            rootMargin: '0px 0px -25%',
-            threshold: [0.1, 0.5, 1]
-        };
-
-        // Ensure observerOptions exists, create it if it doesn't
-        options.observerOptions = { ...defaultBootstrapObserverOptions, ...options.observerOptions };
-
         // Create an IntersectionObserver that will invoke the callback when targets intersect
-        const observer = new IntersectionObserver(options.callback, options.observerOptions);
+        const observer = new IntersectionObserver(options.callback, observerOptions);
 
         // Start observing each target element for intersection events
         for (const section of observableSections.values()) {
@@ -130,7 +149,7 @@ export function scrollspy(options: ScrollspyOptions): Attachment<HTMLElement> {
         // Return cleanup function that will be called when the attachment is removed
         return () => {
             // Remove click event listener
-            for (const anchor of targetLinks.values()) {
+            for (const anchor of targetLinks) {
                 anchor.removeEventListener('click', handleClick);
             }
             // Disconnect the observer to prevent memory leaks

@@ -84,13 +84,6 @@ describe('Form.Root', () => {
         expect(form).toHaveAttribute('data-custom', 'abc');
     });
 
-    test('binds elementRef to the form element (exists in DOM)', () => {
-        const { container } = render(Root);
-        const form = container.querySelector('form') as HTMLFormElement;
-        expect(form).toBeInstanceOf(HTMLFormElement);
-        expect(form).toBeInTheDocument();
-    });
-
     test('handles a complete configuration (classes + flags + attrs)', () => {
         const { container } = render(Root, {
             props: {

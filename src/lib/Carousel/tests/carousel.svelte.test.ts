@@ -1,8 +1,11 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Carousel } from '../index.js';
 import CarouselAutoplayTest from './carousel-autoplay-test.svelte';
+import CarouselAdversarialTest from './carousel-adversarial-test.svelte';
+import CarouselAsyncAutoplayTest from './carousel-async-autoplay-test.svelte';
 import CarouselBasicTest from './carousel-basic-test.svelte';
+import CarouselIntervalTest from './carousel-interval-test.svelte';
+import CarouselRegressionTest from './carousel-regression-test.svelte';
 import CarouselTimerTest from './carousel-timer-test.svelte';
 
 describe('Carousel Component', () => {
@@ -95,93 +98,6 @@ describe('Carousel Component', () => {
         expect(crossfadeCarousel).toHaveClass('slide');
         expect(crossfadeCarousel).toHaveClass('carousel-fade');
     });
-
-    it('should render carousel with custom interval', () => {
-        render(CarouselBasicTest);
-
-        const intervalCarousel = screen.getByTestId('interval-carousel');
-        expect(intervalCarousel).toHaveClass('carousel');
-
-        // The interval property is not directly visible in the DOM, but we can check
-        // that the carousel was rendered correctly
-        const intervalCarouselItem = screen.getByTestId('interval-carousel-item-1');
-        expect(intervalCarouselItem).toHaveClass('active');
-    });
-
-    it('should render carousel with custom transition duration', () => {
-        render(CarouselBasicTest);
-
-        const durationCarousel = screen.getByTestId('duration-carousel');
-        expect(durationCarousel).toHaveClass('carousel');
-
-        // The transitionDuration property is not directly visible in the DOM, but we can check
-        // that the carousel was rendered correctly
-        const durationCarouselItem = screen.getByTestId('duration-carousel-item-1');
-        expect(durationCarouselItem).toHaveClass('active');
-    });
-
-    it('should render carousel with ride enabled', () => {
-        render(CarouselBasicTest);
-
-        const rideCarousel = screen.getByTestId('ride-carousel');
-        expect(rideCarousel).toHaveClass('carousel');
-
-        // The ride property is not directly visible in the DOM, but we can check
-        // that the carousel was rendered correctly
-        const rideCarouselItem = screen.getByTestId('ride-carousel-item-1');
-        expect(rideCarouselItem).toHaveClass('active');
-    });
-
-    it('should render carousel autoplay without a reactive update loop', () => {
-        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-        try {
-            render(CarouselAutoplayTest);
-
-            const autoplayCarousel = screen.getByTestId('autoplay-carousel');
-            expect(autoplayCarousel).toHaveClass('carousel');
-
-            const runtimeErrors = errorSpy.mock.calls.flat().map((message) => String(message));
-            expect(runtimeErrors.some((message) => message.includes('effect_update_depth_exceeded'))).toBe(false);
-            expect(runtimeErrors.some((message) => message.includes('infinite_loop_guard'))).toBe(false);
-        } finally {
-            errorSpy.mockRestore();
-        }
-    });
-
-    // Test for component API existence
-
-    it('should create a Root component with expected properties', () => {
-        expect(Carousel.Root).toBeDefined();
-    });
-
-    it('should create an Inner component with expected properties', () => {
-        expect(Carousel.Inner).toBeDefined();
-    });
-
-    it('should create an Item component with expected properties', () => {
-        expect(Carousel.Item).toBeDefined();
-    });
-
-    it('should create a Caption component with expected properties', () => {
-        expect(Carousel.Caption).toBeDefined();
-    });
-
-    it('should create a ControlPrev component with expected properties', () => {
-        expect(Carousel.ControlPrev).toBeDefined();
-    });
-
-    it('should create a ControlNext component with expected properties', () => {
-        expect(Carousel.ControlNext).toBeDefined();
-    });
-
-    it('should create an Indicators component with expected properties', () => {
-        expect(Carousel.Indicators).toBeDefined();
-    });
-
-    it('should create an IndicatorButton component with expected properties', () => {
-        expect(Carousel.IndicatorButton).toBeDefined();
-    });
 });
 
 describe('Carousel Timer Cleanup On Dispose', () => {
@@ -264,6 +180,248 @@ describe('Carousel navigation and autoplay', () => {
 
         expect(screen.getByTestId('autoplay-carousel-item-2')).toHaveClass('active');
         expect(screen.queryByTestId('autoplay-carousel-item-1')).not.toBeInTheDocument();
+    });
+
+    it('starts ride=carousel autoplay when asynchronous item registration reaches two slides', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselAsyncAutoplayTest);
+
+        await vi.advanceTimersByTimeAsync(10);
+        expect(screen.getByTestId('async-autoplay-item-1')).toHaveClass('active');
+
+        await vi.advanceTimersByTimeAsync(19);
+        expect(screen.getByTestId('async-autoplay-item-1')).toHaveClass('active');
+
+        await vi.advanceTimersByTimeAsync(1);
+        expect(screen.getByTestId('async-autoplay-item-2')).toHaveClass('active');
+        expect(screen.queryByTestId('async-autoplay-item-1')).not.toBeInTheDocument();
+    });
+
+    it('uses the root interval for consecutive cycles when items have no override', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselIntervalTest);
+
+        await vi.advanceTimersByTimeAsync(20);
+        expect(screen.getByTestId('root-interval-item-2')).toHaveClass('active');
+        await vi.advanceTimersByTimeAsync(20);
+        expect(screen.getByTestId('root-interval-item-3')).toHaveClass('active');
+    });
+
+    it('uses an active item interval on the first ride=carousel cycle', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselIntervalTest);
+
+        await vi.advanceTimersByTimeAsync(20);
+        expect(screen.getByTestId('item-interval-item-2')).toHaveClass('active');
+    });
+
+    it('starts ride=true autoplay after an indicator navigation', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselAdversarialTest);
+
+        await fireEvent.click(screen.getByTestId('indicator-2'));
+        await vi.advanceTimersByTimeAsync(0);
+        expect(screen.getByTestId('indicator-item-2')).toHaveClass('active');
+        await vi.advanceTimersByTimeAsync(20);
+        expect(screen.getByTestId('indicator-item-3')).toHaveClass('active');
+    });
+
+    it('does not resume touch cycling after ride is disabled', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselAdversarialTest);
+        const carousel = screen.getByTestId('touch-carousel');
+
+        fireEvent.pointerDown(carousel, { clientX: 100, isPrimary: true, pointerType: 'touch' });
+        fireEvent.pointerUp(carousel, { clientX: 100, isPrimary: true, pointerType: 'touch' });
+        await fireEvent.click(screen.getByTestId('disable-touch-ride'));
+        await vi.advanceTimersByTimeAsync(1000);
+
+        expect(vi.getTimerCount()).toBe(0);
+        expect(screen.getByTestId('touch-item-1')).toHaveClass('active');
+    });
+
+    it('composes root pointer and item hover callbacks with carousel handlers', () => {
+        render(CarouselAdversarialTest);
+        const carousel = screen.getByTestId('touch-carousel');
+        const item = screen.getByTestId('touch-item-1');
+
+        fireEvent.pointerDown(carousel, { clientX: 10, isPrimary: true, pointerType: 'touch' });
+        fireEvent.pointerCancel(carousel, { clientX: 10, isPrimary: true, pointerType: 'touch' });
+        fireEvent.mouseEnter(item);
+        fireEvent.mouseLeave(item);
+        expect(screen.getByTestId('callback-counts')).toHaveTextContent('2:2');
+    });
+
+    it('keeps fade transitions locked through their full duration', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselAdversarialTest);
+        const next = screen.getByTestId('fade-boundary-next');
+
+        fireEvent.click(next);
+        await vi.advanceTimersByTimeAsync(501);
+        fireEvent.click(next);
+        await vi.advanceTimersByTimeAsync(499);
+
+        expect(screen.getByTestId('fade-boundary-item-2')).toHaveClass('active');
+        expect(screen.queryByTestId('fade-boundary-item-3')).not.toBeInTheDocument();
+    });
+
+    it('reconciles a removed middle item before navigating', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselAdversarialTest);
+        await fireEvent.click(screen.getByTestId('remove-middle'));
+        await fireEvent.click(screen.getByTestId('removal-next'));
+        await vi.advanceTimersByTimeAsync(0);
+
+        const inner = screen.getByTestId('removal-inner');
+        expect(screen.getByTestId('removal-item-3')).toHaveClass('active');
+        expect(inner.querySelectorAll('.carousel-item.active')).toHaveLength(1);
+    });
+
+    it.each([
+        ['first', 'one', 'two', 'Slide 1'],
+        ['middle', 'two', 'three', 'Slide 2']
+    ] as const)('reactively pairs the remaining item and indicator after removing the active %s item', async (_, removed, active, label) => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselRegressionTest);
+
+        if (removed === 'two') {
+            await fireEvent.click(screen.getByTestId('indicator-two'));
+            await vi.advanceTimersByTimeAsync(0);
+        }
+
+        await fireEvent.click(screen.getByTestId(`remove-${removed}`));
+
+        const item = screen.getByTestId(`item-${active}`);
+        const indicator = screen.getByTestId(`indicator-${active}`);
+        expect(item).toHaveClass('active');
+        expect(screen.getByTestId('regression-inner').querySelectorAll('.carousel-item.active')).toHaveLength(1);
+        expect(indicator).toHaveClass('active');
+        expect(indicator).toHaveAttribute('aria-current', 'true');
+        expect(indicator).toHaveAttribute('aria-label', label);
+        expect(screen.getByTestId('regression-indicators').querySelectorAll('.active')).toHaveLength(1);
+    });
+
+    it.each([
+        ['slide', 'from', 'one', 'two'],
+        ['slide', 'to', 'two', 'one'],
+        ['fade', 'from', 'one', 'two'],
+        ['fade', 'to', 'two', 'three'],
+        ['none', 'to', 'two', 'one']
+    ] as const)('invalidates a pending %s transition when its %s item is removed', async (animation, _, removed, active) => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselRegressionTest, { props: { animation, transitionDuration: 100 } });
+
+        fireEvent.click(screen.getByTestId('regression-next'));
+        fireEvent.click(screen.getByTestId(`remove-${removed}`));
+        await vi.advanceTimersByTimeAsync(200);
+
+        expect(screen.getByTestId(`item-${active}`)).toHaveClass('active');
+        expect(screen.getByTestId(`indicator-${active}`)).toHaveAttribute('aria-current', 'true');
+        expect(screen.getByTestId('regression-inner').querySelectorAll('.carousel-item.active')).toHaveLength(1);
+        expect(screen.getByTestId('regression-indicators').querySelectorAll('.active')).toHaveLength(1);
+
+        await vi.advanceTimersByTimeAsync(1_000);
+        expect(screen.getByTestId(`item-${active}`)).toHaveClass('active');
+        expect(screen.getByTestId('regression-inner').querySelectorAll('.carousel-item.active')).toHaveLength(1);
+    });
+
+    it('resumes ride=true autoplay after an unexpected terminal pointer event', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselRegressionTest, { props: { interval: 20, ride: true } });
+        const carousel = screen.getByTestId('regression-carousel');
+
+        fireEvent.pointerDown(carousel, { clientX: 100, isPrimary: true, pointerType: 'touch' });
+        fireEvent.pointerUp(carousel, { clientX: 100, isPrimary: false, pointerType: 'mouse' });
+
+        await vi.advanceTimersByTimeAsync(1_019);
+        expect(screen.getByTestId('item-one')).toHaveClass('active');
+        await vi.advanceTimersByTimeAsync(1);
+        expect(screen.getByTestId('item-two')).toHaveClass('active');
+    });
+
+    it('holds ride=true autoplay for a full second after a swipe before applying the item interval', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselRegressionTest, { props: { interval: 20, ride: true } });
+        const carousel = screen.getByTestId('regression-carousel');
+
+        fireEvent.pointerDown(carousel, { clientX: 100, isPrimary: true, pointerType: 'touch' });
+        fireEvent.pointerUp(carousel, { clientX: 0, isPrimary: true, pointerType: 'touch' });
+        await vi.advanceTimersByTimeAsync(0);
+        expect(screen.getByTestId('item-two')).toHaveClass('active');
+
+        await vi.advanceTimersByTimeAsync(1_019);
+        expect(screen.getByTestId('item-two')).toHaveClass('active');
+        await vi.advanceTimersByTimeAsync(1);
+        expect(screen.getByTestId('item-three')).toHaveClass('active');
+    });
+
+    it.each([Number.NaN, -1, 0])('falls back to the configured root interval for invalid item interval %s', async (itemInterval) => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselRegressionTest, { props: { interval: 40, itemInterval, ride: 'carousel' } });
+
+        await vi.advanceTimersByTimeAsync(39);
+        expect(screen.getByTestId('item-one')).toHaveClass('active');
+        await vi.advanceTimersByTimeAsync(1);
+        expect(screen.getByTestId('item-two')).toHaveClass('active');
+    });
+
+    it.each([Number.NaN, -1, 0])('normalizes invalid root interval %s to 5000ms', async (interval) => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselRegressionTest, { props: { interval, ride: 'carousel' } });
+
+        await vi.advanceTimersByTimeAsync(4_999);
+        expect(screen.getByTestId('item-one')).toHaveClass('active');
+        await vi.advanceTimersByTimeAsync(1);
+        expect(screen.getByTestId('item-two')).toHaveClass('active');
+    });
+
+    it.each(['slide', 'fade'] as const)('honors a zero-duration %s transition', async (animation) => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselRegressionTest, { props: { animation, transitionDuration: 0 } });
+
+        expect(screen.getByTestId('item-one').getAttribute('style')).toContain('transition: transform 0s');
+        fireEvent.click(screen.getByTestId('regression-next'));
+        await vi.advanceTimersByTimeAsync(0);
+        expect(screen.getByTestId('item-two')).toHaveClass('active');
+
+        fireEvent.click(screen.getByTestId('regression-next'));
+        await vi.advanceTimersByTimeAsync(0);
+        expect(screen.getByTestId('item-three')).toHaveClass('active');
+    });
+
+    it.each([
+        ['slide', -1],
+        ['slide', Number.NaN],
+        ['fade', -1],
+        ['fade', Number.NaN]
+    ] as const)('normalizes invalid %s transition duration %s to 600ms', async (animation, transitionDuration) => {
+        vi.useFakeTimers({ shouldAdvanceTime: false });
+        render(CarouselRegressionTest, { props: { animation, transitionDuration } });
+        const next = screen.getByTestId('regression-next');
+
+        expect(screen.getByTestId('item-one').getAttribute('style')).toContain('transition: transform 0.6s');
+        fireEvent.click(next);
+        await vi.advanceTimersByTimeAsync(599);
+        fireEvent.click(next);
+        await vi.advanceTimersByTimeAsync(1);
+        expect(screen.getByTestId('item-two')).toHaveClass('active');
+
+        fireEvent.click(next);
+        await vi.advanceTimersByTimeAsync(animation === 'slide' ? 600 : 0);
+        expect(screen.getByTestId('item-three')).toHaveClass('active');
+    });
+
+    it('clears a cancelled touch gesture without navigating', async () => {
+        render(CarouselAdversarialTest);
+        const carousel = screen.getByTestId('cancel-carousel');
+
+        fireEvent.pointerDown(carousel, { clientX: 100, isPrimary: true, pointerType: 'touch' });
+        fireEvent.pointerCancel(carousel, { clientX: 0, isPrimary: false, pointerType: 'mouse' });
+        fireEvent.pointerUp(carousel, { clientX: 0, isPrimary: true, pointerType: 'touch' });
+
+        expect(screen.getByTestId('cancel-item-1')).toHaveClass('active');
+        expect(screen.queryByTestId('cancel-item-2')).not.toBeInTheDocument();
     });
 
     it('should atomically swap the active class between items when the slide transition commits', async () => {

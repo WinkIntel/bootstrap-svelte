@@ -1,15 +1,11 @@
 /// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom/vitest';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, test } from 'vitest';
 import Row from './row.svelte';
+import RowStateTest from './tests/row-state-test.svelte';
 
 describe('Row.svelte', () => {
-    test('should render', () => {
-        const { container } = render(Row);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders a row with default properties', () => {
         const { container } = render(Row);
         const row = container.firstChild as HTMLElement;
@@ -54,12 +50,15 @@ describe('Row.svelte', () => {
         expect(row).toHaveClass('row-cols-sm-4');
     });
 
-    // Test for cols with multiple breakpoints
-    test('renders with multiple breakpoint cols', () => {
+    test.each([
+        [1, 'row-cols-1'],
+        [6, 'row-cols-6'],
+        ['auto', 'row-cols-auto']
+    ] as const)('uses Bootstrap xs classes for %s', (xs, expectedClass) => {
         const { container } = render(Row, {
             props: {
                 cols: {
-                    xs: 1,
+                    xs,
                     md: 3,
                     lg: 5
                 }
@@ -68,9 +67,45 @@ describe('Row.svelte', () => {
 
         const row = container.firstChild as HTMLElement;
         expect(row).toHaveClass('row');
-        expect(row).toHaveClass('row-col-1'); // Notice xs is handled differently
+        expect(row).toHaveClass(expectedClass);
+        expect(row).not.toHaveClass(`row-cols-xs-${xs}`);
         expect(row).toHaveClass('row-cols-md-3');
         expect(row).toHaveClass('row-cols-lg-5');
+    });
+
+    test('ignores out-of-range runtime xs values that are excluded by the public type', () => {
+        const { container } = render(Row, { props: { cols: { xs: 0 } as never } });
+        const row = container.firstChild as HTMLElement;
+
+        expect(row).not.toHaveClass('row-cols-0');
+        expect(row).not.toHaveClass('row-cols-xs-0');
+    });
+
+    test.each([2.5, Number.NaN, 0, 7])('rejects malformed scalar cols values (%s)', (cols) => {
+        const { container } = render(Row, { props: { cols: cols as never } });
+        const row = container.firstChild as HTMLElement;
+
+        expect(row.className).toBe('row');
+    });
+
+    test.each([{ xs: 2.5 }, { xs: Number.NaN }, { xs: 7 }, { unknown: 2 }])('rejects malformed map values (%o)', (cols) => {
+        const { container } = render(Row, { props: { cols: cols as never } });
+        const row = container.firstChild as HTMLElement;
+
+        expect(row.className).toBe('row');
+    });
+
+    test('updates between xs and responsive classes without retaining stale tokens', async () => {
+        render(RowStateTest);
+        const row = screen.getByTestId('responsive-row');
+
+        expect(row).toHaveClass('row-cols-sm-2');
+        await fireEvent.click(screen.getByTestId('toggle-row-cols'));
+        expect(row).toHaveClass('row-cols-3');
+        expect(row).not.toHaveClass('row-cols-sm-2', 'row-cols-xs-3');
+        await fireEvent.click(screen.getByTestId('toggle-row-cols'));
+        expect(row).toHaveClass('row-cols-sm-2');
+        expect(row).not.toHaveClass('row-cols-3');
     });
 
     // Test for custom ID

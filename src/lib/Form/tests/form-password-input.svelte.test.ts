@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import PasswordInput from '../form-password-input.svelte';
 
 describe('Form.PasswordInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(PasswordInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type password and base class by default', () => {
         const { container } = render(PasswordInput);
         const input = container.querySelector('input[type="password"]') as HTMLInputElement;
@@ -312,14 +307,6 @@ describe('Form.PasswordInput', () => {
 
         expect(input).toHaveAttribute('data-testid', 'password-test');
         expect(input).toHaveAttribute('data-custom', 'custom-value');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(PasswordInput);
-        const input = container.querySelector('input') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 
     test('applies multiple conditional classes together', () => {

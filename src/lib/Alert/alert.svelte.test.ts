@@ -3,8 +3,9 @@ import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { createRawSnippet } from 'svelte';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import Alert from './alert.svelte';
+import AlertVariantStateTest from './tests/alert-variant-state-test.svelte';
 import type { AlertRootProps } from './types.js';
 
 const renderAlertWithText = (text: string, props: AlertRootProps = {}) => {
@@ -19,14 +20,6 @@ const renderAlertWithText = (text: string, props: AlertRootProps = {}) => {
 };
 
 describe('Alert.svelte', () => {
-    test('should render', () => {
-        renderAlertWithText('Alert content');
-        const alert = screen.getByText('Alert content');
-
-        expect(alert).toBeInTheDocument();
-        expect(alert).toHaveClass('alert');
-    });
-
     test('renders an alert with default properties', () => {
         renderAlertWithText('Default Alert');
         const alert = screen.getByText('Default Alert');
@@ -37,21 +30,54 @@ describe('Alert.svelte', () => {
         expect(alert).toHaveAttribute('role', 'alert');
     });
 
-    // Test for specific variant
-    test('renders with primary variant', () => {
-        renderAlertWithText('Primary Alert', { colorVariant: 'primary' });
-        const alert = screen.getByText('Primary Alert');
+    test('applies explicit color variants and caller classes without the default', () => {
+        const { container } = renderAlertWithText('Explicit Alert', { colorVariant: 'success', class: 'text-bg-secondary' });
+        const alert = container.querySelector('[role="alert"]');
 
-        expect(alert).toHaveClass('alert');
-        expect(alert).toHaveClass('alert-primary');
+        expect(alert).toHaveClass('alert-success', 'text-bg-secondary');
+        expect(alert).not.toHaveClass('alert-primary');
     });
 
-    test('renders with success variant', () => {
+    test('does not combine the default with an explicit color variant', () => {
         renderAlertWithText('Success Alert', { colorVariant: 'success' });
         const alert = screen.getByText('Success Alert');
 
-        expect(alert).toHaveClass('alert');
         expect(alert).toHaveClass('alert-success');
+        expect(alert).not.toHaveClass('alert-primary');
+    });
+
+    test.each([
+        [undefined, undefined, true],
+        [null, null, true],
+        ['', '', true],
+        ['success', undefined, false],
+        [undefined, 'text-bg-secondary', false]
+    ])('normalizes colorVariant=%s and class=%s defaults', (colorVariant, classValue, hasDefault) => {
+        const { container } = renderAlertWithText('Normalized Alert', {
+            colorVariant: colorVariant as never,
+            class: classValue as never
+        });
+        const alert = container.querySelector('[role="alert"]');
+
+        expect(alert).toHaveClass('alert');
+        expect(alert?.classList.contains('alert-primary')).toBe(hasDefault);
+    });
+
+    test('reapplies the default only after class and color overrides are cleared', async () => {
+        const user = userEvent.setup();
+        render(AlertVariantStateTest);
+        const alert = screen.getByTestId('stateful-alert');
+
+        expect(alert).toHaveClass('alert-primary');
+        await user.click(screen.getByTestId('set-alert-class'));
+        expect(alert).toHaveClass('text-bg-secondary');
+        expect(alert).not.toHaveClass('alert-primary');
+        await user.click(screen.getByTestId('set-alert-variant'));
+        expect(alert).toHaveClass('alert-success', 'text-bg-secondary');
+        await user.click(screen.getByTestId('clear-alert-variant'));
+        expect(alert).not.toHaveClass('alert-success', 'alert-primary');
+        await user.click(screen.getByTestId('clear-alert-class'));
+        expect(alert).toHaveClass('alert-primary');
     });
 
     // Test dismissible alert
@@ -98,16 +124,17 @@ describe('Alert.svelte', () => {
     // Test dismissal functionality
     test('dismisses alert when close button is clicked', async () => {
         const user = userEvent.setup();
-        const { container } = renderAlertWithText('Dismissible Alert', { isDismissible: true });
+        const onClose = vi.fn();
+        const onClosed = vi.fn();
+        const { container } = renderAlertWithText('Dismissible Alert', { isAnimated: false, isDismissible: true, onClose, onClosed });
         const closeButton = container.querySelector('.btn-close');
 
         expect(screen.getByText('Dismissible Alert')).toBeInTheDocument();
 
-        if (closeButton) {
-            await user.click(closeButton);
-        }
+        await user.click(closeButton!);
 
-        // Not able to get events to work with svelte...
-        // expect(screen.queryByText('Dismissible Alert')).not.toBeInTheDocument();
+        expect(screen.queryByText('Dismissible Alert')).not.toBeInTheDocument();
+        expect(onClose).toHaveBeenCalledTimes(1);
+        expect(onClosed).toHaveBeenCalledTimes(1);
     });
 });

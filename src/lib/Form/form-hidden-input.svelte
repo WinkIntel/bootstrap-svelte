@@ -14,7 +14,7 @@ Bootstrap-styled hidden input component for passing data in forms without visual
 <script lang="ts">
     import type { Form } from './index.js';
 
-    let { elementRef = $bindable(null), value = $bindable(undefined), ...restOfProps }: Form.FileInputProps = $props();
+    let { elementRef = $bindable(null), value = $bindable(undefined), ...restOfProps }: Form.HiddenInputProps = $props();
 </script>
 
-<input bind:this={elementRef} bind:value type="hidden" {...restOfProps} />
+<input {...restOfProps} bind:this={elementRef} bind:value type="hidden" />

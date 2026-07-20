@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import DateInput from '../form-date-input.svelte';
 
 describe('Form.DateInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(DateInput);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders input with type date and default form-control class', () => {
         const { container } = render(DateInput);
         const input = container.querySelector('input[type="date"]') as HTMLInputElement;
@@ -351,14 +346,6 @@ describe('Form.DateInput', () => {
         const input = container.querySelector('input[type="date"]') as HTMLInputElement;
 
         expect(input).toHaveAttribute('title', 'Choose your date');
-    });
-
-    test('binds elementRef to the input element', () => {
-        const { container } = render(DateInput);
-        const input = container.querySelector('input[type="date"]') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
     });
 
     test('combines plaintext with validation classes', () => {

@@ -5,11 +5,6 @@ import { describe, expect, test } from 'vitest';
 import InputGroup from '../form-input-group.svelte';
 
 describe('Form.InputGroup', () => {
-    test('renders without crashing', () => {
-        const { container } = render(InputGroup);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders div element with base class', () => {
         const { container } = render(InputGroup);
         const div = container.querySelector('div') as HTMLDivElement;
@@ -134,14 +129,6 @@ describe('Form.InputGroup', () => {
 
         expect(div).toHaveAttribute('data-testid', 'input-group-test');
         expect(div).toHaveAttribute('data-custom', 'custom-value');
-    });
-
-    test('binds elementRef to the div element', () => {
-        const { container } = render(InputGroup);
-        const div = container.querySelector('div') as HTMLDivElement;
-
-        expect(div).toBeInstanceOf(HTMLDivElement);
-        expect(div).toBeInTheDocument();
     });
 
     test('applies multiple conditional classes together', () => {

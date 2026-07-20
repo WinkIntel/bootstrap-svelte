@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import Badge from './badge.svelte';
+import BadgeVariantStateTest from './tests/badge-variant-state-test.svelte';
 import type { BadgeRootProps } from './types.js';
 
 const renderBadgeWithText = (text: string, props: BadgeRootProps = {}) => {
@@ -18,12 +19,6 @@ const renderBadgeWithText = (text: string, props: BadgeRootProps = {}) => {
 };
 
 describe('Badge.svelte', () => {
-    test('should render', () => {
-        const results = renderBadgeWithText('Badge');
-        const badge = results.getByText('Badge');
-        expect(badge).toBeInTheDocument();
-    });
-
     test('renders a badge with default properties', () => {
         renderBadgeWithText('Default Badge');
         const badge = screen.getByText('Default Badge');
@@ -35,22 +30,60 @@ describe('Badge.svelte', () => {
         expect(badge.tagName).toBe('SPAN');
     });
 
-    // Test for specific variant
-    test('renders with primary variant', () => {
-        renderBadgeWithText('Primary Badge', { colorVariant: 'text-bg-primary' });
-        const badge = screen.getByText('Primary Badge');
+    test('applies explicit variants and caller classes without the default', () => {
+        renderBadgeWithText('Explicit Badge', { colorVariant: 'text-bg-success', class: 'text-bg-secondary' });
+        const badge = screen.getByText('Explicit Badge');
 
-        expect(badge).toHaveClass('badge');
+        expect(badge).toHaveClass('text-bg-success', 'text-bg-secondary');
+        expect(badge).not.toHaveClass('text-bg-primary');
+    });
+
+    test('does not combine the default with an explicit color variant', () => {
+        renderBadgeWithText('Success Badge', { colorVariant: 'text-bg-success' });
+        const badge = screen.getByText('Success Badge');
+
+        expect(badge).toHaveClass('text-bg-success');
+        expect(badge).not.toHaveClass('text-bg-primary');
+    });
+
+    test.each([
+        [undefined, undefined, true],
+        [null, null, true],
+        ['', '', true],
+        ['text-bg-success', undefined, false],
+        [undefined, 'text-bg-secondary', false]
+    ])('normalizes colorVariant=%s and class=%s defaults', (colorVariant, classValue, hasDefault) => {
+        renderBadgeWithText('Normalized Badge', {
+            colorVariant: colorVariant as never,
+            class: classValue as never
+        });
+        const badge = screen.getByText('Normalized Badge');
+
+        expect(badge.classList.contains('text-bg-primary')).toBe(hasDefault);
+    });
+
+    test('reapplies the default only after class and color overrides are cleared', async () => {
+        render(BadgeVariantStateTest);
+        const badge = screen.getByTestId('stateful-badge');
+
+        expect(badge).toHaveClass('text-bg-primary');
+        await screen.getByTestId('set-badge-class').click();
+        expect(badge).toHaveClass('text-bg-secondary');
+        expect(badge).not.toHaveClass('text-bg-primary');
+        await screen.getByTestId('set-badge-variant').click();
+        expect(badge).toHaveClass('text-bg-success', 'text-bg-secondary');
+        await screen.getByTestId('clear-badge-variant').click();
+        expect(badge).not.toHaveClass('text-bg-success', 'text-bg-primary');
+        await screen.getByTestId('clear-badge-class').click();
         expect(badge).toHaveClass('text-bg-primary');
     });
 
-    // Test for subtle variants
-    test('renders with subtle variant', () => {
-        renderBadgeWithText('Subtle Badge', { colorVariant: 'bg-secondary-subtle' });
-        const badge = screen.getByText('Subtle Badge');
+    test('ignores malformed positions instead of rendering an undefined class', () => {
+        renderBadgeWithText('Malformed Badge', { position: 'unknown' as never });
+        const badge = screen.getByText('Malformed Badge');
 
-        expect(badge).toHaveClass('badge');
-        expect(badge).toHaveClass('bg-secondary-subtle');
+        expect(badge.className).not.toContain('undefined');
+        expect(badge).not.toHaveClass('position-absolute', 'translate-middle');
     });
 
     // Test for pill style

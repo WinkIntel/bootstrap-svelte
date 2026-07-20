@@ -6,11 +6,6 @@ import { describe, expect, test } from 'vitest';
 import Feedback from '../form-feedback.svelte';
 
 describe('Form.Feedback', () => {
-    test('renders without crashing', () => {
-        const { container } = render(Feedback);
-        expect(container).toBeInTheDocument();
-    });
-
     test('renders as div element', () => {
         const { container } = render(Feedback);
         const feedback = container.querySelector('div');
@@ -198,14 +193,6 @@ describe('Form.Feedback', () => {
         const feedback = container.querySelector('div');
 
         expect(feedback).toHaveAttribute('title', 'Feedback message');
-    });
-
-    test('binds elementRef to the div element', () => {
-        const { container } = render(Feedback);
-        const feedback = container.querySelector('div');
-
-        expect(feedback).toBeInstanceOf(HTMLDivElement);
-        expect(feedback).toBeInTheDocument();
     });
 
     test('renders with complex children content', () => {

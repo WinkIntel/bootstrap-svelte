@@ -1,15 +1,74 @@
 /// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom/vitest';
-import { render } from '@testing-library/svelte';
-import { describe, expect, test } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/svelte';
+import { userEvent } from '@testing-library/user-event';
+import { describe, expect, test, vi } from 'vitest';
 import FileInput from '../form-file-input.svelte';
+import FileInputBindingTest from './form-file-input-binding-test.svelte';
 
 describe('Form.FileInput', () => {
-    test('renders without crashing', () => {
-        const { container } = render(FileInput);
-        expect(container).toBeInTheDocument();
+    test('binds a user-selected platform FileList instead of a value attribute', async () => {
+        render(FileInputBindingTest);
+        const input = screen.getByTestId('file-input') as HTMLInputElement;
+        const user = userEvent.setup();
+        const file = new File(['photo'], 'photo.png', { type: 'image/png' });
+
+        await user.upload(input, file);
+
+        expect(input).not.toHaveAttribute('value');
+        expect(input.files).toHaveLength(1);
+        expect(input.files?.[0]).toBe(file);
+        expect(screen.getByTestId('bound-file-name')).toHaveTextContent('photo.png');
+        expect(screen.getByTestId('callback-file-name')).toHaveTextContent('photo.png');
     });
 
+    test('syncs parent-driven file replacement and clearing to the DOM files property', async () => {
+        render(FileInputBindingTest);
+        const input = screen.getByTestId('file-input') as HTMLInputElement;
+        const replacementSource = screen.getByTestId('replacement-file-source') as HTMLInputElement;
+        const user = userEvent.setup();
+
+        await user.upload(replacementSource, new File(['replacement'], 'replacement.txt', { type: 'text/plain' }));
+        // userEvent installs a getter-only FileList shim; make the target writable
+        // so this test can exercise parent-to-DOM propagation in jsdom.
+        Object.defineProperty(input, 'files', { configurable: true, value: input.files, writable: true });
+
+        await fireEvent.click(screen.getByTestId('set-files'));
+
+        expect(screen.getByTestId('bound-file-name')).toHaveTextContent('replacement.txt');
+        expect(input.files?.[0]?.name).toBe('replacement.txt');
+
+        await fireEvent.click(screen.getByTestId('clear-files'));
+
+        expect(screen.getByTestId('bound-file-name')).toHaveTextContent('none');
+        expect(input.files).toBeNull();
+    });
+
+    test('normalizes malformed parent files without throwing and clears the native selection', async () => {
+        render(FileInputBindingTest);
+        const input = screen.getByTestId('file-input') as HTMLInputElement;
+        const user = userEvent.setup();
+
+        await user.upload(input, new File(['photo'], 'photo.png', { type: 'image/png' }));
+        expect(input.files).toHaveLength(1);
+
+        await expect(fireEvent.click(screen.getByTestId('set-malformed-files'))).resolves.toBe(true);
+
+        expect(screen.getByTestId('bound-file-name')).toHaveTextContent('none');
+        expect(input.files).toHaveLength(0);
+    });
+
+    test('does not allow rest props to replace the file type or validation aria state', () => {
+        const { container } = render(FileInput, {
+            props: { isInvalid: true, type: 'text', value: 'not-allowed', 'aria-invalid': 'false' } as never
+        });
+        const input = container.querySelector('input') as HTMLInputElement;
+
+        expect(input).toHaveAttribute('type', 'file');
+        expect(input).toHaveAttribute('aria-invalid', 'true');
+        expect(input).not.toHaveAttribute('value');
+        expect(input.value).toBe('');
+    });
     test('renders input with type file and default form-control class', () => {
         const { container } = render(FileInput);
         const input = container.querySelector('input[type="file"]') as HTMLInputElement;
@@ -229,14 +288,6 @@ describe('Form.FileInput', () => {
         expect(input).toHaveAttribute('title', 'Choose files to upload');
     });
 
-    test('binds elementRef to the input element', () => {
-        const { container } = render(FileInput);
-        const input = container.querySelector('input[type="file"]') as HTMLInputElement;
-
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect(input).toBeInTheDocument();
-    });
-
     test('combines sizing with validation classes', () => {
         const { container } = render(FileInput, {
             props: {
@@ -435,17 +486,19 @@ describe('Form.FileInput', () => {
         });
     });
 
-    test('handles file input specific events', () => {
+    test('updates the bound files before forwarding the consumer change handler', async () => {
+        const onchange = vi.fn((event: Event) => (event.currentTarget as HTMLInputElement).files?.[0]?.name);
         const { container } = render(FileInput, {
-            props: {
-                onchange: () => {},
-                oninput: () => {}
-            }
+            props: { onchange }
         });
         const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+        const file = new File(['event'], 'event.txt', { type: 'text/plain' });
 
-        expect(input).toBeInTheDocument();
-        // Event handlers are attached but not easily testable without user interaction
+        await userEvent.upload(input, file);
+
+        expect(input.files?.[0]).toBe(file);
+        expect(onchange).toHaveBeenCalledTimes(1);
+        expect(onchange).toHaveReturnedWith('event.txt');
     });
 
     test('supports tabindex attribute', () => {

@@ -99,6 +99,24 @@ describe('Portal Component', () => {
         warnSpy.mockRestore();
     });
 
+    it('treats malformed target selectors as missing targets', () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        expect(() => {
+            render(Portal, {
+                props: {
+                    children: createRawSnippet(() => ({
+                        render: () => portalHtml
+                    })),
+                    target: '['
+                }
+            });
+        }).not.toThrow();
+
+        expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[Portal] Unable to find target element: ['));
+        warnSpy.mockRestore();
+    });
+
     it('accepts an Element reference as target', () => {
         // Render the portal with an Element reference
         render(Portal, {

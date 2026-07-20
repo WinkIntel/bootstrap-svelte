@@ -45,6 +45,7 @@ Bootstrap-styled datetime-local input component for selecting both date and time
     import type { Form } from './index.js';
 
     let {
+        'aria-invalid': ariaInvalid,
         class: classValues,
         elementRef = $bindable(null),
         isInvalid,
@@ -70,9 +71,9 @@ Bootstrap-styled datetime-local input component for selecting both date and time
 </script>
 
 <input
-    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : undefined}
+    {...restOfProps}
+    aria-invalid={isInvalid === true ? 'true' : isValid === true ? 'false' : ariaInvalid}
     bind:this={elementRef}
     bind:value
     class={classes}
-    type="datetime-local"
-    {...restOfProps} />
+    type="datetime-local" />

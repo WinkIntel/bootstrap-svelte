@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
-import { Tooltip } from '../index.js';
+import { describe, expect, it, vi } from 'vitest';
 import TooltipBasicTest from './tooltip-basic-test.svelte';
+import TooltipMixedTriggerTest from './tooltip-mixed-trigger-test.svelte';
 import TooltipSpecialIdTest from './tooltip-special-id-test.svelte';
 
 describe('Tooltip Component', () => {
@@ -83,8 +83,6 @@ describe('Tooltip Component', () => {
         expect(containerInner).toHaveTextContent('This tooltip is rendered in a custom container');
 
         // Check that the tooltip is inside the custom container
-        const customContainer = screen.getByTestId('custom-container');
-        expect(customContainer).toBeDefined();
         expect(containerTooltip.closest('#custom-container')).toBeTruthy();
     });
 
@@ -97,15 +95,85 @@ describe('Tooltip Component', () => {
         const tooltip = screen.getByTestId('tooltip');
         expect(tooltip).toHaveAttribute('data-popper-placement', 'top');
     });
+});
 
-    // Additional tests for programmatic API (these would require Jest mocks and DOM events)
+describe('Tooltip mixed triggers', () => {
+    it('keeps the default hover-focus tooltip open until both triggers end', async () => {
+        render(TooltipMixedTriggerTest);
 
-    it('should create a Root component with expected properties', () => {
-        expect(Tooltip.Root).toBeDefined();
+        const trigger = screen.getByTestId('default-tooltip-trigger');
+
+        await fireEvent.mouseEnter(trigger);
+        await fireEvent.focusIn(trigger);
+        expect(screen.getByTestId('default-tooltip')).toBeInTheDocument();
+
+        await fireEvent.mouseLeave(trigger);
+        expect(screen.getByTestId('default-tooltip')).toBeInTheDocument();
+
+        await fireEvent.focusOut(trigger);
+        expect(screen.queryByTestId('default-tooltip')).not.toBeInTheDocument();
+
+        await fireEvent.focusIn(trigger);
+        await fireEvent.mouseEnter(trigger);
+        await fireEvent.focusOut(trigger);
+        expect(screen.getByTestId('default-tooltip')).toBeInTheDocument();
+
+        await fireEvent.mouseLeave(trigger);
+        expect(screen.queryByTestId('default-tooltip')).not.toBeInTheDocument();
     });
 
-    it('should create an Inner component with expected properties', () => {
-        expect(Tooltip.Inner).toBeDefined();
+    it('clears inactive trigger state when the configured triggers change', async () => {
+        render(TooltipMixedTriggerTest);
+
+        const trigger = screen.getByTestId('mixed-tooltip-trigger');
+        await fireEvent.mouseEnter(trigger);
+        expect(screen.getByTestId('mixed-tooltip')).toBeInTheDocument();
+
+        await fireEvent.click(screen.getByTestId('set-tooltip-focus-trigger'));
+        expect(screen.queryByTestId('mixed-tooltip')).not.toBeInTheDocument();
+
+        await fireEvent.focusIn(trigger);
+        expect(screen.getByTestId('mixed-tooltip')).toBeInTheDocument();
+        await fireEvent.focusOut(trigger);
+        expect(screen.queryByTestId('mixed-tooltip')).not.toBeInTheDocument();
+    });
+
+    it('preserves focus activity when hover is removed from the configured triggers', async () => {
+        render(TooltipMixedTriggerTest);
+
+        const trigger = screen.getByTestId('mixed-tooltip-trigger');
+        trigger.focus();
+        await fireEvent.focusIn(trigger);
+        expect(screen.getByTestId('mixed-tooltip')).toBeInTheDocument();
+
+        await fireEvent.click(screen.getByTestId('set-tooltip-focus-trigger'));
+        expect(screen.getByTestId('mixed-tooltip')).toBeInTheDocument();
+
+        await fireEvent.focusOut(trigger);
+        expect(screen.queryByTestId('mixed-tooltip')).not.toBeInTheDocument();
+    });
+
+    it('shows when focus is added while the reference is already focused', async () => {
+        render(TooltipMixedTriggerTest);
+
+        const trigger = screen.getByTestId('mixed-tooltip-trigger');
+        await fireEvent.click(screen.getByTestId('set-tooltip-hover-trigger'));
+        trigger.focus();
+        expect(screen.queryByTestId('mixed-tooltip')).not.toBeInTheDocument();
+
+        await fireEvent.click(screen.getByTestId('add-tooltip-focus-trigger'));
+        expect(screen.getByTestId('mixed-tooltip')).toBeInTheDocument();
+    });
+
+    it('shows when hover is enabled while the pointer is already over the reference', async () => {
+        render(TooltipMixedTriggerTest);
+
+        const trigger = screen.getByTestId('mixed-tooltip-trigger');
+        await fireEvent.click(screen.getByTestId('set-tooltip-focus-trigger'));
+        vi.spyOn(trigger, 'matches').mockImplementation((selector) => selector === ':hover');
+
+        await fireEvent.click(screen.getByTestId('add-tooltip-focus-trigger'));
+        expect(screen.getByTestId('mixed-tooltip')).toBeInTheDocument();
     });
 });
 
