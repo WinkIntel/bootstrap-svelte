@@ -10,15 +10,7 @@ export type BadgeColorVariant = TextBackgroundColorVariant | BackgroundSubtleCol
  * Follows a "vertical-horizontal" naming pattern to indicate placement.
  */
 export type BadgePosition =
-    | 'top-start'
-    | 'top-middle'
-    | 'top-end'
-    | 'middle-start'
-    | 'middle-middle'
-    | 'middle-end'
-    | 'bottom-start'
-    | 'bottom-middle'
-    | 'bottom-end';
+    'top-start' | 'top-middle' | 'top-end' | 'middle-start' | 'middle-middle' | 'middle-end' | 'bottom-start' | 'bottom-middle' | 'bottom-end';
 
 /**
  * Props for the Badge component root element.

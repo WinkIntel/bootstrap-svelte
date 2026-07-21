@@ -8,15 +8,7 @@ import type { DivElement } from '$lib/common/types.js';
  * - Horizontal position: start, center, end (respects RTL/LTR direction)
  */
 export type ToastPlacement =
-    | 'top-start'
-    | 'top-center'
-    | 'top-end'
-    | 'middle-start'
-    | 'middle-center'
-    | 'middle-end'
-    | 'bottom-start'
-    | 'bottom-center'
-    | 'bottom-end';
+    'top-start' | 'top-center' | 'top-end' | 'middle-start' | 'middle-center' | 'middle-end' | 'bottom-start' | 'bottom-center' | 'bottom-end';
 
 /**
  * Transforms the placement type into a Bootstrap class string.
