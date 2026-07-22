@@ -1,7 +1,8 @@
-import BezierEasing, { type EasingFunction } from 'bezier-easing';
+import BezierEasing from 'bezier-easing';
 import type clsx from 'clsx';
 
 type ClassValue = Parameters<typeof clsx>[number];
+type EasingFunction = ReturnType<typeof BezierEasing>;
 
 const whitespacePattern = /\s/;
 const classTokenPattern = /\S+/g;
