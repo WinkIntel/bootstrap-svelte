@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.7
+
+- Updated Svelte, SvelteKit, Vite, Vitest, ESLint, Prettier, and related development dependencies.
+- Updated `bezier-easing` and derived its easing-function type from the package's factory return type for compatibility with current typings.
+- Reformatted Badge and Toast type unions for the updated formatter.
+
 ## 1.0.6
 
 - **Breaking:** Specialized Form input components now accept only their matching `type` literal; mismatched types that were previously accepted but overridden no longer type-check.
