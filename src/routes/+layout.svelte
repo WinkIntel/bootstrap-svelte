@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from '$app/state';
+    import { Button, Dropdown } from '$lib/index.js';
     import { onMount, tick, type Snippet } from 'svelte';
     import routeJson from './(common)/routes.json' with { type: 'json' };
     import type { RouteType } from './(common)/types.js';
@@ -415,41 +416,35 @@
                         <i class={installCopied ? 'bi bi-check2' : 'bi bi-clipboard'} aria-hidden="true"></i>
                     </button>
                 </div>
-                <div class="btn-group">
-                    <button
-                        class="btn btn-sm btn-outline-secondary"
-                        type="button"
+                <Dropdown.Root isButtonGroup={true}>
+                    <Button
+                        colorVariant="outline-secondary"
+                        size="sm"
                         onclick={cycleColorMode}
                         aria-label={`Cycle color mode. Current mode: ${colorModeLabel}`}
                         title={`Current color mode: ${colorModeLabel}`}>
                         <i class={`bi ${colorModeIcon} me-1`} aria-hidden="true"></i>
                         {colorModeLabel}
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
+                    </Button>
+                    <Dropdown.Toggle
+                        colorVariant="outline-secondary"
+                        size="sm"
+                        isSplit={true}
                         aria-label="Change color mode"
-                        title="Change color mode">
-                        <span class="visually-hidden">Toggle color mode</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                        title="Change color mode" />
+                    <Dropdown.Menu isEnd={true}>
                         {#each colorModeOptions as mode (mode)}
-                            <li>
-                                <button
-                                    class="dropdown-item d-flex align-items-center gap-2"
-                                    class:active={colorMode === mode}
-                                    type="button"
-                                    onclick={() => setColorMode(mode)}
-                                    aria-current={colorMode === mode ? 'true' : undefined}>
-                                    <i class={`bi ${colorModeIcons[mode]}`} aria-hidden="true"></i>
-                                    {colorModeLabels[mode]}
-                                </button>
-                            </li>
+                            <Dropdown.Item
+                                class="d-flex align-items-center gap-2"
+                                isActive={colorMode === mode}
+                                onclick={() => setColorMode(mode)}
+                                aria-current={colorMode === mode ? 'true' : undefined}>
+                                <i class={`bi ${colorModeIcons[mode]}`} aria-hidden="true"></i>
+                                {colorModeLabels[mode]}
+                            </Dropdown.Item>
                         {/each}
-                    </ul>
-                </div>
+                    </Dropdown.Menu>
+                </Dropdown.Root>
                 <a class="btn btn-sm btn-dark" href="https://github.com/WinkIntel/bootstrap-svelte" target="_blank" rel="noreferrer">GitHub</a>
             </div>
         </header>
