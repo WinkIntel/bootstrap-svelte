@@ -40,3 +40,6 @@ coverage
 # Improve skill
 plans/*
 .svelte-doctor/*
+
+# Superpowers skill — design specs and plans are temporary working documents
+docs/superpowers/

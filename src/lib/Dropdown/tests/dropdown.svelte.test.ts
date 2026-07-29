@@ -1221,6 +1221,125 @@ describe('Dropdown Keyboard Dismissal', () => {
         expect(toggle).toHaveAttribute('aria-expanded', 'true');
     });
 
+    it.each([
+        ['an input', 'dismiss-custom-input'],
+        ['a checkbox', 'dismiss-custom-checkbox'],
+        ['a plain link', 'dismiss-custom-link'],
+        ['a plain button', 'dismiss-custom-button']
+    ])('should close when Escape is pressed on %s inside the menu', async (_label, testId) => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-custom-toggle');
+        await fireEvent.click(toggle);
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        const target = screen.getByTestId(testId);
+        target.focus();
+        fireEvent.keyDown(target, { key: 'Escape' });
+
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+        expect(screen.getByTestId('dismiss-custom-menu')).not.toHaveClass('show');
+        expect(toggle).toHaveFocus();
+    });
+
+    it('should close when Escape is pressed on custom content inside a portaled menu', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-custom-portal-toggle');
+        await fireEvent.click(toggle);
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        const input = screen.getByTestId('dismiss-custom-portal-input');
+        input.focus();
+        fireEvent.keyDown(input, { key: 'Escape' });
+
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+        expect(toggle).toHaveFocus();
+    });
+
+    it('should still call a consumer onkeydown passed to the menu', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-custom-toggle');
+        await fireEvent.click(toggle);
+
+        const input = screen.getByTestId('dismiss-custom-input');
+        input.focus();
+        fireEvent.keyDown(input, { key: 'Escape' });
+
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+        expect(screen.getByTestId('menu-keydown-count')).toHaveTextContent('1');
+    });
+
+    it('should not let Escape from an item reach the menu backstop', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-custom-toggle');
+        await fireEvent.click(toggle);
+
+        const item = screen.getByTestId('dismiss-custom-item');
+        item.focus();
+        fireEvent.keyDown(item, { key: 'Escape' });
+
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+        // The item consumes Escape and stops it, so it never bubbles to the menu — the
+        // menu's own handler and the consumer's onkeydown both stay untouched.
+        expect(screen.getByTestId('menu-keydown-count')).toHaveTextContent('0');
+        expect(screen.getByTestId('dismiss-custom-menu')).not.toHaveClass('show');
+    });
+
+    it('should not reach a document listener registered before the dropdown mounted', async () => {
+        // Registered before render so it cannot be dismissed as ordering luck: a bubble
+        // phase listener never sees an Escape the dropdown consumed, whenever it was bound.
+        const documentKeydown = vi.fn();
+        document.addEventListener('keydown', documentKeydown);
+
+        try {
+            render(DropdownDismissTest);
+
+            const toggle = screen.getByTestId('dismiss-toggle');
+            fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+
+            const firstItem = screen.getByTestId('dismiss-item-1');
+            await waitFor(() => expect(firstItem).toHaveFocus());
+            documentKeydown.mockClear();
+
+            fireEvent.keyDown(firstItem, { key: 'Escape' });
+
+            await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+            expect(documentKeydown).not.toHaveBeenCalled();
+        } finally {
+            document.removeEventListener('keydown', documentKeydown);
+        }
+    });
+
+    it('documents that capture-phase document listeners still observe Escape', async () => {
+        // Capture runs before the event ever reaches the dropdown, so stopPropagation in
+        // the bubble phase cannot suppress it. Bootstrap's data-API handlers are bound this
+        // way, which is why loading its JS bundle alongside this package is unsupported.
+        // Pinned deliberately so the guarantee is not overstated.
+        const captureKeydown = vi.fn();
+        document.addEventListener('keydown', captureKeydown, true);
+
+        try {
+            render(DropdownDismissTest);
+
+            const toggle = screen.getByTestId('dismiss-toggle');
+            fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+
+            const firstItem = screen.getByTestId('dismiss-item-1');
+            await waitFor(() => expect(firstItem).toHaveFocus());
+            captureKeydown.mockClear();
+
+            fireEvent.keyDown(firstItem, { key: 'Escape' });
+
+            await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+            expect(captureKeydown).toHaveBeenCalledTimes(1);
+        } finally {
+            document.removeEventListener('keydown', captureKeydown, true);
+        }
+    });
+
     it('should fire onHide and onHidden exactly once when dismissed with Escape', async () => {
         render(DropdownDismissTest);
 

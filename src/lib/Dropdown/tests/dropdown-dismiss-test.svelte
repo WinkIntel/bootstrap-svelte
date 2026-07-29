@@ -2,6 +2,7 @@
     import { Dropdown } from '$lib/index.js';
 
     let ancestorKeydowns = $state(0);
+    let menuKeydowns = $state(0);
 </script>
 
 <!-- The wrapper stands in for an app-level container that also dismisses on Escape.
@@ -39,6 +40,31 @@
     <Dropdown.Menu container="body" data-testid="dismiss-portal-menu">
         <Dropdown.Item href="#!" data-testid="dismiss-portal-item-1">First Item</Dropdown.Item>
         <Dropdown.Item href="#!" data-testid="dismiss-portal-item-2">Second Item</Dropdown.Item>
+    </Dropdown.Menu>
+</Dropdown.Root>
+
+<!-- Focusable content that is not a Dropdown.Item. Escape has to reach the menu boundary
+     for these, since they carry no dropdown keydown handler of their own. -->
+<Dropdown.Root data-testid="dismiss-custom-dropdown">
+    <Dropdown.Toggle colorVariant="warning" data-testid="dismiss-custom-toggle">Custom Content</Dropdown.Toggle>
+    <Dropdown.Menu data-testid="dismiss-custom-menu" onkeydown={() => (menuKeydowns += 1)}>
+        <form class="px-4 py-3">
+            <input type="email" data-testid="dismiss-custom-input" aria-label="Email" />
+            <input type="checkbox" data-testid="dismiss-custom-checkbox" aria-label="Remember me" />
+            <a href="#!" data-testid="dismiss-custom-link">A plain link</a>
+            <button type="button" data-testid="dismiss-custom-button">A plain button</button>
+        </form>
+        <Dropdown.Item href="#!" data-testid="dismiss-custom-item">A real item</Dropdown.Item>
+    </Dropdown.Menu>
+</Dropdown.Root>
+
+<output data-testid="menu-keydown-count">{menuKeydowns}</output>
+
+<!-- Same, but portaled out of the root so containment cannot rely on the root element. -->
+<Dropdown.Root data-testid="dismiss-custom-portal-dropdown">
+    <Dropdown.Toggle colorVariant="dark" data-testid="dismiss-custom-portal-toggle">Portaled Custom Content</Dropdown.Toggle>
+    <Dropdown.Menu container="body" data-testid="dismiss-custom-portal-menu">
+        <input type="text" data-testid="dismiss-custom-portal-input" aria-label="Search" />
     </Dropdown.Menu>
 </Dropdown.Root>
 

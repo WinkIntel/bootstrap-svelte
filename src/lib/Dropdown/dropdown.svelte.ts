@@ -287,6 +287,7 @@ export class DropdownMenuState {
         this.destroyPopper = this.destroyPopper.bind(this);
         this.determinePopperPlacement = this.determinePopperPlacement.bind(this);
         this.dispose = this.dispose.bind(this);
+        this.onkeydown = this.onkeydown.bind(this);
         this.syncIsEndWithRoot = this.syncIsEndWithRoot.bind(this);
         this.windowOnkeyup = this.windowOnkeyup.bind(this);
         this.root.menu = this; // Let the root reach the menu element, which may be portaled outside the root.
@@ -353,6 +354,16 @@ export class DropdownMenuState {
         if (this.autoClose === true || this.autoClose === 'outside') {
             this.root.toggleIsShown(event);
         }
+    }
+
+    // Backstop for Escape pressed on focusable content inside the menu that is not a
+    // Dropdown.Item — a form input, a plain link, a consumer's own button. Items and the
+    // toggle consume Escape before it can bubble this far, so this never double-handles.
+    onkeydown(event: KeyboardEvent): void {
+        if (event.key !== 'Escape') {
+            return;
+        }
+        handleEscape(event, this.root);
     }
 
     // Closes the dropdown once Tab has moved focus out of it. Handled on keyup rather than
@@ -578,6 +589,39 @@ export function initDropdownItemState(props: Dropdown.ItemProps): DropdownItemSt
 }
 
 /**
+ * Dismisses an open dropdown in response to Escape, returning focus to the toggle.
+ *
+ * Shared by the toggle, the items, and the menu itself. The menu is the backstop that
+ * catches Escape from focusable content a consumer renders inside it — inputs, links,
+ * arbitrary buttons — which are not Dropdown.Items and carry no handler of their own.
+ * Because the toggle and items stop a consumed Escape from propagating, the menu-level
+ * handler never sees the same key twice.
+ *
+ * Escape ignores autoClose: it is an explicit dismissal rather than an incidental one.
+ *
+ * @param event KeyboardEvent
+ * @param root DropdownRootState
+ */
+function handleEscape(event: KeyboardEvent, root: DropdownRootState): void {
+    if (!root.isShown) {
+        return;
+    }
+    event.preventDefault();
+    // Stop the event here so an ancestor that also dismisses on Escape (a modal, an
+    // offcanvas, an app-level sidebar) does not close as well. Escape should unwind one
+    // layer at a time, which is what Bootstrap's own dropdown does.
+    //
+    // This covers listeners in the bubble path only. A listener bound on document or
+    // window in the *capture* phase runs before the event ever reaches the dropdown and
+    // cannot be stopped from here — notably Bootstrap's own data-API handlers, which are
+    // registered with capture. Loading Bootstrap's JS bundle alongside this package makes
+    // both implementations respond to the same markup and is not a supported setup.
+    event.stopPropagation();
+    root.hide(event);
+    root.focusOnToggle();
+}
+
+/**
  * Handles keyboard navigation for the toggle and items within the dropdown.
  * Supports opening the dropdown with ArrowUp/ArrowDown, navigating between items,
  * and dismissing an open dropdown with Escape.
@@ -589,16 +633,7 @@ function handleKeydown(event: KeyboardEvent, root: DropdownRootState) {
     const { key } = event;
 
     if (key === 'Escape') {
-        if (!root.isShown) {
-            return;
-        }
-        event.preventDefault();
-        // Stop the event here so an ancestor that also dismisses on Escape (a modal,
-        // an offcanvas, an app-level sidebar) does not close as well. Escape should
-        // unwind one layer at a time, which is what Bootstrap's own dropdown does.
-        event.stopPropagation();
-        root.hide(event);
-        root.focusOnToggle();
+        handleEscape(event, root);
         return;
     }
 
