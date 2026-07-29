@@ -21,9 +21,11 @@ The container for dropdown items.
 - `isDark` (boolean): Optional. Makes the dropdown menu dark-themed, default is false.
 - `isEnd` (boolean): Optional. Aligns the dropdown menu to the end of its parent, default is false.
 - `offset` (number[]): Optional. Offset for the dropdown menu position, default is `[0, 2]`.
+- `onkeydown` (EventListener): Optional. Keydown handler, called after the menu's own Escape dismissal.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
+    import { noop } from '$lib/common/noop.js';
     import { Portal } from '$lib/index.js';
     import { onMount } from 'svelte';
     import { DropdownMenuState, initDropdownMenuState } from './dropdown.svelte.js';
@@ -41,6 +43,7 @@ The container for dropdown items.
         isDark = false,
         isEnd = false,
         offset = [0, 2],
+        onkeydown = noop,
         ...restOfProps
     }: Dropdown.MenuProps = $props();
 
@@ -88,9 +91,15 @@ The container for dropdown items.
     $effect(() => {
         menuState.isEnd = isEnd;
     });
+
+    const handleKeydown = (event: KeyboardEvent) => {
+        menuState.onkeydown(event);
+        onkeydown(event);
+    };
 </script>
 
 <svelte:body onclick={menuState.bodyOnclick} />
+<svelte:window onkeyup={menuState.windowOnkeyup} />
 
 <Portal target={containerElement} disabled={container === false}>
     <ul
@@ -100,6 +109,7 @@ The container for dropdown items.
         data-bs-popper={menuState.isShown && menuState.root.isNavItem ? 'static' : undefined}
         data-popper-placement={menuState.popperPlacement}
         {id}
+        onkeydown={handleKeydown}
         role={menuState.root.hasItems ? 'menu' : undefined}
         {...restOfProps}>
         {@render children?.()}

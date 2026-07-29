@@ -471,6 +471,14 @@
                 when at the first item and pressing <kbd>↑</kbd>, focus wraps to the last item.
             </li>
             <li><strong>Disabled Items:</strong> Navigation skips disabled items so focus only moves among available actions.</li>
+            <li>
+                <strong>Dismissing the Dropdown:</strong> Pressing <kbd>Esc</kbd> closes an open dropdown and returns focus to the toggle. The key
+                stops there, so a surrounding dialog or drawer that also dismisses on <kbd>Esc</kbd> stays open.
+            </li>
+            <li>
+                <strong>Leaving the Dropdown:</strong> Pressing <kbd>Tab</kbd> until focus moves out of the menu closes the dropdown, unless
+                <code>autoClose</code> is <code>false</code> or <code>"inside"</code>.
+            </li>
         </ul>
 
         <div class="alert alert-info">
@@ -517,6 +525,7 @@
                     <li><kbd>↓</kbd> - Opens dropdown and focuses first item</li>
                     <li><kbd>↑</kbd> - Opens dropdown and focuses last item</li>
                     <li><kbd>Enter</kbd> or <kbd>Space</kbd> - Toggles dropdown</li>
+                    <li><kbd>Esc</kbd> - Closes the dropdown when it is open</li>
                 </ul>
             </div>
             <div class="col-md-6">
@@ -526,6 +535,7 @@
                     <li><kbd>↑</kbd> - Moves focus to previous item (wraps to last)</li>
                     <li><kbd>Enter</kbd> or <kbd>Space</kbd> - Activates focused item</li>
                     <li><kbd>Esc</kbd> - Closes dropdown and returns focus to toggle</li>
+                    <li><kbd>Tab</kbd> - Closes dropdown once focus leaves the menu</li>
                 </ul>
             </div>
         </div>

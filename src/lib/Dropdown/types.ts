@@ -38,6 +38,7 @@ export type DropdownMenuProps = UListElement & {
     isDark?: boolean;
     isEnd?: boolean;
     offset?: PopperOffset;
+    onkeydown?: EventListener;
 };
 
 export type DropdownItemProps = AnchorElement & {

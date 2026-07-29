@@ -47,6 +47,9 @@ The button that triggers the dropdown menu.
     }: Dropdown.ToggleProps = $props();
 
     const toggleState: DropdownToggleState = initDropdownToggleState({
+        get elementRef() {
+            return elementRef;
+        },
         get id() {
             return id;
         },
