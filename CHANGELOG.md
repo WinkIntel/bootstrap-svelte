@@ -2,6 +2,13 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.8
+
+- Removed the Bootstrap JavaScript bundle from the showcase so the site exercises only this package's component behavior and Popper integration.
+- Rebuilt the showcase color-mode dropdown with Bootstrap Svelte components and added regression guards against Bootstrap data-API markup returning to live routes.
+- Added Dropdown dismissal with Escape from toggles, items, form controls, custom content, and portaled menus, with focus restoration and layered bubble-path isolation.
+- Added Tab-out dismissal that follows `autoClose` rules, preserved consumer `onkeydown` handlers, and expanded keyboard behavior documentation and regression coverage.
+
 ## 1.0.7
 
 - Updated Svelte, SvelteKit, Vite, Vitest, ESLint, Prettier, and related development dependencies.
