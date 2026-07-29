@@ -16,7 +16,9 @@ export class DropdownRootState {
     #isNavItem: boolean = $state(false);
     #isShown: boolean = $state(false);
     #items: DropdownItemState[] = $state([]);
+    #menu: DropdownMenuState | null = null; // The menu belonging to this dropdown, registered on construction.
     #reorderScheduled = false;
+    #toggle: DropdownToggleState | null = null; // The toggle that controls this dropdown, registered on construction.
 
     ariaLabelledBy: string | undefined = $state(undefined); // Used for accessibility, linking the dropdown to a label.
 
@@ -29,6 +31,8 @@ export class DropdownRootState {
         // Bind the method to ensure `this` context is correct when passed as a callback.
         this.focusOnNextItem = this.focusOnNextItem.bind(this);
         this.focusOnPreviousItem = this.focusOnPreviousItem.bind(this);
+        this.focusOnToggle = this.focusOnToggle.bind(this);
+        this.hide = this.hide.bind(this);
         this.registerItem = this.registerItem.bind(this);
         this.reorderItems = this.reorderItems.bind(this);
         this.scheduleReorderItems = this.scheduleReorderItems.bind(this);
@@ -96,12 +100,48 @@ export class DropdownRootState {
         return this.#isShown;
     }
 
+    get menu(): DropdownMenuState | null {
+        return this.#menu;
+    }
+    set menu(menu: DropdownMenuState | null) {
+        this.#menu = menu;
+    }
+
+    get toggle(): DropdownToggleState | null {
+        return this.#toggle;
+    }
+    set toggle(toggle: DropdownToggleState | null) {
+        this.#toggle = toggle;
+    }
+
+    // True when the given element is part of this dropdown — its root (toggle included)
+    // or its menu, which may be portaled outside the root via the menu's `container` prop.
+    containsElement(element: Element | null): boolean {
+        if (!element) {
+            return false;
+        }
+        return Boolean(this.#elementRef?.contains(element) || this.#menu?.elementRef?.contains(element));
+    }
+
     focusOnNextItem(): void {
         this.focusOnItemInDirection(1);
     }
 
     focusOnPreviousItem(): void {
         this.focusOnItemInDirection(-1);
+    }
+
+    focusOnToggle(): void {
+        this.#toggle?.props.elementRef?.focus();
+    }
+
+    // Closes the dropdown if it is open, firing the onHide/onHidden callbacks.
+    // Unlike toggleIsShown this is a no-op when the dropdown is already closed.
+    hide(event: Event): void {
+        if (!this.#isShown) {
+            return;
+        }
+        this.toggleIsShown(event);
     }
 
     registerItem(item: DropdownItemState): void {
@@ -202,6 +242,7 @@ export class DropdownToggleState {
         // Bind the method to ensure `this` context is correct when used as an event handler.
         this.onclick = this.onclick.bind(this);
         this.onkeydown = this.onkeydown.bind(this);
+        this.root.toggle = this; // Let the root find the toggle again, e.g. to restore focus on Escape.
         if (this.props.isSplit && !this.root.isButtonGroup) {
             // If the toggle is a split button, the root must be treated as a button group
             // to ensure correct Bootstrap styling and layout.
@@ -247,6 +288,8 @@ export class DropdownMenuState {
         this.determinePopperPlacement = this.determinePopperPlacement.bind(this);
         this.dispose = this.dispose.bind(this);
         this.syncIsEndWithRoot = this.syncIsEndWithRoot.bind(this);
+        this.windowOnkeyup = this.windowOnkeyup.bind(this);
+        this.root.menu = this; // Let the root reach the menu element, which may be portaled outside the root.
         // Ensure the dropdown menu's end alignment is consistent with the root's direction.
         this.syncIsEndWithRoot();
         // Effect to manage the Popper.js instance lifecycle.
@@ -312,9 +355,30 @@ export class DropdownMenuState {
         }
     }
 
+    // Closes the dropdown once Tab has moved focus out of it. Handled on keyup rather than
+    // keydown because focus has not moved yet while the key is down, and at window level
+    // because the newly focused element is usually outside this component's markup.
+    windowOnkeyup(event: KeyboardEvent): void {
+        if (!this.isShown || event.key !== 'Tab') {
+            return;
+        }
+        if (this.root.containsElement(document.activeElement)) {
+            // Focus moved between items inside the dropdown, so it stays open.
+            return;
+        }
+        // Tabbing away is an interaction outside the dropdown, so it follows the same
+        // autoClose rules as an outside click.
+        if (this.autoClose === true || this.autoClose === 'outside') {
+            this.root.hide(event);
+        }
+    }
+
     // Cleans up resources, particularly the Popper.js instance and element references.
     dispose() {
         this.destroyPopper();
+        if (this.root.menu === this) {
+            this.root.menu = null;
+        }
         this.#elementRef = null;
         this.#rootElementRef = null; // Clearing derived state source if it were directly settable.
         this.#popperInstance = null;
@@ -515,13 +579,29 @@ export function initDropdownItemState(props: Dropdown.ItemProps): DropdownItemSt
 
 /**
  * Handles keyboard navigation for the toggle and items within the dropdown.
- * Supports opening the dropdown with ArrowUp/ArrowDown and navigating between items.
+ * Supports opening the dropdown with ArrowUp/ArrowDown, navigating between items,
+ * and dismissing an open dropdown with Escape.
  *
  * @param event KeyboardEvent
  * @param root DropdownRootState
  */
 function handleKeydown(event: KeyboardEvent, root: DropdownRootState) {
     const { key } = event;
+
+    if (key === 'Escape') {
+        if (!root.isShown) {
+            return;
+        }
+        event.preventDefault();
+        // Stop the event here so an ancestor that also dismisses on Escape (a modal,
+        // an offcanvas, an app-level sidebar) does not close as well. Escape should
+        // unwind one layer at a time, which is what Bootstrap's own dropdown does.
+        event.stopPropagation();
+        root.hide(event);
+        root.focusOnToggle();
+        return;
+    }
+
     const isUpOrDownEvent = ['ArrowUp', 'ArrowDown'].includes(event.key);
     if (isUpOrDownEvent && !root.isShown) {
         event.preventDefault();

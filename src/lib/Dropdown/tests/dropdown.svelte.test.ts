@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
 import DropdownBasicTest from './dropdown-basic-test.svelte';
 import DropdownContainerTest from './dropdown-container-test.svelte';
+import DropdownDismissTest from './dropdown-dismiss-test.svelte';
 import DropdownKeyboardTest from './dropdown-keyboard-test.svelte';
 import DropdownReorderTest from './dropdown-reorder-test.svelte';
 import DropdownSpecialIdTest from './dropdown-special-id-test.svelte';
@@ -1040,5 +1041,198 @@ describe('Dropdown Keyboard Navigation', () => {
             const firstItem = screen.getByTestId('keyboard-item-1');
             expect(firstItem).toHaveFocus();
         });
+    });
+});
+
+describe('Dropdown Keyboard Dismissal', () => {
+    it('should close an open dropdown and restore focus to the toggle when Escape is pressed on an item', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-toggle');
+        fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+
+        const firstItem = screen.getByTestId('dismiss-item-1');
+        await waitFor(() => expect(firstItem).toHaveFocus());
+
+        fireEvent.keyDown(firstItem, { key: 'Escape' });
+
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+        expect(screen.getByTestId('dismiss-menu')).not.toHaveClass('show');
+        expect(toggle).toHaveFocus();
+    });
+
+    it('should close an open dropdown when Escape is pressed on the toggle', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-toggle');
+        await fireEvent.click(toggle);
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        fireEvent.keyDown(toggle, { key: 'Escape' });
+
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+        expect(toggle).toHaveFocus();
+    });
+
+    it('should let Escape through to ancestors when the dropdown is already closed', async () => {
+        render(DropdownDismissTest);
+
+        const windowKeydown = vi.fn();
+        window.addEventListener('keydown', windowKeydown);
+
+        try {
+            const toggle = screen.getByTestId('dismiss-toggle');
+            expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+            fireEvent.keyDown(toggle, { key: 'Escape' });
+
+            await waitFor(() => expect(windowKeydown).toHaveBeenCalledTimes(1));
+            expect(screen.getByTestId('ancestor-keydown-count')).toHaveTextContent('1');
+        } finally {
+            window.removeEventListener('keydown', windowKeydown);
+        }
+    });
+
+    it('should stop a consumed Escape from reaching ancestors that also dismiss on Escape', async () => {
+        render(DropdownDismissTest);
+
+        const windowKeydown = vi.fn();
+        window.addEventListener('keydown', windowKeydown);
+
+        try {
+            const toggle = screen.getByTestId('dismiss-toggle');
+            fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+
+            const firstItem = screen.getByTestId('dismiss-item-1');
+            await waitFor(() => expect(firstItem).toHaveFocus());
+
+            // The ArrowDown that opened the dropdown was not consumed, so it already
+            // reached the ancestor. Only the Escape that follows should be swallowed.
+            const ancestorCount = screen.getByTestId('ancestor-keydown-count').textContent;
+            windowKeydown.mockClear();
+
+            fireEvent.keyDown(firstItem, { key: 'Escape' });
+
+            await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+            expect(windowKeydown).not.toHaveBeenCalled();
+            expect(screen.getByTestId('ancestor-keydown-count')).toHaveTextContent(String(ancestorCount));
+        } finally {
+            window.removeEventListener('keydown', windowKeydown);
+        }
+    });
+
+    it('should close on Escape even when autoClose is disabled', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-noautoclose-toggle');
+        await fireEvent.click(toggle);
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        fireEvent.keyDown(toggle, { key: 'Escape' });
+
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+    });
+
+    it('should close when Tab moves focus out of the dropdown', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-toggle');
+        fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+        await waitFor(() => expect(screen.getByTestId('dismiss-item-1')).toHaveFocus());
+
+        // jsdom does not move focus for Tab, so emulate where the browser would land.
+        screen.getByTestId('dismiss-outside-button').focus();
+        fireEvent.keyUp(screen.getByTestId('dismiss-outside-button'), { key: 'Tab' });
+
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+    });
+
+    it('should stay open when Tab moves focus between items inside the dropdown', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-toggle');
+        fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+
+        const firstItem = screen.getByTestId('dismiss-item-1');
+        await waitFor(() => expect(firstItem).toHaveFocus());
+
+        const secondItem = screen.getByTestId('dismiss-item-2');
+        secondItem.focus();
+        fireEvent.keyUp(secondItem, { key: 'Tab' });
+
+        await waitFor(() => expect(secondItem).toHaveFocus());
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('should stay open when Tab moves focus between items of a portaled menu', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-portal-toggle');
+        fireEvent.keyDown(toggle, { key: 'ArrowDown' });
+
+        const firstItem = screen.getByTestId('dismiss-portal-item-1');
+        await waitFor(() => expect(firstItem).toHaveFocus());
+
+        const secondItem = screen.getByTestId('dismiss-portal-item-2');
+        secondItem.focus();
+        fireEvent.keyUp(secondItem, { key: 'Tab' });
+
+        await waitFor(() => expect(secondItem).toHaveFocus());
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        // Leaving the portaled menu entirely still closes it.
+        screen.getByTestId('dismiss-outside-button').focus();
+        fireEvent.keyUp(screen.getByTestId('dismiss-outside-button'), { key: 'Tab' });
+
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+    });
+
+    it('should not close on Tab when autoClose is disabled or set to inside', async () => {
+        render(DropdownDismissTest);
+
+        const noAutoCloseToggle = screen.getByTestId('dismiss-noautoclose-toggle');
+        const insideToggle = screen.getByTestId('dismiss-inside-toggle');
+        await fireEvent.click(noAutoCloseToggle);
+        await fireEvent.click(insideToggle);
+        expect(noAutoCloseToggle).toHaveAttribute('aria-expanded', 'true');
+        expect(insideToggle).toHaveAttribute('aria-expanded', 'true');
+
+        const outsideButton = screen.getByTestId('dismiss-outside-button');
+        outsideButton.focus();
+        fireEvent.keyUp(outsideButton, { key: 'Tab' });
+
+        await waitFor(() => expect(outsideButton).toHaveFocus());
+        expect(noAutoCloseToggle).toHaveAttribute('aria-expanded', 'true');
+        expect(insideToggle).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('should ignore keys other than Tab on keyup', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-toggle');
+        await fireEvent.click(toggle);
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        const outsideButton = screen.getByTestId('dismiss-outside-button');
+        outsideButton.focus();
+        fireEvent.keyUp(outsideButton, { key: 'Enter' });
+
+        await waitFor(() => expect(outsideButton).toHaveFocus());
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('should fire onHide and onHidden exactly once when dismissed with Escape', async () => {
+        render(DropdownDismissTest);
+
+        const toggle = screen.getByTestId('dismiss-toggle');
+        await fireEvent.click(toggle);
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+        fireEvent.keyDown(toggle, { key: 'Escape' });
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
+
+        // A second Escape on a closed dropdown must be a no-op rather than reopening it.
+        fireEvent.keyDown(toggle, { key: 'Escape' });
+        await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'false'));
     });
 });

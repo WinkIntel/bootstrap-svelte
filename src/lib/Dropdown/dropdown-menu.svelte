@@ -91,6 +91,7 @@ The container for dropdown items.
 </script>
 
 <svelte:body onclick={menuState.bodyOnclick} />
+<svelte:window onkeyup={menuState.windowOnkeyup} />
 
 <Portal target={containerElement} disabled={container === false}>
     <ul
