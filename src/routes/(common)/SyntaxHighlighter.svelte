@@ -54,6 +54,7 @@
 
 <div class="wk-code-example border rounded">
     <div class="wk-code-toolbar">
+        <span class="wk-code-lang" aria-hidden="true">svelte</span>
         <span class="visually-hidden" aria-live="polite">
             {#if copyStatus === 'copied'}
                 Code copied to clipboard.
@@ -61,7 +62,8 @@
                 Code could not be copied.
             {/if}
         </span>
-        <button class="btn btn-sm btn-outline-secondary" type="button" onclick={copyCode} aria-label={`Copy ${label.toLowerCase()}`}>
+        <button class="btn btn-sm btn-outline-secondary wk-copy-btn" type="button" onclick={copyCode} aria-label={`Copy ${label.toLowerCase()}`}>
+            <i class={copyStatus === 'copied' ? 'bi bi-check2' : 'bi bi-clipboard'} aria-hidden="true"></i>
             {copyStatus === 'copied' ? 'Copied' : 'Copy'}
         </button>
     </div>
@@ -78,6 +80,7 @@
     .wk-code-example {
         background: var(--wk-code-bg, #fff);
         border-color: var(--wk-border, rgba(108, 117, 125, 0.2)) !important;
+        border-radius: 0.85rem !important;
         overflow: hidden;
     }
 
@@ -86,8 +89,24 @@
         background: var(--wk-code-toolbar-bg, #f8f9fa);
         border-bottom: 1px solid var(--wk-border, rgba(108, 117, 125, 0.2));
         display: flex;
-        justify-content: flex-end;
-        padding: 0.45rem 0.6rem;
+        justify-content: space-between;
+        padding: 0.4rem 0.5rem 0.4rem 0.85rem;
+    }
+
+    .wk-code-lang {
+        color: var(--wk-muted-color, #6c757d);
+        font-family: var(--wk-font-mono, monospace);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .wk-copy-btn {
+        --bs-btn-border-color: transparent;
+        align-items: center;
+        display: inline-flex;
+        gap: 0.35rem;
     }
 
     .wk-code-scroll {

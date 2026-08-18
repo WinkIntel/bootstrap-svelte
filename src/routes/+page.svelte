@@ -1,12 +1,18 @@
 <script lang="ts">
+    import { Alert, Badge, Button } from '$lib/index.js';
     import routeJson from './(common)/routes.json' with { type: 'json' };
     import SyntaxHighlighter from './(common)/SyntaxHighlighter.svelte';
     import type { RouteType } from './(common)/types.js';
 
     const routes: RouteType[] = routeJson as RouteType[];
     const componentCount = routes.reduce((count, section) => count + section.items.length, 0);
-    const componentSection = routes.find((section) => section.section === 'Components');
-    const featuredComponents = componentSection?.items.slice(0, 8) ?? [];
+
+    const sectionIcons: Record<string, string> = {
+        Guides: 'bi-compass',
+        Layout: 'bi-grid-1x2',
+        Components: 'bi-boxes',
+        Form: 'bi-ui-checks'
+    };
 
     const installExample = `pnpm add @winkintel/bootstrap-svelte
 pnpm add svelte@~5.0.0`;
@@ -20,52 +26,80 @@ pnpm add svelte@~5.0.0`;
 
     const principles = [
         {
+            icon: 'bi-bootstrap',
             title: 'Bootstrap-compatible',
             body: 'Component props and generated markup are designed to stay close to Bootstrap conventions.'
         },
         {
+            icon: 'bi-lightning-charge',
             title: 'Svelte-native',
             body: 'Use Svelte 5 components, snippets, bindings, and TypeScript-friendly public APIs.'
         },
         {
+            icon: 'bi-journal-code',
             title: 'Docs as playground',
             body: 'The package-local SvelteKit app is both documentation and a live component showcase.'
         }
     ];
+
+    let demoProgress: number = $state(72);
 </script>
 
 <section class="wk-hero">
     <div class="wk-hero-copy">
-        <div class="wk-pill">Svelte 5 · Bootstrap components</div>
-        <h1>Bootstrap components, rebuilt for Svelte.</h1>
+        <div class="wk-pill">
+            <span class="wk-pill-dot" aria-hidden="true"></span>
+            Svelte 5 · Bootstrap 5 · TypeScript
+        </div>
+        <h1>
+            Bootstrap components,
+            <span class="wk-hero-gradient">rebuilt for Svelte.</span>
+        </h1>
         <p>
-            Bootstrap Svelte packages a focused set of Bootstrap-compatible UI primitives for Svelte 5 apps, with live examples and package-local
-            documentation built into this showcase.
+            A focused set of Bootstrap-compatible UI primitives for Svelte 5 apps — typed APIs, runes-based state, and live documentation built into
+            this showcase.
         </p>
         <div class="wk-hero-actions">
-            <a class="btn btn-primary btn-lg" href="/components/button">Browse components</a>
-            <a class="btn btn-outline-dark btn-lg wk-hero-secondary-action" href="#installation">Install package</a>
+            <a class="btn btn-lg wk-btn-gradient" href="/components/button">
+                Browse components
+                <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
+            <a class="btn btn-lg wk-btn-ghost" href="#installation">Install package</a>
         </div>
     </div>
 
-    <div class="wk-hero-panel" aria-hidden="true">
+    <div class="wk-hero-panel">
         <div class="wk-window-bar">
             <span></span>
             <span></span>
             <span></span>
+            <code>+page.svelte</code>
         </div>
         <div class="wk-preview-card">
-            <div class="alert alert-primary d-flex justify-content-between align-items-center" role="alert">
+            <Alert colorVariant="primary" class="d-flex justify-content-between align-items-center mb-0">
                 <span>Bootstrap styling, Svelte ergonomics.</span>
-                <span class="badge text-bg-primary">v1.0.1</span>
-            </div>
-            <div class="card shadow-sm">
+                <Badge colorVariant="text-bg-primary">Live</Badge>
+            </Alert>
+            <div class="card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start gap-3">
-                        <div>
-                            <h2 class="h5 mb-2">Typed component APIs</h2>
-                            <p class="text-secondary mb-0">Compose forms, overlays, navigation, tables, and feedback patterns.</p>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                        <h2 class="h6 mb-0">Typed component APIs</h2>
+                        <Badge colorVariant="text-bg-success" isPill>Runes</Badge>
+                    </div>
+                    <p class="text-secondary small mb-3">Compose forms, overlays, navigation, tables, and feedback patterns.</p>
+                    <div
+                        class="progress mb-3"
+                        role="progressbar"
+                        aria-label="Demo progress"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow={demoProgress}
+                        style="--bs-progress-bar-bg: var(--wk-accent-color)">
+                        <div class="progress-bar" style={`width: ${demoProgress}%`}></div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <Button colorVariant="primary" size="sm" onclick={() => (demoProgress = Math.min(100, demoProgress + 7))}>Increment</Button>
+                        <Button colorVariant="outline-secondary" size="sm" onclick={() => (demoProgress = 72)}>Reset</Button>
                     </div>
                 </div>
             </div>
@@ -100,11 +134,11 @@ pnpm add svelte@~5.0.0`;
     </div>
     <div class="wk-code-grid">
         <div>
-            <h3>Install</h3>
+            <h3><span class="wk-step-badge">1</span> Install</h3>
             <SyntaxHighlighter code={installExample} />
         </div>
         <div>
-            <h3>Use</h3>
+            <h3><span class="wk-step-badge">2</span> Use</h3>
             <SyntaxHighlighter code={importExample} />
         </div>
     </div>
@@ -113,17 +147,25 @@ pnpm add svelte@~5.0.0`;
 <section class="wk-section">
     <div class="wk-section-heading">
         <p class="wk-section-kicker">Explore</p>
-        <h2 class="wk-quick-link">Featured components</h2>
-        <p>Jump into the component pages for live examples, usage snippets, and API notes.</p>
+        <h2 class="wk-quick-link">Everything in the box</h2>
+        <p>Every route ships live examples, usage snippets, an interactive playground, and API notes.</p>
     </div>
-    <div class="wk-component-grid">
-        {#each featuredComponents as component (component.href)}
-            <a class="wk-component-card" href={component.href}>
-                <span>{component.label}</span>
-                <small>View examples →</small>
-            </a>
-        {/each}
-    </div>
+    {#each routes as route (route.section)}
+        <div class="wk-index-section">
+            <h3>
+                <i class={`bi ${sectionIcons[route.section] ?? 'bi-box'}`} aria-hidden="true"></i>
+                {route.section}
+            </h3>
+            <div class="wk-component-grid">
+                {#each route.items as item (item.href)}
+                    <a class="wk-component-card" href={item.href}>
+                        <span>{item.label}</span>
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                {/each}
+            </div>
+        </div>
+    {/each}
 </section>
 
 <section class="wk-section">
@@ -135,6 +177,7 @@ pnpm add svelte@~5.0.0`;
     <div class="wk-principle-grid">
         {#each principles as principle (principle.title)}
             <article>
+                <span class="wk-principle-icon"><i class={`bi ${principle.icon}`} aria-hidden="true"></i></span>
                 <h3>{principle.title}</h3>
                 <p>{principle.body}</p>
             </article>
@@ -148,51 +191,80 @@ pnpm add svelte@~5.0.0`;
         <h2 class="wk-quick-link">What to review</h2>
         <p>Review the license, npm package metadata, component API consistency, accessibility notes, and showcase visual direction.</p>
     </div>
-    <a class="btn btn-dark" href="/components/accordion">Open first component</a>
+    <a class="btn wk-btn-gradient" href="/components/accordion">
+        Open first component
+        <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+    </a>
 </section>
 
 <style>
     .wk-hero {
         align-items: center;
         display: grid;
-        gap: 2rem;
-        grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
-        margin-bottom: 2rem;
-        min-height: 34rem;
+        gap: 3rem;
+        grid-template-columns: minmax(0, 1.05fr) minmax(20rem, 0.95fr);
+        padding: 3rem 0 4rem;
     }
 
     .wk-hero-copy h1 {
         color: var(--wk-heading-color);
-        font-size: 4.75rem;
+        font-size: clamp(2.6rem, 4.2vw, 3.9rem);
         font-weight: 850;
-        letter-spacing: 0;
-        line-height: 1;
-        margin: 1rem 0;
-        max-width: 14ch;
+        letter-spacing: -0.045em;
+        line-height: 1.05;
+        margin: 1.1rem 0 1.25rem;
+        max-width: 21ch;
+    }
+
+    .wk-hero-gradient {
+        background: var(--wk-gradient-brand);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
     }
 
     .wk-hero-copy p {
         color: var(--wk-muted-color);
-        font-size: 1.18rem;
-        line-height: 1.65;
-        max-width: 46rem;
+        font-size: 1.14rem;
+        line-height: 1.7;
+        max-width: 34rem;
     }
 
     .wk-pill,
     .wk-section-kicker {
         color: var(--wk-accent-color);
-        font-size: 0.78rem;
+        font-size: 0.74rem;
         font-weight: 800;
         letter-spacing: 0.13em;
         text-transform: uppercase;
     }
 
     .wk-pill {
-        background: rgba(111, 66, 193, 0.08);
-        border: 1px solid rgba(111, 66, 193, 0.18);
+        align-items: center;
+        background: var(--wk-accent-soft);
+        border: 1px solid var(--wk-accent-border);
         border-radius: 999px;
         display: inline-flex;
-        padding: 0.5rem 0.85rem;
+        gap: 0.5rem;
+        padding: 0.45rem 0.85rem;
+    }
+
+    .wk-pill-dot {
+        animation: wk-pulse 2.2s ease-in-out infinite;
+        background: var(--wk-accent-color);
+        border-radius: 999px;
+        height: 0.45rem;
+        width: 0.45rem;
+    }
+
+    @keyframes wk-pulse {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.35;
+        }
     }
 
     .wk-hero-actions {
@@ -202,56 +274,108 @@ pnpm add svelte@~5.0.0`;
         margin-top: 2rem;
     }
 
+    :global(.wk-btn-gradient) {
+        --bs-btn-color: #ffffff;
+        --bs-btn-bg: transparent;
+        --bs-btn-border-color: transparent;
+        --bs-btn-hover-color: #ffffff;
+        --bs-btn-hover-border-color: transparent;
+        --bs-btn-active-color: #ffffff;
+        --bs-btn-active-border-color: transparent;
+        background: var(--wk-gradient-brand);
+        border-radius: 999px;
+        box-shadow: 0 10px 24px -10px rgba(94, 44, 237, 0.6);
+        font-weight: 700;
+        transition:
+            box-shadow 0.16s ease,
+            filter 0.16s ease,
+            transform 0.16s ease;
+    }
+
+    :global(.wk-btn-gradient:hover) {
+        box-shadow: 0 14px 30px -10px rgba(94, 44, 237, 0.7);
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+    }
+
+    .wk-btn-ghost {
+        --bs-btn-color: var(--wk-heading-color);
+        --bs-btn-bg: var(--wk-surface);
+        --bs-btn-border-color: var(--wk-border-strong);
+        --bs-btn-hover-color: var(--wk-accent-color);
+        --bs-btn-hover-bg: var(--wk-surface);
+        --bs-btn-hover-border-color: var(--wk-accent-border);
+        --bs-btn-active-color: var(--wk-accent-color);
+        --bs-btn-active-bg: var(--wk-surface);
+        --bs-btn-active-border-color: var(--wk-accent-border);
+        border-radius: 999px;
+        font-weight: 600;
+    }
+
     .wk-hero-panel {
-        background: linear-gradient(135deg, rgba(13, 110, 253, 0.12), rgba(111, 66, 193, 0.14)), var(--wk-surface);
+        background: var(--wk-surface);
         border: 1px solid var(--wk-border);
-        border-radius: 2rem;
-        box-shadow: 0 2rem 5rem rgba(15, 23, 42, 0.12);
+        border-radius: 1.5rem;
+        box-shadow: var(--wk-shadow-lg);
         overflow: hidden;
-        padding: 1rem;
+        padding: 0;
+        position: relative;
+    }
+
+    .wk-hero-panel::before {
+        background: var(--wk-gradient-brand);
+        content: '';
+        height: 3px;
+        inset: 0 0 auto;
+        position: absolute;
     }
 
     .wk-window-bar {
+        align-items: center;
+        border-bottom: 1px solid var(--wk-border);
         display: flex;
         gap: 0.4rem;
-        padding: 0.35rem 0.35rem 1rem;
+        padding: 0.85rem 1.1rem;
     }
 
     .wk-window-bar span {
         background: color-mix(in srgb, var(--wk-body-color) 22%, transparent);
         border-radius: 999px;
-        height: 0.75rem;
-        width: 0.75rem;
+        height: 0.6rem;
+        width: 0.6rem;
+    }
+
+    .wk-window-bar code {
+        color: var(--wk-muted-color);
+        font-size: 0.72rem;
+        margin-left: 0.5rem;
     }
 
     .wk-preview-card {
-        background: var(--wk-surface-elevated);
-        border-radius: 1.25rem;
         display: grid;
         gap: 1rem;
-        padding: 1rem;
+        padding: 1.25rem;
     }
 
     .wk-stats {
         display: grid;
         gap: 1rem;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
         margin-bottom: 4rem;
     }
 
     .wk-stats div,
-    .wk-component-card,
     .wk-principle-grid article,
     .wk-next-steps,
     .wk-code-grid > div {
         background: var(--wk-surface);
         border: 1px solid var(--wk-border);
-        border-radius: 1.25rem;
-        box-shadow: 0 1rem 2rem rgba(15, 23, 42, 0.05);
+        border-radius: 1.1rem;
+        box-shadow: var(--wk-shadow-sm);
     }
 
     .wk-stats div {
-        padding: 1.1rem;
+        padding: 1.2rem 1.3rem;
     }
 
     .wk-stats strong,
@@ -261,38 +385,39 @@ pnpm add svelte@~5.0.0`;
 
     .wk-stats strong {
         color: var(--wk-heading-color);
-        font-size: 1.35rem;
-        letter-spacing: -0.04em;
+        font-size: 1.45rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
     }
 
     .wk-stats span {
         color: var(--wk-muted-color);
-        font-size: 0.92rem;
-        margin-top: 0.2rem;
+        font-size: 0.88rem;
+        margin-top: 0.15rem;
     }
 
     .wk-section {
-        margin: 4rem 0;
+        margin: 4.5rem 0;
     }
 
     .wk-section-heading {
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.75rem;
         max-width: 48rem;
     }
 
     .wk-section-heading h2,
     .wk-next-steps h2 {
-        font-size: clamp(2rem, 4vw, 3.3rem);
-        font-weight: 820;
-        letter-spacing: -0.06em;
-        line-height: 1;
+        font-size: clamp(1.8rem, 3vw, 2.5rem);
+        font-weight: 830;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
         margin: 0.35rem 0 0.75rem;
     }
 
     .wk-section-heading p,
     .wk-next-steps p {
         color: var(--wk-muted-color);
-        font-size: 1.05rem;
+        font-size: 1.02rem;
         line-height: 1.7;
     }
 
@@ -304,48 +429,102 @@ pnpm add svelte@~5.0.0`;
 
     .wk-code-grid > div {
         min-width: 0;
-        padding: 1.1rem;
+        padding: 1.2rem;
     }
 
     .wk-code-grid h3 {
-        font-size: 1rem;
+        align-items: center;
+        display: flex;
+        font-size: 0.95rem;
+        font-weight: 750;
+        gap: 0.5rem;
+        margin-bottom: 0.9rem;
+    }
+
+    .wk-step-badge {
+        align-items: center;
+        background: var(--wk-accent-soft);
+        border: 1px solid var(--wk-accent-border);
+        border-radius: 999px;
+        color: var(--wk-accent-color);
+        display: inline-flex;
+        font-size: 0.72rem;
         font-weight: 800;
+        height: 1.4rem;
+        justify-content: center;
+        width: 1.4rem;
+    }
+
+    .wk-index-section {
+        margin-bottom: 2rem;
+    }
+
+    .wk-index-section h3 {
+        align-items: center;
+        color: var(--wk-muted-color);
+        display: flex;
+        font-size: 0.76rem;
+        font-weight: 800;
+        gap: 0.5rem;
+        letter-spacing: 0.13em;
         margin-bottom: 0.85rem;
+        text-transform: uppercase;
+    }
+
+    .wk-index-section h3 i {
+        color: var(--wk-accent-color);
     }
 
     .wk-component-grid {
         display: grid;
-        gap: 1rem;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.75rem;
+        grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    }
+
+    :global(.wk-content) a.wk-component-card {
+        color: var(--wk-heading-color);
     }
 
     .wk-component-card {
+        align-items: center;
+        background: var(--wk-surface);
+        border: 1px solid var(--wk-border);
+        border-radius: 0.85rem;
+        box-shadow: var(--wk-shadow-sm);
         color: var(--wk-heading-color);
-        display: grid;
-        min-height: 8rem;
-        padding: 1.1rem;
+        display: flex;
+        justify-content: space-between;
+        padding: 0.85rem 1.05rem;
         text-decoration: none;
         transition:
             border-color 0.16s ease,
-            transform 0.16s ease,
-            box-shadow 0.16s ease;
+            box-shadow 0.16s ease,
+            transform 0.16s ease;
     }
 
     .wk-component-card:hover {
-        border-color: rgba(13, 110, 253, 0.45);
-        box-shadow: 0 1.25rem 2.5rem rgba(13, 110, 253, 0.12);
-        transform: translateY(-0.2rem);
+        border-color: var(--wk-accent-border);
+        box-shadow: var(--wk-shadow-md);
+        transform: translateY(-2px);
     }
 
     .wk-component-card span {
-        font-size: 1.15rem;
-        font-weight: 800;
+        font-size: 0.95rem;
+        font-weight: 650;
     }
 
-    .wk-component-card small {
-        align-self: end;
-        color: var(--wk-link-color);
-        font-weight: 700;
+    .wk-component-card i {
+        color: var(--wk-accent-color);
+        opacity: 0;
+        transform: translateX(-0.25rem);
+        transition:
+            opacity 0.16s ease,
+            transform 0.16s ease;
+    }
+
+    .wk-component-card:hover i {
+        opacity: 1;
+        transform: translateX(0);
     }
 
     .wk-principle-grid {
@@ -355,13 +534,27 @@ pnpm add svelte@~5.0.0`;
     }
 
     .wk-principle-grid article {
-        padding: 1.25rem;
+        padding: 1.5rem;
+    }
+
+    .wk-principle-icon {
+        align-items: center;
+        background: var(--wk-accent-soft);
+        border: 1px solid var(--wk-accent-border);
+        border-radius: 0.85rem;
+        color: var(--wk-accent-color);
+        display: inline-flex;
+        font-size: 1.15rem;
+        height: 2.6rem;
+        justify-content: center;
+        margin-bottom: 1rem;
+        width: 2.6rem;
     }
 
     .wk-principle-grid h3 {
-        font-size: 1.2rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
+        font-size: 1.12rem;
+        font-weight: 750;
+        letter-spacing: -0.02em;
     }
 
     .wk-principle-grid p {
@@ -375,7 +568,7 @@ pnpm add svelte@~5.0.0`;
         display: flex;
         gap: 2rem;
         justify-content: space-between;
-        padding: 1.5rem;
+        padding: 2rem;
     }
 
     .wk-next-steps p {
@@ -383,67 +576,27 @@ pnpm add svelte@~5.0.0`;
         max-width: 58rem;
     }
 
-    :global([data-bs-theme='dark']) .wk-hero-copy h1 {
-        color: #f8fbff;
-        text-shadow: 0 0.08rem 1.25rem rgba(139, 185, 254, 0.12);
-    }
+    @media (max-width: 1399.98px) {
+        .wk-hero {
+            grid-template-columns: 1fr;
+            padding-top: 1.5rem;
+        }
 
-    :global([data-bs-theme='dark']) .wk-hero-copy p {
-        color: #cbd5e1;
-    }
-
-    :global([data-bs-theme='dark']) .wk-pill {
-        background: rgba(196, 181, 253, 0.16);
-        border-color: rgba(196, 181, 253, 0.42);
-        color: #ddd6fe;
-    }
-
-    :global([data-bs-theme='dark']) .wk-hero-secondary-action {
-        --bs-btn-color: #f8fbff;
-        --bs-btn-border-color: #94a3b8;
-        --bs-btn-hover-bg: #f8fbff;
-        --bs-btn-hover-border-color: #f8fbff;
-        --bs-btn-hover-color: #0b1020;
-        --bs-btn-active-bg: #e2e8f0;
-        --bs-btn-active-border-color: #e2e8f0;
-        --bs-btn-active-color: #0b1020;
-    }
-
-    :global([data-bs-theme='dark']) .wk-hero-panel {
-        background: linear-gradient(135deg, rgba(13, 110, 253, 0.18), rgba(196, 181, 253, 0.14)), #111827;
-        box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.34);
-    }
-
-    :global([data-bs-theme='dark']) .wk-preview-card {
-        background: #182235;
+        .wk-hero-panel {
+            max-width: 34rem;
+        }
     }
 
     @media (max-width: 1199.98px) {
-        .wk-hero,
         .wk-code-grid,
         .wk-principle-grid {
             grid-template-columns: 1fr;
-        }
-
-        .wk-stats,
-        .wk-component-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
     }
 
     @media (max-width: 575.98px) {
         .wk-hero {
-            min-height: auto;
-            padding-top: 2rem;
-        }
-
-        .wk-hero-copy h1 {
-            font-size: 2.75rem;
-        }
-
-        .wk-stats,
-        .wk-component-grid {
-            grid-template-columns: 1fr;
+            padding-top: 0.5rem;
         }
 
         .wk-next-steps {
