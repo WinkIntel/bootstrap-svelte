@@ -985,12 +985,12 @@
         padding: 1.35rem;
     }
 
-    :global(.wk-content #api .table) {
+    :global(.wk-content .wk-api-section .table) {
         --bs-table-bg: transparent;
         font-size: 0.92rem;
     }
 
-    :global(.wk-content #api .table thead th) {
+    :global(.wk-content .wk-api-section .table thead th) {
         color: var(--wk-muted-color);
         font-size: 0.72rem;
         font-weight: 800;

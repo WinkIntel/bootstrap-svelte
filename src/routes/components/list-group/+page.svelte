@@ -513,7 +513,7 @@
     </div>
 
     <!-- API Reference -->
-    <div class="row mb-5">
+    <div class="row mb-5 wk-api-section">
         <div class="col-lg-8">
             <h2 class="wk-quick-link" id="api">API Reference</h2>
 

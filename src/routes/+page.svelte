@@ -620,5 +620,11 @@ pnpm add svelte@~5.0.0`;
         :global(.wk-btn-gradient:hover) {
             transform: none;
         }
+
+        .wk-component-card i,
+        .wk-component-card:hover i {
+            transform: none;
+            transition: none;
+        }
     }
 </style>
