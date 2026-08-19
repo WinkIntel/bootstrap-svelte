@@ -293,7 +293,7 @@
         </ul>
     </section>
 
-    <section class="mb-5">
+    <section class="mb-5 wk-api-section">
         <h2 class="wk-quick-link">API Reference</h2>
 
         <div class="card mb-4">

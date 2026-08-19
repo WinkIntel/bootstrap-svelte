@@ -536,7 +536,7 @@
         <SyntaxHighlighter code={disabledElementsExampleCode} />
     </section>
 
-    <section class="mb-5">
+    <section class="mb-5 wk-api-section">
         <h2 class="wk-quick-link">Component API</h2>
 
         <section class="mb-4">

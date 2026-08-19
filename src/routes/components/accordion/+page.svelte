@@ -357,7 +357,7 @@
     </section>
 
     <!-- API Reference -->
-    <section class="mb-5" id="api">
+    <section class="mb-5 wk-api-section" id="api">
         <h2 class="wk-quick-link">API Reference</h2>
 
         <p>The Accordion component is composed of several sub-components:</p>

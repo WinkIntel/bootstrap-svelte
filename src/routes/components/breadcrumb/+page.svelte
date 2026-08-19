@@ -157,7 +157,7 @@
     </section>
 
     <!-- API Reference -->
-    <section class="mb-5" id="api">
+    <section class="mb-5 wk-api-section" id="api">
         <h2 class="wk-quick-link">API Reference</h2>
 
         <h3 class="h5 mt-4">Breadcrumb.Root Props</h3>

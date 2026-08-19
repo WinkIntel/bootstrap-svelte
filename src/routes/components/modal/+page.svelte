@@ -722,7 +722,7 @@
     <hr class="my-5" />
 
     <!-- API Reference Section -->
-    <section class="mb-5">
+    <section class="mb-5 wk-api-section">
         <h2 id="api">API Reference</h2>
 
         <section class="mb-4">

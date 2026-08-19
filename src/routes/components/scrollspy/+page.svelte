@@ -619,7 +619,7 @@ export type ScrollspyOptions = {
         </div>
     </section>
 
-    <section class="mb-5" id="api-reference">
+    <section class="mb-5 wk-api-section" id="api-reference">
         <h2 class="wk-quick-link">API Reference</h2>
         <h3>Scrollspy Attachment</h3>
         <p>

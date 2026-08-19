@@ -613,7 +613,7 @@
         </div>
     </div>
 
-    <div class="row mb-5">
+    <div class="row mb-5 wk-api-section">
         <div class="col">
             <h2 class="h3" id="api">API Reference</h2>
 

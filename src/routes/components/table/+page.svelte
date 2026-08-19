@@ -1861,7 +1861,7 @@
         </div>
     </section>
 
-    <section class="mb-4" id="css-classes-reference">
+    <section class="mb-4 wk-api-section" id="css-classes-reference">
         <h2 class="wk-quick-link mb-3">Table CSS Classes & Usage</h2>
         <p>
             This section documents all CSS classes that can appear on the rendered Table component markup. Understanding these classes helps when

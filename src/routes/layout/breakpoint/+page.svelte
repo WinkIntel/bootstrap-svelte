@@ -185,7 +185,7 @@
     </section>
 
     <!-- API Reference -->
-    <section class="mb-4">
+    <section class="mb-4 wk-api-section">
         <h2 class="wk-quick-link">API Reference</h2>
 
         <h3 class="h5 mt-4">Props</h3>
