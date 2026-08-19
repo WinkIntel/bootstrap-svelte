@@ -298,6 +298,12 @@ pnpm add svelte@~5.0.0`;
         transform: translateY(-1px);
     }
 
+    :global(.wk-btn-gradient:focus-visible),
+    .wk-btn-ghost:focus-visible {
+        outline: 2px solid var(--wk-accent-color);
+        outline-offset: 2px;
+    }
+
     .wk-btn-ghost {
         --bs-btn-color: var(--wk-heading-color);
         --bs-btn-bg: var(--wk-surface);
@@ -602,6 +608,17 @@ pnpm add svelte@~5.0.0`;
         .wk-next-steps {
             align-items: flex-start;
             flex-direction: column;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .wk-pill-dot {
+            animation: none;
+        }
+
+        .wk-component-card:hover,
+        :global(.wk-btn-gradient:hover) {
+            transform: none;
         }
     }
 </style>

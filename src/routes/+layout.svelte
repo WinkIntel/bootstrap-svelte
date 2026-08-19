@@ -857,6 +857,12 @@
         font-weight: 600;
     }
 
+    .wk-github-btn:focus-visible {
+        box-shadow: none;
+        outline: 2px solid var(--wk-accent-color);
+        outline-offset: 2px;
+    }
+
     :global([data-bs-theme='dark'] .wk-github-btn) {
         --bs-btn-hover-color: #16182f;
         --bs-btn-active-color: #16182f;
@@ -883,8 +889,6 @@
     :global(.wk-content h5),
     :global(.wk-content h6) {
         color: var(--wk-heading-color);
-        font-weight: 750;
-        letter-spacing: -0.02em;
     }
 
     :global(.wk-content > div > h1),
@@ -903,7 +907,7 @@
         max-width: 52rem;
     }
 
-    :global(.wk-content hr) {
+    :global(.wk-content .lead + hr) {
         background: linear-gradient(90deg, var(--wk-accent-border), transparent 70%);
         border: 0;
         height: 2px;
@@ -913,6 +917,8 @@
 
     :global(.wk-content h2.wk-quick-link) {
         font-size: 1.45rem;
+        font-weight: 750;
+        letter-spacing: -0.02em;
         margin-bottom: 0.6rem;
         margin-top: 0.5rem;
         position: relative;
@@ -973,19 +979,18 @@
         border: 1px solid var(--wk-border);
         border-radius: 1rem;
         box-shadow: var(--wk-shadow-sm);
-        overflow: hidden;
     }
 
     :global(.wk-content section > .card > .card-body) {
         padding: 1.35rem;
     }
 
-    :global(.wk-content .table) {
+    :global(.wk-content #api .table) {
         --bs-table-bg: transparent;
         font-size: 0.92rem;
     }
 
-    :global(.wk-content .table thead th) {
+    :global(.wk-content #api .table thead th) {
         color: var(--wk-muted-color);
         font-size: 0.72rem;
         font-weight: 800;
