@@ -2,11 +2,15 @@ import { describe, expect, test } from 'vitest';
 import { sitePages } from '../(common)/site.js';
 import { entries, GET, prerender } from './+server.js';
 
+// Rendering a page compiles it and every library component through Vite the first time a worker touches it,
+// which takes well over Vitest's 5 s default on CI runners.
+const PAGE_RENDER_TIMEOUT = 60_000;
+
 function event(path: string): Parameters<typeof GET>[0] {
     return { params: { path } } as unknown as Parameters<typeof GET>[0];
 }
 
-describe('[...path].md endpoint', () => {
+describe('[...path].md endpoint', { timeout: PAGE_RENDER_TIMEOUT }, () => {
     test('is prerendered', () => {
         expect(prerender).toBe(true);
     });

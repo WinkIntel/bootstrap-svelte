@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import { renderPageMarkdown } from './render-page.js';
 
-describe('renderPageMarkdown', () => {
+// Rendering a page compiles it and every library component through Vite the first time a worker touches it,
+// which takes well over Vitest's 5 s default on CI runners.
+const PAGE_RENDER_TIMEOUT = 60_000;
+
+describe('renderPageMarkdown', { timeout: PAGE_RENDER_TIMEOUT }, () => {
     test('renders a component page as Markdown headed by the page title and lead', async () => {
         const page = await renderPageMarkdown('/components/button');
         expect(page.title).toBe('Button');

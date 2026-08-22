@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import { GET, prerender } from './+server.js';
 
-describe('llms.txt endpoint', () => {
+// Rendering a page compiles it and every library component through Vite the first time a worker touches it,
+// which takes well over Vitest's 5 s default on CI runners.
+const PAGE_RENDER_TIMEOUT = 60_000;
+
+describe('llms.txt endpoint', { timeout: PAGE_RENDER_TIMEOUT }, () => {
     test('is prerendered', () => {
         expect(prerender).toBe(true);
     });

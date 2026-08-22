@@ -15,6 +15,49 @@ Object.defineProperty(window, 'matchMedia', {
     }))
 });
 
+// Node.js 25+ defines a global `localStorage`/`sessionStorage` getter that yields undefined unless
+// --localstorage-file is set, and Vitest's jsdom environment only installs window globals that are
+// absent from the Node global, so jsdom's Storage never replaces the stub. Provide an in-memory
+// Storage so components that persist preferences behave the same on every Node version.
+class MemoryStorage {
+    #items = new Map<string, string>();
+
+    get length(): number {
+        return this.#items.size;
+    }
+
+    clear(): void {
+        this.#items.clear();
+    }
+
+    getItem(key: string): string | null {
+        return this.#items.get(String(key)) ?? null;
+    }
+
+    key(index: number): string | null {
+        return Array.from(this.#items.keys())[index] ?? null;
+    }
+
+    removeItem(key: string): void {
+        this.#items.delete(String(key));
+    }
+
+    setItem(key: string, value: string): void {
+        this.#items.set(String(key), String(value));
+    }
+}
+
+for (const name of ['localStorage', 'sessionStorage'] as const) {
+    if (typeof globalThis[name] === 'undefined') {
+        Object.defineProperty(globalThis, name, {
+            configurable: true,
+            enumerable: true,
+            writable: true,
+            value: new MemoryStorage() as unknown as Storage
+        });
+    }
+}
+
 // Timer-clear thunks for animations whose auto-finish timer is still pending.
 // A timer that outlives its test file fires after the jsdom environment is
 // torn down, where `Event` resolves to a different realm and dispatchEvent

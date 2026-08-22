@@ -2,7 +2,7 @@
 import '@testing-library/jest-dom/vitest';
 import { render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
-import { afterEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import Layout from './+layout.svelte';
 
 const state = vi.hoisted(() => ({ pathname: '/components/button' }));
@@ -17,17 +17,28 @@ vi.mock('$app/state', () => ({
 
 function renderLayout(pathname: string) {
     state.pathname = pathname;
-    return render(Layout, {
+    const result = render(Layout, {
         props: { children: createRawSnippet(() => ({ render: () => '<p>Page content</p>' })) }
     });
+    // The layout scans for headings on a short timer after navigation; run it now so nothing outlives the test.
+    vi.runAllTimers();
+    return result;
 }
 
 function headAttribute(selector: string, attribute: string): string | null {
     return document.head.querySelector(selector)?.getAttribute(attribute) ?? null;
 }
 
+beforeEach(() => {
+    vi.useFakeTimers();
+});
+
 afterEach(() => {
+    // A timer that outlives the test would fire after the jsdom document is torn down and fail the run.
+    const pendingTimers = vi.getTimerCount();
+    vi.useRealTimers();
     document.head.innerHTML = '';
+    expect(pendingTimers).toBe(0);
 });
 
 describe('+layout.svelte head metadata', () => {
