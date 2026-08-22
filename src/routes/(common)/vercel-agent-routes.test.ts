@@ -1,20 +1,16 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
-import { MIDDLEWARE_NAME, addAgentRoutes, withAgentRoutes, type VercelConfig, type VercelRoute } from './vercel-agent-routes.js';
+import { acceptPatterns } from './accept-patterns.js';
+import { addAgentRoutes, withAgentRoutes, type VercelConfig, type VercelRoute } from './vercel-agent-routes.js';
 
 const MARKDOWN_TYPE = 'text/markdown; charset=utf-8';
 
 function baseConfig(): VercelConfig {
     return {
         version: 3,
-        routes: [
-            { src: '/about/', dest: '/about' },
-            { src: '/about', status: 308, headers: { Location: '/about/' } },
-            { src: '/_app/immutable/.+', headers: { 'cache-control': 'public, immutable, max-age=31536000' } },
-            { handle: 'filesystem' }
-        ],
+        routes: [{ src: '/_app/immutable/.+', headers: { 'cache-control': 'public, immutable, max-age=31536000' } }, { handle: 'filesystem' }],
         overrides: {
             'index.html': { path: '' },
             'about.html': { path: 'about' },
@@ -24,7 +20,13 @@ function baseConfig(): VercelConfig {
     };
 }
 
-const manifest = { markdownFiles: ['index.md', 'about.md', '404.md', 'components/button.md', 'agents.md'] };
+const manifest = {
+    pages: ['/', '/about', '/404', '/components/button'],
+    markdownFiles: ['index.md', 'about.md', '404.md', 'components/button.md', 'agents.md']
+};
+
+const prefersMarkdown = { type: 'header', key: 'accept', value: acceptPatterns.markdownAcceptable };
+const unlessHtmlWins = acceptPatterns.htmlBeatsMarkdown.map((value) => ({ type: 'header', key: 'accept', value }));
 
 function routesOf(config: VercelConfig): VercelRoute[] {
     return config.routes ?? [];
@@ -37,6 +39,8 @@ function filesystemIndex(routes: VercelRoute[]): number {
 describe('addAgentRoutes', () => {
     const result = addAgentRoutes(baseConfig(), manifest);
     const routes = routesOf(result);
+    const beforeFilesystem = routes.slice(0, filesystemIndex(routes));
+    const afterFilesystem = routes.slice(filesystemIndex(routes) + 1);
 
     test('does not mutate the input config', () => {
         const input = baseConfig();
@@ -44,17 +48,77 @@ describe('addAgentRoutes', () => {
         expect(input).toEqual(baseConfig());
     });
 
-    test('routes every extension-less path through the negotiation middleware before anything else', () => {
-        expect(routes[0]).toEqual({ src: '^/[^.]*$', middlewarePath: MIDDLEWARE_NAME, continue: true });
+    test('emits no functions or middleware routes: the deployment stays static', () => {
+        expect(routes.some((route) => 'middlewarePath' in route)).toBe(false);
+    });
+
+    test('redirects trailing-slash variants to the canonical path before anything else', () => {
+        expect(routes[0]).toEqual({ src: '^/(.+?)/+$', status: 308, headers: { Location: '/$1' } });
     });
 
     test('keeps the adapter routes, in order, ahead of the filesystem handler', () => {
-        const original = routesOf(baseConfig()).slice(0, 3);
-        expect(routes.slice(1, filesystemIndex(routes))).toEqual(original);
+        const original = routesOf(baseConfig()).slice(0, 1);
+        const kept = beforeFilesystem.filter((route) => original.some((candidate) => JSON.stringify(candidate) === JSON.stringify(route)));
+        expect(kept).toEqual(original);
     });
 
-    test('serves 404.html with a 404 status for anything the filesystem misses', () => {
-        expect(routes.slice(filesystemIndex(routes) + 1)).toEqual([{ src: '^/.*$', status: 404, dest: '/404.html', headers: { Vary: 'Accept' } }]);
+    test('adds Vary: Accept to every extension-less path', () => {
+        expect(beforeFilesystem).toContainEqual({ src: '^/[^.]*$', headers: { Vary: 'Accept' }, continue: true });
+    });
+
+    test('advertises the Markdown alternate of each page with a Link header', () => {
+        expect(beforeFilesystem).toContainEqual({
+            src: '^/$',
+            headers: { Link: '<https://bootstrap-svelte.vercel.app/index.md>; rel="alternate"; type="text/markdown"' },
+            continue: true
+        });
+        expect(beforeFilesystem).toContainEqual({
+            src: '^/(about|components/button)$',
+            headers: { Link: '<https://bootstrap-svelte.vercel.app/$1.md>; rel="alternate"; type="text/markdown"' },
+            continue: true
+        });
+    });
+
+    test('returns 406 with an explanatory body when neither representation is acceptable', () => {
+        const route = beforeFilesystem.find((candidate) => candidate.status === 406);
+        expect(route).toEqual({
+            src: '^/(?:about|components/button)?$',
+            has: [{ type: 'header', key: 'accept', value: acceptPatterns.nonEmpty }],
+            missing: [
+                { type: 'header', key: 'accept', value: acceptPatterns.htmlAcceptable },
+                { type: 'header', key: 'accept', value: acceptPatterns.markdownAcceptable }
+            ],
+            status: 406,
+            dest: '/406.txt',
+            headers: { Vary: 'Accept' }
+        });
+    });
+
+    test('rewrites markdown-preferring requests for the home page to /index.md', () => {
+        expect(beforeFilesystem).toContainEqual({ src: '^/$', has: [prefersMarkdown], missing: unlessHtmlWins, dest: '/index.md' });
+    });
+
+    test('rewrites markdown-preferring requests for pages to their .md sibling, excluding the 404 page', () => {
+        expect(beforeFilesystem).toContainEqual({
+            src: '^/(about|components/button)$',
+            has: [prefersMarkdown],
+            missing: unlessHtmlWins,
+            dest: '/$1.md'
+        });
+    });
+
+    test('evaluates the 406 route before the Markdown rewrites', () => {
+        const notAcceptable = beforeFilesystem.findIndex((route) => route.status === 406);
+        const rewrite = beforeFilesystem.findIndex((route) => route.dest === '/index.md');
+        expect(notAcceptable).toBeGreaterThan(-1);
+        expect(notAcceptable).toBeLessThan(rewrite);
+    });
+
+    test('serves negotiated 404 bodies once the filesystem misses', () => {
+        expect(afterFilesystem).toEqual([
+            { src: '^/.*$', has: [prefersMarkdown], missing: unlessHtmlWins, status: 404, dest: '/404.md', headers: { Vary: 'Accept' } },
+            { src: '^/.*$', status: 404, dest: '/404.html', headers: { Vary: 'Accept' } }
+        ]);
     });
 
     test('forces the Markdown content type on .md files and keeps 404.html addressable by file name', () => {
@@ -66,8 +130,8 @@ describe('addAgentRoutes', () => {
 
     test('appends a filesystem handler when the adapter config has none', () => {
         const patched = routesOf(addAgentRoutes({ version: 3, routes: [] }, manifest));
-        expect(filesystemIndex(patched)).toBe(1);
-        expect(patched).toHaveLength(3);
+        expect(filesystemIndex(patched)).toBeGreaterThan(0);
+        expect(patched.slice(filesystemIndex(patched) + 1)).toHaveLength(2);
     });
 });
 
@@ -88,57 +152,37 @@ describe('withAgentRoutes', () => {
         }
     };
 
-    function fakeAdapter(outputDir: string, writeOutput: boolean) {
-        return {
+    test('patches the config written by the wrapped adapter without emitting functions', async () => {
+        const outputDir = mkdtempSync(join(tmpdir(), 'agent-routes-'));
+        const configPath = join(outputDir, 'config.json');
+        let adapted = false;
+        const base = {
             name: 'fake-adapter',
             adapt: async () => {
-                if (!writeOutput) return;
-                mkdirSync(join(outputDir, 'static'), { recursive: true });
-                writeFileSync(join(outputDir, 'config.json'), JSON.stringify(baseConfig()));
-                writeFileSync(join(outputDir, 'static', '404.html'), '<h1>Page not found</h1>');
-                writeFileSync(join(outputDir, 'static', '404.md'), '# Page not found\n');
-                writeFileSync(join(outputDir, 'static', '406.txt'), '406 Not Acceptable\n');
+                adapted = true;
+                writeFileSync(configPath, JSON.stringify(baseConfig()));
             }
         };
-    }
 
-    test('patches the config written by the wrapped adapter and emits the middleware function', async () => {
-        const outputDir = mkdtempSync(join(tmpdir(), 'agent-routes-'));
-        const adapter = withAgentRoutes(fakeAdapter(outputDir, true), { outputDir });
-
+        const adapter = withAgentRoutes(base, { outputDir });
         await adapter.adapt(builder as never);
 
+        expect(adapted).toBe(true);
         expect(adapter.name).toBe('fake-adapter');
-        const written = JSON.parse(readFileSync(join(outputDir, 'config.json'), 'utf8')) as VercelConfig;
-        expect(routesOf(written)[0]).toEqual({ src: '^/[^.]*$', middlewarePath: MIDDLEWARE_NAME, continue: true });
+        const written = JSON.parse(readFileSync(configPath, 'utf8')) as VercelConfig;
+        expect(routesOf(written)).toContainEqual(expect.objectContaining({ dest: '/index.md' }));
+        expect(routesOf(written)).toContainEqual(expect.objectContaining({ src: '^/(about)$', dest: '/$1.md' }));
         expect(written.overrides?.['about.md']).toEqual({ contentType: MARKDOWN_TYPE });
         expect(written.overrides?.['404.html']).toBeUndefined();
-
-        const functionDir = join(outputDir, 'functions', `${MIDDLEWARE_NAME}.func`);
-        expect(JSON.parse(readFileSync(join(functionDir, '.vc-config.json'), 'utf8'))).toEqual({ runtime: 'edge', entrypoint: 'index.js' });
-        for (const file of ['index.js', 'agent-middleware.js', 'accept-negotiation.js', 'site-url.js']) {
-            expect(existsSync(join(functionDir, file)), file).toBe(true);
-        }
-        expect(readFileSync(join(functionDir, 'index.js'), 'utf8')).toMatch(/from '\.\/agent-middleware\.js'/);
-
-        const configModule = readFileSync(join(functionDir, 'config.js'), 'utf8');
-        expect(configModule.startsWith('export default ')).toBe(true);
-        const middlewareConfig = JSON.parse(configModule.replace(/^export default /, '').replace(/;\s*$/, ''));
-        expect(middlewareConfig).toEqual({
-            siteUrl: 'https://bootstrap-svelte.vercel.app',
-            pages: ['/', '/about'],
-            notFound: { html: '<h1>Page not found</h1>', markdown: '# Page not found\n' },
-            notAcceptable: '406 Not Acceptable\n'
-        });
+        expect(existsSync(join(outputDir, 'functions'))).toBe(false);
     });
 
     test('leaves non-Vercel builds alone when no config was written', async () => {
         const outputDir = mkdtempSync(join(tmpdir(), 'agent-routes-'));
-        const adapter = withAgentRoutes(fakeAdapter(outputDir, false), { outputDir });
+        const adapter = withAgentRoutes({ name: 'fake-adapter', adapt: async () => {} }, { outputDir });
 
         await adapter.adapt(builder as never);
 
         expect(existsSync(join(outputDir, 'config.json'))).toBe(false);
-        expect(existsSync(join(outputDir, 'functions'))).toBe(false);
     });
 });

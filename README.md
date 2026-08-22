@@ -18,7 +18,7 @@ Use it when you want Bootstrap's familiar grid, utilities, and UI patterns in a 
 The showcase at <https://bootstrap-svelte.vercel.app> is published for AI agents and tools as well as people:
 
 - `/llms.txt` indexes every page with one-line summaries ([llms.txt format](https://llmstxt.org)); `/llms-full.txt` bundles every page into one Markdown file.
-- Every page is available as Markdown from its own URL with `Accept: text/markdown` (negotiated per RFC 9110 quality values; the response carries `Vary: Accept` and a `Link` alternate header), or by appending `.md` to the path, for example `/components/button.md`.
+- Every page is available as Markdown from its own URL with `Accept: text/markdown` (quality values are honored; the response carries `Vary: Accept` and a `Link` alternate header), or by appending `.md` to the path, for example `/components/button.md`.
 - `/agents.md` explains when to use the library and how to integrate it; `/sitemap.xml` and `/robots.txt` serve crawlers.
 - Paths that do not exist return a real HTTP 404 with a Markdown or HTML body that links back to the documentation index.
 
@@ -91,9 +91,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
     let showModal = $state(false);
 </script>
 
-<Alert colorVariant="primary" isDismissible>
-    Welcome to Bootstrap Svelte!
-</Alert>
+<Alert colorVariant="primary" isDismissible>Welcome to Bootstrap Svelte!</Alert>
 
 <Card>
     <Card.Header>
@@ -101,9 +99,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
     </Card.Header>
     <Card.Body>
         <Card.Text>This is a card built with Bootstrap Svelte components.</Card.Text>
-        <Button colorVariant="primary" onclick={() => (showModal = true)}>
-            Open Modal
-        </Button>
+        <Button colorVariant="primary" onclick={() => (showModal = true)}>Open Modal</Button>
     </Card.Body>
 </Card>
 
@@ -115,9 +111,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
             </Modal.Header>
             <Modal.Body>Modal content goes here.</Modal.Body>
             <Modal.Footer>
-                <Button colorVariant="secondary" onclick={() => (showModal = false)}>
-                    Close
-                </Button>
+                <Button colorVariant="secondary" onclick={() => (showModal = false)}>Close</Button>
             </Modal.Footer>
         </Modal.Content>
     </Modal.Dialog>
