@@ -68,7 +68,7 @@ pnpm add svelte@~5.0.0`;
         </div>
     </div>
 
-    <div class="wk-hero-panel">
+    <div class="wk-hero-panel" data-markdown="skip">
         <div class="wk-window-bar">
             <span></span>
             <span></span>
@@ -107,7 +107,7 @@ pnpm add svelte@~5.0.0`;
     </div>
 </section>
 
-<section class="wk-stats" aria-label="Package highlights">
+<section class="wk-stats" aria-label="Package highlights" data-markdown="skip">
     <div>
         <strong>{componentCount}</strong>
         <span>documented routes</span>
@@ -128,7 +128,7 @@ pnpm add svelte@~5.0.0`;
 
 <section class="wk-section" id="installation">
     <div class="wk-section-heading">
-        <p class="wk-section-kicker">Start here</p>
+        <p class="wk-section-kicker" data-markdown="skip">Start here</p>
         <h2 class="wk-quick-link">Installation</h2>
         <p>Add the package and import Bootstrap CSS from your app entry point or stylesheet pipeline.</p>
     </div>
@@ -146,7 +146,7 @@ pnpm add svelte@~5.0.0`;
 
 <section class="wk-section">
     <div class="wk-section-heading">
-        <p class="wk-section-kicker">Explore</p>
+        <p class="wk-section-kicker" data-markdown="skip">Explore</p>
         <h2 class="wk-quick-link">Everything in the box</h2>
         <p>Every route ships live examples, usage snippets, an interactive playground, and API notes.</p>
     </div>
@@ -170,7 +170,7 @@ pnpm add svelte@~5.0.0`;
 
 <section class="wk-section">
     <div class="wk-section-heading">
-        <p class="wk-section-kicker">Direction</p>
+        <p class="wk-section-kicker" data-markdown="skip">Direction</p>
         <h2 class="wk-quick-link">Design principles</h2>
         <p>The showcase is structured to make public package review fast: installation first, examples second, and API details close by.</p>
     </div>
@@ -187,7 +187,7 @@ pnpm add svelte@~5.0.0`;
 
 <section class="wk-section wk-next-steps">
     <div>
-        <p class="wk-section-kicker">Next</p>
+        <p class="wk-section-kicker" data-markdown="skip">Next</p>
         <h2 class="wk-quick-link">What to review</h2>
         <p>Review the license, npm package metadata, component API consistency, accessibility notes, and showcase visual direction.</p>
     </div>

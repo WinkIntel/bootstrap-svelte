@@ -2,6 +2,13 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## Unreleased
+
+- Added Markdown content negotiation to the showcase on Vercel without adding runtime functions: every page is prerendered as a `.md` sibling, and static Build Output routes serve it for `Accept: text/markdown` from the same URL (q-values, `q=0`, and wildcards honored; fractional q-values compared on their first decimal digit) with `Vary: Accept` and a `Link` alternate header, answer 406 when nothing the site serves is acceptable, and redirect trailing-slash URLs to their canonical path.
+- Added `/llms.txt`, `/llms-full.txt`, `/agents.md`, `/sitemap.xml` (with git-based `lastmod` dates), and `/robots.txt`, plus a real 404 page whose Markdown or HTML body links back to the documentation index.
+- Added About, Contact, and Privacy pages, a site footer, canonical and Open Graph/Twitter metadata with an OG image, and JSON-LD describing the site, the package, and Wink, Inc.
+- The home page title now leads with the product name.
+
 ## 1.0.8
 
 - Removed the Bootstrap JavaScript bundle from the showcase so the site exercises only this package's component behavior and Popper integration.

@@ -2,7 +2,9 @@
     import { page } from '$app/state';
     import { Button, Dropdown } from '$lib/index.js';
     import { onMount, tick, type Snippet } from 'svelte';
+    import { buildHeadMeta } from './(common)/head-meta.js';
     import routeJson from './(common)/routes.json' with { type: 'json' };
+    import { getPageMeta, site } from './(common)/site.js';
     import type { RouteType } from './(common)/types.js';
 
     type ColorMode = 'auto' | 'dark' | 'light';
@@ -19,6 +21,7 @@
         light: 'bi-sun'
     };
     const colorModeOptions: ColorMode[] = ['dark', 'light', 'auto'];
+    const copyrightYear = new Date().getFullYear();
 
     let { children }: { children: Snippet } = $props();
 
@@ -38,9 +41,12 @@
     let routes: RouteType[] = routeJson as RouteType[];
     let activeRoute: string = $derived(page.url.pathname);
     let pageHeadings = $state<{ id: string; text: string }[]>([]);
-    let activeRouteLabel: string = $derived(getActiveRouteLabel(activeRoute));
-    let activeRouteSection: string = $derived(getActiveRouteSection(activeRoute));
-    let pageTitle: string = $derived(`${activeRouteLabel} | Bootstrap Svelte`);
+    let pageMeta = $derived(getPageMeta(activeRoute));
+    let activeRouteLabel: string = $derived(pageMeta.label);
+    let activeRouteSection: string = $derived(pageMeta.section);
+    let headMeta = $derived(buildHeadMeta(activeRoute));
+    let pageTitle: string = $derived(headMeta.title);
+    let jsonLdScript: string = $derived(`<script type="application/ld+json">${headMeta.jsonLd}\u003c/script>`);
     let sidebarIsInert: boolean = $derived(sidebarIsMobile && !sidebarIsShown);
     let colorModeLabel: string = $derived(colorModeLabels[colorMode]);
     let colorModeIcon: string = $derived(colorModeIcons[colorMode]);
@@ -93,28 +99,6 @@
             if (installCopiedTimeout) clearTimeout(installCopiedTimeout);
         };
     });
-
-    function getActiveRouteLabel(pathname: string): string {
-        if (pathname === '/') return 'Overview';
-
-        for (const route of routes) {
-            const item = route.items.find((entry) => entry.href === pathname);
-            if (item) return item.label;
-        }
-
-        return 'Bootstrap Svelte';
-    }
-
-    function getActiveRouteSection(pathname: string): string {
-        if (pathname === '/') return 'Home';
-
-        for (const route of routes) {
-            const item = route.items.find((entry) => entry.href === pathname);
-            if (item) return route.section;
-        }
-
-        return 'Documentation';
-    }
 
     function buildPageHeadings() {
         setTimeout(() => {
@@ -303,7 +287,31 @@
 
 <svelte:head>
     <title>{pageTitle}</title>
-    <meta name="description" content="Bootstrap components for Svelte 5 with TypeScript support, live examples, and package-local documentation." />
+    <meta name="description" content={headMeta.description} />
+    {#if headMeta.robots}
+        <meta name="robots" content={headMeta.robots} />
+    {/if}
+    {#if headMeta.canonical}
+        <link rel="canonical" href={headMeta.canonical} />
+        <meta property="og:url" content={headMeta.canonical} />
+    {/if}
+    {#if headMeta.markdownUrl}
+        <link rel="alternate" type="text/markdown" href={headMeta.markdownUrl} />
+    {/if}
+    <meta property="og:type" content={headMeta.ogType} />
+    <meta property="og:site_name" content={headMeta.siteName} />
+    <meta property="og:title" content={headMeta.title} />
+    <meta property="og:description" content={headMeta.description} />
+    <meta property="og:image" content={headMeta.ogImage} />
+    <meta property="og:image:alt" content={headMeta.ogImageAlt} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content={headMeta.twitterCard} />
+    <meta name="twitter:title" content={headMeta.title} />
+    <meta name="twitter:description" content={headMeta.description} />
+    <meta name="twitter:image" content={headMeta.ogImage} />
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -- jsonLdScript is generated from site constants and escapes "<" -->
+    {@html jsonLdScript}
 </svelte:head>
 
 {#snippet routeMenu(route: RouteType)}
@@ -470,6 +478,19 @@
                     </details>
                 {/if}
                 {@render children()}
+
+                <footer class="wk-docs-footer">
+                    <nav class="wk-footer-links" aria-label="Site">
+                        <a href="/about">About</a>
+                        <a href="/contact">Contact</a>
+                        <a href="/privacy">Privacy</a>
+                        <a href={site.repositoryUrl} target="_blank" rel="noreferrer">GitHub</a>
+                        <a href={site.npmUrl} target="_blank" rel="noreferrer">npm</a>
+                        <a href="/llms.txt">llms.txt</a>
+                        <a href="/sitemap.xml">Sitemap</a>
+                    </nav>
+                    <p class="wk-footer-note">© {copyrightYear} {site.organization.name} · {site.name} {site.version} · {site.license.name}</p>
+                </footer>
             </main>
 
             <aside class="wk-toc" aria-label="On this page">
@@ -1281,5 +1302,39 @@
             animation-iteration-count: 1 !important;
             scroll-behavior: auto !important;
         }
+    }
+    .wk-docs-footer {
+        align-items: baseline;
+        border-top: 1px solid var(--wk-border);
+        color: var(--wk-muted-color);
+        display: flex;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        gap: 0.5rem 1.5rem;
+        justify-content: space-between;
+        margin-top: 4rem;
+        padding-top: 1.25rem;
+    }
+
+    .wk-footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 1.1rem;
+    }
+
+    :global(.wk-content .wk-footer-links a) {
+        color: var(--wk-muted-color);
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    :global(.wk-content .wk-footer-links a:hover),
+    :global(.wk-content .wk-footer-links a:focus-visible) {
+        color: var(--wk-accent-color);
+        text-decoration: underline;
+    }
+
+    .wk-footer-note {
+        margin: 0;
     }
 </style>

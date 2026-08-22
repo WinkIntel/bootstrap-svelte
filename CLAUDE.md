@@ -51,6 +51,17 @@ Consumers write `<Dropdown.Root>`, `<Card.Header>`, etc. Standalone components (
 
 Parent↔child coordination uses the `Context` class in `src/lib/common/context.ts` (type-safe wrapper over Svelte context with symbol keys). `src/lib/common/` also holds shared CSS/class utilities, DOM helpers, and runes-based utilities (`*.svelte.ts`).
 
+### Showcase agent surface (`src/routes/(common)`)
+
+The showcase is fully prerendered, so everything agents consume is generated at build time from one registry:
+
+- `site.ts` — site/package/organization facts, the page registry (`sitePages()`, trust pages, 404 page), titles and descriptions (`getPageMeta`). `site-url.js` holds the canonical URL as plain JS so `svelte.config.js` can import it.
+- `markdown/` — `html-to-markdown.ts` (DOM → Markdown converter) and `render-page.ts` (server-renders a `+page.svelte` with `svelte/server`, strips playgrounds/live demos, converts with jsdom). `[data-markdown="skip"]` opts markup out of the Markdown output.
+- `agent-docs.ts` — builders for `llms.txt`, `llms-full.txt`, `agents.md`, `sitemap.xml`, `robots.txt`, `406.txt`; `head-meta.ts` — canonical/Open Graph/JSON-LD for the layout; `last-modified.ts` — git-based sitemap `lastmod`.
+- `vercel-agent-routes.js` — wraps `adapter-static` in `svelte.config.js` and patches `.vercel/output/config.json` with static routes only (the deployment stays function-free by design): trailing-slash 308s, `Accept: text/markdown` rewrites, `Vary`/`Link` headers, and negotiated 404/406 routes. The Accept conditions are the regexes built by `accept-patterns.js`; they honor q-values in any parameter position, `q=0`, wildcards, and compare fractional q-values on their first decimal digit (finer differences tie, and ties go to explicit `text/markdown`). `accept-negotiation.js` is the RFC 9110 reference used by the tests to pin down exactly where the routes diverge. All three files and `site-url.js` must stay plain JS because `svelte.config.js` imports them. Inspect the result with `VERCEL=1 pnpm build:site`.
+- Prerendered endpoints live in `src/routes/[...path].md`, `llms.txt`, `llms-full.txt`, `agents.md`, `sitemap.xml`, `robots.txt`, `406.txt`; trust pages in `about`, `contact`, `privacy`, and the error page in `404`.
+- The social image is rasterized from `scripts/og-image.svg`: `rsvg-convert -w 1200 -h 630 scripts/og-image.svg -o static/og-image.png`.
+
 ### Testing
 
 The test filename suffix selects the Vitest project (`vitest.config.ts`):
