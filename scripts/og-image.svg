@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Bootstrap Svelte — Bootstrap 5 components for Svelte 5">
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5e2ced"/>
+      <stop offset="45%" stop-color="#8a4bff"/>
+      <stop offset="100%" stop-color="#0d94ff"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#131529"/>
+      <stop offset="100%" stop-color="#1b1e3f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.85" cy="0.15" r="0.6">
+      <stop offset="0%" stop-color="#8a4bff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#8a4bff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect x="0" y="0" width="1200" height="8" fill="url(#brand)"/>
+  <g font-family="Helvetica Neue, Inter, Arial, sans-serif">
+    <rect x="96" y="112" width="96" height="96" rx="22" fill="url(#brand)"/>
+    <text x="144" y="178" text-anchor="middle" font-size="44" font-weight="700" fill="#ffffff" letter-spacing="-1">BS</text>
+    <text x="96" y="318" font-size="88" font-weight="800" fill="#f2f4ff" letter-spacing="-3.5">Bootstrap Svelte</text>
+    <text x="96" y="382" font-size="38" font-weight="400" fill="#b8bddc">Bootstrap 5 components for Svelte 5, with TypeScript</text>
+    <g font-size="24" font-weight="600" fill="#c4b5fd">
+      <rect x="96" y="436" width="150" height="52" rx="26" fill="#2a2456" stroke="#4b3d8f"/>
+      <text x="171" y="470" text-anchor="middle">Svelte 5</text>
+      <rect x="262" y="436" width="182" height="52" rx="26" fill="#2a2456" stroke="#4b3d8f"/>
+      <text x="353" y="470" text-anchor="middle">Bootstrap 5</text>
+      <rect x="460" y="436" width="196" height="52" rx="26" fill="#2a2456" stroke="#4b3d8f"/>
+      <text x="558" y="470" text-anchor="middle">Apache-2.0</text>
+    </g>
+    <text x="96" y="566" font-size="28" font-weight="500" fill="#8b90b8">bootstrap-svelte.vercel.app  ·  npm: @winkintel/bootstrap-svelte</text>
+  </g>
+</svg>

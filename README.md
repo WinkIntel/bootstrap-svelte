@@ -13,6 +13,15 @@ Use it when you want Bootstrap's familiar grid, utilities, and UI patterns in a 
 - Bootstrap: <https://getbootstrap.com/>
 - Svelte: <https://svelte.dev/>
 
+## Machine-readable documentation
+
+The showcase at <https://bootstrap-svelte.vercel.app> is published for AI agents and tools as well as people:
+
+- `/llms.txt` indexes every page with one-line summaries ([llms.txt format](https://llmstxt.org)); `/llms-full.txt` bundles every page into one Markdown file.
+- Every page is available as Markdown from its own URL with `Accept: text/markdown` (the response carries `Vary: Accept`), or by appending `.md` to the path, for example `/components/button.md`.
+- `/agents.md` explains when to use the library and how to integrate it; `/sitemap.xml` and `/robots.txt` serve crawlers.
+- Paths that do not exist return a real HTTP 404 with a Markdown or HTML body that links back to the documentation index.
+
 ## Why this exists
 
 Bootstrap is still a practical choice for many product, enterprise, and internal applications: it is familiar, well documented, stable, and easy for mixed frontend/backend teams to work with.
