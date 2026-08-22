@@ -49,8 +49,12 @@ describe('buildHeadMeta', () => {
         expect(meta.markdownUrl).toBeUndefined();
     });
 
-    test('unknown paths get no canonical URL', () => {
-        expect(buildHeadMeta('/does-not-exist').canonical).toBeUndefined();
+    test('unknown paths are noindex with the 404 title and no canonical or Markdown alternate', () => {
+        const meta = buildHeadMeta('/does-not-exist');
+        expect(meta.title).toBe('Page not found | Bootstrap Svelte');
+        expect(meta.robots).toBe('noindex, nofollow');
+        expect(meta.canonical).toBeUndefined();
+        expect(meta.markdownUrl).toBeUndefined();
     });
 
     test('JSON-LD describes the website, the software, the organization, and the page', () => {

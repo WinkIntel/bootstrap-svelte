@@ -69,6 +69,16 @@ describe('+layout.svelte head metadata', () => {
         expect(headAttribute('meta[name="robots"]', 'content')).toBe('noindex, nofollow');
         expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
     });
+
+    test('keeps the 404 metadata when the 404 page hydrates at an arbitrary missing URL', () => {
+        const { container } = renderLayout('/does-not-exist');
+        expect(document.title).toBe('Page not found | Bootstrap Svelte');
+        expect(headAttribute('meta[name="robots"]', 'content')).toBe('noindex, nofollow');
+        expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
+        expect(document.head.querySelector('link[rel="alternate"][type="text/markdown"]')).toBeNull();
+        expect(container.querySelector('.wk-eyebrow')).toHaveTextContent('Project');
+        expect(container.querySelector('.wk-current-page')).toHaveTextContent('Page not found');
+    });
 });
 
 describe('+layout.svelte chrome', () => {

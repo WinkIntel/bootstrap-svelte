@@ -4,7 +4,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## Unreleased
 
-- Added Markdown content negotiation to the showcase on Vercel: every page is prerendered as a `.md` sibling, requests with `Accept: text/markdown` receive it from the same URL with `Vary: Accept` and a `Link` alternate header, and requests that accept nothing the site can serve get a 406.
+- Added Markdown content negotiation to the showcase on Vercel: every page is prerendered as a `.md` sibling, and a Routing Middleware applies RFC 9110 Accept negotiation so `Accept: text/markdown` receives it from the same URL with `Vary: Accept` and a `Link` alternate header, requests that accept nothing the site can serve get a 406, and trailing-slash URLs redirect to their canonical path.
 - Added `/llms.txt`, `/llms-full.txt`, `/agents.md`, `/sitemap.xml` (with git-based `lastmod` dates), and `/robots.txt`, plus a real 404 page whose Markdown or HTML body links back to the documentation index.
 - Added About, Contact, and Privacy pages, a site footer, canonical and Open Graph/Twitter metadata with an OG image, and JSON-LD describing the site, the package, and Wink, Inc.
 - The home page title now leads with the product name.

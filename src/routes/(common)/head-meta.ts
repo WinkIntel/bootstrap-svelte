@@ -1,4 +1,4 @@
-import { absoluteUrl, findPage, getPageMeta, markdownPath, site } from './site.js';
+import { absoluteUrl, findPage, getPageMeta, markdownPath, normalizePathname, site } from './site.js';
 
 export type HeadMeta = {
     title: string;
@@ -81,7 +81,8 @@ function structuredData(pageUrl: string, title: string, description: string): st
 }
 
 /** Everything the layout needs to describe a page to browsers, social cards, search engines, and agents. */
-export function buildHeadMeta(pathname: string): HeadMeta {
+export function buildHeadMeta(requestedPathname: string): HeadMeta {
+    const pathname = normalizePathname(requestedPathname);
     const meta = getPageMeta(pathname);
     const indexable = findPage(pathname) !== undefined && !meta.noindex;
     const canonical = indexable ? absoluteUrl(pathname) : undefined;

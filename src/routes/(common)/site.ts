@@ -1,5 +1,5 @@
 import routeJson from './routes.json' with { type: 'json' };
-import { SITE_URL } from './site-url.js';
+import { markdownPath, SITE_URL } from './site-url.js';
 import type { RouteType } from './types.js';
 
 export type SitePage = {
@@ -100,13 +100,17 @@ export function findPage(pathname: string): SitePage | undefined {
     return sitePages().find((page) => page.href === pathname);
 }
 
+/** Drops trailing slashes so `/about/` resolves like `/about`. */
+export function normalizePathname(pathname: string): string {
+    return pathname.replace(/\/+$/, '') || '/';
+}
+
+/**
+ * Metadata for the page at `pathname`. Unknown paths are served with the 404 page, which then hydrates at the
+ * requested URL, so they carry the 404 page's metadata.
+ */
 export function getPageMeta(pathname: string): PageMeta {
-    const page = findPage(pathname);
-
-    if (!page) {
-        return { label: site.name, section: 'Documentation', title: site.name, description: site.description, noindex: false };
-    }
-
+    const page = findPage(normalizePathname(pathname)) ?? notFoundPage;
     const description = page.description ?? site.description;
     const noindex = page.href === notFoundPage.href;
 
@@ -121,7 +125,4 @@ export function absoluteUrl(path: string): string {
     return `${site.url}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
-/** Path of the Markdown representation that is served for a page via `Accept: text/markdown` or directly. */
-export function markdownPath(pathname: string): string {
-    return pathname === '/' ? '/index.md' : `${pathname}.md`;
-}
+export { markdownPath };

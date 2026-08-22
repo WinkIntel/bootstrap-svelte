@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import routeJson from './routes.json' with { type: 'json' };
-import { absoluteUrl, getPageMeta, markdownPath, site, sitePages } from './site.js';
+import { absoluteUrl, getPageMeta, markdownPath, notFoundPage, site, sitePages } from './site.js';
 import type { RouteType } from './types.js';
 
 const routes = routeJson as RouteType[];
@@ -81,10 +81,26 @@ describe('getPageMeta', () => {
         expect(meta.noindex).toBe(true);
     });
 
-    test('unknown paths fall back to the site name and a generic section', () => {
+    test('describes unknown paths as the 404 page so hydrated 404 responses keep their metadata', () => {
         const meta = getPageMeta('/does-not-exist');
-        expect(meta.label).toBe('Bootstrap Svelte');
-        expect(meta.section).toBe('Documentation');
-        expect(meta.title).toBe('Bootstrap Svelte');
+        expect(meta.title).toBe('Page not found | Bootstrap Svelte');
+        expect(meta.label).toBe('Page not found');
+        expect(meta.section).toBe('Project');
+        expect(meta.noindex).toBe(true);
+    });
+
+    test('ignores a trailing slash when resolving page metadata', () => {
+        expect(getPageMeta('/about/').title).toBe('About | Bootstrap Svelte');
+        expect(getPageMeta('/components/button/').label).toBe('Button');
+    });
+});
+
+describe('page registry', () => {
+    test('registers every +page.svelte under src/routes', () => {
+        const registered = new Set([...sitePages(), notFoundPage].map((page) => page.href));
+        for (const module of Object.keys(import.meta.glob('/src/routes/**/+page.svelte'))) {
+            const href = module.replace('/src/routes', '').replace(/\/\+page\.svelte$/, '') || '/';
+            expect(registered.has(href), `${href} is not registered in site.ts`).toBe(true);
+        }
     });
 });
