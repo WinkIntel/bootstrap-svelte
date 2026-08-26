@@ -3,5 +3,7 @@ export type RouteType = {
     items: {
         label: string;
         href: string;
+        title?: string;
+        description?: string;
     }[];
 };

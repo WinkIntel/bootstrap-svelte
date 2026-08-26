@@ -39,8 +39,14 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Check install content
+        run: pnpm check:install-content
+
       - name: Build
         run: pnpm build
+
+      - name: Crawl static output
+        run: pnpm check:static-crawl
 
       - name: Inspect npm package contents
         run: npm pack --dry-run

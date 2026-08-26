@@ -19,7 +19,7 @@ function node(pathname: string, type: string): Node {
 describe('buildHeadMeta', () => {
     test('home page leads with the brand and has a canonical URL with a trailing slash', () => {
         const meta = buildHeadMeta('/');
-        expect(meta.title).toBe('Bootstrap Svelte | Bootstrap 5 components for Svelte 5');
+        expect(meta.title).toBe('Bootstrap 5 components for Svelte 5 | Bootstrap Svelte');
         expect(meta.description).toBe(site.description);
         expect(meta.canonical).toBe('https://bootstrap-svelte.vercel.app/');
         expect(meta.markdownUrl).toBe('https://bootstrap-svelte.vercel.app/index.md');
@@ -37,7 +37,7 @@ describe('buildHeadMeta', () => {
 
     test('documentation pages use their own title and a canonical URL without a trailing slash', () => {
         const meta = buildHeadMeta('/components/button');
-        expect(meta.title).toBe('Button | Bootstrap Svelte');
+        expect(meta.title).toBe('Svelte 5 Button Component - Bootstrap 5 | Bootstrap Svelte');
         expect(meta.canonical).toBe('https://bootstrap-svelte.vercel.app/components/button');
         expect(meta.markdownUrl).toBe('https://bootstrap-svelte.vercel.app/components/button.md');
     });
@@ -60,6 +60,24 @@ describe('buildHeadMeta', () => {
     test('JSON-LD describes the website, the software, the organization, and the page', () => {
         const types = graph('/').map((candidate) => candidate['@type']);
         expect(types).toEqual(expect.arrayContaining(['WebSite', 'SoftwareApplication', 'Organization', 'WebPage']));
+    });
+
+    test('JSON-LD describes breadcrumbs for non-home indexable pages', () => {
+        const breadcrumb = node('/components/button', 'BreadcrumbList');
+        expect(breadcrumb.itemListElement).toEqual([
+            {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Bootstrap Svelte',
+                item: 'https://bootstrap-svelte.vercel.app/'
+            },
+            {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Button',
+                item: 'https://bootstrap-svelte.vercel.app/components/button'
+            }
+        ]);
     });
 
     test('the SoftwareApplication node carries identity, licensing, download, and offer details', () => {
@@ -109,7 +127,7 @@ describe('buildHeadMeta', () => {
         const page = node('/components/button', 'WebPage');
         expect(page).toMatchObject({
             url: 'https://bootstrap-svelte.vercel.app/components/button',
-            name: 'Button | Bootstrap Svelte',
+            name: 'Svelte 5 Button Component - Bootstrap 5 | Bootstrap Svelte',
             isPartOf: { '@id': 'https://bootstrap-svelte.vercel.app/#website' },
             about: { '@id': 'https://bootstrap-svelte.vercel.app/#software' }
         });

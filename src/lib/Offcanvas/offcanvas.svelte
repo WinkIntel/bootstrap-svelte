@@ -5,37 +5,37 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 
 @example
 ```svelte
-<Offcanvas placement="start" isVisible={true}>
+<Offcanvas.Root placement="start" isShown={true}>
     <Offcanvas.Header>
         <Offcanvas.Title>Offcanvas Title</Offcanvas.Title>
     </Offcanvas.Header>
     <Offcanvas.Body>
         Content for the offcanvas goes here. You can place just about any Bootstrap component or custom elements here.
     </Offcanvas.Body>
-</Offcanvas>
+</Offcanvas.Root>
 ```
 
 #### Placement options
 ```svelte
-<Offcanvas placement="start">...</Offcanvas>
-<Offcanvas placement="end">...</Offcanvas>
-<Offcanvas placement="top">...</Offcanvas>
-<Offcanvas placement="bottom">...</Offcanvas>
+<Offcanvas.Root placement="start">...</Offcanvas.Root>
+<Offcanvas.Root placement="end">...</Offcanvas.Root>
+<Offcanvas.Root placement="top">...</Offcanvas.Root>
+<Offcanvas.Root placement="bottom">...</Offcanvas.Root>
 ```
 
 #### Body scrolling
 ```svelte
-<Offcanvas bodyScrolling={true}>...</Offcanvas>
+<Offcanvas.Root isBodyScrollable={true}>...</Offcanvas.Root>
 ```
 
 #### Static backdrop
 ```svelte
-<Offcanvas isStatic={true}>...</Offcanvas>
+<Offcanvas.Root useBackdrop="static">...</Offcanvas.Root>
 ```
 
 #### Responsive offcanvas
 ```svelte
-<Offcanvas breakpoint="lg">...</Offcanvas>
+<Offcanvas.Root showOnBreakpoint="lg">...</Offcanvas.Root>
 ```
 
 ### Props

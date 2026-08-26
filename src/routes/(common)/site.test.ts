@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import routeJson from './routes.json' with { type: 'json' };
-import { absoluteUrl, getPageMeta, markdownPath, notFoundPage, site, sitePages } from './site.js';
+import { absoluteUrl, getBreadcrumbs, getPageMeta, markdownPath, notFoundPage, site, sitePages } from './site.js';
 import type { RouteType } from './types.js';
 
 const routes = routeJson as RouteType[];
@@ -37,6 +37,11 @@ describe('sitePages', () => {
         expect(hrefs).not.toContain('/404');
     });
 
+    test('includes both high-intent guides as indexable pages', () => {
+        expect(sitePages().map((page) => page.href)).toEqual(expect.arrayContaining(['/guides/sveltekit-bootstrap-5', '/compare/sveltestrap']));
+        expect(getPageMeta('/compare/sveltestrap').noindex).toBe(false);
+    });
+
     test('has no duplicate hrefs', () => {
         const hrefs = sitePages().map((page) => page.href);
         expect(new Set(hrefs).size).toBe(hrefs.length);
@@ -53,16 +58,16 @@ describe('sitePages', () => {
 describe('getPageMeta', () => {
     test('the home page title leads with the product name', () => {
         const meta = getPageMeta('/');
-        expect(meta.title).toBe('Bootstrap Svelte | Bootstrap 5 components for Svelte 5');
+        expect(meta.title).toBe('Bootstrap 5 components for Svelte 5 | Bootstrap Svelte');
         expect(meta.label).toBe('Overview');
         expect(meta.section).toBe('Home');
         expect(meta.description).toBe(site.description);
         expect(meta.noindex).toBe(false);
     });
 
-    test('navigation pages keep the "<Label> | Bootstrap Svelte" title', () => {
+    test('navigation pages use query-aligned titles', () => {
         const meta = getPageMeta('/components/button');
-        expect(meta.title).toBe('Button | Bootstrap Svelte');
+        expect(meta.title).toBe('Svelte 5 Button Component - Bootstrap 5 | Bootstrap Svelte');
         expect(meta.label).toBe('Button');
         expect(meta.section).toBe('Components');
     });
@@ -102,5 +107,22 @@ describe('page registry', () => {
             const href = module.replace('/src/routes', '').replace(/\/\+page\.svelte$/, '') || '/';
             expect(registered.has(href), `${href} is not registered in site.ts`).toBe(true);
         }
+    });
+});
+
+describe('search metadata', () => {
+    test('every indexable page has a unique title and meta description', () => {
+        const titles = sitePages().map((page) => getPageMeta(page.href).title);
+        const descriptions = sitePages().map((page) => getPageMeta(page.href).description);
+        expect(new Set(titles).size).toBe(titles.length);
+        expect(new Set(descriptions).size).toBe(descriptions.length);
+    });
+
+    test('non-home indexable pages expose home and current-page breadcrumbs', () => {
+        expect(getBreadcrumbs('/')).toEqual([]);
+        expect(getBreadcrumbs('/components/button')).toEqual([
+            { label: 'Bootstrap Svelte', href: '/' },
+            { label: 'Button', href: '/components/button' }
+        ]);
     });
 });

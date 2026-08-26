@@ -1,5 +1,11 @@
 # Bootstrap Svelte
 
+[![npm version](https://img.shields.io/npm/v/@winkintel/bootstrap-svelte.svg)](https://www.npmjs.com/package/@winkintel/bootstrap-svelte)
+[![weekly downloads](https://img.shields.io/npm/dw/@winkintel/bootstrap-svelte.svg)](https://www.npmjs.com/package/@winkintel/bootstrap-svelte)
+[![CI](https://github.com/WinkIntel/bootstrap-svelte/actions/workflows/ci.yml/badge.svg)](https://github.com/WinkIntel/bootstrap-svelte/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/@winkintel/bootstrap-svelte.svg)](https://github.com/WinkIntel/bootstrap-svelte/blob/main/LICENSE.md)
+[![documentation](https://img.shields.io/badge/docs-bootstrap--svelte.vercel.app-7952b3.svg)](https://bootstrap-svelte.vercel.app/)
+
 > Bootstrap 5 components for Svelte 5 with TypeScript support.
 
 Bootstrap Svelte provides ready-to-use, type-safe Bootstrap components for Svelte 5 applications. It follows Bootstrap's design language and class conventions while exposing Svelte-native component APIs.
@@ -8,6 +14,7 @@ Use it when you want Bootstrap's familiar grid, utilities, and UI patterns in a 
 
 ## Links
 
+- Documentation: <https://bootstrap-svelte.vercel.app/>
 - npm: [`@winkintel/bootstrap-svelte`](https://www.npmjs.com/package/@winkintel/bootstrap-svelte)
 - Repository: [`WinkIntel/bootstrap-svelte`](https://github.com/WinkIntel/bootstrap-svelte)
 - Bootstrap: <https://getbootstrap.com/>
@@ -60,11 +67,7 @@ yarn add @winkintel/bootstrap-svelte bootstrap
 
 ### Peer dependency
 
-This package requires Svelte 5:
-
-```bash
-pnpm add svelte@^5.29.0
-```
+This package requires Svelte `^5.29.0` as a peer dependency. Keep Svelte installed in your application; do not replace the package/bootstrap install command with a Svelte install command.
 
 ## Bootstrap CSS
 
@@ -93,7 +96,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
 
 <Alert colorVariant="primary" isDismissible>Welcome to Bootstrap Svelte!</Alert>
 
-<Card>
+<Card.Root>
     <Card.Header>
         <Card.Title>Getting Started</Card.Title>
     </Card.Header>
@@ -101,9 +104,9 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
         <Card.Text>This is a card built with Bootstrap Svelte components.</Card.Text>
         <Button colorVariant="primary" onclick={() => (showModal = true)}>Open Modal</Button>
     </Card.Body>
-</Card>
+</Card.Root>
 
-<Modal isShown={showModal}>
+<Modal.Root isShown={showModal}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header>
@@ -115,7 +118,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
             </Modal.Footer>
         </Modal.Content>
     </Modal.Dialog>
-</Modal>
+</Modal.Root>
 ```
 
 ## Available components

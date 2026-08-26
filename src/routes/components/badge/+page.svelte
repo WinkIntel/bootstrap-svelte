@@ -113,7 +113,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="mb-3">
-                    <h1>Example heading <Badge id="headingBadge1" colorVariant="text-bg-secondary">New</Badge></h1>
+                    <div class="h1">Example heading <Badge id="headingBadge1" colorVariant="text-bg-secondary">New</Badge></div>
                     <h2>Example heading <Badge id="headingBadge2" colorVariant="text-bg-secondary">New</Badge></h2>
                     <h3>Example heading <Badge id="headingBadge3" colorVariant="text-bg-secondary">New</Badge></h3>
                     <h4>Example heading <Badge id="headingBadge4" colorVariant="text-bg-secondary">New</Badge></h4>
