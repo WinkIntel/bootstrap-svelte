@@ -38,8 +38,10 @@ describe('sitePages', () => {
     });
 
     test('includes both high-intent guides as indexable pages', () => {
-        expect(sitePages().map((page) => page.href)).toEqual(expect.arrayContaining(['/guides/sveltekit-bootstrap-5', '/compare/sveltestrap']));
-        expect(getPageMeta('/compare/sveltestrap').noindex).toBe(false);
+        expect(sitePages().map((page) => page.href)).toEqual(
+            expect.arrayContaining(['/guides/sveltekit-bootstrap-5', '/guides/compare-sveltestrap'])
+        );
+        expect(getPageMeta('/guides/compare-sveltestrap').noindex).toBe(false);
     });
 
     test('has no duplicate hrefs', () => {

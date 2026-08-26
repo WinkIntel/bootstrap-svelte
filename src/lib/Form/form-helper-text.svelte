@@ -13,12 +13,12 @@ Bootstrap-styled helper text component for providing additional information abou
 <Form.TextInput id="emailInput" placeholder="Enter your email" aria-describedby="email-help" />
 <Form.HelperText id="email-help">We'll never share your email with anyone else.</Form.HelperText>
 
-// Inside a Bootstrap field wrapper
-<div class="mb-3">
+// Inside an input group
+<Form.InputGroup>
     <Form.InputLabel for="passwordInput">Password</Form.InputLabel>
     <Form.PasswordInput id="passwordInput" />
     <Form.HelperText>Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces or emoji.</Form.HelperText>
-</div>
+</Form.InputGroup>
 ```
 ### Props
 - `class` (string): Optional. Additional CSS classes to apply to the helper text.

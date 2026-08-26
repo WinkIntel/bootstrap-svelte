@@ -57,7 +57,7 @@
 
 <div>
     <div class="mb-5">
-        <h1>Badge</h1>
+        <div class="h1">Badge</div>
         <p class="lead">Bootstrap's badge component built with Svelte 5. Use badges to highlight elements, add counts, or display status.</p>
         <hr />
     </div>
@@ -113,7 +113,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="mb-3">
-                    <div class="h1">Example heading <Badge id="headingBadge1" colorVariant="text-bg-secondary">New</Badge></div>
+                    <h1>Example heading <Badge id="headingBadge1" colorVariant="text-bg-secondary">New</Badge></h1>
                     <h2>Example heading <Badge id="headingBadge2" colorVariant="text-bg-secondary">New</Badge></h2>
                     <h3>Example heading <Badge id="headingBadge3" colorVariant="text-bg-secondary">New</Badge></h3>
                     <h4>Example heading <Badge id="headingBadge4" colorVariant="text-bg-secondary">New</Badge></h4>

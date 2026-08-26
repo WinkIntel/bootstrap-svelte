@@ -74,7 +74,7 @@ const navigationDescriptions: Record<string, Pick<SitePage, 'title' | 'descripti
         description:
             'Install Bootstrap Svelte in SvelteKit, add required Bootstrap CSS or optional SCSS, and use typed Svelte 5 examples for buttons, navbars, forms, and modals.'
     },
-    '/compare/sveltestrap': {
+    '/guides/compare-sveltestrap': {
         title: 'Bootstrap Svelte vs Sveltestrap for Svelte 5 | Bootstrap Svelte',
         description:
             'Compare Bootstrap Svelte and Sveltestrap by Svelte version support, TypeScript API style, Bootstrap assets, component coverage, SSR evidence, and project fit.'

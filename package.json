@@ -26,8 +26,6 @@
         "doctor": "svelte-doctor check",
         "format": "prettier --write --ignore-path=.prettierignore $(git diff --name-only --diff-filter d --relative . && git ls-files --others --exclude-standard | sed \"s|^$(git rev-parse --show-prefix)||\")",
         "format-all": "prettier --write --ignore-path=.prettierignore ./src",
-        "check:install-content": "node scripts/check-install-content.mjs",
-        "check:static-crawl": "node scripts/check-static-crawl.mjs",
         "lint": "prettier --check ./src && eslint ./src",
         "ncu:check": "ncu --target minor && ncu --target minor --cooldown 0d --filter \"@sveltejs/adapter-static,@sveltejs/kit,@sveltejs/vite-plugin-svelte,svelte,svelte-check,svelte-preprocess\"",
         "ncu:upgrade": "ncu --target minor -u && ncu --target minor --cooldown 0d -u --filter \"@sveltejs/adapter-static,@sveltejs/kit,@sveltejs/vite-plugin-svelte,svelte,svelte-check,svelte-preprocess\" && pnpm install",

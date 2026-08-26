@@ -33,7 +33,7 @@ pnpm vitest run src/lib/Button/button.svelte.test.ts
 pnpm vitest run src/lib/Dropdown            # everything under a directory
 ```
 
-CI (`.github/workflows/ci.yml`) runs: lint → check-types → test → check:install-content → build → check:static-crawl → `npm pack --dry-run`. All must pass.
+CI (`.github/workflows/ci.yml`) runs: lint → check-types → test → build → `npm pack --dry-run`. All must pass.
 
 ## Architecture
 

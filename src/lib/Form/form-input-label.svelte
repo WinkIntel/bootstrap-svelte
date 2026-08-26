@@ -6,11 +6,11 @@ Bootstrap-styled label component for form input elements.
 @example
 ```svelte
 // Standard label for input
-<div class="mb-3">
+<Form.InputGroup>
     <Form.InputLabel for="exampleInput">Email address</Form.InputLabel>
     <Form.EmailInput id="exampleInput" placeholder="name@example.com" />
     <Form.HelperText>We'll never share your email with anyone else.</Form.HelperText>
-</div>
+</Form.InputGroup>
 
 // Floating label (used with Form.Floating)
 <Form.Floating>

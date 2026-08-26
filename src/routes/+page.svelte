@@ -51,7 +51,7 @@
             <span class="wk-pill-dot" aria-hidden="true"></span>
             Svelte 5 · Bootstrap 5 · TypeScript
         </div>
-        <h1>Bootstrap 5 components for Svelte 5</h1>
+        <h1>Bootstrap 5 components <span class="wk-hero-gradient">for Svelte 5</span></h1>
         <p>
             <code>@winkintel/bootstrap-svelte</code> provides Bootstrap 5 components for Svelte 5 and SvelteKit with TypeScript-friendly, runes-ready APIs.
             Add Bootstrap CSS in your app; Bootstrap JavaScript is not required.
@@ -62,9 +62,14 @@
                 <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
             </a>
             <a class="btn btn-lg wk-btn-ghost" href="#installation">Install package</a>
-            <a class="btn btn-lg wk-btn-ghost" href="https://www.npmjs.com/package/@winkintel/bootstrap-svelte" target="_blank" rel="noreferrer"
-                >npm</a>
-            <a class="btn btn-lg wk-btn-ghost" href="https://github.com/WinkIntel/bootstrap-svelte" target="_blank" rel="noreferrer">GitHub</a>
+            <a class="btn btn-lg wk-btn-ghost" href="https://www.npmjs.com/package/@winkintel/bootstrap-svelte" target="_blank" rel="noreferrer">
+                npm
+                <i class="bi bi-arrow-up-right ms-1" aria-hidden="true"></i>
+            </a>
+            <a class="btn btn-lg wk-btn-ghost" href="https://github.com/WinkIntel/bootstrap-svelte" target="_blank" rel="noreferrer">
+                GitHub
+                <i class="bi bi-arrow-up-right ms-1" aria-hidden="true"></i>
+            </a>
         </div>
     </div>
 

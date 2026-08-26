@@ -11,7 +11,7 @@
                 "label": "SvelteKit + Bootstrap 5"
             },
             {
-                "href": "/compare/sveltestrap",
+                "href": "/guides/compare-sveltestrap",
                 "label": "Bootstrap Svelte vs Sveltestrap"
             }
         ]
