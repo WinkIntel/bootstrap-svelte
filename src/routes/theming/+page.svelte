@@ -28,7 +28,7 @@ $border-radius: .5rem;
     <section class="mb-5">
         <h2 class="wk-quick-link">SCSS Variables</h2>
         <p>Override Bootstrap Sass variables before importing Bootstrap if your build pipeline compiles SCSS.</p>
-        <SyntaxHighlighter code={scssCode} label="Bootstrap SCSS variables example" />
+        <SyntaxHighlighter code={scssCode} label="Bootstrap SCSS variables example" language="scss" />
     </section>
 
     <section class="mb-5">

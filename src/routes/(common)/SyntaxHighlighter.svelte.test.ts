@@ -6,7 +6,7 @@ import SyntaxHighlighter from './SyntaxHighlighter.svelte';
 
 describe('SyntaxHighlighter', () => {
     test('renders a named focusable code region', () => {
-        render(SyntaxHighlighter, {
+        const { container } = render(SyntaxHighlighter, {
             props: {
                 code: '<Button>Save</Button>',
                 label: 'Button usage example'
@@ -15,6 +15,22 @@ describe('SyntaxHighlighter', () => {
 
         const codeRegion = screen.getByLabelText('Button usage example');
         expect(codeRegion).toHaveAttribute('tabindex', '0');
+        expect(container.querySelector('.wk-code-lang')).toHaveTextContent('svelte');
+        expect(container.querySelector('pre')).toHaveAttribute('data-language', 'html');
+    });
+
+    test('renders and highlights bash examples when requested', () => {
+        const { container } = render(SyntaxHighlighter, {
+            props: {
+                code: 'echo "$HOME"',
+                language: 'bash'
+            }
+        });
+
+        expect(container.querySelector('.wk-code-lang')).toHaveTextContent('bash');
+        expect(container.querySelector('pre')).toHaveAttribute('data-language', 'bash');
+        expect(container.querySelector('code')).toHaveTextContent('echo "$HOME"');
+        expect(container.querySelector('code .hljs-variable')).toHaveTextContent('$HOME');
     });
 
     test('copies code with accessible feedback', async () => {

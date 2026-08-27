@@ -5,7 +5,9 @@
     import type { RouteType } from './(common)/types.js';
 
     const routes: RouteType[] = routeJson as RouteType[];
-    const componentCount = routes.reduce((count, section) => count + section.items.length, 0);
+    const components = routes.find((section) => section.section === 'Components')?.items ?? [];
+    const componentCount = components.length;
+    const firstComponentHref = [...components].sort((left, right) => left.label.localeCompare(right.label))[0]?.href ?? '/components/accordion';
 
     const sectionIcons: Record<string, string> = {
         Guides: 'bi-compass',
@@ -14,8 +16,8 @@
         Form: 'bi-ui-checks'
     };
 
-    const installExample = `pnpm add @winkintel/bootstrap-svelte
-pnpm add svelte@~5.0.0`;
+    const installExample = `pnpm add @winkintel/bootstrap-svelte bootstrap`;
+    const peerDependencyExample = `svelte: ^5.29.0`;
     const importExample = `<script>
   import { Alert, Button, Card, Modal } from '@winkintel/bootstrap-svelte';
 \u003c/script>
@@ -51,20 +53,25 @@ pnpm add svelte@~5.0.0`;
             <span class="wk-pill-dot" aria-hidden="true"></span>
             Svelte 5 · Bootstrap 5 · TypeScript
         </div>
-        <h1>
-            Bootstrap components,
-            <span class="wk-hero-gradient">rebuilt for Svelte.</span>
-        </h1>
+        <h1>Bootstrap 5 components <span class="wk-hero-gradient">for Svelte 5</span></h1>
         <p>
-            A focused set of Bootstrap-compatible UI primitives for Svelte 5 apps — typed APIs, runes-based state, and live documentation built into
-            this showcase.
+            <code>@winkintel/bootstrap-svelte</code> provides Bootstrap 5 components for Svelte 5 and SvelteKit with TypeScript-friendly, runes-ready APIs.
+            Add Bootstrap CSS in your app; Bootstrap JavaScript is not required.
         </p>
         <div class="wk-hero-actions">
-            <a class="btn btn-lg wk-btn-gradient" href="/components/button">
+            <a class="btn btn-lg wk-btn-gradient" href={firstComponentHref}>
                 Browse components
                 <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
             </a>
             <a class="btn btn-lg wk-btn-ghost" href="#installation">Install package</a>
+            <a class="btn btn-lg wk-btn-ghost" href="https://www.npmjs.com/package/@winkintel/bootstrap-svelte" target="_blank" rel="noreferrer">
+                npm
+                <i class="bi bi-arrow-up-right ms-1" aria-hidden="true"></i>
+            </a>
+            <a class="btn btn-lg wk-btn-ghost" href="https://github.com/WinkIntel/bootstrap-svelte" target="_blank" rel="noreferrer">
+                GitHub
+                <i class="bi bi-arrow-up-right ms-1" aria-hidden="true"></i>
+            </a>
         </div>
     </div>
 
@@ -110,7 +117,7 @@ pnpm add svelte@~5.0.0`;
 <section class="wk-stats" aria-label="Package highlights" data-markdown="skip">
     <div>
         <strong>{componentCount}</strong>
-        <span>documented routes</span>
+        <span>documented components</span>
     </div>
     <div>
         <strong>Svelte 5</strong>
@@ -130,12 +137,16 @@ pnpm add svelte@~5.0.0`;
     <div class="wk-section-heading">
         <p class="wk-section-kicker" data-markdown="skip">Start here</p>
         <h2 class="wk-quick-link">Installation</h2>
-        <p>Add the package and import Bootstrap CSS from your app entry point or stylesheet pipeline.</p>
+        <p>
+            Add the package with Bootstrap. Svelte <code>^5.29.0</code> is a peer dependency, so keep your app on Svelte 5 separately from the package install
+            command.
+        </p>
     </div>
     <div class="wk-code-grid">
         <div>
             <h3><span class="wk-step-badge">1</span> Install</h3>
-            <SyntaxHighlighter code={installExample} />
+            <SyntaxHighlighter code={installExample} language="bash" />
+            <p class="small text-secondary mt-3 mb-0">Peer dependency: <code>{peerDependencyExample}</code></p>
         </div>
         <div>
             <h3><span class="wk-step-badge">2</span> Use</h3>
@@ -208,9 +219,9 @@ pnpm add svelte@~5.0.0`;
 
     .wk-hero-copy h1 {
         color: var(--wk-heading-color);
-        font-size: clamp(2.6rem, 4.2vw, 3.9rem);
+        font-size: clamp(2.7rem, 4.2vw, 3.6rem);
         font-weight: 850;
-        letter-spacing: -0.045em;
+        letter-spacing: -0.035em;
         line-height: 1.05;
         margin: 1.1rem 0 1.25rem;
         max-width: 21ch;

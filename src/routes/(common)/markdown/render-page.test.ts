@@ -13,6 +13,13 @@ describe('renderPageMarkdown', { timeout: PAGE_RENDER_TIMEOUT }, () => {
         expect(page.markdown.startsWith("# Button\n\n> Bootstrap's button component built with Svelte 5.")).toBe(true);
     });
 
+    test('uses an explicit page title instead of a real heading inside a component demo', async () => {
+        const page = await renderPageMarkdown('/components/badge');
+        expect(page.title).toBe('Badge');
+        expect(page.markdown.startsWith("# Badge\n\n> Bootstrap's badge component built with Svelte 5.")).toBe(true);
+        expect(page.markdown).not.toContain('# Example heading New');
+    });
+
     test('keeps headings, code samples, and API tables', async () => {
         const page = await renderPageMarkdown('/components/button');
         expect(page.markdown).toContain('## Basic Example');
@@ -56,7 +63,7 @@ describe('renderPageMarkdown', { timeout: PAGE_RENDER_TIMEOUT }, () => {
 
     test('renders the home page without a lead blockquote', async () => {
         const page = await renderPageMarkdown('/');
-        expect(page.title).toBe('Bootstrap components, rebuilt for Svelte.');
+        expect(page.title).toBe('Bootstrap 5 components for Svelte 5');
         expect(page.lead).toBe('');
         expect(page.markdown).not.toContain('\n> ');
         expect(page.markdown).toContain('## Installation');

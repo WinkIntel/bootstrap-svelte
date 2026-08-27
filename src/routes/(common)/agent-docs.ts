@@ -5,8 +5,8 @@ export type PageSummary = SitePage & { lead: string };
 
 export type SitemapEntry = { href: string; lastmod: string };
 
-const INSTALL_COMMAND = 'pnpm add @winkintel/bootstrap-svelte bootstrap';
-const CSS_IMPORT = "import 'bootstrap/dist/css/bootstrap.min.css';";
+const INSTALL_COMMAND = site.installCommand;
+const CSS_IMPORT = site.bootstrapCssImport;
 
 const LLMS_SECTION_TITLES: Record<string, string> = { Home: 'Start here' };
 
@@ -17,15 +17,15 @@ const WHEN_TO_USE = [
 ];
 
 const WHEN_NOT_TO_USE = [
-    'Svelte 4 or earlier: the peer dependency is `svelte ^5.29`.',
+    `Svelte 4 or earlier: the peer dependency is \`svelte ${site.sveltePeerRange}\`.`,
     "Tailwind, shadcn-style copy-in components, or fully custom design systems: this package follows Bootstrap's design language on purpose.",
     "Pages that also load Bootstrap's own JavaScript bundle: the components replace it, so do not load both."
 ];
 
 const HOW_TO_USE = [
     `Install the package together with Bootstrap CSS: \`${INSTALL_COMMAND}\`. The package does not bundle CSS, so import Bootstrap once in your app entry (\`${CSS_IMPORT}\`) or include it through your Sass pipeline.`,
-    "Import components from the package root: `import { Button, Card, Modal } from '@winkintel/bootstrap-svelte'`. Most components are compound (`<Card.Header>`, `<Modal.Dialog>`, `<Dropdown.Item>`); `Alert`, `Badge`, `Button`, and `Spinner` are standalone.",
-    'Props are typed. Import public types such as `ButtonProps` or `ModalProps` from the package, and read each component page for its props table, CSS classes, and accessibility notes.'
+    "Import components from the package root: `import { Button, Card, Modal } from '@winkintel/bootstrap-svelte'`. Compound namespaces start at their `Root` component (`<Card.Root>`, `<Modal.Root>`, `<Dropdown.Root>`) and then use sub-components such as `<Card.Header>`, `<Modal.Dialog>`, and `<Dropdown.Item>`; `Alert`, `Badge`, `Button`, and `Spinner` are standalone.",
+    'Props are typed. Import flat public types such as `ButtonRootProps` from the package root. For compound namespaces, import the namespace type and use exported part aliases such as `Card.RootProps` or `Modal.RootProps`; read each component page for its props table, CSS classes, and accessibility notes.'
 ];
 
 function groupBySection(pages: PageSummary[]): Map<string, PageSummary[]> {
@@ -104,7 +104,7 @@ export function buildAgentsMd(): string {
     let showModal = $state(false);
 </script>
 
-<Card>
+<Card.Root>
     <Card.Header>
         <Card.Title>Getting started</Card.Title>
     </Card.Header>
@@ -112,9 +112,9 @@ export function buildAgentsMd(): string {
         <Card.Text>Bootstrap markup, Svelte 5 ergonomics.</Card.Text>
         <Button colorVariant="primary" onclick={() => (showModal = true)}>Open modal</Button>
     </Card.Body>
-</Card>
+</Card.Root>
 
-<Modal isShown={showModal}>
+<Modal.Root isShown={showModal}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header>
@@ -126,7 +126,7 @@ export function buildAgentsMd(): string {
             </Modal.Footer>
         </Modal.Content>
     </Modal.Dialog>
-</Modal>`;
+</Modal.Root>`;
 
     return [
         `# ${site.name} — agent instructions`,

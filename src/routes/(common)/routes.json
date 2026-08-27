@@ -5,6 +5,14 @@
             {
                 "href": "/theming",
                 "label": "Theming"
+            },
+            {
+                "href": "/guides/sveltekit-bootstrap-5",
+                "label": "SvelteKit + Bootstrap 5"
+            },
+            {
+                "href": "/guides/compare-sveltestrap",
+                "label": "Bootstrap Svelte vs Sveltestrap"
             }
         ]
     },

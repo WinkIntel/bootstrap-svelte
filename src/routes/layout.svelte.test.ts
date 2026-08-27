@@ -44,14 +44,14 @@ afterEach(() => {
 describe('+layout.svelte head metadata', () => {
     test('sets the page title, canonical URL, and Markdown alternate for a docs page', () => {
         renderLayout('/components/button');
-        expect(document.title).toBe('Button | Bootstrap Svelte');
+        expect(document.title).toBe('Svelte 5 Button Component - Bootstrap 5 | Bootstrap Svelte');
         expect(headAttribute('link[rel="canonical"]', 'href')).toBe('https://bootstrap-svelte.vercel.app/components/button');
         expect(headAttribute('link[rel="alternate"][type="text/markdown"]', 'href')).toBe('https://bootstrap-svelte.vercel.app/components/button.md');
     });
 
     test('emits Open Graph, Twitter, and JSON-LD metadata on the home page', () => {
         renderLayout('/');
-        expect(document.title).toBe('Bootstrap Svelte | Bootstrap 5 components for Svelte 5');
+        expect(document.title).toBe('Bootstrap 5 components for Svelte 5 | Bootstrap Svelte');
         expect(headAttribute('meta[property="og:type"]', 'content')).toBe('website');
         expect(headAttribute('meta[property="og:image"]', 'content')).toBe('https://bootstrap-svelte.vercel.app/og-image.png');
         expect(headAttribute('meta[property="og:url"]', 'content')).toBe('https://bootstrap-svelte.vercel.app/');
@@ -82,10 +82,16 @@ describe('+layout.svelte head metadata', () => {
 });
 
 describe('+layout.svelte chrome', () => {
+    test('does not render any visible breadcrumb container on the home page', () => {
+        const { container } = renderLayout('/');
+        expect(container.querySelector('.wk-breadcrumbs')).not.toBeInTheDocument();
+        expect(container.querySelector('nav[aria-label="Breadcrumb"]')).not.toBeInTheDocument();
+    });
+
     test('shows the section and label of project pages in the breadcrumbs', () => {
         const { container } = renderLayout('/about');
-        expect(container.querySelector('.wk-eyebrow')).toHaveTextContent('Project');
-        expect(container.querySelector('.wk-current-page')).toHaveTextContent('About');
+        expect(container.querySelector('nav[aria-label="Breadcrumb"]')).toHaveTextContent('Bootstrap Svelte');
+        expect(container.querySelector('nav[aria-label="Breadcrumb"] [aria-current="page"]')).toHaveTextContent('About');
     });
 
     test('renders a footer with trust, source, and machine-readable links', () => {

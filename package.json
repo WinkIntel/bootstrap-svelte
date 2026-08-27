@@ -1,14 +1,14 @@
 {
     "author": "Wink, Inc.",
     "name": "@winkintel/bootstrap-svelte",
-    "version": "1.0.8",
+    "version": "1.0.10",
     "description": "Bootstrap components for Svelte 5 with TypeScript support.",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/WinkIntel/bootstrap-svelte.git"
     },
-    "homepage": "https://github.com/WinkIntel/bootstrap-svelte#readme",
+    "homepage": "https://bootstrap-svelte.vercel.app/",
     "bugs": {
         "url": "https://github.com/WinkIntel/bootstrap-svelte/issues"
     },
@@ -99,10 +99,15 @@
     },
     "keywords": [
         "bootstrap",
+        "bootstrap5",
+        "bootstrap-5",
         "components",
+        "component-library",
         "svelte",
         "svelte5",
+        "sveltekit",
         "typescript",
-        "ui"
+        "ui",
+        "ui-library"
     ]
 }

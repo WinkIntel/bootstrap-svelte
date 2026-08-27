@@ -4,12 +4,12 @@
     import { onMount, tick, type Snippet } from 'svelte';
     import { buildHeadMeta } from './(common)/head-meta.js';
     import routeJson from './(common)/routes.json' with { type: 'json' };
-    import { getPageMeta, site } from './(common)/site.js';
+    import { getBreadcrumbs, getPageMeta, site } from './(common)/site.js';
     import type { RouteType } from './(common)/types.js';
 
     type ColorMode = 'auto' | 'dark' | 'light';
 
-    const installCommand = 'pnpm add @winkintel/bootstrap-svelte';
+    const installCommand = site.installCommand;
     const colorModeLabels: Record<ColorMode, string> = {
         auto: 'Auto',
         dark: 'Dark',
@@ -44,6 +44,7 @@
     let pageMeta = $derived(getPageMeta(activeRoute));
     let activeRouteLabel: string = $derived(pageMeta.label);
     let activeRouteSection: string = $derived(pageMeta.section);
+    let breadcrumbs = $derived(getBreadcrumbs(activeRoute));
     let headMeta = $derived(buildHeadMeta(activeRoute));
     let pageTitle: string = $derived(headMeta.title);
     let jsonLdScript: string = $derived(`<script type="application/ld+json">${headMeta.jsonLd}\u003c/script>`);
@@ -408,11 +409,28 @@
                 aria-label={sidebarIsShown ? 'Close navigation' : 'Open navigation'}>
                 <i class="bi bi-list" aria-hidden="true"></i>
             </button>
-            <div class="wk-breadcrumbs">
-                <span class="wk-eyebrow">{activeRouteSection}</span>
-                <span class="wk-crumb-divider" aria-hidden="true">/</span>
-                <span class="wk-current-page">{activeRouteLabel}</span>
-            </div>
+            {#if breadcrumbs.length > 0}
+                <nav class="wk-breadcrumbs" aria-label="Breadcrumb">
+                    <ol>
+                        {#each breadcrumbs as breadcrumb, index (`breadcrumb-${index}`)}
+                            <li>
+                                {#if breadcrumb.href && index < breadcrumbs.length - 1}
+                                    <a href={breadcrumb.href}>{breadcrumb.label}</a>
+                                {:else}
+                                    <span aria-current={index === breadcrumbs.length - 1 ? 'page' : undefined}
+                                        >{breadcrumb.section} / {breadcrumb.label}</span>
+                                {/if}
+                            </li>
+                        {/each}
+                    </ol>
+                </nav>
+            {:else if activeRoute !== '/'}
+                <div class="wk-breadcrumbs">
+                    <span class="wk-eyebrow">{activeRouteSection}</span>
+                    <span class="wk-crumb-divider" aria-hidden="true">/</span>
+                    <span class="wk-current-page">{activeRouteLabel}</span>
+                </div>
+            {/if}
             <div class="wk-topbar-actions">
                 <div class="wk-install-action">
                     <code class="wk-install-chip">{installCommand}</code>
@@ -810,6 +828,43 @@
         gap: 0.55rem;
     }
 
+    .wk-breadcrumbs ol {
+        align-items: baseline;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .wk-breadcrumbs li {
+        align-items: baseline;
+        display: flex;
+        gap: 0.55rem;
+    }
+
+    .wk-breadcrumbs li:not(:last-child)::after {
+        color: var(--wk-border-strong);
+        content: '/';
+        font-size: 0.78rem;
+    }
+
+    .wk-breadcrumbs ol a,
+    .wk-breadcrumbs ol span {
+        color: var(--wk-heading-color);
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-decoration: none;
+    }
+
+    .wk-breadcrumbs ol a {
+        color: var(--wk-muted-color);
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
     .wk-eyebrow {
         color: var(--wk-muted-color);
         font-size: 0.78rem;
@@ -825,7 +880,7 @@
         color: var(--wk-heading-color);
         font-size: 0.95rem;
         font-weight: 700;
-        letter-spacing: -0.01em;
+        letter-spacing: 0;
     }
 
     .wk-topbar-actions {
@@ -833,15 +888,17 @@
         display: flex;
         gap: 0.6rem;
         margin-left: auto;
+        min-width: 0;
     }
 
     .wk-install-action {
         align-items: center;
         background: var(--wk-surface-soft);
         border: 1px solid var(--wk-border);
-        border-radius: 999px;
+        border-radius: 0.5rem;
         display: inline-flex;
         gap: 0.15rem;
+        min-width: 0;
         padding: 0.2rem 0.25rem 0.2rem 0.85rem;
     }
 
@@ -849,7 +906,10 @@
         background: transparent;
         color: var(--wk-body-color);
         font-size: 0.76rem;
+        overflow: hidden;
         padding: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .wk-install-action .btn {

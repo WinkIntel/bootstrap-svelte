@@ -1,4 +1,4 @@
-import { absoluteUrl, findPage, getPageMeta, markdownPath, normalizePathname, site } from './site.js';
+import { absoluteUrl, findPage, getBreadcrumbs, getPageMeta, markdownPath, normalizePathname, site } from './site.js';
 
 export type HeadMeta = {
     title: string;
@@ -21,8 +21,9 @@ const WEBSITE_ID = `${site.url}/#website`;
 const SOFTWARE_ID = `${site.url}/#software`;
 const ORGANIZATION_ID = `${site.url}/#organization`;
 
-function structuredData(pageUrl: string, title: string, description: string): string {
-    const graph = [
+function structuredData(pathname: string, pageUrl: string, title: string, description: string): string {
+    const breadcrumbs = getBreadcrumbs(pathname);
+    const graph: Record<string, unknown>[] = [
         {
             '@type': 'WebSite',
             '@id': WEBSITE_ID,
@@ -76,6 +77,18 @@ function structuredData(pageUrl: string, title: string, description: string): st
         }
     ];
 
+    if (breadcrumbs.length > 0) {
+        graph.push({
+            '@type': 'BreadcrumbList',
+            itemListElement: breadcrumbs.map((breadcrumb, index) => ({
+                '@type': 'ListItem',
+                position: index + 1,
+                name: breadcrumb.label,
+                ...(breadcrumb.href ? { item: absoluteUrl(breadcrumb.href) } : {})
+            }))
+        });
+    }
+
     // "<" is escaped so the JSON can never terminate the <script> element it is inlined in.
     return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
 }
@@ -98,6 +111,6 @@ export function buildHeadMeta(requestedPathname: string): HeadMeta {
         ogImage: absoluteUrl('/og-image.png'),
         ogImageAlt: `${site.name} — ${site.tagline}`,
         twitterCard: 'summary_large_image',
-        jsonLd: structuredData(canonical ?? absoluteUrl(pathname), meta.title, meta.description)
+        jsonLd: structuredData(pathname, canonical ?? absoluteUrl(pathname), meta.title, meta.description)
     };
 }

@@ -5,7 +5,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
 @example
 ```svelte
-<Modal isShown={true}>
+<Modal.Root isShown={true}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header>
@@ -19,17 +19,17 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
             </Modal.Footer>
         </Modal.Content>
     </Modal.Dialog>
-</Modal>
+</Modal.Root>
 ```
 
 #### Static backdrop
 ```svelte
-<Modal useBackdrop="static">...</Modal>
+<Modal.Root useBackdrop="static">...</Modal.Root>
 ```
 
 #### Keyboard dismissible
 ```svelte
-<Modal isKeyboardDismissible={true}>...</Modal>
+<Modal.Root isKeyboardDismissible={true}>...</Modal.Root>
 ```
 
 ### Props

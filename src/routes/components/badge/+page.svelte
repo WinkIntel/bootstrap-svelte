@@ -57,7 +57,7 @@
 
 <div>
     <div class="mb-5">
-        <h1>Badge</h1>
+        <div class="h1" data-page-title>Badge</div>
         <p class="lead">Bootstrap's badge component built with Svelte 5. Use badges to highlight elements, add counts, or display status.</p>
         <hr />
     </div>

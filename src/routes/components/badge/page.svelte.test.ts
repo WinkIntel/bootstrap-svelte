@@ -85,31 +85,37 @@ describe('/components/badge/+page.svelte', () => {
 
     // Headings with Badges tests
     describe('Headings with badges', () => {
-        test('should render h1 heading with badge', () => {
+        test('renders the page label with h1 styling and a real h1 badge demo', () => {
             const { container } = render(Page);
             const badge = container.querySelector('#headingBadge1');
+            const pageLabel = container.querySelector('.mb-5 > .h1');
+            expect(pageLabel).toHaveTextContent('Badge');
+            expect(pageLabel?.tagName).toBe('DIV');
             expect(badge).toBeInTheDocument();
             expect(badge).toHaveClass('badge');
             expect(badge).toHaveClass('text-bg-secondary');
             expect(badge).toHaveTextContent('New');
+            expect(badge?.parentElement?.tagName).toBe('H1');
         });
 
-        test('should render h2 heading with badge', () => {
+        test('should render a real h2 heading with a badge', () => {
             const { container } = render(Page);
             const badge = container.querySelector('#headingBadge2');
             expect(badge).toBeInTheDocument();
             expect(badge).toHaveClass('badge');
             expect(badge).toHaveClass('text-bg-secondary');
             expect(badge).toHaveTextContent('New');
+            expect(badge?.parentElement?.tagName).toBe('H2');
         });
 
-        test('should render h6 heading with badge', () => {
+        test('should render a real h6 heading with a badge', () => {
             const { container } = render(Page);
             const badge = container.querySelector('#headingBadge6');
             expect(badge).toBeInTheDocument();
             expect(badge).toHaveClass('badge');
             expect(badge).toHaveClass('text-bg-secondary');
             expect(badge).toHaveTextContent('New');
+            expect(badge?.parentElement?.tagName).toBe('H6');
         });
     });
 
