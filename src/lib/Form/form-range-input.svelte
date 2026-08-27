@@ -16,19 +16,19 @@ Bootstrap-styled range slider input component for selecting a value within a ran
 <Form.RangeInput disabled max="5" min="0" step="0.5" title="Set a number" value="1" />
 
 // With label and current value display
-<div class="mb-3">
+<Form.InputGroup>
     <Form.InputLabel for="customRange">Example range</Form.InputLabel>
     <Form.RangeInput id="customRange" max="10" min="0" />
-</div>
+</Form.InputGroup>
 
 // With steps and ticks
-<div class="mb-3">
+<Form.InputGroup>
     <Form.InputLabel for="stepRange">Range with steps</Form.InputLabel>
     <Form.RangeInput id="stepRange" max="5" min="0" step="1" />
     <div class="d-flex justify-content-between">
         <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
     </div>
-</div>
+</Form.InputGroup>
 ```
 ### Props
 - `class` (string): Optional. Additional CSS classes to apply to the range input.

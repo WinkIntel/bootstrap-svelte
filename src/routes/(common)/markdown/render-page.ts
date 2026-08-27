@@ -57,7 +57,7 @@ export async function renderPageMarkdown(href: string): Promise<RenderedPage> {
     const root = new JSDOM(body).window.document.body;
 
     const canonical = absoluteUrl(href);
-    const heading = root.querySelector('h1');
+    const heading = root.querySelector('[data-page-title], h1');
     const title = collapseWhitespace(heading?.textContent ?? '') || page.label;
     const lead = extractLead(root);
     const leadElement = root.querySelector('p.lead');
