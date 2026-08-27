@@ -85,31 +85,40 @@ describe('/components/badge/+page.svelte', () => {
 
     // Headings with Badges tests
     describe('Headings with badges', () => {
-        test('should render h1 heading with badge', () => {
+        test('keeps Badge as the sole h1 while the demo shows the h1 visual scale', () => {
             const { container } = render(Page);
             const badge = container.querySelector('#headingBadge1');
+            const h1s = container.querySelectorAll('h1');
+            expect(h1s).toHaveLength(1);
+            expect(h1s[0]).toHaveTextContent('Badge');
             expect(badge).toBeInTheDocument();
             expect(badge).toHaveClass('badge');
             expect(badge).toHaveClass('text-bg-secondary');
             expect(badge).toHaveTextContent('New');
+            expect(badge?.parentElement).toHaveClass('h1');
+            expect(badge?.parentElement?.tagName).toBe('DIV');
         });
 
-        test('should render h2 heading with badge', () => {
+        test('should render the h2 visual scale with a badge', () => {
             const { container } = render(Page);
             const badge = container.querySelector('#headingBadge2');
             expect(badge).toBeInTheDocument();
             expect(badge).toHaveClass('badge');
             expect(badge).toHaveClass('text-bg-secondary');
             expect(badge).toHaveTextContent('New');
+            expect(badge?.parentElement).toHaveClass('h2');
+            expect(badge?.parentElement?.tagName).toBe('DIV');
         });
 
-        test('should render h6 heading with badge', () => {
+        test('should render the h6 visual scale with a badge', () => {
             const { container } = render(Page);
             const badge = container.querySelector('#headingBadge6');
             expect(badge).toBeInTheDocument();
             expect(badge).toHaveClass('badge');
             expect(badge).toHaveClass('text-bg-secondary');
             expect(badge).toHaveTextContent('New');
+            expect(badge?.parentElement).toHaveClass('h6');
+            expect(badge?.parentElement?.tagName).toBe('DIV');
         });
     });
 

@@ -849,8 +849,8 @@
         font-size: 0.78rem;
     }
 
-    .wk-breadcrumbs a,
-    .wk-breadcrumbs span {
+    .wk-breadcrumbs ol a,
+    .wk-breadcrumbs ol span {
         color: var(--wk-heading-color);
         font-size: 0.95rem;
         font-weight: 700;
@@ -858,7 +858,7 @@
         text-decoration: none;
     }
 
-    .wk-breadcrumbs a {
+    .wk-breadcrumbs ol a {
         color: var(--wk-muted-color);
         font-size: 0.78rem;
         font-weight: 600;

@@ -5,8 +5,8 @@ export type PageSummary = SitePage & { lead: string };
 
 export type SitemapEntry = { href: string; lastmod: string };
 
-const INSTALL_COMMAND = 'pnpm add @winkintel/bootstrap-svelte bootstrap';
-const CSS_IMPORT = "import 'bootstrap/dist/css/bootstrap.min.css';";
+const INSTALL_COMMAND = site.installCommand;
+const CSS_IMPORT = site.bootstrapCssImport;
 
 const LLMS_SECTION_TITLES: Record<string, string> = { Home: 'Start here' };
 
@@ -17,7 +17,7 @@ const WHEN_TO_USE = [
 ];
 
 const WHEN_NOT_TO_USE = [
-    'Svelte 4 or earlier: the peer dependency is `svelte ^5.29.0`.',
+    `Svelte 4 or earlier: the peer dependency is \`svelte ${site.sveltePeerRange}\`.`,
     "Tailwind, shadcn-style copy-in components, or fully custom design systems: this package follows Bootstrap's design language on purpose.",
     "Pages that also load Bootstrap's own JavaScript bundle: the components replace it, so do not load both."
 ];

@@ -1,10 +1,17 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test } from 'vitest';
 import { crawlStaticBuild } from './static-crawl.js';
 
 const SITE_URL = 'https://bootstrap-svelte.vercel.app';
 const TEST_ROUTES = ['/', '/components/button'];
+const fixtureRoots = new Set<string>();
+
+afterEach(async () => {
+    await Promise.all([...fixtureRoots].map((root) => rm(root, { recursive: true, force: true })));
+    fixtureRoots.clear();
+});
 
 type JsonLdObject = Record<string, unknown>;
 
@@ -76,7 +83,8 @@ async function writeFixtureFile(root: string, path: string, content: string): Pr
 }
 
 async function createStaticBuild(taskId: string, overrides: Partial<Record<'homeHtml' | 'buttonHtml', string>> = {}): Promise<string> {
-    const root = join('/tmp', `bootstrap-svelte-crawl-${process.pid}-${taskId.replace(/\W/g, '-')}`);
+    const root = await mkdtemp(join(tmpdir(), `bootstrap-svelte-crawl-${process.pid}-${taskId.replace(/\W/g, '-')}-`));
+    fixtureRoots.add(root);
     await writeFixtureFile(
         root,
         'sitemap.xml',
@@ -115,6 +123,30 @@ describe('static crawl checks', () => {
 
         expect(result.errors).toEqual([]);
         expect(result.pages).toHaveLength(2);
+    });
+
+    test('parses paired quotes and metadata attributes in any order', async ({ task }) => {
+        const description = "Bootstrap's button description";
+        const buttonHtml = html('/components/button', 'Button | Bootstrap Svelte', description)
+            .replace(`<meta name="description" content="${description}">`, `<meta content="${description}" name="description">`)
+            .replace(
+                '<link rel="canonical" href="https://bootstrap-svelte.vercel.app/components/button">',
+                '<link href="https://bootstrap-svelte.vercel.app/components/button" rel="canonical">'
+            )
+            .replace(
+                '<link rel="alternate" type="text/markdown" href="https://bootstrap-svelte.vercel.app/components/button.md">',
+                '<link href="https://bootstrap-svelte.vercel.app/components/button.md" type="text/markdown" rel="alternate">'
+            )
+            .replace(
+                '<meta property="og:url" content="https://bootstrap-svelte.vercel.app/components/button">',
+                '<meta content="https://bootstrap-svelte.vercel.app/components/button" property="og:url">'
+            );
+        const root = await createStaticBuild(task.id, { buttonHtml });
+
+        const result = await crawlFixture(root);
+
+        expect(result.errors).toEqual([]);
+        expect(result.pages.find((page) => page.href === '/components/button')?.description).toBe(description);
     });
 
     test('requires visible semantic breadcrumb navigation on non-home routes', async ({ task }) => {

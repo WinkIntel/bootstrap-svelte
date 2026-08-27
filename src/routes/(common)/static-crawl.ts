@@ -85,6 +85,23 @@ function attributeValue(attributes: string, name: string): string | undefined {
     return match?.[1] ?? match?.[2] ?? match?.[3];
 }
 
+function elementAttributeValue(
+    html: string,
+    tagName: string,
+    requiredAttributes: Record<string, string>,
+    valueAttribute: string
+): string | undefined {
+    const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    for (const match of html.matchAll(new RegExp(`<${escapedTagName}\\b([^>]*)>`, 'gi'))) {
+        const attributes = match[1] ?? '';
+        const matchesRequiredAttributes = Object.entries(requiredAttributes).every(
+            ([name, value]) => attributeValue(attributes, name)?.toLowerCase() === value.toLowerCase()
+        );
+        if (matchesRequiredAttributes) return attributeValue(attributes, valueAttribute)?.trim();
+    }
+    return undefined;
+}
+
 function isVisiblyHidden(attributes: string): boolean {
     const className = attributeValue(attributes, 'class')?.toLowerCase() ?? '';
     const style = attributeValue(attributes, 'style')?.toLowerCase() ?? '';
@@ -228,11 +245,11 @@ export async function crawlStaticBuild(options: StaticCrawlOptions): Promise<Sta
         if (!html) continue;
 
         const title = matchContent(html, /<title>([\s\S]*?)<\/title>/i) ?? '';
-        const description = matchContent(html, /<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i) ?? '';
-        const canonical = matchContent(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i);
-        const ogUrl = matchContent(html, /<meta\s+property=["']og:url["']\s+content=["']([^"']+)["']/i);
-        const markdownUrl = matchContent(html, /<link\s+rel=["']alternate["']\s+type=["']text\/markdown["']\s+href=["']([^"']+)["']/i);
-        const robots = matchContent(html, /<meta\s+name=["']robots["']\s+content=["']([^"']+)["']/i);
+        const description = elementAttributeValue(html, 'meta', { name: 'description' }, 'content') ?? '';
+        const canonical = elementAttributeValue(html, 'link', { rel: 'canonical' }, 'href');
+        const ogUrl = elementAttributeValue(html, 'meta', { property: 'og:url' }, 'content');
+        const markdownUrl = elementAttributeValue(html, 'link', { rel: 'alternate', type: 'text/markdown' }, 'href');
+        const robots = elementAttributeValue(html, 'meta', { name: 'robots' }, 'content');
         const hasBreadcrumbNav = hasVisibleSemanticBreadcrumbNav(html);
         const hasBreadcrumbContainer = hasVisibleBreadcrumbContainer(html);
 

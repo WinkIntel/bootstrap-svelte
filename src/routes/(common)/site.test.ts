@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import packageJson from '../../../package.json' with { type: 'json' };
 import routeJson from './routes.json' with { type: 'json' };
 import { absoluteUrl, getBreadcrumbs, getPageMeta, markdownPath, notFoundPage, site, sitePages } from './site.js';
 import type { RouteType } from './types.js';
@@ -9,6 +10,10 @@ const navHrefs = routes.flatMap((section) => section.items.map((item) => item.hr
 describe('site metadata', () => {
     test('site.url is the canonical origin without a trailing slash', () => {
         expect(site.url).toBe('https://bootstrap-svelte.vercel.app');
+    });
+
+    test('site.sveltePeerRange matches the published package peer dependency', () => {
+        expect(site.sveltePeerRange).toBe(packageJson.peerDependencies.svelte);
     });
 
     test('absoluteUrl joins a path onto the canonical origin', () => {
