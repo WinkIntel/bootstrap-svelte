@@ -96,7 +96,7 @@ import '../app.scss';`;
     <section class="mb-4">
         <h2 class="wk-quick-link mb-3">Install</h2>
         <p>Install Bootstrap Svelte and Bootstrap together. Svelte <code>^5.29.0</code> is a peer dependency supplied by your SvelteKit app.</p>
-        <SyntaxHighlighter code={installCode} />
+        <SyntaxHighlighter code={installCode} language="bash" />
     </section>
 
     <section class="mb-4">

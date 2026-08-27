@@ -5,7 +5,9 @@
     import type { RouteType } from './(common)/types.js';
 
     const routes: RouteType[] = routeJson as RouteType[];
-    const componentCount = routes.reduce((count, section) => count + section.items.length, 0);
+    const components = routes.find((section) => section.section === 'Components')?.items ?? [];
+    const componentCount = components.length;
+    const firstComponentHref = [...components].sort((left, right) => left.label.localeCompare(right.label))[0]?.href ?? '/components/accordion';
 
     const sectionIcons: Record<string, string> = {
         Guides: 'bi-compass',
@@ -57,7 +59,7 @@
             Add Bootstrap CSS in your app; Bootstrap JavaScript is not required.
         </p>
         <div class="wk-hero-actions">
-            <a class="btn btn-lg wk-btn-gradient" href="/components/button">
+            <a class="btn btn-lg wk-btn-gradient" href={firstComponentHref}>
                 Browse components
                 <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
             </a>
@@ -115,7 +117,7 @@
 <section class="wk-stats" aria-label="Package highlights" data-markdown="skip">
     <div>
         <strong>{componentCount}</strong>
-        <span>documented routes</span>
+        <span>documented components</span>
     </div>
     <div>
         <strong>Svelte 5</strong>
@@ -143,7 +145,7 @@
     <div class="wk-code-grid">
         <div>
             <h3><span class="wk-step-badge">1</span> Install</h3>
-            <SyntaxHighlighter code={installExample} />
+            <SyntaxHighlighter code={installExample} language="bash" />
             <p class="small text-secondary mt-3 mb-0">Peer dependency: <code>{peerDependencyExample}</code></p>
         </div>
         <div>

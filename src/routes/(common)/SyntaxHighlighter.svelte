@@ -1,5 +1,6 @@
 <script lang="ts">
     import hljs from 'highlight.js/lib/core';
+    import bash from 'highlight.js/lib/languages/bash';
     import css from 'highlight.js/lib/languages/css';
     import javascript from 'highlight.js/lib/languages/javascript';
     import xml from 'highlight.js/lib/languages/xml';
@@ -7,13 +8,25 @@
 
     const uid: string = $props.id();
 
-    let { code, label = 'Code example' }: { code: string; label?: string } = $props();
+    type CodeLanguage = 'bash' | 'css' | 'html' | 'javascript' | 'svelte';
 
+    let { code, label = 'Code example', language = 'svelte' }: { code: string; label?: string; language?: CodeLanguage } = $props();
+
+    hljs.registerLanguage('bash', bash);
     hljs.registerLanguage('xml', xml);
     hljs.registerLanguage('javascript', javascript);
     hljs.registerLanguage('css', css);
 
-    let highlighted = $derived.by(() => hljs.highlight(code, { language: 'xml' }).value);
+    const highlighterLanguages: Record<CodeLanguage, string> = {
+        bash: 'bash',
+        css: 'css',
+        html: 'xml',
+        javascript: 'javascript',
+        svelte: 'xml'
+    };
+
+    let highlighted = $derived.by(() => hljs.highlight(code, { language: highlighterLanguages[language] }).value);
+    let fenceLanguage = $derived(language === 'svelte' ? 'html' : language);
     let regionLabel = $derived(label === 'Code example' ? `Code example ${uid}` : label);
     let copyStatus: 'idle' | 'copied' | 'failed' = $state('idle');
     let copyStatusTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -54,7 +67,7 @@
 
 <div class="wk-code-example border rounded">
     <div class="wk-code-toolbar">
-        <span class="wk-code-lang" aria-hidden="true">svelte</span>
+        <span class="wk-code-lang" aria-hidden="true">{language}</span>
         <span class="visually-hidden" aria-live="polite">
             {#if copyStatus === 'copied'}
                 Code copied to clipboard.
@@ -69,7 +82,7 @@
     </div>
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div class="wk-code-scroll" tabindex="0" role="region" aria-label={regionLabel}>
-        <pre data-language="html" class="vstack mb-0">
+        <pre data-language={fenceLanguage} class="vstack mb-0">
             <!-- eslint-disable-next-line svelte/no-at-html-tags -- highlighted is the output of hljs which sanitizes the code argument -->
             <code class="hljs">{@html highlighted}</code>
         </pre>
