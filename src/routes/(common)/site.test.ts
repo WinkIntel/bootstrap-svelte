@@ -128,8 +128,8 @@ describe('search metadata', () => {
     test('non-home indexable pages expose home and current-page breadcrumbs', () => {
         expect(getBreadcrumbs('/')).toEqual([]);
         expect(getBreadcrumbs('/components/button')).toEqual([
-            { label: 'Bootstrap Svelte', href: '/' },
-            { label: 'Button', href: '/components/button' }
+            { label: 'Bootstrap Svelte', href: '/', section: 'Home' },
+            { label: 'Button', href: '/components/button', section: 'Components' }
         ]);
     });
 });

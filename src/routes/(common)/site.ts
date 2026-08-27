@@ -20,6 +20,7 @@ export type PageMeta = {
 };
 
 export type Breadcrumb = {
+    section: string;
     label: string;
     href?: string;
 };
@@ -310,8 +311,8 @@ export function getBreadcrumbs(pathname: string): Breadcrumb[] {
     const page = findPage(normalizePathname(pathname));
     if (!page || page.href === homePage.href || page.href === notFoundPage.href || page.noindex) return [];
     return [
-        { label: site.name, href: homePage.href },
-        { label: page.label, href: page.href }
+        { label: site.name, href: homePage.href, section: homePage.section },
+        { label: page.label, href: page.href, section: page.section }
     ];
 }
 

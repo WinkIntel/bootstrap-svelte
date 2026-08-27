@@ -417,7 +417,8 @@
                                 {#if breadcrumb.href && index < breadcrumbs.length - 1}
                                     <a href={breadcrumb.href}>{breadcrumb.label}</a>
                                 {:else}
-                                    <span aria-current={index === breadcrumbs.length - 1 ? 'page' : undefined}>{breadcrumb.label}</span>
+                                    <span aria-current={index === breadcrumbs.length - 1 ? 'page' : undefined}
+                                        >{breadcrumb.section} / {breadcrumb.label}</span>
                                 {/if}
                             </li>
                         {/each}
