@@ -8,7 +8,7 @@
 
     const uid: string = $props.id();
 
-    type CodeLanguage = 'bash' | 'css' | 'html' | 'javascript' | 'svelte';
+    type CodeLanguage = 'bash' | 'css' | 'html' | 'javascript' | 'scss' | 'svelte';
 
     let { code, label = 'Code example', language = 'svelte' }: { code: string; label?: string; language?: CodeLanguage } = $props();
 
@@ -22,6 +22,7 @@
         css: 'css',
         html: 'xml',
         javascript: 'javascript',
+        scss: 'css',
         svelte: 'xml'
     };
 
