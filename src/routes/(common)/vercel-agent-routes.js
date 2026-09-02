@@ -4,7 +4,8 @@
  *
  * The showcase is fully prerendered and deliberately ships no runtime functions, so everything happens in static
  * routing rules:
- * - trailing-slash URLs redirect to the canonical path,
+ * - trailing-slash URLs redirect to the canonical path with a 301 (Bing's Webmaster Guidelines ask for 301 on permanent
+ *   moves; for a GET-only static site it is equivalent to 308),
  * - requests that prefer `text/markdown` are rewritten to the prerendered `.md` sibling of each page,
  * - page responses carry `Vary: Accept` and a `Link: <…>; rel="alternate"; type="text/markdown"` header,
  * - requests whose Accept header accepts neither representation get a 406 with an explanatory body,
@@ -109,7 +110,7 @@ export function addAgentRoutes(config, manifest) {
     return {
         ...config,
         routes: [
-            { src: '^/(.+?)/+$', status: 308, headers: { Location: '/$1' } },
+            { src: '^/(.+?)/+$', status: 301, headers: { Location: '/$1' } },
             ...routes.slice(0, filesystemIndex),
             ...negotiation,
             ...routes.slice(filesystemIndex),

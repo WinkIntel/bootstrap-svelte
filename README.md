@@ -26,7 +26,7 @@ The showcase at <https://bootstrap-svelte.vercel.app> is published for AI agents
 
 - `/llms.txt` indexes every page with one-line summaries ([llms.txt format](https://llmstxt.org)); `/llms-full.txt` bundles every page into one Markdown file.
 - Every page is available as Markdown from its own URL with `Accept: text/markdown` (quality values are honored; the response carries `Vary: Accept` and a `Link` alternate header), or by appending `.md` to the path, for example `/components/button.md`.
-- `/agents.md` explains when to use the library and how to integrate it; `/sitemap.xml` and `/robots.txt` serve crawlers.
+- `/agents.md` explains when to use the library and how to integrate it; `/sitemap.xml` and `/robots.txt` serve crawlers, and `pnpm indexnow` pushes changed URLs to Bing and the other [IndexNow](https://www.indexnow.org/) engines after a deploy.
 - Paths that do not exist return a real HTTP 404 with a Markdown or HTML body that links back to the documentation index.
 
 ## Why this exists

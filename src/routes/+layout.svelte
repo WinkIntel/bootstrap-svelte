@@ -502,9 +502,11 @@
                         <a href="/about">About</a>
                         <a href="/contact">Contact</a>
                         <a href="/privacy">Privacy</a>
-                        <a href={site.repositoryUrl} target="_blank" rel="noreferrer">GitHub</a>
-                        <a href={site.npmUrl} target="_blank" rel="noreferrer">npm</a>
+                        <a href={site.repositoryUrl} target="_blank" rel="noreferrer"
+                            >GitHub<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
+                        <a href={site.npmUrl} target="_blank" rel="noreferrer">npm<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
                         <a href="/llms.txt">llms.txt</a>
+                        <a href="/llms-full.txt">llms-full.txt</a>
                         <a href="/sitemap.xml">Sitemap</a>
                     </nav>
                     <p class="wk-footer-note">© {copyrightYear} {site.organization.name} · {site.name} {site.version} · {site.license.name}</p>
@@ -529,8 +531,10 @@
                     </nav>
                     <div class="wk-resource-links">
                         <div class="wk-toc-title">Resources</div>
-                        <a href="https://getbootstrap.com/docs/5.3/" target="_blank" rel="noreferrer">Bootstrap docs</a>
-                        <a href="https://svelte.dev/docs" target="_blank" rel="noreferrer">Svelte docs</a>
+                        <a href="https://getbootstrap.com/docs/5.3/" target="_blank" rel="noreferrer"
+                            >Bootstrap docs<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
+                        <a href="https://svelte.dev/docs" target="_blank" rel="noreferrer"
+                            >Svelte docs<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
                     </div>
                 </div>
             </aside>

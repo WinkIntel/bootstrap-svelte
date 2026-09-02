@@ -20,7 +20,8 @@
         <p>
             The following examples replicate each of the examples from the Bootstrap documentation: <a
                 href="https://getbootstrap.com/docs/5.3/layout/breakpoints/"
-                target="_blank">https://getbootstrap.com/docs/5.3/layout/breakpoints/</a>
+                target="_blank"
+                >https://getbootstrap.com/docs/5.3/layout/breakpoints/<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
         </p>
         <hr />
     </div>

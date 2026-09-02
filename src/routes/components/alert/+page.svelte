@@ -25,7 +25,7 @@
   <p class="mb-0">Whenever you need to, be sure to use margin utilities to keep things nice and tidy.</p>
 </Alert>`;
     const iconExampleCode = `<Alert colorVariant="primary">
-  <i class="bi bi-info-circle-fill me-2"></i>
+  <i class="bi bi-info-circle-fill me-2" aria-hidden="true"></i>
   An example alert with an icon
 </Alert>`;
 </script>
@@ -135,7 +135,7 @@
             <div class="card-body">
                 <div class="mb-3">
                     <Alert id="iconAlert" colorVariant="primary">
-                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <i class="bi bi-info-circle-fill me-2" aria-hidden="true"></i>
                         An example alert with an icon
                     </Alert>
                 </div>

@@ -318,7 +318,9 @@
         <p>
             The <code>colorVariant</code> prop supports all Bootstrap background color variants and automatically sets the appropriate
             <code>data-bs-theme</code> attribute based on the background color to ensure proper text contrast as per
-            <a href="https://getbootstrap.com/docs/5.3/helpers/color-background/#overview" target="_blank" rel="noopener">Bootstrap documentation</a>.
+            <a href="https://getbootstrap.com/docs/5.3/helpers/color-background/#overview" target="_blank" rel="noopener"
+                >Bootstrap documentation<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a
+            >.
         </p>
 
         <div class="card">

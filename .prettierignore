@@ -6,4 +6,5 @@ bun.lock
 bun.lockb
 # Generated and binary assets
 static/*.png
+static/*.txt
 scripts/*.svg

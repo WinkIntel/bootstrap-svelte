@@ -26,6 +26,7 @@
         "doctor": "svelte-doctor check",
         "format": "prettier --write --ignore-path=.prettierignore $(git diff --name-only --diff-filter d --relative . && git ls-files --others --exclude-standard | sed \"s|^$(git rev-parse --show-prefix)||\")",
         "format-all": "prettier --write --ignore-path=.prettierignore ./src",
+        "indexnow": "node scripts/indexnow.mjs",
         "lint": "prettier --check ./src && eslint ./src",
         "ncu:check": "ncu --target minor && ncu --target minor --cooldown 0d --filter \"@sveltejs/adapter-static,@sveltejs/kit,@sveltejs/vite-plugin-svelte,svelte,svelte-check,svelte-preprocess\"",
         "ncu:upgrade": "ncu --target minor -u && ncu --target minor --cooldown 0d -u --filter \"@sveltejs/adapter-static,@sveltejs/kit,@sveltejs/vite-plugin-svelte,svelte,svelte-check,svelte-preprocess\" && pnpm install",

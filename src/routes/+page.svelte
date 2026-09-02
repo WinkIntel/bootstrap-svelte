@@ -66,11 +66,11 @@
             <a class="btn btn-lg wk-btn-ghost" href="#installation">Install package</a>
             <a class="btn btn-lg wk-btn-ghost" href="https://www.npmjs.com/package/@winkintel/bootstrap-svelte" target="_blank" rel="noreferrer">
                 npm
-                <i class="bi bi-arrow-up-right ms-1" aria-hidden="true"></i>
+                <i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i>
             </a>
             <a class="btn btn-lg wk-btn-ghost" href="https://github.com/WinkIntel/bootstrap-svelte" target="_blank" rel="noreferrer">
                 GitHub
-                <i class="bi bi-arrow-up-right ms-1" aria-hidden="true"></i>
+                <i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i>
             </a>
         </div>
     </div>
