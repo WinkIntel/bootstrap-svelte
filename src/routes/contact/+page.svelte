@@ -48,7 +48,7 @@
             {address.postalCode}<br />
             United States<br />
             Phone: <a href={`tel:${site.organization.telephone}`}>{site.organization.telephone}</a><br />
-            Web: <a href={site.organization.url} target="_blank" rel="noreferrer">{site.organization.url}</a>
+            Web: <a href={site.organization.url} target="_blank" rel="noreferrer">{site.organization.url}<i class="bi bi-box-arrow-up-right ms-1"></i></a>
         </address>
     </section>
 
