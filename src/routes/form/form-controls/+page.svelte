@@ -156,7 +156,7 @@
                         <Form.CheckInput id="checkReadonly" isIndeterminate={true} name="checkReadonly" value="" />
                         <Form.CheckLabel for="checkReadonly"
                             >Indeterminate checkbox (<a href="https://www.w3schools.com/jsref/prop_checkbox_indeterminate.asp" target="_blank"
-                                >via JavaScript</a
+                                >via JavaScript<i class="bi bi-box-arrow-up-right ms-1"></i></a
                             >)</Form.CheckLabel>
                     </Form.Check>
                     <hr />

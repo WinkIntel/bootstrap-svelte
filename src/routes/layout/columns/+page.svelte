@@ -15,7 +15,7 @@
         <p>
             The following examples replicate each of the examples from the Bootstrap documentation: <a
                 href="https://getbootstrap.com/docs/5.3/layout/columns/"
-                target="_blank">https://getbootstrap.com/docs/5.3/layout/columns/</a>
+                target="_blank">https://getbootstrap.com/docs/5.3/layout/columns/<i class="bi bi-box-arrow-up-right ms-1"></i></a>
         </p>
         <hr />
     </div>

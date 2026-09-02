@@ -666,7 +666,7 @@ export type ScrollspyOptions = {
                             <a
                                 href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver"
                                 target="_blank"
-                                rel="noopener noreferrer">MDN Documentation</a>
+                                rel="noopener noreferrer">MDN Documentation<i class="bi bi-box-arrow-up-right ms-1"></i></a>
                         </td>
                     </tr>
                 </tbody>
