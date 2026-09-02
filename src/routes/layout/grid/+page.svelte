@@ -13,7 +13,7 @@
         <p>
             The following examples replicate each of the examples from the Bootstrap documentation: <a
                 href="https://getbootstrap.com/docs/5.3/layout/grid/"
-                target="_blank">https://getbootstrap.com/docs/5.3/layout/grid/<i class="bi bi-box-arrow-up-right ms-1"></i></a>
+                target="_blank">https://getbootstrap.com/docs/5.3/layout/grid/<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
         </p>
         <hr />
     </div>

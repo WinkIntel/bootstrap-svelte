@@ -43,10 +43,11 @@
             {site.organization.name} is a software and market-intelligence company based in {site.organization.address.addressLocality}, Iowa, United
             States. It publishes Bootstrap Svelte from the
             <a href={site.organization.githubUrl} target="_blank" rel="noreferrer"
-                >WinkIntel organization on GitHub<i class="bi bi-box-arrow-up-right ms-1"></i></a>
+                >WinkIntel organization on GitHub<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
             and uses the library in its own Svelte applications. Company information is available at
-            <a href={site.organization.url} target="_blank" rel="noreferrer">winkintel.com<i class="bi bi-box-arrow-up-right ms-1"></i></a>; ways to
-            reach the maintainers are listed on the
+            <a href={site.organization.url} target="_blank" rel="noreferrer"
+                >winkintel.com<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a
+            >; ways to reach the maintainers are listed on the
             <a href="/contact">contact page</a>.
         </p>
     </section>
@@ -55,14 +56,15 @@
         <h2 class="wk-quick-link">License and versions</h2>
         <p>
             Bootstrap Svelte is released under the
-            <a href={site.license.url} target="_blank" rel="noreferrer">Apache License 2.0<i class="bi bi-box-arrow-up-right ms-1"></i></a>. The
-            current published version is
+            <a href={site.license.url} target="_blank" rel="noreferrer"
+                >Apache License 2.0<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a
+            >. The current published version is
             <code>{site.version}</code>, available from the
-            <a href={site.npmUrl} target="_blank" rel="noreferrer">npm registry<i class="bi bi-box-arrow-up-right ms-1"></i></a>
+            <a href={site.npmUrl} target="_blank" rel="noreferrer">npm registry<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
             and developed in the
             <a href={site.repositoryUrl} target="_blank" rel="noreferrer">GitHub repository</a>. Release notes are kept in the repository's
             <a href={`${site.repositoryUrl}/blob/main/CHANGELOG.md`} target="_blank" rel="noreferrer"
-                >changelog<i class="bi bi-box-arrow-up-right ms-1"></i></a
+                >changelog<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a
             >. The package requires Svelte 5 as a peer dependency and expects the consuming application to provide Bootstrap 5 CSS.
         </p>
     </section>
@@ -82,10 +84,10 @@
         <h2 class="wk-quick-link">Contributing</h2>
         <p>
             Bug reports, feature requests, and API or design feedback are welcome through
-            <a href={site.issuesUrl} target="_blank" rel="noreferrer">GitHub Issues<i class="bi bi-box-arrow-up-right ms-1"></i></a>. Pull requests
-            should follow the repository's
+            <a href={site.issuesUrl} target="_blank" rel="noreferrer">GitHub Issues<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a
+            >. Pull requests should follow the repository's
             <a href={`${site.repositoryUrl}/blob/main/CONTRIBUTING.md`} target="_blank" rel="noreferrer"
-                >contributing guide<i class="bi bi-box-arrow-up-right ms-1"></i></a
+                >contributing guide<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a
             >: add or update tests for behavior changes, keep components generic, and update this showcase when a public component API changes.
         </p>
     </section>

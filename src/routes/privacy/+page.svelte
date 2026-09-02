@@ -35,7 +35,7 @@
             The site is served by Vercel. Like any web host, Vercel processes the technical data needed to deliver and protect the site, such as your
             IP address, user agent, the requested URL, and timestamps, under the
             <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noreferrer"
-                >Vercel privacy policy<i class="bi bi-box-arrow-up-right ms-1"></i></a
+                >Vercel privacy policy<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a
             >. {site.organization.name}
             does not receive that data in a form that identifies individual visitors.
         </p>
@@ -47,10 +47,10 @@
             Pages load Bootstrap CSS and Bootstrap Icons from the jsDelivr CDN and the Inter and JetBrains Mono typefaces from Google Fonts. Your
             browser requests those files directly, so jsDelivr and Google receive your IP address and user agent for those requests, as described in
             the <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank" rel="noreferrer"
-                >jsDelivr privacy policy<i class="bi bi-box-arrow-up-right ms-1"></i></a>
+                >jsDelivr privacy policy<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
             and the
             <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer"
-                >Google privacy policy<i class="bi bi-box-arrow-up-right ms-1"></i></a
+                >Google privacy policy<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a
             >.
         </p>
     </section>
@@ -75,8 +75,9 @@
         <h2 class="wk-quick-link">Changes and contact</h2>
         <p>
             Changes to this notice are published on this page with an updated date. Questions about it can be raised through
-            <a href={site.issuesUrl} target="_blank" rel="noreferrer">GitHub Issues<i class="bi bi-box-arrow-up-right ms-1"></i></a> or the channels
-            listed on the
+            <a href={site.issuesUrl} target="_blank" rel="noreferrer"
+                >GitHub Issues<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
+            or the channels listed on the
             <a href="/contact">contact page</a>.
         </p>
     </section>

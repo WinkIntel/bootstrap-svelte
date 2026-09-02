@@ -14,12 +14,13 @@
     <section class="mb-5" id="bugs-and-feature-requests">
         <h2 class="wk-quick-link">Bugs, feature requests, and questions</h2>
         <p>
-            Use <a href={site.issuesUrl} target="_blank" rel="noreferrer">GitHub Issues<i class="bi bi-box-arrow-up-right ms-1"></i></a> for bugs,
-            feature requests, missing Bootstrap components or variants, accessibility problems, SvelteKit or SSR edge cases, and documentation gaps.
-            Include the package and Svelte versions you are using and, for bugs, a minimal reproduction. Feedback on component API ergonomics and
+            Use <a href={site.issuesUrl} target="_blank" rel="noreferrer"
+                >GitHub Issues<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
+            for bugs, feature requests, missing Bootstrap components or variants, accessibility problems, SvelteKit or SSR edge cases, and documentation
+            gaps. Include the package and Svelte versions you are using and, for bugs, a minimal reproduction. Feedback on component API ergonomics and
             Svelte 5 idioms is just as welcome as bug reports. Pull requests are accepted; see the repository's
             <a href={`${site.repositoryUrl}/blob/main/CONTRIBUTING.md`} target="_blank" rel="noreferrer"
-                >contributing guide<i class="bi bi-box-arrow-up-right ms-1"></i></a> first.
+                >contributing guide<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a> first.
         </p>
     </section>
 
@@ -28,7 +29,7 @@
         <p>
             Please report suspected vulnerabilities privately through
             <a href={site.securityPolicyUrl} target="_blank" rel="noreferrer"
-                >GitHub's security reporting for this repository<i class="bi bi-box-arrow-up-right ms-1"></i></a>
+                >GitHub's security reporting for this repository<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
             rather than in a public issue, and allow the maintainers a reasonable amount of time to investigate and coordinate a fix before disclosing.
             The security policy describes what is in scope: published package contents, generated <code>dist</code> files, and component behavior that touches
             the DOM, focus management, portals, overlays, or user-provided HTML.
@@ -48,7 +49,9 @@
             {address.postalCode}<br />
             United States<br />
             Phone: <a href={`tel:${site.organization.telephone}`}>{site.organization.telephone}</a><br />
-            Web: <a href={site.organization.url} target="_blank" rel="noreferrer">{site.organization.url}<i class="bi bi-box-arrow-up-right ms-1"></i></a>
+            Web:
+            <a href={site.organization.url} target="_blank" rel="noreferrer"
+                >{site.organization.url}<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
         </address>
     </section>
 
