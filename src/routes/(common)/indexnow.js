@@ -75,6 +75,49 @@ export function describeIndexNowStatus(status) {
         case 429:
             return 'Too many requests: submissions are being rate limited as potential spam.';
         default:
-            return `Unexpected HTTP ${status}.`;
+            return `Unexpected HTTP ${status}; only 200 and 202 mean the submission was accepted.`;
     }
+}
+
+/** The only response statuses the protocol defines as a successful submission. */
+export const INDEXNOW_SUCCESS_STATUSES = [200, 202];
+
+/**
+ * Whether `status` means IndexNow accepted the submission. Other 2xx codes are undefined by the protocol and count as
+ * failures, so automation can never record a false success.
+ * @param {number} status
+ * @returns {boolean}
+ */
+export function isIndexNowSuccess(status) {
+    return INDEXNOW_SUCCESS_STATUSES.includes(status);
+}
+
+/** @type {Record<string, 'dryRun' | 'help' | undefined>} */
+const CLI_OPTIONS = { '--dry-run': 'dryRun', '--help': 'help', '-h': 'help' };
+
+/**
+ * Parses the arguments of `scripts/indexnow.mjs`. Unknown options throw instead of being ignored, so a typo such as
+ * `--dryrun` can never turn a rehearsal into a real submission; `--` ends option parsing. Site-relative paths are
+ * expanded to absolute URLs.
+ * @param {readonly string[]} argv
+ * @returns {{ help: boolean, dryRun: boolean, urls: string[] }}
+ */
+export function parseIndexNowArgs(argv) {
+    /** @type {{ help: boolean, dryRun: boolean, urls: string[] }} */
+    const result = { help: false, dryRun: false, urls: [] };
+    let optionsEnded = false;
+
+    for (const arg of argv) {
+        if (optionsEnded || !arg.startsWith('-')) {
+            result.urls.push(arg.startsWith('/') ? `${SITE_URL}${arg}` : arg);
+        } else if (arg === '--') {
+            optionsEnded = true;
+        } else {
+            const option = CLI_OPTIONS[arg];
+            if (!option) throw new Error(`Unknown option: ${arg}. Run with --help for usage.`);
+            result[option] = true;
+        }
+    }
+
+    return result;
 }

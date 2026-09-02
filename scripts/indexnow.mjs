@@ -3,24 +3,38 @@
 // participating search engines. Bing's Webmaster Guidelines recommend doing so whenever URLs are added, updated,
 // or removed instead of waiting for Bingbot to schedule a crawl.
 //
-//   pnpm indexnow                       submit every URL in the live sitemap
-//   pnpm indexnow /components/button    submit specific pages (paths or absolute URLs)
-//   pnpm indexnow --dry-run             print the request without sending it
-//
 // Run it after a production deployment: IndexNow verifies the key against the live /<key>.txt file.
+// Exit codes: 0 submission accepted (HTTP 200 or 202), 1 network or protocol failure, 2 usage error.
 import {
     describeIndexNowStatus,
     INDEXNOW_ENDPOINT,
     INDEXNOW_KEY,
     INDEXNOW_KEY_PATH,
     indexNowPayload,
+    isIndexNowSuccess,
+    parseIndexNowArgs,
     sitemapUrls
 } from '../src/routes/(common)/indexnow.js';
 import { SITE_URL } from '../src/routes/(common)/site-url.js';
 
-const args = process.argv.slice(2);
-const dryRun = args.includes('--dry-run');
-const requested = args.filter((arg) => !arg.startsWith('--')).map((arg) => (arg.startsWith('/') ? `${SITE_URL}${arg}` : arg));
+const USAGE = `Usage: pnpm indexnow [--dry-run] [path-or-url ...]
+
+  (no arguments)        submit every URL in the live sitemap
+  /components/button    submit specific pages (site-relative paths or absolute URLs)
+  --dry-run             print the request without sending it
+  -h, --help            show this help
+`;
+
+/**
+ * @param {unknown} error
+ * @param {number} code
+ * @returns {never}
+ */
+function fail(error, code) {
+    console.error(error instanceof Error ? error.message : String(error));
+    if (code === 2) console.error(`\n${USAGE}`);
+    process.exit(code);
+}
 
 async function assertKeyFileIsLive() {
     const url = `${SITE_URL}${INDEXNOW_KEY_PATH}`;
@@ -38,20 +52,51 @@ async function liveSitemapUrls() {
     return sitemapUrls(await response.text());
 }
 
-await assertKeyFileIsLive();
-const payload = indexNowPayload(requested.length > 0 ? requested : await liveSitemapUrls());
+let options;
+try {
+    options = parseIndexNowArgs(process.argv.slice(2));
+} catch (error) {
+    fail(error, 2);
+}
 
-console.log(`${dryRun ? 'Would submit' : 'Submitting'} ${payload.urlList.length} URL(s) for ${payload.host} to ${INDEXNOW_ENDPOINT}`);
-if (dryRun) {
+if (options.help) {
+    console.log(USAGE);
+    process.exit(0);
+}
+
+// Explicit URLs are validated before the first network request, so a mistake fails fast and offline.
+let payload;
+if (options.urls.length > 0) {
+    try {
+        payload = indexNowPayload(options.urls);
+    } catch (error) {
+        fail(error, 2);
+    }
+}
+
+try {
+    await assertKeyFileIsLive();
+    payload ??= indexNowPayload(await liveSitemapUrls());
+} catch (error) {
+    fail(error, 1);
+}
+
+console.log(`${options.dryRun ? 'Would submit' : 'Submitting'} ${payload.urlList.length} URL(s) for ${payload.host} to ${INDEXNOW_ENDPOINT}`);
+if (options.dryRun) {
     console.log(JSON.stringify(payload, null, 2));
 } else {
-    const response = await fetch(INDEXNOW_ENDPOINT, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json; charset=utf-8' },
-        body: JSON.stringify(payload)
-    });
+    let response;
+    try {
+        response = await fetch(INDEXNOW_ENDPOINT, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json; charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {
+        fail(error, 1);
+    }
     console.log(`HTTP ${response.status}: ${describeIndexNowStatus(response.status)}`);
     const body = (await response.text()).trim();
     if (body) console.log(body);
-    process.exitCode = response.ok ? 0 : 1;
+    process.exitCode = isIndexNowSuccess(response.status) ? 0 : 1;
 }

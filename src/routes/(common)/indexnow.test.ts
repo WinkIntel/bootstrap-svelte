@@ -1,10 +1,21 @@
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
-import { describeIndexNowStatus, INDEXNOW_ENDPOINT, INDEXNOW_KEY, INDEXNOW_KEY_PATH, indexNowPayload, sitemapUrls } from './indexnow.js';
+import {
+    describeIndexNowStatus,
+    INDEXNOW_ENDPOINT,
+    INDEXNOW_KEY,
+    INDEXNOW_KEY_PATH,
+    indexNowPayload,
+    isIndexNowSuccess,
+    parseIndexNowArgs,
+    sitemapUrls
+} from './indexnow.js';
 import { SITE_URL } from './site-url.js';
 
 const staticDir = fileURLToPath(new URL('../../../static/', import.meta.url));
+const cli = fileURLToPath(new URL('../../../scripts/indexnow.mjs', import.meta.url));
 
 describe('IndexNow key', () => {
     test('is 8 to 128 characters drawn from letters, digits, and dashes', () => {
@@ -86,5 +97,68 @@ describe('describeIndexNowStatus', () => {
 
     test('still names an unexpected status code', () => {
         expect(describeIndexNowStatus(503)).toMatch(/503/);
+    });
+});
+
+describe('parseIndexNowArgs', () => {
+    test('expands site-relative paths and keeps absolute URLs as given', () => {
+        expect(parseIndexNowArgs(['/components/button', `${SITE_URL}/about`])).toEqual({
+            help: false,
+            dryRun: false,
+            urls: [`${SITE_URL}/components/button`, `${SITE_URL}/about`]
+        });
+    });
+
+    test('recognises --dry-run and --help / -h', () => {
+        expect(parseIndexNowArgs(['--dry-run'])).toEqual({ help: false, dryRun: true, urls: [] });
+        expect(parseIndexNowArgs(['--help'])).toEqual({ help: true, dryRun: false, urls: [] });
+        expect(parseIndexNowArgs(['-h'])).toEqual({ help: true, dryRun: false, urls: [] });
+    });
+
+    test('rejects unknown options instead of dropping them, naming the offending argument', () => {
+        expect(() => parseIndexNowArgs(['--dryrun'])).toThrow(/Unknown option: --dryrun/);
+        expect(() => parseIndexNowArgs(['/about', '--verbose'])).toThrow(/Unknown option: --verbose/);
+        expect(() => parseIndexNowArgs(['-x'])).toThrow(/Unknown option: -x/);
+    });
+
+    test('treats everything after -- as URLs', () => {
+        expect(parseIndexNowArgs(['--', '--dryrun']).urls).toEqual(['--dryrun']);
+    });
+});
+
+describe('isIndexNowSuccess', () => {
+    test('accepts only the two statuses the protocol defines as success', () => {
+        expect(isIndexNowSuccess(200)).toBe(true);
+        expect(isIndexNowSuccess(202)).toBe(true);
+    });
+
+    test('fails closed on other 2xx statuses and on every error status', () => {
+        for (const status of [201, 204, 206, 400, 403, 422, 429, 500]) expect(isIndexNowSuccess(status)).toBe(false);
+    });
+});
+
+describe('indexnow CLI', () => {
+    const run = (...args: string[]) => spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8', timeout: 15_000 });
+
+    test('refuses an unknown option before making any network request', () => {
+        const result = run('--dryrun');
+        expect(result.status).toBe(2);
+        expect(result.stderr).toMatch(/Unknown option: --dryrun/);
+        expect(result.stderr).toMatch(/Usage:/);
+        expect(result.stdout).toBe('');
+    });
+
+    test('prints usage and exits 0 for --help', () => {
+        const result = run('--help');
+        expect(result.status).toBe(0);
+        expect(result.stdout).toMatch(/Usage:/);
+        expect(result.stdout).toMatch(/--dry-run/);
+    });
+
+    test('rejects explicit URLs on another host before touching the network', () => {
+        const result = run('--dry-run', 'https://example.com/');
+        expect(result.status).toBe(2);
+        expect(result.stderr).toMatch(/example\.com/);
+        expect(result.stdout).toBe('');
     });
 });
