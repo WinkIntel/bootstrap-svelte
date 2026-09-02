@@ -52,8 +52,8 @@ describe('addAgentRoutes', () => {
         expect(routes.some((route) => 'middlewarePath' in route)).toBe(false);
     });
 
-    test('redirects trailing-slash variants to the canonical path before anything else', () => {
-        expect(routes[0]).toEqual({ src: '^/(.+?)/+$', status: 308, headers: { Location: '/$1' } });
+    test('redirects trailing-slash variants to the canonical path with a 301 before anything else', () => {
+        expect(routes[0]).toEqual({ src: '^/(.+?)/+$', status: 301, headers: { Location: '/$1' } });
     });
 
     test('keeps the adapter routes, in order, ahead of the filesystem handler', () => {
