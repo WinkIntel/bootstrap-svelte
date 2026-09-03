@@ -8,6 +8,7 @@ import ModalBasicTest from './modal-basic-test.svelte';
 import ModalDynamicTitleIdTest from './modal-dynamic-title-id-test.svelte';
 import ModalLifecycleTest from './modal-lifecycle-test.svelte';
 import ModalOffcanvasStackTest from './modal-offcanvas-stack-test.svelte';
+import ModalQuickStartTest from './modal-quick-start-test.svelte';
 import ModalStackedTest from './modal-stacked-test.svelte';
 import ModalStaticBackdropTest from './modal-static-backdrop-test.svelte';
 
@@ -514,6 +515,27 @@ describe('Modal Component', () => {
             expect(document.body).not.toHaveClass('modal-open');
             expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
             expect(document.body.style.overflow).toBe('');
+        });
+    });
+
+    describe('README quick start', () => {
+        // Regression test for issue #22: Modal.Title's registration effect must not
+        // depend on the `titleId` state it writes, or Svelte >= 5.56.5 throws
+        // "Maximum update depth exceeded" when the modal opens...
+        it('opens and closes a modal controlled by a plain isShown prop', async () => {
+            const user = userEvent.setup();
+            render(ModalQuickStartTest);
+
+            await user.click(screen.getByTestId('open'));
+            const modal = screen.getByTestId('modal');
+            expect(modal).toBeInTheDocument();
+            expect(modal).toHaveAttribute('aria-labelledby', screen.getByText('Modal Title').id);
+
+            await user.click(screen.getByTestId('close'));
+            await waitFor(() => expect(screen.queryByTestId('modal')).not.toBeInTheDocument());
+
+            await user.click(screen.getByTestId('open'));
+            expect(screen.getByTestId('modal')).toBeInTheDocument();
         });
     });
 

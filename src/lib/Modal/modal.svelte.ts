@@ -1,4 +1,5 @@
 import { Context } from '$lib/common/index.js';
+import { untrack } from 'svelte';
 import type { Modal } from './index.js';
 import type { ModalBackdrop } from './types.js';
 
@@ -37,12 +38,19 @@ export class ModalRootState {
         this.#isShown = !this.#isShown;
     }
 
+    // Both methods are called from Modal.Title's `$effect`. Reading `titleId`
+    // there would make that effect depend on the state it writes, which Svelte
+    // treats as a self-invalidating effect (infinite "Maximum update depth
+    // exceeded" loop since Svelte 5.56.5). Read it untracked so the effect only
+    // depends on the title's `id`...
     registerTitleId(id: string) {
-        this.titleId ??= id;
+        if (untrack(() => this.titleId) === undefined) {
+            this.titleId = id;
+        }
     }
 
     unregisterTitleId(id: string) {
-        if (this.titleId === id) {
+        if (untrack(() => this.titleId) === id) {
             this.titleId = undefined;
         }
     }
