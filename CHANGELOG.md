@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.11
+
+- Fixed `Modal` throwing "Maximum update depth exceeded" on Svelte 5.56.5 and newer, which left the modal unable to close from its buttons ([#22](https://github.com/WinkIntel/bootstrap-svelte/issues/22)). `Modal.Title` registration no longer reads the `titleId` state it writes; titles are tracked in an ordered, per-instance registry so the dialog stays labelled by the first mounted title, falls back to the next title when that one unmounts, and follows an id change without reordering.
+- Added regression tests for the README quick start flow and for multi-title labelling lifecycles.
+- Updated the development Svelte version to `5.57.0`; the `svelte` peer range is unchanged (`^5.29.0`).
+
 ## 1.0.10
 
 - Added Markdown content negotiation to the showcase on Vercel without adding runtime functions: every page is prerendered as a `.md` sibling, and static Build Output routes serve it for `Accept: text/markdown` from the same URL (q-values, `q=0`, and wildcards honored; fractional q-values compared on their first decimal digit) with `Vary: Accept` and a `Link` alternate header, answer 406 when nothing the site serves is acceptable, and redirect trailing-slash URLs to their canonical path.
