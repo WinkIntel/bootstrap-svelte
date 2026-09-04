@@ -10,9 +10,10 @@ export class ModalRootState {
     // Private
     #isShown: boolean = $state(false);
     #useBackdrop: ModalBackdrop = $state(true);
-    // Plain (non-reactive) ordered registry of mounted Modal.Title ids; the
-    // first registered title labels the dialog...
-    #titleIds: string[] = [];
+    // Plain (non-reactive) ordered registry of mounted Modal.Title components,
+    // keyed by a stable per-instance token so an id change updates the entry in
+    // place instead of moving it. The first registered title labels the dialog...
+    #titles: { key: symbol; id: string }[] = [];
     titleId: string | undefined = $state(undefined);
 
     constructor(readonly props: Modal.RootProps) {
@@ -40,20 +41,23 @@ export class ModalRootState {
         this.#isShown = !this.#isShown;
     }
 
-    // Both methods are called from Modal.Title's `$effect`. They must never
-    // read `titleId` (reactive state) there, or the effect would depend on the
-    // state it writes and Svelte >= 5.56.5 loops with "Maximum update depth
-    // exceeded". The registry is a plain array, and `titleId` is only written...
-    registerTitleId(id: string) {
-        if (!this.#titleIds.includes(id)) {
-            this.#titleIds.push(id);
+    // Both methods are called from Modal.Title. They must never read `titleId`
+    // (reactive state) there, or the title's `$effect` would depend on the state
+    // it writes and Svelte >= 5.56.5 loops with "Maximum update depth exceeded".
+    // The registry is a plain array, and `titleId` is only written...
+    registerTitleId(key: symbol, id: string) {
+        const entry = this.#titles.find((title) => title.key === key);
+        if (entry) {
+            entry.id = id;
+        } else {
+            this.#titles.push({ key, id });
         }
-        this.titleId = this.#titleIds[0];
+        this.titleId = this.#titles[0]?.id;
     }
 
-    unregisterTitleId(id: string) {
-        this.#titleIds = this.#titleIds.filter((titleId) => titleId !== id);
-        this.titleId = this.#titleIds[0];
+    unregisterTitleId(key: symbol) {
+        this.#titles = this.#titles.filter((title) => title.key !== key);
+        this.titleId = this.#titles[0]?.id;
     }
 }
 

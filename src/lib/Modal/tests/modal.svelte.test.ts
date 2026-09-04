@@ -11,6 +11,7 @@ import ModalOffcanvasStackTest from './modal-offcanvas-stack-test.svelte';
 import ModalQuickStartTest from './modal-quick-start-test.svelte';
 import ModalStackedTest from './modal-stacked-test.svelte';
 import ModalStaticBackdropTest from './modal-static-backdrop-test.svelte';
+import ModalTwoTitlesDynamicIdTest from './modal-two-titles-dynamic-id-test.svelte';
 import ModalTwoTitlesTest from './modal-two-titles-test.svelte';
 
 describe('Modal Component', () => {
@@ -237,6 +238,20 @@ describe('Modal Component', () => {
         render(ModalTwoTitlesTest);
         const modal = screen.getByTestId('modal');
         expect(modal).toHaveAttribute('aria-labelledby', 'first-title');
+
+        await user.click(screen.getByTestId('remove-first'));
+        await waitFor(() => expect(modal).toHaveAttribute('aria-labelledby', 'second-title'));
+    });
+
+    it('should keep labelling from the first mounted title after its id changes', async () => {
+        const user = userEvent.setup();
+        render(ModalTwoTitlesDynamicIdTest);
+        const modal = screen.getByTestId('modal');
+        expect(modal).toHaveAttribute('aria-labelledby', 'first-title');
+
+        await user.click(screen.getByTestId('rename-first'));
+        await waitFor(() => expect(modal).toHaveAttribute('aria-labelledby', 'updated-first-title'));
+        expect(screen.getByText('First Title')).toHaveAttribute('id', 'updated-first-title');
 
         await user.click(screen.getByTestId('remove-first'));
         await waitFor(() => expect(modal).toHaveAttribute('aria-labelledby', 'second-title'));

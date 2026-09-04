@@ -23,6 +23,7 @@ Title component for the Modal.Header.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
+    import { onDestroy } from 'svelte';
     import type { Modal } from './index.js';
     import { getOptionalModalRootState } from './modal.svelte.js';
 
@@ -42,16 +43,20 @@ Title component for the Modal.Header.
 
     let classes: string = $derived(uniqueClsx('modal-title', classValues));
     const rootState = getOptionalModalRootState();
+    // Stable identity for this title's registry entry, so an id change updates
+    // the entry in place and keeps its position among sibling titles...
+    const titleKey = Symbol('modal-title');
 
     $effect(() => {
-        const registeredId = id;
-        if (!registeredId) return;
+        if (id) {
+            rootState?.registerTitleId(titleKey, id);
+        } else {
+            rootState?.unregisterTitleId(titleKey);
+        }
+    });
 
-        rootState?.registerTitleId(registeredId);
-
-        return () => {
-            rootState?.unregisterTitleId(registeredId);
-        };
+    onDestroy(() => {
+        rootState?.unregisterTitleId(titleKey);
     });
 </script>
 
