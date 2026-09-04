@@ -11,6 +11,7 @@ import ModalOffcanvasStackTest from './modal-offcanvas-stack-test.svelte';
 import ModalQuickStartTest from './modal-quick-start-test.svelte';
 import ModalStackedTest from './modal-stacked-test.svelte';
 import ModalStaticBackdropTest from './modal-static-backdrop-test.svelte';
+import ModalTwoTitlesTest from './modal-two-titles-test.svelte';
 
 describe('Modal Component', () => {
     it('should render basic modal with all sub-components', () => {
@@ -229,6 +230,16 @@ describe('Modal Component', () => {
             expect(screen.getByText('Dynamic modal title')).toHaveAttribute('id', 'updated-modal-title');
             expect(modal).toHaveAttribute('aria-labelledby', 'updated-modal-title');
         });
+    });
+
+    it('should fall back to the next remaining title when the labelling title unmounts', async () => {
+        const user = userEvent.setup();
+        render(ModalTwoTitlesTest);
+        const modal = screen.getByTestId('modal');
+        expect(modal).toHaveAttribute('aria-labelledby', 'first-title');
+
+        await user.click(screen.getByTestId('remove-first'));
+        await waitFor(() => expect(modal).toHaveAttribute('aria-labelledby', 'second-title'));
     });
 
     describe('stacked modals', () => {

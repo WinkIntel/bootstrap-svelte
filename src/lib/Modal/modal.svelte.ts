@@ -1,5 +1,4 @@
 import { Context } from '$lib/common/index.js';
-import { untrack } from 'svelte';
 import type { Modal } from './index.js';
 import type { ModalBackdrop } from './types.js';
 
@@ -11,6 +10,9 @@ export class ModalRootState {
     // Private
     #isShown: boolean = $state(false);
     #useBackdrop: ModalBackdrop = $state(true);
+    // Plain (non-reactive) ordered registry of mounted Modal.Title ids; the
+    // first registered title labels the dialog...
+    #titleIds: string[] = [];
     titleId: string | undefined = $state(undefined);
 
     constructor(readonly props: Modal.RootProps) {
@@ -38,21 +40,20 @@ export class ModalRootState {
         this.#isShown = !this.#isShown;
     }
 
-    // Both methods are called from Modal.Title's `$effect`. Reading `titleId`
-    // there would make that effect depend on the state it writes, which Svelte
-    // treats as a self-invalidating effect (infinite "Maximum update depth
-    // exceeded" loop since Svelte 5.56.5). Read it untracked so the effect only
-    // depends on the title's `id`...
+    // Both methods are called from Modal.Title's `$effect`. They must never
+    // read `titleId` (reactive state) there, or the effect would depend on the
+    // state it writes and Svelte >= 5.56.5 loops with "Maximum update depth
+    // exceeded". The registry is a plain array, and `titleId` is only written...
     registerTitleId(id: string) {
-        if (untrack(() => this.titleId) === undefined) {
-            this.titleId = id;
+        if (!this.#titleIds.includes(id)) {
+            this.#titleIds.push(id);
         }
+        this.titleId = this.#titleIds[0];
     }
 
     unregisterTitleId(id: string) {
-        if (untrack(() => this.titleId) === id) {
-            this.titleId = undefined;
-        }
+        this.#titleIds = this.#titleIds.filter((titleId) => titleId !== id);
+        this.titleId = this.#titleIds[0];
     }
 }
 
