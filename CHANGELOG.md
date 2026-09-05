@@ -6,7 +6,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 - Changed all `Offcanvas` panels with `useBackdrop={false}` to ignore outside mousedown. They can still close through Escape (when enabled), a dismiss button, the navbar toggler, or the `isShown` prop. This fixes a navbar toggler's second click reopening the panel instead of closing it ([#24](https://github.com/WinkIntel/bootstrap-svelte/issues/24)). Consumers relying on click-away without a backdrop should enable `useBackdrop={true}` or provide their own outside-click handler.
 - Fixed clearing `Offcanvas`'s `showOnBreakpoint` prop leaving the previous media query active. Clearing the breakpoint now restores ordinary offcanvas visibility and backdrop behavior, and a later breakpoint uses its own query ([#24](https://github.com/WinkIntel/bootstrap-svelte/issues/24)).
-- Preserve explicit visibility changes made while a breakpoint is matched, synchronize body scroll locks when switching between inline and overlay modes, and retain the parent navbar's breakpoint when a nested offcanvas clears its own breakpoint.
+- Preserve explicit visibility changes made while a breakpoint is matched, synchronize body scroll locks when switching between inline and overlay modes, and retain the parent navbar's breakpoint when a nested offcanvas clears its own breakpoint. This also locks body scroll for overlays initially mounted with `isShown={true}`, even without an intro transition; `isBodyScrollable={true}` and responsive inline panels remain exempt.
 - Added regression tests for navbar toggling without a backdrop, mixed-backdrop stacking, dismissal behavior, and clearing or replacing responsive breakpoints.
 
 ## 1.0.11
