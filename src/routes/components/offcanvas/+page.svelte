@@ -222,7 +222,10 @@
         <h2 class="wk-quick-link">Backdrop Options</h2>
         <p>
             You can control the behavior of the backdrop with the <code>useBackdrop</code> prop. It accepts three values:
-            <code>true</code> (default, clickable backdrop), <code>"static"</code> (backdrop present but not clickable), or <code>false</code> (no backdrop).
+            <code>true</code> (default, clickable backdrop), <code>"static"</code> (backdrop present but not clickable), or <code>false</code> (no
+            backdrop). With <code>false</code>, outside clicks do not dismiss the panel. Use Escape (when keyboard dismissal is enabled), a dismiss
+            button, the navbar toggler, or the <code>isShown</code> prop to close it. If you need click-away dismissal, enable the backdrop or provide your
+            own outside-click handler.
         </p>
 
         <div class="card mb-3">
@@ -401,7 +404,9 @@
                         <td><code>useBackdrop</code></td>
                         <td><code>'static' | boolean</code></td>
                         <td><code>true</code></td>
-                        <td>Controls backdrop behavior: true (default, clickable), "static" (not clickable), false (no backdrop)</td>
+                        <td
+                            >Controls backdrop behavior: true (default, clickable), "static" (not clickable), false (no backdrop or outside-click
+                            dismissal)</td>
                     </tr>
                     <tr>
                         <td><code>onHide</code></td>
