@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.0.12
+
+- Fixed `Offcanvas` dismissing on outside mousedown when `useBackdrop={false}`, which caused a navbar toggler's second click to reopen the panel instead of closing it ([#24](https://github.com/WinkIntel/bootstrap-svelte/issues/24)). Escape and dismiss buttons remain available without a backdrop.
+- Fixed clearing `Offcanvas`'s `showOnBreakpoint` prop leaving the previous media query active. Clearing the breakpoint now restores ordinary offcanvas visibility and backdrop behavior, and a later breakpoint uses its own query ([#24](https://github.com/WinkIntel/bootstrap-svelte/issues/24)).
+- Added regression tests for navbar toggling without a backdrop, dismissal behavior, and clearing or replacing responsive breakpoints.
+
 ## 1.0.11
 
 - Fixed `Modal` throwing "Maximum update depth exceeded" on Svelte 5.56.5 and newer, which left the modal unable to close from its buttons ([#22](https://github.com/WinkIntel/bootstrap-svelte/issues/22)). `Modal.Title` registration no longer reads the `titleId` state it writes; titles are tracked in an ordered, per-instance registry so the dialog stays labelled by the first mounted title, falls back to the next title when that one unmounts, and follows an id change without reordering.

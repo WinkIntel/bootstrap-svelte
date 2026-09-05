@@ -1,9 +1,36 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
-import { createRawSnippet } from 'svelte';
-import { describe, expect, it, vi } from 'vitest';
+import { userEvent } from '@testing-library/user-event';
+import { createRawSnippet, tick } from 'svelte';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Offcanvas } from '../index.js';
 import OffcanvasBasicTest from './offcanvas-basic-test.svelte';
+import OffcanvasNavbarTest from './offcanvas-navbar-test.svelte';
 import OffcanvasStackedTest from './offcanvas-stacked-test.svelte';
+
+function mockMatchMedia(initialMatches: Record<string, boolean> = {}) {
+    const queries = new Map<string, MediaQueryList>();
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
+        let mediaQuery = queries.get(query);
+        if (!mediaQuery) {
+            mediaQuery = Object.assign(new EventTarget(), {
+                media: query,
+                matches: initialMatches[query] ?? false,
+                onchange: null,
+                addListener: vi.fn(),
+                removeListener: vi.fn()
+            });
+            queries.set(query, mediaQuery);
+        }
+        return mediaQuery;
+    });
+
+    return (query: string, matches: boolean) => {
+        const mediaQuery = queries.get(query);
+        if (!mediaQuery) throw new Error(`Expected a registered media query: ${query}`);
+        Object.defineProperty(mediaQuery, 'matches', { value: matches, configurable: true });
+        mediaQuery.dispatchEvent(new Event('change'));
+    };
+}
 
 async function openStackedOffcanvas(): Promise<void> {
     await fireEvent.click(screen.getByTestId('open-offcanvas-a'));
@@ -189,6 +216,142 @@ describe('Offcanvas Component', () => {
         await fireEvent.keyDown(window, { key: 'Escape' });
         expect(onHidePrevented).toHaveBeenCalledTimes(1);
         expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    describe('without a backdrop', () => {
+        it('opens, closes, and reopens from the navbar toggler with a full pointer click', async () => {
+            const user = userEvent.setup();
+            const onShown = vi.fn();
+            const onHidden = vi.fn();
+            render(OffcanvasNavbarTest, { props: { onShown, onHidden } });
+            const toggler = screen.getByTestId('navbar-toggler');
+
+            expect(toggler).toHaveAttribute('aria-expanded', 'false');
+            expect(toggler).toHaveClass('collapsed');
+            expect(screen.queryByTestId('navbar-offcanvas')).not.toBeInTheDocument();
+
+            await user.click(toggler);
+            await waitFor(() => expect(onShown).toHaveBeenCalledTimes(1));
+            expect(screen.getByTestId('navbar-offcanvas')).toHaveClass('show');
+            expect(toggler).toHaveAttribute('aria-expanded', 'true');
+            expect(toggler).not.toHaveClass('collapsed');
+            expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
+
+            await user.click(toggler);
+            await waitFor(() => expect(screen.queryByTestId('navbar-offcanvas')).not.toBeInTheDocument());
+            expect(onHidden).toHaveBeenCalledTimes(1);
+            expect(toggler).toHaveAttribute('aria-expanded', 'false');
+            expect(toggler).toHaveClass('collapsed');
+
+            await user.click(toggler);
+            await waitFor(() => expect(onShown).toHaveBeenCalledTimes(2));
+            expect(screen.getByTestId('navbar-offcanvas')).toHaveClass('show');
+            expect(toggler).toHaveAttribute('aria-expanded', 'true');
+            expect(toggler).not.toHaveClass('collapsed');
+            expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
+        });
+
+        it('ignores outside mousedown without reporting a dismissal or preventing one', async () => {
+            vi.useFakeTimers();
+            try {
+                const onHide = vi.fn();
+                const onHidden = vi.fn();
+                const onHidePrevented = vi.fn();
+                render(Offcanvas.Root, { props: { isShown: true, useBackdrop: false, onHide, onHidden, onHidePrevented } });
+                await tick();
+                await vi.runAllTimersAsync();
+
+                await fireEvent.mouseDown(document.body);
+                // Finish any dismissal transition before asserting that the panel stayed open.
+                await vi.runAllTimersAsync();
+
+                expect(screen.getByRole('dialog')).toHaveClass('show');
+                expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
+                expect(onHide).not.toHaveBeenCalled();
+                expect(onHidden).not.toHaveBeenCalled();
+                expect(onHidePrevented).not.toHaveBeenCalled();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it.each(['Escape', 'dismiss button'])('still closes through %s', async (dismissal) => {
+            const user = userEvent.setup();
+            const onShown = vi.fn();
+            const onHidden = vi.fn();
+            render(OffcanvasNavbarTest, { props: { onShown, onHidden } });
+            const toggler = screen.getByTestId('navbar-toggler');
+            await user.click(toggler);
+            await waitFor(() => expect(onShown).toHaveBeenCalledTimes(1));
+
+            if (dismissal === 'Escape') {
+                await user.keyboard('{Escape}');
+            } else {
+                await user.click(screen.getByRole('button', { name: 'Close' }));
+            }
+
+            await waitFor(() => expect(screen.queryByTestId('navbar-offcanvas')).not.toBeInTheDocument());
+            expect(onHidden).toHaveBeenCalledTimes(1);
+            expect(toggler).toHaveAttribute('aria-expanded', 'false');
+            expect(toggler).toHaveClass('collapsed');
+        });
+    });
+
+    describe('changing responsive breakpoints', () => {
+        afterEach(() => {
+            vi.restoreAllMocks();
+        });
+
+        it('hides an implicitly shown offcanvas when its matched breakpoint is cleared', async () => {
+            mockMatchMedia({ '(min-width: 992px)': true });
+            const { rerender } = render(Offcanvas.Root, { props: { showOnBreakpoint: 'lg' } });
+
+            expect(screen.getByRole('dialog')).toHaveClass('offcanvas-lg', 'show');
+            expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
+
+            await rerender({ showOnBreakpoint: undefined });
+
+            await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+            expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
+        });
+
+        it('keeps an explicitly shown offcanvas open with a backdrop when its matched breakpoint is cleared', async () => {
+            mockMatchMedia({ '(min-width: 992px)': true });
+            const { rerender } = render(Offcanvas.Root, { props: { isShown: true, showOnBreakpoint: 'lg' } });
+
+            expect(screen.getByRole('dialog')).toHaveClass('offcanvas-lg', 'show');
+            expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
+
+            await rerender({ showOnBreakpoint: undefined });
+
+            expect(screen.getByRole('dialog')).toHaveClass('offcanvas', 'show');
+            expect(screen.getByRole('dialog')).not.toHaveClass('offcanvas-lg');
+            await waitFor(() => expect(document.querySelector('.offcanvas-backdrop')).toBeInTheDocument());
+        });
+
+        it('ignores the cleared query and resumes responsive behavior with a new breakpoint', async () => {
+            const setMatch = mockMatchMedia();
+            const { rerender } = render(Offcanvas.Root, { props: { showOnBreakpoint: 'lg' } });
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+            await rerender({ showOnBreakpoint: undefined });
+            setMatch('(min-width: 992px)', true);
+            await tick();
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+            await rerender({ showOnBreakpoint: 'md' });
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+            setMatch('(min-width: 768px)', true);
+            await waitFor(() => expect(screen.getByRole('dialog')).toHaveClass('offcanvas-md', 'show'));
+            expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
+
+            setMatch('(min-width: 992px)', false);
+            await tick();
+            expect(screen.getByRole('dialog')).toHaveClass('show');
+
+            setMatch('(min-width: 768px)', false);
+            await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        });
     });
 
     describe('stacked pointer ownership', () => {

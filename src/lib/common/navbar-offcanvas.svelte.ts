@@ -152,6 +152,8 @@ export class OffcanvasRootState {
         if (typeof window !== 'undefined' && this.#showOnBreakpoint) {
             const query: string | undefined = BreakpointMinimumMediaQuery[this.#showOnBreakpoint];
             this.#mediaQuery = new MediaQuery(query || '');
+        } else {
+            this.#mediaQuery = undefined;
         }
     }
 
