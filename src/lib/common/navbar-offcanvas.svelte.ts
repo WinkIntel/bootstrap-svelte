@@ -42,6 +42,9 @@ export class NavbarRootState {
     get isExpanded(): boolean {
         return this.#isExpanded || this.#mediaQuery?.current || false;
     }
+    set isExpanded(value: boolean) {
+        this.#isExpanded = value;
+    }
 
     get defaultCollapseId(): string {
         return `${this.props.id || 'navbar'}-collapse`;
@@ -136,6 +139,13 @@ export class OffcanvasRootState {
     get isShown(): boolean {
         return this.#isShown || this.#mediaQuery?.current || false;
     }
+    set isShown(value: boolean) {
+        if (this.#navbarRootState) {
+            this.#navbarRootState.isExpanded = value;
+        } else {
+            this.#isShown = value;
+        }
+    }
 
     get useBackdrop(): OffcanvasBackdrop {
         return this.#useBackdrop;
@@ -148,7 +158,7 @@ export class OffcanvasRootState {
         return this.#showOnBreakpoint;
     }
     set showOnBreakpoint(value: OffcanvasBreakpoint | undefined) {
-        this.#showOnBreakpoint = value;
+        this.#showOnBreakpoint = value ?? this.#navbarRootState?.props.expandOnBreakpoint;
         if (typeof window !== 'undefined' && this.#showOnBreakpoint) {
             const query: string | undefined = BreakpointMinimumMediaQuery[this.#showOnBreakpoint];
             this.#mediaQuery = new MediaQuery(query || '');

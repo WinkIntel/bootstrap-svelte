@@ -12,6 +12,7 @@
 <button data-testid="open-offcanvas-a" onclick={() => (isAShown = true)}>Open A</button>
 <button data-testid="open-offcanvas-b" onclick={() => (isBShown = true)}>Open B</button>
 <button data-testid="make-offcanvas-b-static" onclick={() => (bBackdrop = 'static')}>Make B static</button>
+<button data-testid="remove-offcanvas-b-backdrop" onclick={() => (bBackdrop = false)}>Remove B backdrop</button>
 <output data-testid="offcanvas-a-prevented-count">{aHidePreventedCount}</output>
 <output data-testid="offcanvas-b-prevented-count">{bHidePreventedCount}</output>
 

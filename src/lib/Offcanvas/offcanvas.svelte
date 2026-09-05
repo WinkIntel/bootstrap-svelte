@@ -155,12 +155,11 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     // Listen changes to the isShown prop and update the root state accordingly...
     $effect(() => {
         if (previousIsShown !== unset && previousIsShown !== isShown) {
-            if (isShown !== rootState.isShown) {
-                // Because the transition is asynchronous, we need to wait for the next tick before toggling the state...
-                tick().then(() => {
-                    rootState.toggleIsShown();
-                });
-            }
+            const nextIsShown = isShown;
+            // Sync the explicit value, even when a matching breakpoint already makes the panel visible.
+            tick().then(() => {
+                rootState.isShown = nextIsShown;
+            });
         }
 
         previousIsShown = isShown;
@@ -206,14 +205,21 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         }
     });
 
-    // Listen to the transition events to properly manage the body scrollbar...
-    const handleOnShow: EventListener = (event: Event) => {
-        if (bodyElement && !isBodyScrollable && !rootState.isMediaQueryMatched && !holdsScrollLock) {
+    // Breakpoint and scrolling-option changes can enter or leave overlay mode without an intro/outro.
+    $effect(() => {
+        const isMediaQueryMatched = rootState.isMediaQueryMatched;
+        const shouldLockScroll = rootState.isShown && !isMediaQueryMatched && !isBodyScrollable;
+        if (!bodyElement) return;
+
+        if (shouldLockScroll && !holdsScrollLock) {
             acquireBodyScrollLock(bodyElement);
             holdsScrollLock = true;
+        } else if (holdsScrollLock && (isMediaQueryMatched || isBodyScrollable)) {
+            releaseBodyScrollLock(bodyElement);
+            holdsScrollLock = false;
         }
-        onShow(event);
-    };
+        // A normal dismissal keeps its lock until handleOnHidden completes the outro.
+    });
 
     // Listen to the transition events to properly manage the body scrollbar...
     const handleOnHidden: EventListener = (event: Event) => {
@@ -276,7 +282,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         bind:this={elementRef}
         class={classes}
         {id}
-        onintrostart={handleOnShow}
+        onintrostart={onShow}
         onintroend={onShown}
         onoutrostart={onHide}
         onoutroend={handleOnHidden}
