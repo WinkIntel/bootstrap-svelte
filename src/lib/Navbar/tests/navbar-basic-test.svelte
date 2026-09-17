@@ -8,8 +8,8 @@
     let collapsed = $state(0);
 </script>
 
-<!-- Test with undefined expandOnBreakpoint to completely disable media queries -->
-<Navbar.Root expandOnBreakpoint={undefined} class="bg-body-tertiary" data-testid="navbar">
+<!-- Exercise toggling below the lg breakpoint. -->
+<Navbar.Root expandOnBreakpoint="lg" class="bg-body-tertiary" data-testid="navbar">
     <Container isFluid={true} data-testid="container">
         <Navbar.Brand href="#!" data-testid="navbar-brand">Navbar Brand</Navbar.Brand>
         <Navbar.Text data-testid="navbar-text">Some navbar text</Navbar.Text>

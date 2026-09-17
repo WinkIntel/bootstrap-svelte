@@ -96,7 +96,6 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     const unset = Symbol('unset');
     let previousIsShown: Offcanvas.RootProps['isShown'] | typeof unset = unset;
     let previousRootIsOverlayShown = false;
-    let previousShowOnBreakpoint: Offcanvas.RootProps['showOnBreakpoint'] | typeof unset = unset;
     let previousUseBackdrop: Offcanvas.RootProps['useBackdrop'] | typeof unset = unset;
     const rootState: OffcanvasRootState = initOffcanvasRootState({
         get id() {
@@ -135,7 +134,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         if (placement === 'bottom') return '100%';
         return undefined;
     });
-    let hasShownOnBreakpoint = $derived(!!showOnBreakpoint); // !! to convert to boolean
+    let hasShownOnBreakpoint = $derived(!!rootState.showOnBreakpoint); // !! to convert to boolean
     let hasPlacement = $derived(!!placement); // !! to convert to boolean
 
     // Derived classes for the offcanvas component...
@@ -144,7 +143,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         uniqueClsx(
             {
                 offcanvas: !hasShownOnBreakpoint,
-                [`offcanvas-${showOnBreakpoint}`]: hasShownOnBreakpoint,
+                [`offcanvas-${rootState.showOnBreakpoint}`]: hasShownOnBreakpoint,
                 [`offcanvas-${placement}`]: hasPlacement,
                 show: rootState.isShown
             },
@@ -174,17 +173,6 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         }
 
         previousUseBackdrop = useBackdrop;
-    });
-
-    // Listen changes to the showOnBreakpoint prop and update the root state accordingly...
-    $effect(() => {
-        if (previousShowOnBreakpoint !== unset && previousShowOnBreakpoint !== showOnBreakpoint) {
-            if (showOnBreakpoint !== rootState.showOnBreakpoint) {
-                rootState.showOnBreakpoint = showOnBreakpoint;
-            }
-        }
-
-        previousShowOnBreakpoint = showOnBreakpoint;
     });
 
     $effect(() => {

@@ -2,6 +2,14 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## Unreleased
+
+- Fixed Navbar breakpoint changes leaving stale responsive state. CSS, toggler ARIA, Collapse visibility, and an inheriting Offcanvas now follow the current `expandOnBreakpoint`, with obsolete media-query subscriptions released ([#27](https://github.com/WinkIntel/bootstrap-svelte/issues/27)).
+- **Behavior change:** omitted `expandOnBreakpoint` and explicit `"xs"` now consistently mean always-expanded inline navigation at every width, including phones and SSR. Previously the default combined collapsible CSS with inconsistent small-screen state. Consumers wanting a hamburger at every width must set `expandOnBreakpoint={false}`; use `"lg"` (or another named breakpoint) for responsive collapsing. This also preserves Bootstrap's plain wrapping Navbar layout when `false` is selected.
+- Preserve explicit Offcanvas visibility assignments across responsive changes until a subsequent toggle, dismissal, or changed `isShown` prop replaces them. An unchanged `isShown` value is not continuously reapplied. Clear toggler-opened state upon entering inline mode so a later downward resize does not briefly acquire an overlay scroll lock.
+- Fixed nested Offcanvas panels with a different explicit breakpoint being forced into an undismissable overlay by the parent Navbar's responsive match. Invalid runtime breakpoint values now use the component's default mode consistently for state and CSS rather than throwing.
+- Updated Navbar examples and playground options, and retained the Scrollspy showcase's plain-navbar wrapping layout.
+
 ## 1.0.12
 
 - Changed all `Offcanvas` panels with `useBackdrop={false}` to ignore outside mousedown. They can still close through Escape (when enabled), a dismiss button, the navbar toggler, or the `isShown` prop. This fixes a navbar toggler's second click reopening the panel instead of closing it ([#24](https://github.com/WinkIntel/bootstrap-svelte/issues/24)). Consumers relying on click-away without a backdrop should enable `useBackdrop={true}` or provide their own outside-click handler.

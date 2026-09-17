@@ -5,7 +5,7 @@ Default hamburger icon for the navbar toggle button.
 
 @example
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">My Brand</Navbar.Brand>
     <Navbar.Toggler>
         <Navbar.TogglerIcon />

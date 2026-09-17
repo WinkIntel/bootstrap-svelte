@@ -657,9 +657,11 @@
                     </tr>
                     <tr>
                         <td><code>expandOnBreakpoint</code></td>
-                        <td><code>'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'</code></td>
+                        <td><code>'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | false</code></td>
                         <td><code>'xs'</code></td>
-                        <td>Breakpoint at which the navbar expands</td>
+                        <td
+                            >Minimum breakpoint at which the navbar expands. Omitted or <code>xs</code> means always expanded inline. Use
+                            <code>false</code> for a toggler at every width. Changes apply immediately.</td>
                     </tr>
                     <tr>
                         <td><code>id</code></td>
@@ -951,7 +953,8 @@
         <p>The component applies Bootstrap's navbar classes based on the provided props:</p>
         <ul>
             <li><code>navbar</code> - Base class for the Navbar component</li>
-            <li><code>navbar-expand-*</code> - Applied based on expandOnBreakpoint</li>
+            <li><code>navbar-expand</code> - Always inline when the breakpoint is omitted or <code>xs</code></li>
+            <li><code>navbar-expand-*</code> - Applied for named responsive breakpoints; neither expansion class is used for <code>false</code></li>
             <li><code>navbar-brand</code> - Applied to Navbar.Brand components</li>
             <li><code>navbar-nav</code> - Applied to Navbar.Nav components</li>
             <li><code>navbar-text</code> - Applied to Navbar.Text components</li>
@@ -963,11 +966,28 @@
         </ul>
 
         <h3 class="h5 mt-4">Responsive Behavior</h3>
-        <p>Navbars are responsive by default:</p>
+        <p>Choose an expansion breakpoint to make navigation collapse on smaller screens:</p>
         <ul>
+            <li>
+                Use <code>expandOnBreakpoint=&#123;false&#125;</code> to keep navigation collapsible at every width, or to render a plain wrapping navbar
+                without responsive expansion classes.
+            </li>
             <li>At smaller screen sizes (below the specified breakpoint), the navbar collapses and requires the toggler button to expand.</li>
             <li>At larger screen sizes (at or above the specified breakpoint), the navbar content displays horizontally.</li>
-            <li>Use the expandOnBreakpoint prop to configure where this happens.</li>
+            <li>Use <code>expandOnBreakpoint="lg"</code>, for example, to collapse below 992px. The breakpoint can change without remounting.</li>
+            <li>
+                Omitting the prop or choosing <code>xs</code> keeps navigation expanded at every width, using Bootstrap's <code>navbar-expand</code> class.
+            </li>
+            <li>
+                An inheriting Offcanvas follows the same breakpoint. In inline mode it has no backdrop or body-scroll lock, including on phones with <code
+                    >xs</code
+                >.
+            </li>
+            <li>
+                A menu opened with the toggler resets after entering inline mode. Explicit Offcanvas <code>isShown</code> assignments survive
+                responsive changes until a later toggle, dismissal, or changed prop replaces them. An unchanged prop is not reapplied; to reopen after
+                dismissal, change <code>isShown</code> to false and then true.
+            </li>
         </ul>
     </section>
 </div>

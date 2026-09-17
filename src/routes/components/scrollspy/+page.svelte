@@ -59,7 +59,7 @@ const callback: IntersectionObserverCallback = (entries: IntersectionObserverEnt
 };
 \u003c/script>
 
-<Navbar.Root id="navbar-example" class="bg-body-tertiary px-3 mb-3">
+<Navbar.Root expandOnBreakpoint={false} id="navbar-example" class="bg-body-tertiary px-3 mb-3">
     <Navbar.Brand href="#!">Navbar</Navbar.Brand>
     <Nav.Root itemStyle="pills">
         <Nav.Item>
@@ -301,7 +301,7 @@ export type ScrollspyOptions = {
         <p>Use Scrollspy with a Bootstrap navbar to highlight the active section as you scroll down the page.</p>
         <div class="card mb-3">
             <div class="card-body">
-                <Navbar.Root id="navbar-example2" class="bg-body-tertiary px-3 mb-3">
+                <Navbar.Root expandOnBreakpoint={false} id="navbar-example2" class="bg-body-tertiary px-3 mb-3">
                     <Navbar.Brand href="#!">Navbar</Navbar.Brand>
                     <Nav.Root itemStyle="pills">
                         <Nav.Item>

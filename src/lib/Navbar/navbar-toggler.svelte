@@ -5,7 +5,7 @@ Toggle button for Navbar.Collapse and nested Offcanvas.Root panels.
 
 @example
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">My Brand</Navbar.Brand>
     <Navbar.Toggler>
         <Navbar.TogglerIcon />
@@ -22,7 +22,7 @@ Toggle button for Navbar.Collapse and nested Offcanvas.Root panels.
 
 #### Custom toggle button text
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">My Brand</Navbar.Brand>
     <Navbar.Toggler>Menu</Navbar.Toggler>
     <Navbar.Collapse>

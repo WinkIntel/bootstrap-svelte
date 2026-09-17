@@ -5,9 +5,9 @@ Container for navigation items within a navbar, providing proper styling and spa
 
 @example
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">My Brand</Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Navbar.Nav>
             <Nav.Item>
@@ -28,9 +28,9 @@ Container for navigation items within a navbar, providing proper styling and spa
 
 #### With vertical scrolling
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">My Brand</Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Navbar.Nav isVerticalScrolling={true} style="max-height:200px;">
             <Nav.Item>
