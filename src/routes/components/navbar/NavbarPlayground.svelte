@@ -27,10 +27,10 @@
 
     // Available options for dropdowns
     const expandBreakpointOptions = [
-        { value: 'xs', label: 'Always Expanded' },
+        { value: 'xs', label: 'Always Expanded (Default)' },
         { value: 'sm', label: 'Expand at SM' },
         { value: 'md', label: 'Expand at MD' },
-        { value: 'lg', label: 'Expand at LG (Default)' },
+        { value: 'lg', label: 'Expand at LG' },
         { value: 'xl', label: 'Expand at XL' },
         { value: 'xxl', label: 'Expand at XXL' }
     ];

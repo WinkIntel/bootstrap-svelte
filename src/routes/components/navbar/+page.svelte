@@ -659,7 +659,8 @@
                         <td><code>expandOnBreakpoint</code></td>
                         <td><code>'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'</code></td>
                         <td><code>'xs'</code></td>
-                        <td>Breakpoint at which the navbar expands</td>
+                        <td
+                            >Minimum breakpoint at which the navbar expands. Omitted or <code>xs</code> means always expanded inline. Changes apply immediately.</td>
                     </tr>
                     <tr>
                         <td><code>id</code></td>
@@ -963,11 +964,23 @@
         </ul>
 
         <h3 class="h5 mt-4">Responsive Behavior</h3>
-        <p>Navbars are responsive by default:</p>
+        <p>Choose an expansion breakpoint to make navigation collapse on smaller screens:</p>
         <ul>
             <li>At smaller screen sizes (below the specified breakpoint), the navbar collapses and requires the toggler button to expand.</li>
             <li>At larger screen sizes (at or above the specified breakpoint), the navbar content displays horizontally.</li>
-            <li>Use the expandOnBreakpoint prop to configure where this happens.</li>
+            <li>Use <code>expandOnBreakpoint="lg"</code>, for example, to collapse below 992px. The breakpoint can change without remounting.</li>
+            <li>
+                Omitting the prop or choosing <code>xs</code> keeps navigation expanded at every width, using Bootstrap's <code>navbar-expand</code> class.
+            </li>
+            <li>
+                An inheriting Offcanvas follows the same breakpoint. In inline mode it has no backdrop or body-scroll lock, including on phones with <code
+                    >xs</code
+                >.
+            </li>
+            <li>
+                A menu opened with the toggler resets when returning below the breakpoint. Explicit Offcanvas <code>isShown</code> updates are preserved
+                across responsive changes.
+            </li>
         </ul>
     </section>
 </div>

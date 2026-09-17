@@ -96,7 +96,6 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     const unset = Symbol('unset');
     let previousIsShown: Offcanvas.RootProps['isShown'] | typeof unset = unset;
     let previousRootIsOverlayShown = false;
-    let previousShowOnBreakpoint: Offcanvas.RootProps['showOnBreakpoint'] | typeof unset = unset;
     let previousUseBackdrop: Offcanvas.RootProps['useBackdrop'] | typeof unset = unset;
     const rootState: OffcanvasRootState = initOffcanvasRootState({
         get id() {
@@ -174,17 +173,6 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         }
 
         previousUseBackdrop = useBackdrop;
-    });
-
-    // Listen changes to the showOnBreakpoint prop and update the root state accordingly...
-    $effect(() => {
-        if (previousShowOnBreakpoint !== unset && previousShowOnBreakpoint !== showOnBreakpoint) {
-            if (showOnBreakpoint !== rootState.showOnBreakpoint) {
-                rootState.showOnBreakpoint = showOnBreakpoint;
-            }
-        }
-
-        previousShowOnBreakpoint = showOnBreakpoint;
     });
 
     $effect(() => {

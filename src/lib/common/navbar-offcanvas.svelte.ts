@@ -3,7 +3,7 @@ import { BreakpointMinimumMediaQuery } from '$lib/common/types.js';
 import { tick } from 'svelte';
 import { MediaQuery } from 'svelte/reactivity';
 import type { Navbar, Offcanvas } from '../index.js';
-import type { OffcanvasBackdrop, OffcanvasBreakpoint } from '../Offcanvas/types.js';
+import type { OffcanvasBackdrop } from '../Offcanvas/types.js';
 
 /**
  * NavbarRootState is the state of the Navbar component.
@@ -12,8 +12,14 @@ import type { OffcanvasBackdrop, OffcanvasBreakpoint } from '../Offcanvas/types.
 export class NavbarRootState {
     // Private
     #isExpanded: boolean = $state(false);
-    #expandOnBreakpoint: string = $state('xs');
-    #mediaQuery: MediaQuery | undefined = $state(undefined);
+    #resetExpandedOnCollapse = false;
+    readonly expandOnBreakpoint = $derived.by(() => this.props.expandOnBreakpoint ?? 'xs');
+    #mediaQuery = $derived.by(() => {
+        // xs is unconditional, including during SSR. Only viewport-dependent modes need a query.
+        if (typeof window === 'undefined' || this.expandOnBreakpoint === 'xs') return undefined;
+        return new MediaQuery(BreakpointMinimumMediaQuery[this.expandOnBreakpoint]!);
+    });
+    readonly isMediaQueryMatched = $derived(this.expandOnBreakpoint === 'xs' || (this.#mediaQuery?.current ?? false));
     #togglers: HTMLButtonElement[] = [];
     // Plain registry: effects may write ariaControls, but must not read it (or a
     // reactive registry) and subscribe to their own writes. Every target is controlled.
@@ -24,19 +30,14 @@ export class NavbarRootState {
 
     constructor(readonly props: Navbar.RootProps) {
         this.toggleIsExpanded = this.toggleIsExpanded.bind(this);
-        this.#expandOnBreakpoint = this.props.expandOnBreakpoint || 'xs';
-        if (typeof window !== 'undefined' && this.#expandOnBreakpoint) {
-            const query: string | undefined = BreakpointMinimumMediaQuery[this.#expandOnBreakpoint];
-            this.#mediaQuery = new MediaQuery(query || '');
-        }
-        // Reset the explicit-expanded flag when we cross from inline mode
+        // Reset a toggler-opened menu when we cross from inline mode
         // (media query matched) back into collapsed/offcanvas mode. Without
         // this, a previous toggle keeps the offcanvas appearing pre-opened on
         // the next downward cross.
         let previousMediaQueryMatched: boolean | undefined = undefined;
         $effect(() => {
-            const matched = this.#mediaQuery?.current;
-            if (previousMediaQueryMatched === true && matched === false && this.#isExpanded) {
+            const matched = this.isMediaQueryMatched;
+            if (previousMediaQueryMatched === true && !matched && this.#resetExpandedOnCollapse) {
                 this.#isExpanded = false;
             }
             previousMediaQueryMatched = matched;
@@ -44,9 +45,11 @@ export class NavbarRootState {
     }
 
     get isExpanded(): boolean {
-        return this.#isExpanded || this.#mediaQuery?.current || false;
+        return this.#isExpanded || this.isMediaQueryMatched;
     }
     set isExpanded(value: boolean) {
+        // Explicit visibility updates survive responsive changes; toggler state resets below the breakpoint.
+        this.#resetExpandedOnCollapse = false;
         this.#isExpanded = value;
     }
 
@@ -101,6 +104,7 @@ export class NavbarRootState {
     }
 
     toggleIsExpanded() {
+        this.#resetExpandedOnCollapse = true;
         this.#isExpanded = !this.#isExpanded;
     }
 }
@@ -156,12 +160,18 @@ export class OffcanvasRootState {
     // Private
     #isShown: boolean = $state(false);
     #useBackdrop: OffcanvasBackdrop = $state(true);
-    #mediaQuery: MediaQuery | undefined = $state(undefined);
-    #showOnBreakpoint: OffcanvasBreakpoint | undefined = $state(undefined);
-    #navbarRootState: NavbarRootState | undefined = $state(undefined);
+    #navbarRootState: NavbarRootState | undefined;
+    #mediaQuery = $derived.by(() => {
+        // An inheriting panel shares Navbar's responsive mode, including its always-inline xs mode.
+        const breakpoint = this.props.showOnBreakpoint;
+        if (typeof window === 'undefined' || !breakpoint) return undefined;
+        return new MediaQuery(BreakpointMinimumMediaQuery[breakpoint]!);
+    });
     // Public
-    readonly isMediaQueryMatched: boolean = $derived(this.#mediaQuery?.current || false);
-    readonly transitionDuration: number = $derived(this.#mediaQuery?.current ? 0 : 350);
+    readonly isMediaQueryMatched: boolean = $derived.by(() =>
+        this.props.showOnBreakpoint ? (this.#mediaQuery?.current ?? false) : (this.#navbarRootState?.isMediaQueryMatched ?? false)
+    );
+    readonly transitionDuration: number = $derived(this.isMediaQueryMatched ? 0 : 350);
 
     constructor(readonly props: Offcanvas.RootProps) {
         this.toggleIsShown = this.toggleIsShown.bind(this);
@@ -169,23 +179,12 @@ export class OffcanvasRootState {
         this.#useBackdrop = this.props.useBackdrop ?? true;
         if (NavbarRootContext.exists()) {
             this.#navbarRootState = NavbarRootContext.get();
-            this.showOnBreakpoint = this.#navbarRootState.props.expandOnBreakpoint;
-            $effect(() => {
-                if (this.#navbarRootState && this.#isShown !== this.#navbarRootState.isExpanded) {
-                    const navbarIsExpanded = this.#navbarRootState.isExpanded;
-                    // Because the transition is asynchronous, we need to wait for the next tick before toggling the state...
-                    tick().then(() => {
-                        this.#isShown = navbarIsExpanded;
-                    });
-                }
-            });
-        } else {
-            this.showOnBreakpoint = this.props.showOnBreakpoint;
+            if (this.#isShown) this.#navbarRootState.isExpanded = true;
         }
     }
 
     get isShown(): boolean {
-        return this.#isShown || this.#mediaQuery?.current || false;
+        return (this.#navbarRootState?.isExpanded ?? this.#isShown) || this.isMediaQueryMatched;
     }
     set isShown(value: boolean) {
         if (this.#navbarRootState) {
@@ -200,19 +199,6 @@ export class OffcanvasRootState {
     }
     set useBackdrop(value: OffcanvasBackdrop) {
         this.#useBackdrop = value;
-    }
-
-    get showOnBreakpoint(): OffcanvasBreakpoint | undefined {
-        return this.#showOnBreakpoint;
-    }
-    set showOnBreakpoint(value: OffcanvasBreakpoint | undefined) {
-        this.#showOnBreakpoint = value ?? this.#navbarRootState?.props.expandOnBreakpoint;
-        if (typeof window !== 'undefined' && this.#showOnBreakpoint) {
-            const query: string | undefined = BreakpointMinimumMediaQuery[this.#showOnBreakpoint];
-            this.#mediaQuery = new MediaQuery(query || '');
-        } else {
-            this.#mediaQuery = undefined;
-        }
     }
 
     get isBackdropShown(): boolean {

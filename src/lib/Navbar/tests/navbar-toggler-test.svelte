@@ -9,7 +9,7 @@
     <Navbar.Toggler onclick={null} data-testid="null-handler-toggler" />
 </Navbar.Root>
 
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Toggler data-testid="registered-controls-toggler" />
     <Navbar.Collapse id="registered-navbar-collapse">Registered collapse</Navbar.Collapse>
 </Navbar.Root>

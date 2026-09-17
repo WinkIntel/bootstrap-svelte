@@ -196,14 +196,14 @@ describe('Navbar Component', () => {
     });
 
     it('should render with correct breakpoint class', () => {
-        // Test with no breakpoint (from test component) - should not have navbar-expand-* class
+        // The fixture uses lg so its toggler remains active below that breakpoint.
         render(NavbarBasicTest);
         const navbar = screen.getByTestId('navbar');
         expect(navbar).toHaveClass('navbar');
         expect(navbar).not.toHaveClass('navbar-expand-xs');
         expect(navbar).not.toHaveClass('navbar-expand-sm');
         expect(navbar).not.toHaveClass('navbar-expand-md');
-        expect(navbar).not.toHaveClass('navbar-expand-lg');
+        expect(navbar).toHaveClass('navbar-expand-lg');
         expect(navbar).not.toHaveClass('navbar-expand-xl');
         expect(navbar).not.toHaveClass('navbar-expand-xxl');
 

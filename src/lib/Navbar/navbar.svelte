@@ -79,7 +79,7 @@ Root navigation bar component that provides responsive navigation header functio
 - `class` (string): Optional. Additional CSS classes to apply to the navbar.
 - `colorVariant` (NavbarColorVariant): Optional. Background color variant for the navbar, one of: 'primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark'.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
-- `expandOnBreakpoint` (string): Optional. Breakpoint at which navbar will expand, one of: 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'. Defaults to 'xs'.
+- `expandOnBreakpoint` (string): Optional. Breakpoint at which navbar will expand, one of: 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'. Defaults to 'xs' (always expanded inline). Changes apply without remounting.
 - `id` (string): Optional. Unique ID for the navbar element. Defaults to `navbar-{uid}`, where `uid` is a unique identifier.
 - `placement` (string): Optional. Navbar positioning, one of: 'fixed-top', 'fixed-bottom', 'sticky-top', 'sticky-bottom'.
 -->
@@ -111,11 +111,10 @@ Root navigation bar component that provides responsive navigation header functio
         }
     });
 
-    let hasExpandedOnBreakpoint = $derived(!!expandOnBreakpoint); // !! to convert to boolean
     let classes = $derived(
         uniqueClsx(
             'navbar',
-            { [`navbar-expand-${expandOnBreakpoint}`]: hasExpandedOnBreakpoint && expandOnBreakpoint !== 'xs' },
+            { 'navbar-expand': expandOnBreakpoint === 'xs', [`navbar-expand-${expandOnBreakpoint}`]: expandOnBreakpoint !== 'xs' },
             {
                 'fixed-top': placement === 'fixed-top',
                 'fixed-bottom': placement === 'fixed-bottom',

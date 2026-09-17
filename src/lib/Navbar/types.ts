@@ -16,6 +16,7 @@ export type NavbarPlacement = 'fixed-top' | 'fixed-bottom' | 'sticky-top' | 'sti
 
 export type NavbarRootProps = NavElement & {
     colorVariant?: NavbarColorVariant;
+    /** Minimum expansion breakpoint. Omitted or 'xs' means always expanded inline; updates reactively. */
     expandOnBreakpoint?: NavbarExpandBreakpoint;
     placement?: NavbarPlacement;
 };
