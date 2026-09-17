@@ -5,9 +5,9 @@ Collapsible container for navbar content that toggles when the navbar toggler is
 
 @example
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">My Brand</Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Navbar.Nav>
             <Nav.Item>
@@ -23,9 +23,9 @@ Collapsible container for navbar content that toggles when the navbar toggler is
 
 #### With event handlers
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">My Brand</Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse
         onExpand={() => console.log('Expanding')}
         onExpanded={() => console.log('Expanded')}

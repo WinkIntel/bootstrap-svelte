@@ -1,58 +1,10 @@
+import { mockMatchMedia } from '$lib/common/tests/mock-match-media.js';
+import { BreakpointMinimumMediaQuery } from '$lib/common/types.js';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import NavbarResponsiveTest from './navbar-responsive-test.svelte';
-
-// Model the browser boundary, including obsolete-query events and subscription disposal.
-function mockViewport(width: number) {
-    const original = window.matchMedia;
-    onTestFinished(() => {
-        window.matchMedia = original;
-    });
-    const queries = new Map<string, { list: MediaQueryList; listeners: Set<EventListenerOrEventListenerObject> }>();
-    window.matchMedia = vi.fn((query: string) => {
-        let entry = queries.get(query);
-        if (!entry) {
-            const minimum = query.match(/min-width:\s*([\d.]+)px/);
-            const maximum = query.match(/max-width:\s*([\d.]+)px/);
-            const listeners = new Set<EventListenerOrEventListenerObject>();
-            const list = Object.assign(new EventTarget(), {
-                media: query,
-                matches: (!minimum || width >= Number(minimum[1])) && (!maximum || width <= Number(maximum[1])),
-                onchange: null,
-                addListener: vi.fn(),
-                removeListener: vi.fn()
-            });
-            const add = list.addEventListener.bind(list);
-            const remove = list.removeEventListener.bind(list);
-            list.addEventListener = (type, listener, options) => {
-                if (type === 'change' && listener) listeners.add(listener);
-                add(type, listener, options);
-            };
-            list.removeEventListener = (type, listener, options) => {
-                if (type === 'change' && listener) listeners.delete(listener);
-                remove(type, listener, options);
-            };
-            entry = { list, listeners };
-            queries.set(query, entry);
-        }
-        return entry.list;
-    });
-    return {
-        emit(query: string, matches: boolean) {
-            const entry = queries.get(query);
-            if (!entry) throw new Error(`Query was never created: ${query}`);
-            Object.defineProperty(entry.list, 'matches', { value: matches, configurable: true });
-            entry.list.dispatchEvent(new Event('change'));
-        },
-        listenerCount(query: string) {
-            return queries.get(query)?.listeners.size ?? 0;
-        },
-        totalListeners() {
-            return [...queries.values()].reduce((sum, entry) => sum + entry.listeners.size, 0);
-        }
-    };
-}
+import { Navbar, Offcanvas } from '$lib/index.js';
 
 function expectExpanded(expanded: boolean) {
     const toggler = screen.getByTestId('responsive-toggler');
@@ -75,12 +27,12 @@ function expectInline() {
     expect(document.body.style.overflow).toBe('');
 }
 
-const lg = '(min-width: 992px)';
-const md = '(min-width: 768px)';
+const lg = BreakpointMinimumMediaQuery.lg!;
+const md = BreakpointMinimumMediaQuery.md!;
 
 describe('Navbar responsive state', () => {
     it('updates lg → md → lg at 800px without remounting', async () => {
-        mockViewport(800);
+        mockMatchMedia(800);
         const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint: 'lg' });
         const navbar = screen.getByTestId('responsive-navbar');
         expectExpanded(false);
@@ -96,7 +48,7 @@ describe('Navbar responsive state', () => {
     });
 
     it('detaches obsolete queries, responds to the replacement and disposes all subscriptions', async () => {
-        const viewport = mockViewport(800);
+        const viewport = mockMatchMedia(800);
         const { rerender, unmount } = render(NavbarResponsiveTest, { expandOnBreakpoint: 'md' });
         await waitFor(expectInline);
         await rerender({ expandOnBreakpoint: 'lg' });
@@ -134,7 +86,7 @@ describe('Navbar responsive state', () => {
         ['xs', 576],
         ['xs', 1280]
     ] as const)('treats %s as inline navigation at %spx', async (expandOnBreakpoint, width) => {
-        mockViewport(width);
+        mockMatchMedia(width);
         render(NavbarResponsiveTest, { expandOnBreakpoint });
         await waitFor(expectInline);
         expect(screen.getByTestId('responsive-navbar')).toHaveClass('navbar-expand');
@@ -143,7 +95,7 @@ describe('Navbar responsive state', () => {
     });
 
     it('updates a collapse-only Navbar independently of Offcanvas', async () => {
-        mockViewport(800);
+        mockMatchMedia(800);
         const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint: 'lg', withOffcanvas: false });
         expect(screen.getByTestId('responsive-toggler')).toHaveAttribute('aria-expanded', 'false');
         await rerender({ expandOnBreakpoint: undefined });
@@ -156,7 +108,7 @@ describe('Navbar responsive state', () => {
     });
 
     it('switches at the sm boundary and can close a phone overlay', async () => {
-        const viewport = mockViewport(575.98);
+        const viewport = mockMatchMedia(575.98);
         render(NavbarResponsiveTest, { expandOnBreakpoint: 'sm' });
         expectExpanded(false);
         await fireEvent.click(screen.getByTestId('responsive-toggler'));
@@ -164,12 +116,12 @@ describe('Navbar responsive state', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
         await waitFor(() => expectExpanded(false));
         expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
-        viewport.emit('(min-width: 576px)', true);
+        viewport.emit(BreakpointMinimumMediaQuery.sm!, true);
         await waitFor(expectInline);
     });
 
     it('releases a toggled overlay on entering inline mode and collapses on returning', async () => {
-        mockViewport(800);
+        mockMatchMedia(800);
         const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint: 'lg' });
         await fireEvent.click(screen.getByTestId('responsive-toggler'));
         await waitFor(() => expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1'));
@@ -182,7 +134,7 @@ describe('Navbar responsive state', () => {
     });
 
     it.each([true, false])('preserves an explicit visibility update to %s during inline mode', async (isShown) => {
-        mockViewport(800);
+        mockMatchMedia(800);
         const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint: 'md', isShown: false });
         await waitFor(expectInline);
         await rerender({ isShown: true });
@@ -202,7 +154,7 @@ describe('Navbar responsive state', () => {
     });
 
     it('honors initially explicit visibility when leaving inline mode', async () => {
-        mockViewport(800);
+        mockMatchMedia(800);
         const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint: 'md', isShown: true });
         await waitFor(expectInline);
         await rerender({ expandOnBreakpoint: 'lg' });
@@ -210,5 +162,111 @@ describe('Navbar responsive state', () => {
         expectExpanded(true);
         await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
         await waitFor(() => expectExpanded(false));
+    });
+});
+
+describe('PR 32 review regressions', () => {
+    it.each([
+        ['md', 'lg', 800],
+        [undefined, 'lg', 800],
+        ['lg', 'xl', 1000],
+        ['xs', 'xs', 1280]
+    ] as const)('does not let Navbar %s force an unmatched Offcanvas %s open at %spx', async (expandOnBreakpoint, showOnBreakpoint, width) => {
+        mockMatchMedia(width);
+        const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint, showOnBreakpoint });
+        expect(screen.queryByTestId('responsive-offcanvas')).not.toBeInTheDocument();
+        expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
+        await rerender({ isShown: true });
+        await waitFor(() => expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1'));
+        await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        await waitFor(() => expect(screen.queryByTestId('responsive-offcanvas')).not.toBeInTheDocument());
+        expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
+        await rerender({ isShown: false });
+        await rerender({ isShown: true });
+        await waitFor(() => expect(screen.getByTestId('responsive-offcanvas')).toHaveClass('show'));
+        await fireEvent.keyDown(document, { key: 'Escape' });
+        await waitFor(() => expect(screen.queryByTestId('responsive-offcanvas')).not.toBeInTheDocument());
+        expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
+    });
+
+    it.each([390, 1280])('supports never-expanded navigation at %spx', async (width) => {
+        mockMatchMedia(width);
+        const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint: false });
+        expect(screen.getByTestId('responsive-navbar')).toHaveClass('navbar');
+        expect(screen.getByTestId('responsive-navbar').className).not.toContain('navbar-expand');
+        expectExpanded(false);
+        await fireEvent.click(screen.getByTestId('responsive-toggler'));
+        await waitFor(() => expectExpanded(true));
+        await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        await waitFor(() => expectExpanded(false));
+        await rerender({ expandOnBreakpoint: 'xs' });
+        await waitFor(expectInline);
+        await rerender({ expandOnBreakpoint: false });
+        await waitFor(() => expectExpanded(false));
+    });
+
+    it.each([null, '', 'xxxl', '__proto__'])('normalizes malformed Navbar breakpoint %s on mount and update', async (invalid) => {
+        mockMatchMedia(800);
+        const value = invalid as Navbar.RootProps['expandOnBreakpoint'];
+        const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint: value });
+        await waitFor(expectInline);
+        expect(screen.getByTestId('responsive-navbar')).toHaveClass('navbar-expand');
+        expect(screen.getByTestId('responsive-navbar').className).not.toContain('navbar-expand-');
+        await rerender({ expandOnBreakpoint: 'lg' });
+        await waitFor(() => expectExpanded(false));
+        await rerender({ expandOnBreakpoint: value });
+        await waitFor(expectInline);
+        expect(screen.getByTestId('responsive-navbar')).toHaveClass('navbar-expand');
+    });
+
+    it.each(['', 'xxxl', '__proto__'])('normalizes malformed Offcanvas breakpoint %s and resumes inheritance', async (invalid) => {
+        mockMatchMedia(800);
+        const value = invalid as Offcanvas.RootProps['showOnBreakpoint'];
+        const { rerender, unmount } = render(NavbarResponsiveTest, { expandOnBreakpoint: 'md', showOnBreakpoint: value });
+        await waitFor(expectInline);
+        expect(screen.getByTestId('responsive-offcanvas')).toHaveClass('offcanvas');
+        await rerender({ showOnBreakpoint: 'lg' });
+        await waitFor(() => expect(screen.queryByTestId('responsive-offcanvas')).not.toBeInTheDocument());
+        await rerender({ showOnBreakpoint: value });
+        await waitFor(expectInline);
+        await unmount();
+        render(Offcanvas.Root, { isShown: true, showOnBreakpoint: value });
+        expect(screen.getByRole('dialog')).toHaveClass('offcanvas');
+        await waitFor(() => expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1'));
+    });
+
+    it('never reacquires an overlay scroll lock on the downward cross of a toggler-opened menu', async () => {
+        const viewport = mockMatchMedia(800);
+        render(NavbarResponsiveTest, { expandOnBreakpoint: 'lg' });
+        await fireEvent.click(screen.getByTestId('responsive-toggler'));
+        await waitFor(() => expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1'));
+        viewport.emit(lg, true);
+        await waitFor(expectInline);
+        const setAttribute = vi.spyOn(document.body, 'setAttribute');
+        onTestFinished(() => setAttribute.mockRestore());
+        viewport.emit(lg, false);
+        await tick();
+        expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
+        await waitFor(() => expectExpanded(false));
+        expect(setAttribute.mock.calls.filter(([name]) => name === 'data-scrollbar-lock-count')).toEqual([]);
+    });
+
+    it('treats later user actions as replacing an earlier explicit visibility assignment', async () => {
+        const viewport = mockMatchMedia(800);
+        const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint: 'lg', isShown: true });
+        await waitFor(() => expectExpanded(true));
+        await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        await waitFor(() => expectExpanded(false));
+        await rerender({ isShown: true });
+        expectExpanded(false);
+        await fireEvent.click(screen.getByTestId('responsive-toggler'));
+        await waitFor(() => expectExpanded(true));
+        viewport.emit(lg, true);
+        await waitFor(expectInline);
+        viewport.emit(lg, false);
+        await waitFor(() => expectExpanded(false));
+        await rerender({ isShown: false });
+        await rerender({ isShown: true });
+        await waitFor(() => expectExpanded(true));
     });
 });

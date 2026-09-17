@@ -11,6 +11,14 @@ describe('Navbar responsive SSR', () => {
         expect(body).toContain('data-testid="responsive-offcanvas"');
         expect(body).not.toContain('offcanvas-backdrop');
     });
+    it('renders never-expanded navigation without an expansion class', () => {
+        const { body } = render(NavbarResponsiveTest, { props: { expandOnBreakpoint: false } });
+        expect(body).toContain('class="navbar"');
+        expect(body).toContain('aria-expanded="false"');
+        expect(body).not.toContain('data-testid="responsive-collapse"');
+        expect(body).not.toContain('data-testid="responsive-offcanvas"');
+    });
+
     it('leaves a viewport-dependent navbar collapsed on the server', () => {
         const { body } = render(NavbarResponsiveTest, { props: { expandOnBreakpoint: 'lg' } });
         expect(body).toContain('navbar-expand-lg');

@@ -11,12 +11,12 @@ import type {
 } from '$lib/common/types.js';
 
 export type NavbarColorVariant = BaseColorVariant;
-export type NavbarExpandBreakpoint = BaseBreakpoint;
+export type NavbarExpandBreakpoint = BaseBreakpoint | false;
 export type NavbarPlacement = 'fixed-top' | 'fixed-bottom' | 'sticky-top' | 'sticky-bottom';
 
 export type NavbarRootProps = NavElement & {
     colorVariant?: NavbarColorVariant;
-    /** Minimum expansion breakpoint. Omitted or 'xs' means always expanded inline; updates reactively. */
+    /** Minimum expansion breakpoint. Omitted or 'xs' means always expanded inline; false keeps the toggler active at every width. Updates reactively. */
     expandOnBreakpoint?: NavbarExpandBreakpoint;
     placement?: NavbarPlacement;
 };

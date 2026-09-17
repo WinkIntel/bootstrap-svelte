@@ -5,9 +5,9 @@ Component for displaying the company, product, or project name/logo in the navba
 
 @example
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">My Brand</Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Navbar.Nav>
             <Nav.Item>
@@ -20,12 +20,12 @@ Component for displaying the company, product, or project name/logo in the navba
 
 #### With image logo
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">
         <img src="/logo.svg" alt="Brand Logo" height="30" class="d-inline-block align-text-top me-2" />
         My Brand
     </Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Navbar.Nav>
             <Nav.Item>

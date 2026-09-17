@@ -5,9 +5,9 @@ Component for displaying text content within a navbar with proper vertical align
 
 @example
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">My Brand</Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Navbar.Nav class="me-auto">
             <Nav.Item>

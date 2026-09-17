@@ -5,11 +5,11 @@ Root navigation bar component that provides responsive navigation header functio
 
 @example
 ```svelte
-<Navbar.Root>
+<Navbar.Root expandOnBreakpoint="lg">
     <Navbar.Brand href="/">
         My Brand
     </Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Nav.Root horizontalAlignment="end">
             <Nav.Item>
@@ -25,11 +25,11 @@ Root navigation bar component that provides responsive navigation header functio
 
 #### With color variant
 ```svelte
-<Navbar.Root colorVariant="bg-primary">
+<Navbar.Root expandOnBreakpoint="lg" colorVariant="bg-primary">
     <Navbar.Brand href="/">
         My Brand
     </Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Nav.Root horizontalAlignment="end">
             <Nav.Item>
@@ -42,11 +42,11 @@ Root navigation bar component that provides responsive navigation header functio
 
 #### With colored background (manual class)
 ```svelte
-<Navbar.Root class="bg-dark navbar-dark">
+<Navbar.Root expandOnBreakpoint="lg" class="bg-dark navbar-dark">
     <Navbar.Brand href="/">
         My Brand
     </Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Nav.Root horizontalAlignment="end">
             <Nav.Item>
@@ -59,11 +59,11 @@ Root navigation bar component that provides responsive navigation header functio
 
 #### Fixed to top
 ```svelte
-<Navbar.Root placement="fixed-top">
+<Navbar.Root expandOnBreakpoint="lg" placement="fixed-top">
     <Navbar.Brand href="/">
         My Brand
     </Navbar.Brand>
-    <Navbar.Toggle />
+    <Navbar.Toggler />
     <Navbar.Collapse>
         <Nav.Root horizontalAlignment="end">
             <Nav.Item>
@@ -79,7 +79,7 @@ Root navigation bar component that provides responsive navigation header functio
 - `class` (string): Optional. Additional CSS classes to apply to the navbar.
 - `colorVariant` (NavbarColorVariant): Optional. Background color variant for the navbar, one of: 'primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark'.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
-- `expandOnBreakpoint` (string): Optional. Breakpoint at which navbar will expand, one of: 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'. Defaults to 'xs' (always expanded inline). Changes apply without remounting.
+- `expandOnBreakpoint` (string | false): Optional. Breakpoint at which navbar will expand, one of: 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'. Defaults to 'xs' (always expanded inline). Use false to keep the toggler active at every width. Changes apply without remounting.
 - `id` (string): Optional. Unique ID for the navbar element. Defaults to `navbar-{uid}`, where `uid` is a unique identifier.
 - `placement` (string): Optional. Navbar positioning, one of: 'fixed-top', 'fixed-bottom', 'sticky-top', 'sticky-bottom'.
 -->
@@ -102,7 +102,7 @@ Root navigation bar component that provides responsive navigation header functio
         ...restOfProps
     }: Navbar.RootProps = $props();
 
-    const _rootState: NavbarRootState = initNavbarRootState({
+    const rootState: NavbarRootState = initNavbarRootState({
         get expandOnBreakpoint() {
             return expandOnBreakpoint;
         },
@@ -114,7 +114,10 @@ Root navigation bar component that provides responsive navigation header functio
     let classes = $derived(
         uniqueClsx(
             'navbar',
-            { 'navbar-expand': expandOnBreakpoint === 'xs', [`navbar-expand-${expandOnBreakpoint}`]: expandOnBreakpoint !== 'xs' },
+            {
+                'navbar-expand': rootState.expandOnBreakpoint === 'xs',
+                [`navbar-expand-${rootState.expandOnBreakpoint}`]: !!rootState.expandOnBreakpoint && rootState.expandOnBreakpoint !== 'xs'
+            },
             {
                 'fixed-top': placement === 'fixed-top',
                 'fixed-bottom': placement === 'fixed-bottom',

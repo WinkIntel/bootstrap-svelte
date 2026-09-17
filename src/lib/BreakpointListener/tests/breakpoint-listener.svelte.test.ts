@@ -1,56 +1,18 @@
+import { mockMatchMedia } from '$lib/common/tests/mock-match-media.js';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { BreakpointEnum, MediaQueryStringsByBreakpointEnum } from '../types.js';
+import { BreakpointEnum } from '../types.js';
 import BreakpointListenerBasicTest from './breakpoint-listener-basic-test.svelte';
 
-interface MockMediaQueryList {
-    media: string;
-    matches: boolean;
-    addEventListener: (type: string, cb: EventListener) => void;
-    removeEventListener: (type: string, cb: EventListener) => void;
-    dispatchEvent: (e: Event) => boolean;
-    _listeners: Set<EventListener>;
-}
-
-let mqlMap: Record<string, MockMediaQueryList> = {};
-
-function installMatchMedia(initial: BreakpointEnum) {
-    mqlMap = {};
-    for (const query of Object.values(MediaQueryStringsByBreakpointEnum)) {
-        mqlMap[query] = {
-            media: query,
-            matches: false,
-            _listeners: new Set<EventListener>(),
-            addEventListener: function (_type: string, cb: EventListener) {
-                this._listeners.add(cb);
-            },
-            removeEventListener: function (_type: string, cb: EventListener) {
-                this._listeners.delete(cb);
-            },
-            dispatchEvent: function (e: Event) {
-                this._listeners.forEach((l) => l(e));
-                return true;
-            }
-        } as MockMediaQueryList;
-    }
-    setActiveBreakpoint(initial, false);
-    window.matchMedia = (query: string) => mqlMap[query] as unknown as MediaQueryList;
-}
-
-function setActiveBreakpoint(bp: BreakpointEnum, fire = true) {
-    const targetQuery = MediaQueryStringsByBreakpointEnum[bp];
-    for (const [query, mql] of Object.entries(mqlMap)) {
-        mql.matches = query === targetQuery;
-    }
-    if (fire) {
-        // Fire change on all to mimic environment updates
-        Object.values(mqlMap).forEach((mql) => mql.dispatchEvent(new Event('change')));
-    }
+let viewport: ReturnType<typeof mockMatchMedia>;
+const widths = [390, 576, 768, 992, 1200, 1400];
+function setActiveBreakpoint(breakpoint: BreakpointEnum) {
+    viewport.setWidth(widths[breakpoint]!);
 }
 
 describe('BreakpointListener Component', () => {
     beforeEach(() => {
-        installMatchMedia(BreakpointEnum.SM);
+        viewport = mockMatchMedia(576);
     });
 
     it('binds currentBreakpoint and triggers change / breakUp / breakDown callbacks correctly', async () => {
@@ -87,7 +49,7 @@ describe('BreakpointListener Component', () => {
 
     it('conditionally renders children for single and multiple breakpoints', async () => {
         // Start at md so renderOn="md" and ['md','lg'] both show
-        installMatchMedia(BreakpointEnum.MD);
+        setActiveBreakpoint(BreakpointEnum.MD);
         render(BreakpointListenerBasicTest);
         await waitFor(() => {
             expect(screen.getByTestId('single-md')).toBeInTheDocument();

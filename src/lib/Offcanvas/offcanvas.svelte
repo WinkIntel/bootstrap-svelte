@@ -134,7 +134,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         if (placement === 'bottom') return '100%';
         return undefined;
     });
-    let hasShownOnBreakpoint = $derived(!!showOnBreakpoint); // !! to convert to boolean
+    let hasShownOnBreakpoint = $derived(!!rootState.showOnBreakpoint); // !! to convert to boolean
     let hasPlacement = $derived(!!placement); // !! to convert to boolean
 
     // Derived classes for the offcanvas component...
@@ -143,7 +143,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         uniqueClsx(
             {
                 offcanvas: !hasShownOnBreakpoint,
-                [`offcanvas-${showOnBreakpoint}`]: hasShownOnBreakpoint,
+                [`offcanvas-${rootState.showOnBreakpoint}`]: hasShownOnBreakpoint,
                 [`offcanvas-${placement}`]: hasPlacement,
                 show: rootState.isShown
             },

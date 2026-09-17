@@ -1,9 +1,19 @@
 import { Context } from '$lib/common/index.js';
-import { BreakpointMinimumMediaQuery } from '$lib/common/types.js';
+import { BreakpointMinimumMediaQuery, type BaseBreakpoint } from '$lib/common/types.js';
 import { tick } from 'svelte';
 import { MediaQuery } from 'svelte/reactivity';
 import type { Navbar, Offcanvas } from '../index.js';
 import type { OffcanvasBackdrop } from '../Offcanvas/types.js';
+
+// Validate untyped consumer input before using it for either state or Bootstrap classes.
+function resolveBreakpoint(value: unknown): BaseBreakpoint | undefined {
+    return typeof value === 'string' && Object.hasOwn(BreakpointMinimumMediaQuery, value) ? (value as BaseBreakpoint) : undefined;
+}
+
+function createBreakpointQuery(breakpoint: BaseBreakpoint | false | undefined): MediaQuery | undefined {
+    if (typeof window === 'undefined' || !breakpoint) return undefined;
+    return new MediaQuery(BreakpointMinimumMediaQuery[breakpoint]!);
+}
 
 /**
  * NavbarRootState is the state of the Navbar component.
@@ -11,13 +21,13 @@ import type { OffcanvasBackdrop } from '../Offcanvas/types.js';
  */
 export class NavbarRootState {
     // Private
-    #isExpanded: boolean = $state(false);
-    #resetExpandedOnCollapse = false;
-    readonly expandOnBreakpoint = $derived.by(() => this.props.expandOnBreakpoint ?? 'xs');
+    #expansion: 'toggle' | 'explicit' | null = $state(null);
+    readonly expandOnBreakpoint = $derived.by(() =>
+        this.props.expandOnBreakpoint === false ? false : (resolveBreakpoint(this.props.expandOnBreakpoint) ?? 'xs')
+    );
     #mediaQuery = $derived.by(() => {
         // xs is unconditional, including during SSR. Only viewport-dependent modes need a query.
-        if (typeof window === 'undefined' || this.expandOnBreakpoint === 'xs') return undefined;
-        return new MediaQuery(BreakpointMinimumMediaQuery[this.expandOnBreakpoint]!);
+        return createBreakpointQuery(this.expandOnBreakpoint === 'xs' ? undefined : this.expandOnBreakpoint);
     });
     readonly isMediaQueryMatched = $derived(this.expandOnBreakpoint === 'xs' || (this.#mediaQuery?.current ?? false));
     #togglers: HTMLButtonElement[] = [];
@@ -30,27 +40,22 @@ export class NavbarRootState {
 
     constructor(readonly props: Navbar.RootProps) {
         this.toggleIsExpanded = this.toggleIsExpanded.bind(this);
-        // Reset a toggler-opened menu when we cross from inline mode
-        // (media query matched) back into collapsed/offcanvas mode. Without
-        // this, a previous toggle keeps the offcanvas appearing pre-opened on
-        // the next downward cross.
-        let previousMediaQueryMatched: boolean | undefined = undefined;
+        // Discard toggler intent while inline, before a downward cross can briefly
+        // re-open an overlay. Explicit assignments remain until another visibility action.
         $effect(() => {
-            const matched = this.isMediaQueryMatched;
-            if (previousMediaQueryMatched === true && !matched && this.#resetExpandedOnCollapse) {
-                this.#isExpanded = false;
-            }
-            previousMediaQueryMatched = matched;
+            if (this.isMediaQueryMatched && this.#expansion === 'toggle') this.#expansion = null;
         });
     }
 
+    get explicitExpanded(): boolean {
+        return this.#expansion !== null;
+    }
+
     get isExpanded(): boolean {
-        return this.#isExpanded || this.isMediaQueryMatched;
+        return this.explicitExpanded || this.isMediaQueryMatched;
     }
     set isExpanded(value: boolean) {
-        // Explicit visibility updates survive responsive changes; toggler state resets below the breakpoint.
-        this.#resetExpandedOnCollapse = false;
-        this.#isExpanded = value;
+        this.#expansion = value ? 'explicit' : null;
     }
 
     get defaultCollapseId(): string {
@@ -104,8 +109,7 @@ export class NavbarRootState {
     }
 
     toggleIsExpanded() {
-        this.#resetExpandedOnCollapse = true;
-        this.#isExpanded = !this.#isExpanded;
+        this.#expansion = this.explicitExpanded ? null : 'toggle';
     }
 }
 
@@ -161,15 +165,12 @@ export class OffcanvasRootState {
     #isShown: boolean = $state(false);
     #useBackdrop: OffcanvasBackdrop = $state(true);
     #navbarRootState: NavbarRootState | undefined;
-    #mediaQuery = $derived.by(() => {
-        // An inheriting panel shares Navbar's responsive mode, including its always-inline xs mode.
-        const breakpoint = this.props.showOnBreakpoint;
-        if (typeof window === 'undefined' || !breakpoint) return undefined;
-        return new MediaQuery(BreakpointMinimumMediaQuery[breakpoint]!);
-    });
+    readonly showOnBreakpoint = $derived.by(() => resolveBreakpoint(this.props.showOnBreakpoint));
+    // Only explicit panel breakpoints create a query. Inheritance shares Navbar's match below.
+    #mediaQuery = $derived.by(() => createBreakpointQuery(this.showOnBreakpoint));
     // Public
     readonly isMediaQueryMatched: boolean = $derived.by(() =>
-        this.props.showOnBreakpoint ? (this.#mediaQuery?.current ?? false) : (this.#navbarRootState?.isMediaQueryMatched ?? false)
+        this.showOnBreakpoint ? (this.#mediaQuery?.current ?? false) : (this.#navbarRootState?.isMediaQueryMatched ?? false)
     );
     readonly transitionDuration: number = $derived(this.isMediaQueryMatched ? 0 : 350);
 
@@ -184,7 +185,7 @@ export class OffcanvasRootState {
     }
 
     get isShown(): boolean {
-        return (this.#navbarRootState?.isExpanded ?? this.#isShown) || this.isMediaQueryMatched;
+        return (this.#navbarRootState?.explicitExpanded ?? this.#isShown) || this.isMediaQueryMatched;
     }
     set isShown(value: boolean) {
         if (this.#navbarRootState) {

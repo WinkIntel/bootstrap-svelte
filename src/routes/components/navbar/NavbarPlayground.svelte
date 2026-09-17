@@ -28,6 +28,7 @@
     // Available options for dropdowns
     const expandBreakpointOptions = [
         { value: 'xs', label: 'Always Expanded (Default)' },
+        { value: false, label: 'Never Expand' },
         { value: 'sm', label: 'Expand at SM' },
         { value: 'md', label: 'Expand at MD' },
         { value: 'lg', label: 'Expand at LG' },
@@ -59,7 +60,7 @@
     function getCodeSnippet(): string {
         let code = '<Navbar.Root';
 
-        code += `\n  expandOnBreakpoint="${expandOnBreakpoint}"`;
+        code += expandOnBreakpoint === false ? `\n  expandOnBreakpoint={false}` : `\n  expandOnBreakpoint="${expandOnBreakpoint}"`;
         if (placement) code += `\n  placement="${placement}"`;
         if (colorVariant) code += `\n  colorVariant="${colorVariant}"`;
 
