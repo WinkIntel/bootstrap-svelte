@@ -244,6 +244,8 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     // Dismiss the offcanvas when the backdrop is clicked...
     const handleBackdropMouseDown: EventListener = (event: Event) => {
         if (!isTopOverlay(overlayEntry) || useBackdrop === false) return;
+        // Its click handler owns this state change; mousedown must not dismiss it first.
+        if (rootState.isControllingTogglerEvent(event)) return;
 
         const target = event.target as HTMLElement;
         const nearestOffcanvas = target.closest('.offcanvas');

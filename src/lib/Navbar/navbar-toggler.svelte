@@ -80,9 +80,14 @@ Toggle button for collapsible navbar content. Controls the expansion/collapse of
         togglerState.onclick();
         (onclick as EventListener | null)?.(_event);
     };
+
+    function registerToggler(element: HTMLButtonElement) {
+        return { destroy: togglerState.root.registerToggler(element) };
+    }
 </script>
 
 <button
+    use:registerToggler
     {...restOfProps}
     aria-controls={ariaControls}
     aria-expanded={isExpanded}

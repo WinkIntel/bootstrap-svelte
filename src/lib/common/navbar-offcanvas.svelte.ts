@@ -1,6 +1,6 @@
 import { Context } from '$lib/common/index.js';
 import { BreakpointMinimumMediaQuery } from '$lib/common/types.js';
-import { tick } from 'svelte';
+import { onDestroy, tick } from 'svelte';
 import { MediaQuery } from 'svelte/reactivity';
 import type { Navbar, Offcanvas } from '../index.js';
 import type { OffcanvasBackdrop, OffcanvasBreakpoint } from '../Offcanvas/types.js';
@@ -14,6 +14,9 @@ export class NavbarRootState {
     #isExpanded: boolean = $state(false);
     #expandOnBreakpoint: string = $state('xs');
     #mediaQuery: MediaQuery | undefined = $state(undefined);
+    #togglers: HTMLButtonElement[] = [];
+    // Keep registration order stable across ID changes; the last mounted target wins.
+    #controlledIds: { key: symbol; id: string }[] = [];
     // Public
     ariaControls: string | undefined = $state(undefined);
     transitionDuration = $state(0);
@@ -48,6 +51,32 @@ export class NavbarRootState {
 
     get defaultCollapseId(): string {
         return `${this.props.id || 'navbar'}-collapse`;
+    }
+
+    registerControlledId(key: symbol, id: string) {
+        const entry = this.#controlledIds.find((target) => target.key === key);
+        if (entry) {
+            entry.id = id;
+        } else {
+            this.#controlledIds.push({ key, id });
+        }
+        this.ariaControls = this.#controlledIds.at(-1)?.id;
+    }
+
+    unregisterControlledId(key: symbol) {
+        this.#controlledIds = this.#controlledIds.filter((target) => target.key !== key);
+        this.ariaControls = this.#controlledIds.at(-1)?.id;
+    }
+
+    registerToggler(element: HTMLButtonElement) {
+        this.#togglers.push(element);
+        return () => {
+            this.#togglers = this.#togglers.filter((toggler) => toggler !== element);
+        };
+    }
+
+    isTogglerEvent(event: Event): boolean {
+        return event.composedPath().some((target) => this.#togglers.includes(target as HTMLButtonElement));
     }
 
     toggleIsExpanded() {
@@ -96,7 +125,12 @@ export class NavbarCollapseState {
         readonly props: Navbar.CollapseProps,
         readonly root: NavbarRootState
     ) {
-        this.root.ariaControls = this.props.id || this.root.defaultCollapseId;
+        const key = Symbol('navbar-collapse');
+        this.root.registerControlledId(key, this.id);
+        $effect(() => {
+            this.root.registerControlledId(key, this.id);
+        });
+        onDestroy(() => this.root.unregisterControlledId(key));
     }
 }
 
@@ -121,6 +155,17 @@ export class OffcanvasRootState {
         this.#useBackdrop = this.props.useBackdrop ?? true;
         if (NavbarRootContext.exists()) {
             this.#navbarRootState = NavbarRootContext.get();
+            const navbar = this.#navbarRootState;
+            const key = Symbol('navbar-offcanvas');
+            if (this.props.id) navbar.registerControlledId(key, this.props.id);
+            $effect(() => {
+                if (this.props.id) {
+                    navbar.registerControlledId(key, this.props.id);
+                } else {
+                    navbar.unregisterControlledId(key);
+                }
+            });
+            onDestroy(() => navbar.unregisterControlledId(key));
             this.showOnBreakpoint = this.#navbarRootState.props.expandOnBreakpoint;
             $effect(() => {
                 if (this.#navbarRootState && this.#isShown !== this.#navbarRootState.isExpanded) {
@@ -169,6 +214,10 @@ export class OffcanvasRootState {
 
     get isBackdropShown(): boolean {
         return this.isShown && this.#useBackdrop && !this.isMediaQueryMatched;
+    }
+
+    isControllingTogglerEvent(event: Event): boolean {
+        return this.#navbarRootState?.isTogglerEvent(event) ?? false;
     }
 
     toggleIsShown() {
