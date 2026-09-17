@@ -3,14 +3,16 @@ import { BreakpointMinimumMediaQuery, type BaseBreakpoint } from '$lib/common/ty
 import { tick } from 'svelte';
 import { MediaQuery } from 'svelte/reactivity';
 import type { Navbar, Offcanvas } from '../index.js';
-import type { OffcanvasBackdrop } from '../Offcanvas/types.js';
+import type { OffcanvasBackdrop, OffcanvasBreakpoint } from '../Offcanvas/types.js';
 
 // Validate untyped consumer input before using it for either state or Bootstrap classes.
 function resolveBreakpoint(value: unknown): BaseBreakpoint | undefined {
     return typeof value === 'string' && Object.hasOwn(BreakpointMinimumMediaQuery, value) ? (value as BaseBreakpoint) : undefined;
 }
 
-function createBreakpointQuery(breakpoint: BaseBreakpoint | false | undefined): MediaQuery | undefined {
+function createBreakpointMatch(breakpoint: BaseBreakpoint | false | undefined): Pick<MediaQuery, 'current'> | undefined {
+    // xs starts at zero, so it also matches during SSR without a browser query.
+    if (breakpoint === 'xs') return { current: true };
     if (typeof window === 'undefined' || !breakpoint) return undefined;
     return new MediaQuery(BreakpointMinimumMediaQuery[breakpoint]!);
 }
@@ -25,11 +27,8 @@ export class NavbarRootState {
     readonly expandOnBreakpoint = $derived.by(() =>
         this.props.expandOnBreakpoint === false ? false : (resolveBreakpoint(this.props.expandOnBreakpoint) ?? 'xs')
     );
-    #mediaQuery = $derived.by(() => {
-        // xs is unconditional, including during SSR. Only viewport-dependent modes need a query.
-        return createBreakpointQuery(this.expandOnBreakpoint === 'xs' ? undefined : this.expandOnBreakpoint);
-    });
-    readonly isMediaQueryMatched = $derived(this.expandOnBreakpoint === 'xs' || (this.#mediaQuery?.current ?? false));
+    #mediaQuery = $derived.by(() => createBreakpointMatch(this.expandOnBreakpoint));
+    readonly isMediaQueryMatched = $derived(this.#mediaQuery?.current ?? false);
     #togglers: HTMLButtonElement[] = [];
     // Plain registry: effects may write ariaControls, but must not read it (or a
     // reactive registry) and subscribe to their own writes. Every target is controlled.
@@ -165,9 +164,13 @@ export class OffcanvasRootState {
     #isShown: boolean = $state(false);
     #useBackdrop: OffcanvasBackdrop = $state(true);
     #navbarRootState: NavbarRootState | undefined;
-    readonly showOnBreakpoint = $derived.by(() => resolveBreakpoint(this.props.showOnBreakpoint));
+    readonly showOnBreakpoint: OffcanvasBreakpoint | undefined = $derived.by(() => {
+        const breakpoint = resolveBreakpoint(this.props.showOnBreakpoint);
+        // Bootstrap has no offcanvas-xs mode. Legacy/untyped xs follows omitted-prop behavior.
+        return breakpoint === 'xs' ? undefined : breakpoint;
+    });
     // Only explicit panel breakpoints create a query. Inheritance shares Navbar's match below.
-    #mediaQuery = $derived.by(() => createBreakpointQuery(this.showOnBreakpoint));
+    #mediaQuery = $derived.by(() => createBreakpointMatch(this.showOnBreakpoint));
     // Public
     readonly isMediaQueryMatched: boolean = $derived.by(() =>
         this.showOnBreakpoint ? (this.#mediaQuery?.current ?? false) : (this.#navbarRootState?.isMediaQueryMatched ?? false)

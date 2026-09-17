@@ -119,7 +119,7 @@ export const BreakpointMaximumMediaQuery: { [index: string]: string } = {
  * See Bootstrap 5 documentation: https://getbootstrap.com/docs/5.3/layout/breakpoints/
  */
 export const BreakpointMinimumMediaQuery: { [index: string]: string } = {
-    xs: '(max-width: 575.98px)',
+    xs: '(min-width: 0px)',
     sm: '(min-width: 576px)',
     md: '(min-width: 768px)',
     lg: '(min-width: 992px)',

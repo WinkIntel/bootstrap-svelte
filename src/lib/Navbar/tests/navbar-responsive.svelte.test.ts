@@ -169,8 +169,7 @@ describe('PR 32 review regressions', () => {
     it.each([
         ['md', 'lg', 800],
         [undefined, 'lg', 800],
-        ['lg', 'xl', 1000],
-        ['xs', 'xs', 1280]
+        ['lg', 'xl', 1000]
     ] as const)('does not let Navbar %s force an unmatched Offcanvas %s open at %spx', async (expandOnBreakpoint, showOnBreakpoint, width) => {
         mockMatchMedia(width);
         const { rerender } = render(NavbarResponsiveTest, { expandOnBreakpoint, showOnBreakpoint });
