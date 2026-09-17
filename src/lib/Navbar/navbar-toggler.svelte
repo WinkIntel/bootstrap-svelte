@@ -1,7 +1,7 @@
 <!--
 @component
 ## Navbar.Toggler
-Toggle button for collapsible navbar content. Controls the expansion/collapse of Navbar.Collapse component.
+Toggle button for Navbar.Collapse and nested Offcanvas.Root panels.
 
 @example
 ```svelte
@@ -36,6 +36,8 @@ Toggle button for collapsible navbar content. Controls the expansion/collapse of
 ```
 
 ### Props
+- `aria-controls` (string): Optional. Overrides the automatic space-separated IDs of rendered controlled panels.
+- `aria-expanded` (boolean): Managed by Navbar expansion state; consumer values do not override it.
 - `ariaLabel` (string): Optional. Accessibility label for the toggle button. Defaults to 'Toggle navigation'.
 - `children`: Optional. Content to render inside the toggle button.
 - `class` (string): Optional. Additional CSS classes to apply to the toggle button.
@@ -82,12 +84,12 @@ Toggle button for collapsible navbar content. Controls the expansion/collapse of
     };
 
     function registerToggler(element: HTMLButtonElement) {
-        return { destroy: togglerState.root.registerToggler(element) };
+        return togglerState.root.registerToggler(element);
     }
 </script>
 
 <button
-    use:registerToggler
+    {@attach registerToggler}
     {...restOfProps}
     aria-controls={ariaControls}
     aria-expanded={isExpanded}

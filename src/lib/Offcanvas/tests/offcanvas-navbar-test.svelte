@@ -10,12 +10,16 @@
         isShown,
         id,
         ariaControls,
+        togglerDisabled = false,
+        fieldsetDisabled = false,
         renderOffcanvas = true,
         renderToggler = true,
         renderCollapse = false,
         renderFollowingCollapse = false
     }: Pick<Offcanvas.RootProps, 'id' | 'onShown' | 'onHidden' | 'onHidePrevented' | 'useBackdrop' | 'showOnBreakpoint' | 'isShown'> & {
         ariaControls?: string;
+        togglerDisabled?: boolean;
+        fieldsetDisabled?: boolean;
         renderOffcanvas?: boolean;
         renderToggler?: boolean;
         renderCollapse?: boolean;
@@ -26,7 +30,10 @@
 <Navbar.Root expandOnBreakpoint="lg">
     <Container>
         {#if renderToggler}
-            <Navbar.Toggler aria-controls={ariaControls} data-testid="navbar-toggler"><Navbar.TogglerIcon /></Navbar.Toggler>
+            <fieldset disabled={fieldsetDisabled}>
+                <Navbar.Toggler disabled={togglerDisabled} aria-controls={ariaControls} data-testid="navbar-toggler"
+                    ><Navbar.TogglerIcon /></Navbar.Toggler>
+            </fieldset>
         {/if}
         {#if renderCollapse}
             <Navbar.Collapse id="fallback-collapse">Fallback</Navbar.Collapse>

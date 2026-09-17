@@ -1,6 +1,6 @@
 import { Context } from '$lib/common/index.js';
 import { BreakpointMinimumMediaQuery } from '$lib/common/types.js';
-import { onDestroy, tick } from 'svelte';
+import { tick } from 'svelte';
 import { MediaQuery } from 'svelte/reactivity';
 import type { Navbar, Offcanvas } from '../index.js';
 import type { OffcanvasBackdrop, OffcanvasBreakpoint } from '../Offcanvas/types.js';
@@ -15,8 +15,9 @@ export class NavbarRootState {
     #expandOnBreakpoint: string = $state('xs');
     #mediaQuery: MediaQuery | undefined = $state(undefined);
     #togglers: HTMLButtonElement[] = [];
-    // Keep registration order stable across ID changes; the last mounted target wins.
-    #controlledIds: { key: symbol; id: string }[] = [];
+    // Plain registry: effects may write ariaControls, but must not read it (or a
+    // reactive registry) and subscribe to their own writes. Every target is controlled.
+    #controlledIds: { key: symbol; id: string | undefined }[] = [];
     // Public
     ariaControls: string | undefined = $state(undefined);
     transitionDuration = $state(0);
@@ -53,19 +54,37 @@ export class NavbarRootState {
         return `${this.props.id || 'navbar'}-collapse`;
     }
 
-    registerControlledId(key: symbol, id: string) {
+    registerControlledId(key: symbol, id: string | undefined) {
         const entry = this.#controlledIds.find((target) => target.key === key);
         if (entry) {
             entry.id = id;
         } else {
             this.#controlledIds.push({ key, id });
         }
-        this.ariaControls = this.#controlledIds.at(-1)?.id;
+        this.ariaControls =
+            this.#controlledIds
+                .map((target) => target.id)
+                .filter(Boolean)
+                .join(' ') || undefined;
     }
 
     unregisterControlledId(key: symbol) {
         this.#controlledIds = this.#controlledIds.filter((target) => target.key !== key);
-        this.ariaControls = this.#controlledIds.at(-1)?.id;
+        this.ariaControls =
+            this.#controlledIds
+                .map((target) => target.id)
+                .filter(Boolean)
+                .join(' ') || undefined;
+    }
+
+    // Attach to a rendered panel. Keep one entry through ID changes and remove
+    // it when the element leaves the DOM, including after its outro.
+    registerControlledPanel(getId: () => string | undefined) {
+        const key = Symbol('navbar-panel');
+        $effect(() => {
+            this.registerControlledId(key, getId());
+        });
+        return () => this.unregisterControlledId(key);
     }
 
     registerToggler(element: HTMLButtonElement) {
@@ -75,8 +94,10 @@ export class NavbarRootState {
         };
     }
 
-    isTogglerEvent(event: Event): boolean {
-        return event.composedPath().some((target) => this.#togglers.includes(target as HTMLButtonElement));
+    isTogglerEvent(event: MouseEvent): boolean {
+        if (event.button !== 0) return false;
+        const path = event.composedPath();
+        return this.#togglers.some((toggler) => !toggler.matches(':disabled') && path.includes(toggler));
     }
 
     toggleIsExpanded() {
@@ -124,14 +145,7 @@ export class NavbarCollapseState {
     constructor(
         readonly props: Navbar.CollapseProps,
         readonly root: NavbarRootState
-    ) {
-        const key = Symbol('navbar-collapse');
-        this.root.registerControlledId(key, this.id);
-        $effect(() => {
-            this.root.registerControlledId(key, this.id);
-        });
-        onDestroy(() => this.root.unregisterControlledId(key));
-    }
+    ) {}
 }
 
 /**
@@ -155,17 +169,6 @@ export class OffcanvasRootState {
         this.#useBackdrop = this.props.useBackdrop ?? true;
         if (NavbarRootContext.exists()) {
             this.#navbarRootState = NavbarRootContext.get();
-            const navbar = this.#navbarRootState;
-            const key = Symbol('navbar-offcanvas');
-            if (this.props.id) navbar.registerControlledId(key, this.props.id);
-            $effect(() => {
-                if (this.props.id) {
-                    navbar.registerControlledId(key, this.props.id);
-                } else {
-                    navbar.unregisterControlledId(key);
-                }
-            });
-            onDestroy(() => navbar.unregisterControlledId(key));
             this.showOnBreakpoint = this.#navbarRootState.props.expandOnBreakpoint;
             $effect(() => {
                 if (this.#navbarRootState && this.#isShown !== this.#navbarRootState.isExpanded) {
@@ -216,8 +219,12 @@ export class OffcanvasRootState {
         return this.isShown && this.#useBackdrop && !this.isMediaQueryMatched;
     }
 
-    isControllingTogglerEvent(event: Event): boolean {
+    isControllingTogglerEvent(event: MouseEvent): boolean {
         return this.#navbarRootState?.isTogglerEvent(event) ?? false;
+    }
+
+    registerControlledPanel() {
+        return this.#navbarRootState?.registerControlledPanel(() => this.props.id ?? undefined);
     }
 
     toggleIsShown() {

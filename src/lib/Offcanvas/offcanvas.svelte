@@ -242,7 +242,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     });
 
     // Dismiss the offcanvas when the backdrop is clicked...
-    const handleBackdropMouseDown: EventListener = (event: Event) => {
+    const handleBackdropMouseDown = (event: MouseEvent) => {
         if (!isTopOverlay(overlayEntry) || useBackdrop === false) return;
         // Its click handler owns this state change; mousedown must not dismiss it first.
         if (rootState.isControllingTogglerEvent(event)) return;
@@ -280,6 +280,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 
 {#if rootState.isShown}
     <div
+        {@attach () => rootState.registerControlledPanel()}
         aria-modal={rootState.isShown}
         bind:this={elementRef}
         class={classes}

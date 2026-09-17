@@ -87,6 +87,7 @@ Collapsible container for navbar content that toggles when the navbar toggler is
 </script>
 
 <Collapse
+    {@attach () => collapseState.root.registerControlledPanel(() => collapseState.id)}
     {...restOfProps}
     bind:elementRef
     class={classes}

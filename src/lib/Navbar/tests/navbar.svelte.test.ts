@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Navbar } from '../index.js';
@@ -30,11 +30,17 @@ describe('Navbar Component', () => {
         expect(screen.getByTestId('default-toggler')).not.toHaveAttribute('aria-controls');
     });
 
-    it('uses the registered collapse id after the collapse mounts', async () => {
+    it('references a collapse only while its element is rendered', async () => {
         render(NavbarTogglerTest);
-        await tick();
+        const toggler = screen.getByTestId('registered-controls-toggler');
+        expect(toggler).not.toHaveAttribute('aria-controls');
 
-        expect(screen.getByTestId('registered-controls-toggler')).toHaveAttribute('aria-controls', 'registered-navbar-collapse');
+        await fireEvent.click(toggler);
+        await screen.findByText('Registered collapse');
+        expect(toggler).toHaveAttribute('aria-controls', 'registered-navbar-collapse');
+        await fireEvent.click(toggler);
+        await waitFor(() => expect(document.getElementById('registered-navbar-collapse')).not.toBeInTheDocument());
+        expect(toggler).not.toHaveAttribute('aria-controls');
     });
 
     it('preserves explicit aria-controls after a collapse sibling registers', async () => {

@@ -3,6 +3,13 @@ import { describe, expect, it } from 'vitest';
 import NavbarTogglerSsrTest from './navbar-toggler-ssr-test.svelte';
 
 describe('Navbar.Toggler SSR', () => {
+    it('does not reference an unrendered offcanvas even when that component precedes the toggler', () => {
+        const { body } = render(NavbarTogglerSsrTest);
+
+        expect(body).not.toContain('id="absent-offcanvas"');
+        expect(body).toMatch(/<button(?=[^>]*id="offcanvas-toggler")(?![^>]*aria-controls)[^>]*>/);
+    });
+
     it('preserves an explicit aria-controls before the collapse sibling registers', () => {
         const { body } = render(NavbarTogglerSsrTest);
 

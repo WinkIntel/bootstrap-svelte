@@ -581,9 +581,10 @@
         <h2 class="wk-quick-link">Offcanvas</h2>
         <p>Transform your navbar with an offcanvas component that displays navigation content when the navbar is collapsed or expanded.</p>
         <p>
-            <code>Navbar.Toggler</code> automatically receives <code>aria-controls</code> for the nested <code>Offcanvas.Root</code>, including when
-            the panel uses a generated ID. The association follows ID changes and is cleared when the panel is removed, or falls back to another
-            registered panel. An explicit <code>aria-controls</code> on the toggler takes precedence.
+            <code>Navbar.Toggler</code> automatically receives <code>aria-controls</code> while the nested <code>Offcanvas.Root</code> is rendered,
+            including when the panel uses a generated ID. The association follows ID changes and is removed when the panel leaves the DOM after
+            closing. When multiple controlled panels are rendered, their IDs are listed together. An explicit <code>aria-controls</code> on the toggler
+            takes precedence.
         </p>
         <div class="alert alert-info">
             <strong>Responsive Behavior:</strong> The offcanvas content will automatically show when the navbar expands at the XL breakpoint, creating a
@@ -745,10 +746,11 @@
                     <tr>
                         <td><code>aria-controls</code></td>
                         <td><code>string</code></td>
-                        <td>Registered panel ID</td>
+                        <td>Rendered panel IDs</td>
                         <td>
-                            Automatically identifies the registered Navbar.Collapse or nested Offcanvas.Root and follows its ID changes. An explicit
-                            value overrides the automatic association. Omitted when no panel is registered and no override is provided.
+                            Automatically lists the IDs of rendered Navbar.Collapse and nested Offcanvas.Root panels, separated by spaces, and follows
+                            their ID changes. An explicit value overrides the automatic association. Omitted when no target ID or override is
+                            available.
                         </td>
                     </tr>
                     <tr>

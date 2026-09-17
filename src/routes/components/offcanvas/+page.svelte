@@ -230,7 +230,8 @@
         </p>
         <p>
             When the panel is nested in a <code>Navbar.Root</code>, its <code>Navbar.Toggler</code> can open and close it with any backdrop setting,
-            provided the toggler remains reachable above the backdrop. A controlling toggler click changes visibility once and does not trigger
+            provided the toggler is enabled and remains reachable above the backdrop. A controlling toggler click changes visibility once and does not
+            trigger
             <code>onHidePrevented</code>. Clicking outside a panel with a static backdrop still triggers that callback and keeps the panel open.
         </p>
 
