@@ -14,6 +14,10 @@ export class NavbarRootState {
     #isExpanded: boolean = $state(false);
     #expandOnBreakpoint: string = $state('xs');
     #mediaQuery: MediaQuery | undefined = $state(undefined);
+    #togglers: HTMLButtonElement[] = [];
+    // Plain registry: effects may write ariaControls, but must not read it (or a
+    // reactive registry) and subscribe to their own writes. Every target is controlled.
+    #controlledIds: { key: symbol; id: string | undefined }[] = [];
     // Public
     ariaControls: string | undefined = $state(undefined);
     transitionDuration = $state(0);
@@ -48,6 +52,52 @@ export class NavbarRootState {
 
     get defaultCollapseId(): string {
         return `${this.props.id || 'navbar'}-collapse`;
+    }
+
+    registerControlledId(key: symbol, id: string | undefined) {
+        const entry = this.#controlledIds.find((target) => target.key === key);
+        if (entry) {
+            entry.id = id;
+        } else {
+            this.#controlledIds.push({ key, id });
+        }
+        this.ariaControls =
+            this.#controlledIds
+                .map((target) => target.id)
+                .filter(Boolean)
+                .join(' ') || undefined;
+    }
+
+    unregisterControlledId(key: symbol) {
+        this.#controlledIds = this.#controlledIds.filter((target) => target.key !== key);
+        this.ariaControls =
+            this.#controlledIds
+                .map((target) => target.id)
+                .filter(Boolean)
+                .join(' ') || undefined;
+    }
+
+    // Attach to a rendered panel. Keep one entry through ID changes and remove
+    // it when the element leaves the DOM, including after its outro.
+    registerControlledPanel(getId: () => string | undefined) {
+        const key = Symbol('navbar-panel');
+        $effect(() => {
+            this.registerControlledId(key, getId());
+        });
+        return () => this.unregisterControlledId(key);
+    }
+
+    registerToggler(element: HTMLButtonElement) {
+        this.#togglers.push(element);
+        return () => {
+            this.#togglers = this.#togglers.filter((toggler) => toggler !== element);
+        };
+    }
+
+    isTogglerEvent(event: MouseEvent): boolean {
+        if (event.button !== 0) return false;
+        const path = event.composedPath();
+        return this.#togglers.some((toggler) => !toggler.matches(':disabled') && path.includes(toggler));
     }
 
     toggleIsExpanded() {
@@ -95,9 +145,7 @@ export class NavbarCollapseState {
     constructor(
         readonly props: Navbar.CollapseProps,
         readonly root: NavbarRootState
-    ) {
-        this.root.ariaControls = this.props.id || this.root.defaultCollapseId;
-    }
+    ) {}
 }
 
 /**
@@ -169,6 +217,14 @@ export class OffcanvasRootState {
 
     get isBackdropShown(): boolean {
         return this.isShown && this.#useBackdrop && !this.isMediaQueryMatched;
+    }
+
+    isControllingTogglerEvent(event: MouseEvent): boolean {
+        return this.#navbarRootState?.isTogglerEvent(event) ?? false;
+    }
+
+    registerControlledPanel() {
+        return this.#navbarRootState?.registerControlledPanel(() => this.props.id ?? undefined);
     }
 
     toggleIsShown() {

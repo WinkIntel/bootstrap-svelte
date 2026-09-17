@@ -1,11 +1,17 @@
 <script lang="ts">
     import { Navbar } from '$lib/Navbar/index.js';
+    import { Offcanvas } from '$lib/Offcanvas/index.js';
 </script>
 
 <div id="consumer-collapse"></div>
 <Navbar.Root>
     <Navbar.Toggler aria-controls="consumer-collapse">Menu</Navbar.Toggler>
     <Navbar.Collapse id="generated-collapse">Content</Navbar.Collapse>
+</Navbar.Root>
+
+<Navbar.Root expandOnBreakpoint="lg">
+    <Offcanvas.Root id="absent-offcanvas">Panel</Offcanvas.Root>
+    <Navbar.Toggler id="offcanvas-toggler">Offcanvas menu</Navbar.Toggler>
 </Navbar.Root>
 
 <Navbar.Root id="default-navbar">

@@ -79,10 +79,6 @@ Collapsible container for navbar content that toggles when the navbar toggler is
     let transitionDuration = $derived(transitionDurationOverride ?? collapseState.root.transitionDuration);
     let isExpandedState = $derived(collapseState.isExpanded);
 
-    $effect(() => {
-        collapseState.root.ariaControls = collapseState.id;
-    });
-
     function handleOnCollapsed(event: Event) {
         // This will ensure that not transition animation will occur when the Navbar is expanded...
         collapseState.root.transitionDuration = 0;
@@ -91,6 +87,7 @@ Collapsible container for navbar content that toggles when the navbar toggler is
 </script>
 
 <Collapse
+    {@attach () => collapseState.root.registerControlledPanel(() => collapseState.id)}
     {...restOfProps}
     bind:elementRef
     class={classes}

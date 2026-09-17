@@ -222,10 +222,17 @@
         <h2 class="wk-quick-link">Backdrop Options</h2>
         <p>
             You can control the behavior of the backdrop with the <code>useBackdrop</code> prop. It accepts three values:
-            <code>true</code> (default, clickable backdrop), <code>"static"</code> (backdrop present but not clickable), or <code>false</code> (no
-            backdrop). With <code>false</code>, outside clicks do not dismiss the panel. Use Escape (when keyboard dismissal is enabled), a dismiss
-            button, the navbar toggler, or the <code>isShown</code> prop to close it. If you need click-away dismissal, enable the backdrop or provide your
-            own outside-click handler.
+            <code>true</code> (default, click outside to dismiss), <code>"static"</code> (backdrop present; outside clicks do not dismiss), or
+            <code>false</code>
+            (no backdrop). With <code>false</code>, outside clicks do not dismiss the panel. Use Escape (when keyboard dismissal is enabled), a
+            dismiss button, the navbar toggler, or the <code>isShown</code> prop to close it. If you need click-away dismissal, enable the backdrop or provide
+            your own outside-click handler.
+        </p>
+        <p>
+            When the panel is nested in a <code>Navbar.Root</code>, its <code>Navbar.Toggler</code> can open and close it with any backdrop setting,
+            provided the toggler is enabled and remains reachable above the backdrop. A controlling toggler click changes visibility once and does not
+            trigger
+            <code>onHidePrevented</code>. Clicking outside a panel with a static backdrop still triggers that callback and keeps the panel open.
         </p>
 
         <div class="card mb-3">
