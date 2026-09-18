@@ -8,7 +8,8 @@ import OffcanvasXsTest from './offcanvas-xs-test.svelte';
 const legacyXs = 'xs' as OffcanvasBreakpoint;
 
 describe('legacy Offcanvas xs SSR', () => {
-    it('exposes only Bootstrap-supported responsive sizes in the public prop', () => {
+    it('exposes only Bootstrap-supported responsive sizes (checked by pnpm check-types)', () => {
+        // Vitest transpiles this assertion; svelte-check enforces it during pnpm check-types and CI.
         expectTypeOf<NonNullable<Offcanvas.RootProps['showOnBreakpoint']>>().toEqualTypeOf<'sm' | 'md' | 'lg' | 'xl' | 'xxl'>();
     });
     it('keeps a standalone panel closed unless explicitly shown', () => {
@@ -24,5 +25,12 @@ describe('legacy Offcanvas xs SSR', () => {
         expect(body).toContain('class="offcanvas offcanvas-start show"');
         expect(body).not.toContain('offcanvas-backdrop');
         expect(body).not.toContain('offcanvas-xs');
+    });
+    it.each([false, 'lg'] as const)('inherits collapsed Navbar %s without browser APIs', (expandOnBreakpoint) => {
+        const { body } = render(NavbarResponsiveTest, { props: { expandOnBreakpoint, showOnBreakpoint: legacyXs } });
+        expect(body).toContain('aria-expanded="false"');
+        expect(body).not.toContain('data-testid="responsive-offcanvas"');
+        expect(body).not.toContain('role="dialog"');
+        expect(body).not.toContain('offcanvas-backdrop');
     });
 });

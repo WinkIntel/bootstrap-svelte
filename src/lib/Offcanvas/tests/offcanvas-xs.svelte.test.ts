@@ -44,6 +44,26 @@ describe('legacy Offcanvas xs normalization', () => {
         expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
     });
 
+    it.each([390, 1280])('inherits a never-inline Navbar and can open, close, and reopen at %spx', async (width) => {
+        mockMatchMedia(width);
+        render(NavbarResponsiveTest, { expandOnBreakpoint: false, showOnBreakpoint: legacyXs });
+        expect(screen.queryByTestId('responsive-offcanvas')).not.toBeInTheDocument();
+        const toggler = screen.getByTestId('responsive-toggler');
+        expect(toggler).toHaveAttribute('aria-expanded', 'false');
+        await fireEvent.click(toggler);
+        await waitFor(() => expect(screen.getByTestId('responsive-offcanvas')).toHaveClass('offcanvas', 'show'));
+        expect(screen.getByTestId('responsive-offcanvas')).not.toHaveClass('offcanvas-xs');
+        expect(document.querySelector('.offcanvas-backdrop')).toBeInTheDocument();
+        expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1');
+        await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        await waitFor(() => expect(screen.queryByTestId('responsive-offcanvas')).not.toBeInTheDocument());
+        await waitFor(() => expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument());
+        expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
+        await fireEvent.click(toggler);
+        await waitFor(() => expect(screen.getByTestId('responsive-offcanvas')).toHaveClass('offcanvas', 'show'));
+        expect(toggler).toHaveAttribute('aria-expanded', 'true');
+    });
+
     it('inherits a responsive Navbar and remains dismissible below its breakpoint', async () => {
         const viewport = mockMatchMedia(800);
         render(NavbarResponsiveTest, { expandOnBreakpoint: 'lg', showOnBreakpoint: legacyXs });

@@ -33,7 +33,7 @@ Runtime changes to the breakpoint now replace the previous responsive subscripti
 
 ## Remove Offcanvas `showOnBreakpoint="xs"`
 
-`OffcanvasBreakpoint` and `Offcanvas.RootProps['showOnBreakpoint']` now accept only `sm`, `md`, `lg`, `xl`, and `xxl`. Bootstrap has no `offcanvas-xs` class. Update both component markup and any typed configuration containing `"xs"`.
+`Offcanvas.RootProps['showOnBreakpoint']` now accepts only `sm`, `md`, `lg`, `xl`, and `xxl`. Bootstrap has no `offcanvas-xs` class. Update both component markup and any typed configuration containing `"xs"`.
 
 For a standalone overlay, remove the prop and control visibility normally:
 
@@ -63,12 +63,33 @@ Inside a Navbar, omitting the Offcanvas breakpoint makes the panel inherit the N
 
 For responsive navigation, use a named breakpoint such as `"lg"` on the Navbar and omit the Offcanvas breakpoint. Set an explicit, supported Offcanvas breakpoint only when the panel should use its own responsive threshold.
 
+A default/`xs` Navbar containing `<Offcanvas.Root showOnBreakpoint="lg">` needs particular attention: below `lg`, the panel is closed while the always-inline Navbar hides its toggler. Forcing `Navbar.Toggler` visible with CSS does not fix this, because inline Navbar mode also clears toggler-opened state. Move the breakpoint to the Navbar so both components share the same mode:
+
+```svelte
+<!-- Before: the Navbar default and the panel's own breakpoint disagree -->
+<Navbar.Root>
+    <Navbar.Toggler />
+    <Offcanvas.Root showOnBreakpoint="lg">
+        <!-- Navigation content -->
+    </Offcanvas.Root>
+</Navbar.Root>
+
+<!-- After: the toggler and panel share the lg breakpoint -->
+<Navbar.Root expandOnBreakpoint="lg">
+    <Navbar.Toggler />
+    <Offcanvas.Root>
+        <!-- Navigation content -->
+    </Offcanvas.Root>
+</Navbar.Root>
+```
+
+If independent thresholds are intentional, use a separate reachable trigger that updates the Offcanvas `isShown` prop where the Navbar is inline but the panel is an overlay. `Navbar.Toggler` cannot control that combination.
+
 Legacy JavaScript or untyped input that still supplies `"xs"` is treated as an omitted Offcanvas breakpoint: standalone panels become overlays, and nested panels inherit their Navbar's mode. This runtime fallback does not preserve TypeScript source compatibility or the old behavior; update those usages before upgrading.
 
 ## Check custom breakpoint and visibility logic
 
-- `BreakpointMinimumMediaQuery.xs` now means `(min-width: 0px)`, matching all viewport widths. If custom code used it to detect only the smallest size, use `BreakpointMaximumMediaQuery.xs` instead. The maximum-width map and BreakpointListener's size ranges are unchanged.
-- A nested Offcanvas with its own explicit breakpoint follows that breakpoint for inline visibility. A parent Navbar's responsive match no longer forces an unmatched panel open. Ensure a trigger remains available wherever that panel becomes an overlay.
+- A nested Offcanvas with its own explicit breakpoint follows that breakpoint for inline visibility. A parent Navbar's responsive match no longer forces an unmatched panel open. Prefer the shared-breakpoint setup above so the Navbar toggler remains usable whenever the panel becomes an overlay.
 - Navbar toggler-opened state is cleared when navigation becomes inline. Resizing back below the breakpoint leaves it collapsed until opened again. Explicit visibility assignments are preserved separately until a subsequent visibility action replaces them.
 
 ## Verify the consuming application
