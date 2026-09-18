@@ -1,10 +1,22 @@
 import type { Attachment } from 'svelte/attachments';
 import type { CollapseAriaOptions } from './types.js';
 
+type AttributeWrite = {
+    name: string;
+    previous: string | null;
+    written: string;
+    previousWrite?: AttributeWrite;
+};
+
+// Track this helper's live writes so cleanup cannot resurrect a removed attachment.
+const liveWrites = new WeakMap<HTMLElement, Map<string, AttributeWrite[]>>();
+
 /**
  * Applies browser-only ARIA attributes; does not discover targets or provide SSR attributes.
  * Cleanup restores only values still matching this attachment's writes. Identical writes
- * from another owner cannot be distinguished. Each reattachment reapplies ariaExpanded.
+ * from a consumer cannot be distinguished. With Svelte-managed attributes, cleanup may
+ * leave the DOM out of sync until the bound value changes again, because Svelte caches
+ * its last write. Each reattachment reapplies ariaExpanded.
  */
 export function collapseAria(options: CollapseAriaOptions): Attachment<HTMLElement> {
     return (element: HTMLElement) => {
@@ -19,9 +31,23 @@ export function collapseAria(options: CollapseAriaOptions): Attachment<HTMLEleme
             throw new Error('CollapseAria: options.ariaExpanded must be a boolean');
         }
 
-        const changes: { name: string; previous: string | null; written: string }[] = [];
+        // eslint-disable-next-line svelte/prefer-svelte-reactivity -- ownership bookkeeping must not subscribe or retrigger attachments
+        const writes = liveWrites.get(element) ?? new Map<string, AttributeWrite[]>();
+        liveWrites.set(element, writes);
+        const changes: AttributeWrite[] = [];
         function writeAttribute(name: string, written: string) {
-            changes.push({ name, previous: element.getAttribute(name), written });
+            const previous = element.getAttribute(name);
+            const attributeWrites = writes.get(name) ?? [];
+            const previousWrite = attributeWrites.at(-1);
+            const change: AttributeWrite = {
+                name,
+                previous,
+                written,
+                previousWrite: previousWrite?.written === previous ? previousWrite : undefined
+            };
+            changes.push(change);
+            attributeWrites.push(change);
+            writes.set(name, attributeWrites);
             element.setAttribute(name, written);
         }
 
@@ -40,11 +66,26 @@ export function collapseAria(options: CollapseAriaOptions): Attachment<HTMLEleme
 
         // Leave later consumer changes (including removals) intact.
         return () => {
-            for (const { name, previous, written } of changes) {
-                if (element.getAttribute(name) !== written) continue;
-                if (previous === null) element.removeAttribute(name);
-                else element.setAttribute(name, previous);
+            for (const change of changes) {
+                const attributeWrites = writes.get(change.name);
+                const index = attributeWrites?.indexOf(change) ?? -1;
+                if (!attributeWrites || index < 0) continue;
+                const isLatest = attributeWrites.at(-1) === change;
+                // Splice this writer out of later baselines, even when cleanup is not LIFO.
+                // Only link helper-owned values; intervening consumer writes stay baselines.
+                for (const later of attributeWrites) {
+                    if (later.previousWrite === change) {
+                        later.previous = change.previous;
+                        later.previousWrite = change.previousWrite;
+                    }
+                }
+                attributeWrites.splice(index, 1);
+                if (attributeWrites.length === 0) writes.delete(change.name);
+                if (!isLatest || element.getAttribute(change.name) !== change.written) continue;
+                if (change.previous === null) element.removeAttribute(change.name);
+                else element.setAttribute(change.name, change.previous);
             }
+            if (writes.size === 0 && liveWrites.get(element) === writes) liveWrites.delete(element);
         };
     };
 }

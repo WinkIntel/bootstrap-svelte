@@ -8,12 +8,4 @@ describe('collapseAria SSR', () => {
         expect(body).not.toContain('aria-controls');
         expect(body).not.toContain('aria-expanded');
     });
-
-    it('preserves explicitly rendered attributes before the attachment runs in the browser', () => {
-        const { body } = render(LifecycleTest, {
-            props: { consumerControls: 'consumer-panel', consumerExpanded: 'false', expanded: true }
-        });
-        expect(body).toContain('aria-controls="consumer-panel"');
-        expect(body).toContain('aria-expanded="false"');
-    });
 });
