@@ -405,9 +405,25 @@
     <section class="mb-5 wk-api-section" id="api">
         <h2 class="wk-quick-link">API Reference</h2>
 
-        <h3>Scrollspy Attachment</h3>
+        <h3>Collapse ARIA Attachment</h3>
         <p>
             The <code>collapseAria</code> function creates an attachment that can be applied to an element with the <code>{`{@attach ...}`}</code> directive.
+        </p>
+        <p>
+            The attachment preserves existing <code>aria-controls</code> and <code>role</code> attributes, and sets <code>aria-expanded</code> from the
+            supplied state. On cleanup, it restores the previous expanded value or removes attributes it introduced, but only when their current values
+            still match its own writes. Later consumer changes, including attribute removal, are left intact. Ownership is value-based: an identical later
+            write cannot be distinguished from the attachment's write.
+        </p>
+        <p>
+            Reactive option changes clean up and reattach: attachment-owned target IDs update, consumer target overrides remain, and the new
+            <code>ariaExpanded</code> value is applied. A later consumer-expanded value is preserved on cleanup if it differs from the attachment's write,
+            but the next attachment takes control of expanded state again.
+        </p>
+        <p>
+            This helper runs in the browser. For server-rendered accessibility, also supply <code>aria-controls</code> and <code>aria-expanded</code>
+            directly in your markup. It does not discover or register a controlled component; <code>ariaControls</code> remains required and should identify
+            your Collapse target. It does not replace Navbar or Offcanvas trigger ownership.
         </p>
         <div class="card mb-3">
             <div class="card-body">

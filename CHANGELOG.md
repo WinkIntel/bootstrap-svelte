@@ -2,6 +2,10 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## Unreleased
+
+- Fixed `collapseAria` cleanup and reactive reattachment deleting consumer-owned ARIA attributes and roles ([#29](https://github.com/WinkIntel/bootstrap-svelte/issues/29)). Cleanup restores previous expanded state and removes attachment-created attributes only while their current values still match the attachment's writes, preserving later consumer changes. The required `ariaControls` API and Svelte peer range are unchanged; browser-only behavior and value-based ownership are documented.
+
 ## 2.0.0 — 2026-09-18
 
 See the [1.x to 2.0 migration guide](MIGRATION.md) before upgrading. The Svelte peer requirement remains `^5.29.0`.
