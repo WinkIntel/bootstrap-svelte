@@ -1,6 +1,6 @@
 # Migrating from 1.x to 2.0
 
-Version **2.0.0 is planned and has not been released**. This guide covers the Navbar and Offcanvas changes currently under development. The package version will be updated separately when the release is prepared.
+Version **2.0.0** includes breaking Navbar and Offcanvas changes. This guide explains how to update a 1.x application before upgrading.
 
 The Svelte peer requirement remains `^5.29.0`. Continue importing Bootstrap 5 CSS in your application.
 

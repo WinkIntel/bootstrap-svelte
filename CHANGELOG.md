@@ -2,9 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## Unreleased
+## 2.0.0 — 2026-09-18
 
-The changes below target a future **2.0.0** release. See the [1.x to 2.0 migration guide](MIGRATION.md) before upgrading. No 2.0.0 release has been published yet.
+See the [1.x to 2.0 migration guide](MIGRATION.md) before upgrading. The Svelte peer requirement remains `^5.29.0`.
+
+- Fixed Navbar-owned togglers dismissing an Offcanvas on mousedown before their click toggled it again. Owning enabled primary-button presses now leave the state change to the toggler; unrelated outside presses retain normal backdrop behavior ([#26](https://github.com/WinkIntel/bootstrap-svelte/issues/26)).
+- Automatically associate Navbar togglers with rendered Collapse and Offcanvas panel IDs through `aria-controls`, preserve explicit consumer overrides, and update registrations when IDs change or panels leave the DOM.
 
 - **Breaking type correction:** `Offcanvas.RootProps['showOnBreakpoint']` now accepts only `sm`, `md`, `lg`, `xl`, and `xxl`, matching Bootstrap's responsive Offcanvas classes ([#33](https://github.com/WinkIntel/bootstrap-svelte/issues/33)). Remove `showOnBreakpoint="xs"`: omitted standalone panels remain dismissible overlays; omitted nested panels inherit the Navbar's responsive mode. Legacy/untyped runtime `xs` is normalized to omitted, so default/`xs` Navbar content remains reachable at every width and `offcanvas-xs` is never emitted. For always-inline Navbar content, select `expandOnBreakpoint="xs"` on Navbar and omit the panel breakpoint.
 - Corrected the internal minimum-width map's `xs` entry to `(min-width: 0px)`. The maps are not public runtime exports and require no consumer migration. Navbar's unconditional `xs` handling continues to provide SSR consistency independently of the map; the maximum-width map and BreakpointListener's size ranges are unchanged.

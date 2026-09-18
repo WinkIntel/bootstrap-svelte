@@ -17,7 +17,7 @@ Use it when you want Bootstrap's familiar grid, utilities, and UI patterns in a 
 - Documentation: <https://bootstrap-svelte.vercel.app/>
 - npm: [`@winkintel/bootstrap-svelte`](https://www.npmjs.com/package/@winkintel/bootstrap-svelte)
 - Repository: [`WinkIntel/bootstrap-svelte`](https://github.com/WinkIntel/bootstrap-svelte)
-- Planned 2.0 upgrade: [Migration guide](https://github.com/WinkIntel/bootstrap-svelte/blob/main/MIGRATION.md) (unreleased)
+- Upgrading from 1.x: [2.0 migration guide](https://github.com/WinkIntel/bootstrap-svelte/blob/v2.0.0/MIGRATION.md)
 - Bootstrap: <https://getbootstrap.com/>
 - Svelte: <https://svelte.dev/>
 
