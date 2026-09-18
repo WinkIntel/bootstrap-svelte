@@ -1,6 +1,11 @@
 import type { Attachment } from 'svelte/attachments';
 import type { CollapseAriaOptions } from './types.js';
 
+/**
+ * Applies browser-only ARIA attributes; does not discover targets or provide SSR attributes.
+ * Cleanup restores only values still matching this attachment's writes. Identical writes
+ * from another owner cannot be distinguished. Each reattachment reapplies ariaExpanded.
+ */
 export function collapseAria(options: CollapseAriaOptions): Attachment<HTMLElement> {
     return (element: HTMLElement) => {
         // Sanity check the options...
@@ -14,25 +19,31 @@ export function collapseAria(options: CollapseAriaOptions): Attachment<HTMLEleme
             throw new Error('CollapseAria: options.ariaExpanded must be a boolean');
         }
 
-        // Update the aria-expanded attribute based on isExpanded option
-        element.setAttribute('aria-expanded', options.ariaExpanded.toString());
+        const changes: { name: string; previous: string | null; written: string }[] = [];
+        function writeAttribute(name: string, written: string) {
+            changes.push({ name, previous: element.getAttribute(name), written });
+            element.setAttribute(name, written);
+        }
+
+        // Expanded state belongs to this attachment while active; preserve its baseline.
+        writeAttribute('aria-expanded', options.ariaExpanded.toString());
 
         // Set the aria-controls attribute to link to the controlled element
         if (!element.hasAttribute('aria-controls')) {
-            element.setAttribute('aria-controls', options.ariaControls);
+            writeAttribute('aria-controls', options.ariaControls);
         }
 
         // If the element is not a button, set role="button" for accessibility
         if (element.tagName.toLowerCase() !== 'button' && !element.hasAttribute('role')) {
-            element.setAttribute('role', 'button');
+            writeAttribute('role', 'button');
         }
 
-        // Return cleanup function that will be called when the attachment is removed
+        // Leave later consumer changes (including removals) intact.
         return () => {
-            element.removeAttribute('aria-expanded');
-            element.removeAttribute('aria-controls');
-            if (element.getAttribute('role') === 'button') {
-                element.removeAttribute('role');
+            for (const { name, previous, written } of changes) {
+                if (element.getAttribute(name) !== written) continue;
+                if (previous === null) element.removeAttribute(name);
+                else element.setAttribute(name, previous);
             }
         };
     };
