@@ -3,7 +3,7 @@ import { BreakpointMinimumMediaQuery, type BaseBreakpoint } from '$lib/common/ty
 import { tick } from 'svelte';
 import { MediaQuery } from 'svelte/reactivity';
 import type { Navbar, Offcanvas } from '../index.js';
-import type { OffcanvasBackdrop } from '../Offcanvas/types.js';
+import type { OffcanvasBackdrop, OffcanvasBreakpoint } from '../Offcanvas/types.js';
 
 // Validate untyped consumer input before using it for either state or Bootstrap classes.
 function resolveBreakpoint(value: unknown): BaseBreakpoint | undefined {
@@ -165,7 +165,11 @@ export class OffcanvasRootState {
     #isShown: boolean = $state(false);
     #useBackdrop: OffcanvasBackdrop = $state(true);
     #navbarRootState: NavbarRootState | undefined;
-    readonly showOnBreakpoint = $derived.by(() => resolveBreakpoint(this.props.showOnBreakpoint));
+    readonly showOnBreakpoint: OffcanvasBreakpoint | undefined = $derived.by(() => {
+        const breakpoint = resolveBreakpoint(this.props.showOnBreakpoint);
+        // Bootstrap has no offcanvas-xs mode. Legacy/untyped xs follows omitted-prop behavior.
+        return breakpoint === 'xs' ? undefined : breakpoint;
+    });
     // Only explicit panel breakpoints create a query. Inheritance shares Navbar's match below.
     #mediaQuery = $derived.by(() => createBreakpointQuery(this.showOnBreakpoint));
     // Public

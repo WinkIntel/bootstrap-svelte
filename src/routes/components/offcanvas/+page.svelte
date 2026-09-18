@@ -307,7 +307,13 @@
         <h2 class="wk-quick-link">Responsive Behaviors</h2>
         <p>
             The Offcanvas component can be configured to behave responsively using the <code>showOnBreakpoint</code> prop. When set, the component will
-            be visible as a regular element above the specified breakpoint, and will behave as an offcanvas below it.
+            be visible as a regular element at or above the specified breakpoint, and will behave as an offcanvas below it.
+        </p>
+        <p>
+            Supported breakpoints are <code>sm</code> through <code>xxl</code>. Omit <code>showOnBreakpoint</code> for a standalone dismissible
+            overlay, or to inherit a parent Navbar's mode. For always-inline Navbar content, use <code>Navbar.Root expandOnBreakpoint="xs"</code> and
+            omit the panel's breakpoint. <code>xs</code> is not an Offcanvas breakpoint: remove legacy <code>showOnBreakpoint="xs"</code> usages.
+            Untyped runtime values of <code>xs</code> are treated as omitted, preserving Navbar inheritance without generating an invalid CSS class.
         </p>
 
         <div class="card mb-3">
@@ -403,9 +409,11 @@
                     </tr>
                     <tr>
                         <td><code>showOnBreakpoint</code></td>
-                        <td><code>'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'</code></td>
+                        <td><code>'sm' | 'md' | 'lg' | 'xl' | 'xxl'</code></td>
                         <td><code>undefined</code></td>
-                        <td>Makes the offcanvas visible as a regular element above the specified breakpoint</td>
+                        <td
+                            >Inline at or above the selected breakpoint. Omitted inherits a parent Navbar, or keeps a standalone panel as an overlay.
+                            Legacy runtime <code>xs</code> is treated as omitted.</td>
                     </tr>
                     <tr>
                         <td><code>useBackdrop</code></td>
@@ -551,7 +559,9 @@
         <p>The component applies Bootstrap's offcanvas classes based on the provided props:</p>
         <ul>
             <li><code>offcanvas</code> - Base class for the Offcanvas component</li>
-            <li><code>offcanvas-[breakpoint]</code> - Applied when showOnBreakpoint is set</li>
+            <li>
+                <code>offcanvas-[breakpoint]</code> - Applied for <code>sm</code> through <code>xxl</code>; there is no <code>offcanvas-xs</code> class
+            </li>
             <li><code>offcanvas-[placement]</code> - Position classes (start, end, top, bottom)</li>
             <li><code>show</code> - Applied when the offcanvas is visible</li>
             <li><code>offcanvas-header</code> - Applied to Offcanvas.Header components</li>

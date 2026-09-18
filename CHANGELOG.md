@@ -4,6 +4,11 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## Unreleased
 
+The changes below target a future **2.0.0** release. See the [1.x to 2.0 migration guide](MIGRATION.md) before upgrading. No 2.0.0 release has been published yet.
+
+- **Breaking type correction:** `Offcanvas.RootProps['showOnBreakpoint']` now accepts only `sm`, `md`, `lg`, `xl`, and `xxl`, matching Bootstrap's responsive Offcanvas classes ([#33](https://github.com/WinkIntel/bootstrap-svelte/issues/33)). Remove `showOnBreakpoint="xs"`: omitted standalone panels remain dismissible overlays; omitted nested panels inherit the Navbar's responsive mode. Legacy/untyped runtime `xs` is normalized to omitted, so default/`xs` Navbar content remains reachable at every width and `offcanvas-xs` is never emitted. For always-inline Navbar content, select `expandOnBreakpoint="xs"` on Navbar and omit the panel breakpoint.
+- Corrected the internal minimum-width map's `xs` entry to `(min-width: 0px)`. The maps are not public runtime exports and require no consumer migration. Navbar's unconditional `xs` handling continues to provide SSR consistency independently of the map; the maximum-width map and BreakpointListener's size ranges are unchanged.
+
 - Fixed Navbar breakpoint changes leaving stale responsive state. CSS, toggler ARIA, Collapse visibility, and an inheriting Offcanvas now follow the current `expandOnBreakpoint`, with obsolete media-query subscriptions released ([#27](https://github.com/WinkIntel/bootstrap-svelte/issues/27)).
 - **Behavior change:** omitted `expandOnBreakpoint` and explicit `"xs"` now consistently mean always-expanded inline navigation at every width, including phones and SSR. Previously the default combined collapsible CSS with inconsistent small-screen state. Consumers wanting a hamburger at every width must set `expandOnBreakpoint={false}`; use `"lg"` (or another named breakpoint) for responsive collapsing. This also preserves Bootstrap's plain wrapping Navbar layout when `false` is selected.
 - Preserve explicit Offcanvas visibility assignments across responsive changes until a subsequent toggle, dismissal, or changed `isShown` prop replaces them. An unchanged `isShown` value is not continuously reapplied. Clear toggler-opened state upon entering inline mode so a later downward resize does not briefly acquire an overlay scroll lock.

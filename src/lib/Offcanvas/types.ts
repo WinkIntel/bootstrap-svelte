@@ -1,7 +1,8 @@
 import type { BaseBreakpoint, DivElement, HeadingElement, HeadingLevels, TextDirection } from '$lib/common/types.js';
 
 export type OffcanvasBackdrop = 'static' | boolean;
-export type OffcanvasBreakpoint = BaseBreakpoint;
+/** Bootstrap responsive Offcanvas sizes. xs has no corresponding Bootstrap class. */
+export type OffcanvasBreakpoint = Exclude<BaseBreakpoint, 'xs'>;
 export type OffcanvasPlacement = 'start' | 'end' | 'top' | 'bottom';
 
 export type OffcanvasRootProps = DivElement & {
@@ -15,6 +16,7 @@ export type OffcanvasRootProps = DivElement & {
     onShow?: EventListener;
     onShown?: EventListener;
     placement?: OffcanvasPlacement;
+    /** Inline at or above this breakpoint; omitted inherits Navbar mode when nested. Runtime xs is treated as omitted. */
     showOnBreakpoint?: OffcanvasBreakpoint;
     useBackdrop?: OffcanvasBackdrop;
 };

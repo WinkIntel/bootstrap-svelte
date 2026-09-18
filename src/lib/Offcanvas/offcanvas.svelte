@@ -48,7 +48,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 - `isKeyboardDismissible` (boolean): Optional. Enables dismissing the offcanvas on Escape key press.
 - `isShown` (boolean): Optional. Controls whether the offcanvas is visible.
 - `placement` (string): Optional. Position of the offcanvas ('start', 'end', 'top', 'bottom').
-- `showOnBreakpoint` (string): Optional. Show the offcanvas on a specific breakpoint ('sm', 'md', 'lg', 'xl', 'xxl').
+- `showOnBreakpoint` (string): Optional. Show inline at or above 'sm', 'md', 'lg', 'xl', or 'xxl'. When omitted, inherit the parent Navbar's mode or remain a standalone overlay. Legacy runtime 'xs' is treated as omitted; Bootstrap has no offcanvas-xs class.
 - `useBackdrop` (boolean): Optional. Controls whether to show a backdrop when the offcanvas is open.
 - `onHide` (function): Optional. Callback function when the offcanvas is hidden.
 - `onHidePrevented` (function): Optional. Callback function when the offcanvas hide is prevented.
