@@ -416,6 +416,12 @@
             write cannot be distinguished from the attachment's write.
         </p>
         <p>
+            With Svelte-managed attributes, that identical-write limitation can leave the DOM out of sync with the bound value after cleanup. Svelte
+            caches its last attribute value and may not write it again until the bound value changes. Prefer one owner for each attribute; supply
+            consumer target and role overrides before attaching. Overlapping instances of this helper track their own writes so removing them in
+            either order does not restore a value from an attachment that has already been removed.
+        </p>
+        <p>
             Reactive option changes clean up and reattach: attachment-owned target IDs update, consumer target overrides remain, and the new
             <code>ariaExpanded</code> value is applied. A later consumer-expanded value is preserved on cleanup if it differs from the attachment's write,
             but the next attachment takes control of expanded state again.

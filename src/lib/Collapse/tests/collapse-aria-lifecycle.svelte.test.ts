@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 import { collapseAria } from '../collapse-aria-attachment.svelte.js';
 import LifecycleTest from './collapse-aria-lifecycle-test.svelte';
+import OverlapTest from './collapse-aria-overlap-test.svelte';
 
 describe('collapseAria attribute ownership', () => {
     it.each(['button', 'div'])('restores consumer attributes through cleanup and reattachment on %s', (tag) => {
@@ -47,19 +48,6 @@ describe('collapseAria attribute ownership', () => {
         for (const name of ['aria-controls', 'aria-expanded', 'role']) element.removeAttribute(name);
         cleanup?.();
         for (const name of ['aria-controls', 'aria-expanded', 'role']) expect(element).not.toHaveAttribute(name);
-    });
-
-    it('uses the final DOM value to determine ownership, including identical later writes', () => {
-        const element = document.createElement('div');
-        element.setAttribute('aria-expanded', 'false');
-        const cleanup = collapseAria({ ariaControls: 'panel', ariaExpanded: true })(element);
-        element.setAttribute('aria-controls', 'panel');
-        element.setAttribute('aria-expanded', 'true');
-        element.setAttribute('role', 'button');
-        cleanup?.();
-        expect(element).not.toHaveAttribute('aria-controls');
-        expect(element).toHaveAttribute('aria-expanded', 'false');
-        expect(element).not.toHaveAttribute('role');
     });
 
     it('restores empty pre-existing attributes without treating them as absent', () => {
@@ -118,6 +106,43 @@ describe('collapseAria attribute ownership', () => {
         expect(element).toHaveAttribute('aria-controls', 'consumer-panel');
         expect(element).toHaveAttribute('aria-expanded', 'true');
         await rerender({ enabled: false });
+        expect(element).toHaveAttribute('aria-expanded', 'false');
+    });
+    it.each([true, false])('cleans up overlapping mounted attachments (first removed first: %s)', async (firstRemovedFirst) => {
+        const { rerender } = render(OverlapTest);
+        const element = screen.getByTestId('overlap-control');
+        expect(element).toHaveAttribute('aria-expanded', 'true');
+        await rerender(firstRemovedFirst ? { first: false } : { second: false });
+        expect(element).toHaveAttribute('aria-expanded', firstRemovedFirst ? 'true' : 'false');
+        await rerender({ first: false, second: false });
+        expect(screen.getByTestId('overlap-control')).toBe(element);
+        expect(element).not.toHaveAttribute('aria-expanded');
+        expect(element).not.toHaveAttribute('aria-controls');
+    });
+
+    it.each([
+        [0, 1, 2],
+        [0, 2, 1],
+        [1, 0, 2],
+        [1, 2, 0],
+        [2, 0, 1],
+        [2, 1, 0]
+    ])('restores the consumer baseline when three writers are removed in order %s/%s/%s', (...order) => {
+        const element = document.createElement('button');
+        element.setAttribute('aria-expanded', 'false');
+        const cleanups = [true, false, true].map((ariaExpanded) => collapseAria({ ariaControls: 'panel', ariaExpanded })(element));
+        for (const index of order) cleanups[index]?.();
+        expect(element).toHaveAttribute('aria-expanded', 'false');
+        expect(element).not.toHaveAttribute('aria-controls');
+    });
+
+    it('keeps a consumer write between overlapping attachments as the new baseline', () => {
+        const element = document.createElement('button');
+        const first = collapseAria({ ariaControls: 'panel', ariaExpanded: true })(element);
+        element.setAttribute('aria-expanded', 'false');
+        const second = collapseAria({ ariaControls: 'panel', ariaExpanded: true })(element);
+        first?.();
+        second?.();
         expect(element).toHaveAttribute('aria-expanded', 'false');
     });
 });

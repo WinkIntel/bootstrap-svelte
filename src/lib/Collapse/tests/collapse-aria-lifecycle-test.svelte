@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { collapseAria } from '../index.js';
+    import { collapseAria } from '../collapse-aria-attachment.svelte.js';
 
     let {
         enabled = true,
@@ -16,6 +16,10 @@
         consumerExpanded?: 'true' | 'false';
         consumerRole?: string;
     } = $props();
+
+    export function disableAttachment() {
+        enabled = false;
+    }
 </script>
 
 <button
