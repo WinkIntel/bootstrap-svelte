@@ -47,9 +47,9 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 - `isBodyScrollable` (boolean): Optional. Enables body scrolling when offcanvas is open.
 - `isKeyboardDismissible` (boolean): Optional. Enables dismissing the offcanvas on Escape key press.
 - `isShown` (boolean): Optional. Controls whether the offcanvas is visible.
-- `triggerElements` (readonly HTMLElement array): Optional. DOM references to consumer-controlled triggers; null/undefined entries are allowed. Enabled primary presses leave visibility to the consumer click handler. Remove a reference to revoke ownership; detached nodes are ignored. Does not set ARIA or stacking styles.
 - `placement` (string): Optional. Position of the offcanvas ('start', 'end', 'top', 'bottom').
 - `showOnBreakpoint` (string): Optional. Show inline at or above 'sm', 'md', 'lg', 'xl', or 'xxl'. When omitted, inherit the parent Navbar's mode or remain a standalone overlay. Legacy runtime 'xs' is treated as omitted; Bootstrap has no offcanvas-xs class.
+- `triggerElements` (readonly Element array | null): Optional. DOM references to consumer-controlled triggers; null/undefined entries are allowed. A null list means no triggers. Enabled primary presses leave visibility to the consumer click handler. Remove a reference to revoke ownership; detached nodes are ignored. Does not set ARIA or stacking styles.
 - `useBackdrop` (boolean): Optional. Controls whether to show a backdrop when the offcanvas is open.
 - `onHide` (function): Optional. Callback function when the offcanvas is hidden.
 - `onHidePrevented` (function): Optional. Callback function when the offcanvas hide is prevented.
@@ -235,13 +235,15 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     const handleBackdropMouseDown = (event: MouseEvent) => {
         if (!isTopOverlay(overlayEntry) || useBackdrop === false) return;
         // Read current refs for each press; there are no registrations or deferred toggles to clean up.
-        if (
-            event.button === 0 &&
-            triggerElements.some(
-                (trigger) => trigger?.isConnected && !trigger.matches(':disabled, [aria-disabled="true"]') && event.composedPath().includes(trigger)
+        if (event.button === 0) {
+            const path = event.composedPath();
+            if (
+                triggerElements?.some(
+                    (trigger) => trigger?.isConnected && path.includes(trigger) && !trigger.matches(':disabled, [aria-disabled="true"]')
+                )
             )
-        )
-            return;
+                return;
+        }
         // Its click handler owns this state change; mousedown must not dismiss it first.
         if (rootState.isControllingTogglerEvent(event)) return;
 

@@ -1,9 +1,40 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+import { Offcanvas } from '../index.js';
 import OffcanvasTriggerTest from './offcanvas-trigger-test.svelte';
 
 describe('Standalone Offcanvas trigger ownership', () => {
+    it.each([true, 'static'] as const)('preserves outside dismissal with a null trigger list and backdrop %s', async (useBackdrop) => {
+        const onHide = vi.fn();
+        const onHidePrevented = vi.fn();
+        const { container } = render(Offcanvas.Root, { isShown: true, triggerElements: null, useBackdrop, onHide, onHidePrevented });
+        await fireEvent.mouseDown(document.body);
+        if (useBackdrop === 'static') {
+            expect(onHidePrevented).toHaveBeenCalledTimes(1);
+            expect(container.querySelector('[role="dialog"]')).toBeInTheDocument();
+        } else {
+            await waitFor(() => expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument());
+            expect(onHide).toHaveBeenCalledTimes(1);
+        }
+    });
+
+    it('accepts SVG references and recognizes presses on their descendants', async () => {
+        const trigger = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        const child = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        trigger.append(child);
+        // The public type must accept SVG as well as HTML references (enforced by check-types).
+        const triggerElements: Offcanvas.RootProps['triggerElements'] = [null, trigger, undefined];
+        const onHidePrevented = vi.fn();
+        const { container } = render(Offcanvas.Root, { isShown: true, triggerElements, useBackdrop: 'static', onHidePrevented });
+        container.append(trigger);
+        await fireEvent.mouseDown(child);
+        expect(onHidePrevented).not.toHaveBeenCalled();
+        trigger.setAttribute('aria-disabled', 'true');
+        await fireEvent.mouseDown(child);
+        expect(onHidePrevented).toHaveBeenCalledTimes(1);
+    });
+
     it.each([true, false, 'static'] as const)('opens, closes and reopens once per full click with backdrop %s', async (useBackdrop) => {
         const onShow = vi.fn();
         const onShown = vi.fn();
@@ -51,6 +82,10 @@ describe('Standalone Offcanvas trigger ownership', () => {
         await fireEvent.mouseDown(trigger);
         await fireEvent.pointerCancel(trigger);
         await fireEvent.mouseUp(document.body);
+        expect(screen.getByTestId('owned-panel')).toBeInTheDocument();
+        expect(onHide).not.toHaveBeenCalled();
+        expect(onHidePrevented).not.toHaveBeenCalled();
+
         await view.rerender({ cancelClick: true });
         await user.click(trigger);
         expect(screen.getByTestId('owned-panel')).toBeInTheDocument();

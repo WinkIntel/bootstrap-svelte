@@ -11,7 +11,7 @@
 \u003c/script>
 
 <Button bind:elementRef={trigger} aria-controls="my-panel" aria-expanded={open}
-    style="position: relative; z-index: 1050;" onclick={() => open = !open}>
+    style="position: relative; z-index: 1042;" onclick={() => open = !open}>
     Toggle Offcanvas
 </Button>
 <Offcanvas.Root id="my-panel" isShown={open} triggerElements={[trigger]}
@@ -186,9 +186,10 @@
             enabled primary press on a listed element (including its descendants) is not treated as an outside dismissal.
         </p>
         <p>
-            The list may contain multiple references and null or undefined entries. Remove a reference to revoke ownership; detached elements are
-            ignored and conditional bindings follow replacement elements. No extra listeners or global registrations are retained. Keep references
-            reactive when changing the list. Each panel recognizes only its own list, and only the top overlay handles dismissal.
+            HTML and SVG element references are supported. The list may contain multiple references and null or undefined entries; a null list means
+            no triggers. Remove a reference to revoke ownership; detached elements are ignored and conditional bindings follow replacement elements.
+            No extra listeners or global registrations are retained. Keep references reactive when changing the list. Each panel recognizes only its
+            own list, and only the top overlay handles dismissal.
         </p>
         <p>
             Native disabled controls (including disabled fieldsets) and elements with <code>aria-disabled="true"</code> do not receive this exemption. Non-primary
@@ -197,8 +198,10 @@
         </p>
         <p>
             Ownership does not add click handlers, set ARIA, or raise the trigger above a backdrop. Classes and <code>aria-controls</code> alone do
-            not establish ownership. This example deliberately raises its trigger so it remains clickable; consumers control that styling. Keep
-            consumer visibility in sync with dismissals using <code>onHide</code>.
+            not establish ownership. This example uses <code>z-index: 1042</code>, between a single Offcanvas backdrop (1040) and panel (1045). The
+            panel covers the trigger where they overlap on narrow screens. Stacked overlays receive higher layers, so this fixed value is only
+            suitable for this single-overlay example; consumers control their trigger's stacking context. Keep consumer visibility in sync with
+            dismissals using <code>onHide</code>.
         </p>
         <OffcanvasTriggersExample />
         <SyntaxHighlighter code={triggerExampleCode} />
@@ -459,7 +462,7 @@
                     </tr>
                     <tr>
                         <td><code>triggerElements</code></td>
-                        <td><code>readonly (HTMLElement | null | undefined)[]</code></td>
+                        <td><code>readonly (Element | null | undefined)[] | null</code></td>
                         <td><code>[]</code></td>
                         <td
                             >DOM references to consumer-controlled triggers. Enabled primary presses leave visibility to the consumer click handler.</td>
