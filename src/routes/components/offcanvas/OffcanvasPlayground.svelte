@@ -5,6 +5,7 @@
 
     // Configurable props
     let isShown: boolean = $state(false);
+    let trigger: HTMLElement | null = $state(null);
     let placement: OffcanvasPlacement = $state('start');
     let useBackdrop: boolean | 'static' = $state(true);
     let isBodyScrollable: boolean = $state(false);
@@ -84,15 +85,16 @@
 
     // Generate code snippet based on current props
     function getCodeSnippet(): string {
-        let code = '<script>\n';
-        code += '  let isShown = false;\n';
+        let code = '<script lang="ts">\n';
+        code += '  let isShown = $state(false);\n';
+        code += '  let trigger: HTMLElement | null = $state(null);\n';
         code += '  \n';
         code += '  function toggleOffcanvas() {\n';
         code += '    isShown = !isShown;\n';
         code += '  }\n';
         code += '\u003c/script>\n\n';
 
-        code += '<Button onclick={toggleOffcanvas}>\n';
+        code += '<Button bind:elementRef={trigger} onclick={toggleOffcanvas}>\n';
         code += '  Toggle Offcanvas\n';
         code += '</Button>\n\n';
 
@@ -104,6 +106,7 @@
         }
 
         code += `\n  isShown={isShown}`;
+        code += '\n  triggerElements={[trigger]}';
 
         if (useBackdrop !== true) {
             code += `\n  useBackdrop={${typeof useBackdrop === 'string' ? `"${useBackdrop}"` : useBackdrop}}`;
@@ -240,6 +243,7 @@
                     <div class="p-2 border rounded bg-light" style="min-height: 200px;">
                         <div class="mb-3">
                             <Button
+                                bind:elementRef={trigger}
                                 class={[{ [`d-${showOnBreakpoint}-none`]: showOnBreakpoint !== undefined }]}
                                 colorVariant="primary"
                                 onclick={toggleOffcanvas}>{isShown ? 'Hide' : 'Show'} Offcanvas</Button>
@@ -251,6 +255,7 @@
                         </div>
 
                         <Offcanvas.Root
+                            triggerElements={[trigger]}
                             {placement}
                             {showOnBreakpoint}
                             {isShown}
