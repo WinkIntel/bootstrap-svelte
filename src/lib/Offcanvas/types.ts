@@ -18,6 +18,14 @@ export type OffcanvasRootProps = DivElement & {
     placement?: OffcanvasPlacement;
     /** Inline at or above this breakpoint; omitted inherits Navbar mode when nested. Runtime xs is treated as omitted. */
     showOnBreakpoint?: OffcanvasBreakpoint;
+    /**
+     * Elements whose click handlers control this panel. Enabled primary presses are not outside dismissals.
+     * Bind HTML or SVG references with bind:this (or bind:elementRef on Button).
+     * A null list means no triggers; null/undefined entries and detached nodes are ignored.
+     * Remove a reference to revoke ownership. No listeners or registrations outlive this prop or component.
+     * This does not install click handlers, manage ARIA, or change trigger stacking above the backdrop.
+     */
+    triggerElements?: readonly (Element | null | undefined)[] | null;
     useBackdrop?: OffcanvasBackdrop;
 };
 
