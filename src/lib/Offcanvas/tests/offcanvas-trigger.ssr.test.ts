@@ -3,9 +3,9 @@ import { render } from 'svelte/server';
 import { describe, expect, it } from 'vitest';
 
 describe('Offcanvas trigger references during SSR', () => {
-    it('accepts references that are not mounted yet without forwarding them as DOM attributes', () => {
+    it.each([null, [null, undefined]])('accepts unmounted references %j without forwarding them as DOM attributes', (triggerElements) => {
         const { body } = render(Offcanvas.Root, {
-            props: { isShown: true, triggerElements: [null, undefined] }
+            props: { isShown: true, triggerElements }
         });
         expect(body).toContain('role="dialog"');
         expect(body.toLowerCase()).not.toContain('triggerelements');
