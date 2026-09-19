@@ -14,6 +14,7 @@ on:
         options:
           - next
           - latest
+          - maintenance
       dry-run:
         description: Run publish checks without publishing to npm
         type: boolean

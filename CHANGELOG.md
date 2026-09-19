@@ -2,7 +2,9 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## Unreleased
+## 1.1.0 — 2026-09-19
+
+Compatible maintenance update for 1.x consumers. Existing 1.x Navbar and breakpoint behavior is retained; the Svelte peer requirement remains `^5.29.0`.
 
 - Added optional `Offcanvas.Root` `triggerElements` references for standalone consumer-controlled buttons and links ([#31](https://github.com/WinkIntel/bootstrap-svelte/issues/31)). Enabled primary presses on owning triggers no longer dismiss the panel before the consumer click or emit spurious static-backdrop `onHidePrevented` events. Ownership follows the current references without retained registrations; disabled, non-primary, and unrelated outside presses keep their existing behavior. Includes trigger lifecycle, cancellation, and overlay-stack regressions plus an interactive example. The Svelte peer range is unchanged.
 
