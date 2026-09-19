@@ -2,6 +2,22 @@
     import { Button, Offcanvas } from '$lib/index.js';
     import SyntaxHighlighter from '../../(common)/SyntaxHighlighter.svelte';
     import OffcanvasPlayground from './OffcanvasPlayground.svelte';
+    import OffcanvasTriggersExample from './OffcanvasTriggersExample.svelte';
+
+    const triggerExampleCode = `<script lang="ts">
+    import { Button, Offcanvas } from '@winkintel/bootstrap-svelte';
+    let open = $state(false);
+    let trigger: HTMLElement | null = $state(null);
+\u003c/script>
+
+<Button bind:elementRef={trigger} aria-controls="my-panel" aria-expanded={open}
+    style="position: relative; z-index: 1042;" onclick={() => open = !open}>
+    Toggle Offcanvas
+</Button>
+<Offcanvas.Root id="my-panel" isShown={open} triggerElements={[trigger]}
+    useBackdrop="static" placement="end" onHide={() => open = false}>
+    <Offcanvas.Body>Panel content</Offcanvas.Body>
+</Offcanvas.Root>`;
 
     // Toggle states for examples
     let showBasic = $state(false);
@@ -160,6 +176,35 @@
         </div>
 
         <SyntaxHighlighter code={basicExampleCode} />
+    </section>
+
+    <section class="mb-5">
+        <h2 class="wk-quick-link">Consumer-controlled triggers</h2>
+        <p>
+            Pass DOM references through <code>triggerElements</code> when a standalone button or link controls the panel. Use
+            <code>bind:this</code> on a native element or <code>bind:elementRef</code> on <code>Button</code>. Your click handler owns visibility; an
+            enabled primary press on a listed element (including its descendants) is not treated as an outside dismissal.
+        </p>
+        <p>
+            HTML and SVG element references are supported. The list may contain multiple references and null or undefined entries; a null list means
+            no triggers. Remove a reference to revoke ownership; detached elements are ignored and conditional bindings follow replacement elements.
+            No extra listeners or global registrations are retained. Keep references reactive when changing the list. Each panel recognizes only its
+            own list, and only the top overlay handles dismissal.
+        </p>
+        <p>
+            Native disabled controls (including disabled fieldsets) and elements with <code>aria-disabled="true"</code> do not receive this exemption. Non-primary
+            presses retain the existing outside-press behavior. A cancelled or abandoned primary press on an enabled owner leaves the panel unchanged; ownership
+            never schedules a later toggle. Without a backdrop, outside presses remain ignored.
+        </p>
+        <p>
+            Ownership does not add click handlers, set ARIA, or raise the trigger above a backdrop. Classes and <code>aria-controls</code> alone do
+            not establish ownership. This example uses <code>z-index: 1042</code>, between a single Offcanvas backdrop (1040) and panel (1045). The
+            panel covers the trigger where they overlap on narrow screens. Stacked overlays receive higher layers, so this fixed value is only
+            suitable for this single-overlay example; consumers control their trigger's stacking context. Keep consumer visibility in sync with
+            dismissals using <code>onHide</code>.
+        </p>
+        <OffcanvasTriggersExample />
+        <SyntaxHighlighter code={triggerExampleCode} />
     </section>
 
     <section class="mb-5">
@@ -399,6 +444,13 @@
                         <td><code>'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'</code></td>
                         <td><code>undefined</code></td>
                         <td>Makes the offcanvas visible as a regular element above the specified breakpoint</td>
+                    </tr>
+                    <tr>
+                        <td><code>triggerElements</code></td>
+                        <td><code>readonly (Element | null | undefined)[] | null</code></td>
+                        <td><code>[]</code></td>
+                        <td
+                            >DOM references to consumer-controlled triggers. Enabled primary presses leave visibility to the consumer click handler.</td>
                     </tr>
                     <tr>
                         <td><code>useBackdrop</code></td>
