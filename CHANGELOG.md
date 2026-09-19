@@ -4,6 +4,8 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## Unreleased
 
+- Added optional `Offcanvas.Root` `triggerElements` references for standalone consumer-controlled buttons and links ([#31](https://github.com/WinkIntel/bootstrap-svelte/issues/31)). Enabled primary presses on owning triggers no longer dismiss the panel before the consumer click or emit spurious static-backdrop `onHidePrevented` events. Ownership follows the current references without retained registrations; disabled, non-primary, and unrelated outside presses keep their existing behavior. Includes trigger lifecycle, cancellation, and overlay-stack regressions plus an interactive example. The Svelte peer range is unchanged.
+
 - Fixed `collapseAria` cleanup and reactive reattachment deleting consumer-owned ARIA attributes and roles ([#29](https://github.com/WinkIntel/bootstrap-svelte/issues/29)). Cleanup restores previous expanded state and removes attachment-created attributes only while their current values still match the attachment's writes, preserving later consumer changes. The required `ariaControls` API and Svelte peer range are unchanged; browser-only behavior and value-based ownership are documented.
 
 ## 1.0.12

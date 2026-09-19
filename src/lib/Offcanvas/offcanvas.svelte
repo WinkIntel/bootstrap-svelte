@@ -47,6 +47,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 - `isBodyScrollable` (boolean): Optional. Enables body scrolling when offcanvas is open.
 - `isKeyboardDismissible` (boolean): Optional. Enables dismissing the offcanvas on Escape key press.
 - `isShown` (boolean): Optional. Controls whether the offcanvas is visible.
+- `triggerElements` (readonly HTMLElement array): Optional. DOM references to consumer-controlled triggers; null/undefined entries are allowed. Enabled primary presses leave visibility to the consumer click handler. Remove a reference to revoke ownership; detached nodes are ignored. Does not set ARIA or stacking styles.
 - `placement` (string): Optional. Position of the offcanvas ('start', 'end', 'top', 'bottom').
 - `showOnBreakpoint` (string): Optional. Show the offcanvas on a specific breakpoint ('sm', 'md', 'lg', 'xl', 'xxl').
 - `useBackdrop` (boolean): Optional. Controls whether to show a backdrop when the offcanvas is open.
@@ -79,6 +80,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         isShown = false,
         placement = 'start',
         showOnBreakpoint,
+        triggerElements = [],
         useBackdrop = true,
         onHide = noop,
         onHidePrevented = noop,
@@ -242,8 +244,16 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     });
 
     // Dismiss the offcanvas when the backdrop is clicked...
-    const handleBackdropMouseDown: EventListener = (event: Event) => {
+    const handleBackdropMouseDown = (event: MouseEvent) => {
         if (!isTopOverlay(overlayEntry) || useBackdrop === false) return;
+        // Read current refs for each press; there are no registrations or deferred toggles to clean up.
+        if (
+            event.button === 0 &&
+            triggerElements.some(
+                (trigger) => trigger?.isConnected && !trigger.matches(':disabled, [aria-disabled="true"]') && event.composedPath().includes(trigger)
+            )
+        )
+            return;
 
         const target = event.target as HTMLElement;
         const nearestOffcanvas = target.closest('.offcanvas');
