@@ -55,31 +55,41 @@ Two notes:
     ```bash
     node --version && pnpm --version
     ```
-3. Ensure `ncu` is available (`ncu --version`). The repository scripts require [npm-check-updates](https://github.com/raineorshine/npm-check-updates), but it is not a declared devDependency. Install a reviewed version globally if needed (`npm install --global npm-check-updates@<reviewed-version>`).
-4. Install from the lockfile and confirm a green baseline. If anything fails, stop and resolve the baseline failure on the selected target first:
+3. Ensure `ncu` is available (`ncu --version`). Use a reviewed **19.4.0 or newer 19.x/20.x** release of [npm-check-updates](https://github.com/raineorshine/npm-check-updates), installed globally (`npm install --global npm-check-updates@<reviewed-version>`); it is not a declared devDependency. Numeric cooldown support began in 18.2.0, but this repo's `1d`/`0d` strings require [19.4.0](https://github.com/raineorshine/npm-check-updates/releases/tag/v19.4.0). Before adopting 21+, migrate `.ncurc.js` to `.ncurc.cjs` (and update documentation links) or ESM: [21.0.0 changed config loading](https://github.com/raineorshine/npm-check-updates/releases/tag/v21.0.0), and this repo uses CommonJS config in a `"type": "module"` package.
+4. Install from the lockfile, then run the baseline checks once in Phase 1. If anything fails, stop and resolve the baseline failure on the selected target first:
     ```bash
     pnpm install --frozen-lockfile
-    pnpm lint && pnpm check-types && pnpm test && pnpm build && npm pack --dry-run
     ```
 
 ---
 
 ## Phase 1: Capture a baseline
 
-Save artifacts in `test-results/` (gitignored) so you can compare them after the update.
+Run from the repository root. This replaces only the scratch directory `test-results/deps/` (gitignored); copy any baseline you want to retain elsewhere before restarting Phase 1. Do not rerun Phase 1 after updating dependencies: use Phase 4 so the original baseline survives.
+
+The Bash subprocess stops on failed checks or failed pipeline commands without changing the interactive shell's options. Full logs remain available, including failures. Review the audit output and recorded exit status before proceeding; advisories need triage, while registry/network failures mean the audit is incomplete.
 
 ```bash
-set -o pipefail                            # bash/zsh: preserve command failures through pipes
+bash -euo pipefail <<'EOF'
+rm -rf test-results/deps
 mkdir -p test-results/deps
-pnpm check-types 2>&1 | tail -n 5          > test-results/deps/before-check-types.txt
-pnpm vitest run 2>&1 | tail -n 15          > test-results/deps/before-tests.txt
-pnpm build > test-results/deps/before-build-log.txt 2>&1
-cp -R dist                                   test-results/deps/before-dist
-(cd build && find . -type f | sort)        > test-results/deps/before-site-files.txt
-cp build/llms.txt build/sitemap.xml          test-results/deps/
-npm pack --dry-run > test-results/deps/before-pack.txt 2>&1
-pnpm audit --prod > test-results/deps/before-audit.txt 2>&1
-# A nonzero audit exit needs review; distinguish advisories from network failures.
+pnpm lint 2>&1 | tee test-results/deps/before-lint.txt
+pnpm check-types 2>&1 | tee test-results/deps/before-check-types.txt
+pnpm test 2>&1 | tee test-results/deps/before-tests.txt
+pnpm build 2>&1 | tee test-results/deps/before-build-log.txt
+cp -R dist test-results/deps/before-dist
+(cd build && find . -type f | sort) > test-results/deps/before-site-files.txt
+cp build/llms.txt test-results/deps/before-llms.txt
+cp build/sitemap.xml test-results/deps/before-sitemap.xml
+# pnpm build already ran prepack (svelte-package and publint).
+npm pack --dry-run --ignore-scripts --json > test-results/deps/before-pack.json
+node -e 'const fs = require("node:fs"); const pack = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); console.log(pack[0].files.map(file => file.path).sort().join("\n"));' test-results/deps/before-pack.json > test-results/deps/before-pack-files.txt
+# Audit may exit nonzero for advisories or an operational failure; retain both.
+audit_status=0
+pnpm audit --prod > test-results/deps/before-audit.txt 2>&1 || audit_status=$?
+printf '%s\n' "$audit_status" > test-results/deps/before-audit-status.txt
+cat test-results/deps/before-audit.txt
+EOF
 ```
 
 ---
@@ -127,7 +137,7 @@ pnpm ncu:upgrade       # both ncu passes, then pnpm install
 git diff -- package.json pnpm-lock.yaml
 ```
 
-Review the manifest immediately: preserve the selected branch's package version and restore the original `svelte` peer range if ncu raised it unintentionally, then run `pnpm install` again.
+Review `packageManager` immediately: ncu 17+ includes it in the default update set, while CI separately pins pnpm in `.github/workflows/ci.yml`. Restore an unintended pnpm bump before reinstalling, or intentionally update CI's `corepack prepare` version to match and validate with that pnpm version. ncu does not update the package's own `version`, and its default dependency sections exclude `peerDependencies`; the Svelte peer floor remains a separate compatibility decision.
 
 During install, watch for:
 
@@ -135,14 +145,13 @@ During install, watch for:
 - **Peer dependency warnings.** Resolve them; don't ignore them.
 - **Engine errors.** These come from `engine-strict`.
 
-Then tidy the lockfile and verify:
+Then tidy the lockfile:
 
 ```bash
 pnpm dedupe
-pnpm lint && pnpm check-types && pnpm test && pnpm build && npm pack --dry-run
 ```
 
-If Prettier's formatting output changed, run `pnpm format-all` and commit the reformat **separately**, so the dependency diff stays readable.
+Run Phase 4 to capture and validate the updated tree before committing. If Prettier's formatting output changed, run `pnpm format-all` and commit the reformat **separately**, so the dependency diff stays readable.
 
 ```bash
 git add package.json pnpm-lock.yaml && git commit -m "chore(deps): update dev dependencies to latest minor"
@@ -154,21 +163,52 @@ git add package.json pnpm-lock.yaml && git commit -m "chore(deps): update dev de
 
 ## Phase 4: Compare against the baseline
 
-Re-run the Phase 1 commands with `after-` names. Preserve the original `before-dist` directory and baseline `llms.txt` and `sitemap.xml` files; copy the new versions under different names. Then diff:
+Capture the updated tree explicitly. This replaces only `after-dist` when repeated, preserves all `before-` artifacts, and runs the updated quality checks once. As in Phase 1, review the audit output/status and resolve any operational failure before comparing.
 
 ```bash
-diff -ru test-results/deps/before-dist dist                   # emitted library code and .d.ts
-diff test-results/deps/before-site-files.txt <(cd build && find . -type f | sort)
-diff test-results/deps/llms.txt build/llms.txt
-diff test-results/deps/sitemap.xml build/sitemap.xml          # only lastmod noise is expected
-diff test-results/deps/before-pack.txt test-results/deps/after-pack.txt
-diff test-results/deps/before-build-log.txt test-results/deps/after-build-log.txt   # new compiler/a11y warnings
+bash -euo pipefail <<'EOF'
+test -d test-results/deps/before-dist
+rm -rf test-results/deps/after-dist
+pnpm lint 2>&1 | tee test-results/deps/after-lint.txt
+pnpm check-types 2>&1 | tee test-results/deps/after-check-types.txt
+pnpm test 2>&1 | tee test-results/deps/after-tests.txt
+pnpm build 2>&1 | tee test-results/deps/after-build-log.txt
+cp -R dist test-results/deps/after-dist
+(cd build && find . -type f | sort) > test-results/deps/after-site-files.txt
+cp build/llms.txt test-results/deps/after-llms.txt
+cp build/sitemap.xml test-results/deps/after-sitemap.xml
+# pnpm build already ran prepack (svelte-package and publint).
+npm pack --dry-run --ignore-scripts --json > test-results/deps/after-pack.json
+node -e 'const fs = require("node:fs"); const pack = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); console.log(pack[0].files.map(file => file.path).sort().join("\n"));' test-results/deps/after-pack.json > test-results/deps/after-pack-files.txt
+# Audit may exit nonzero for advisories or an operational failure; retain both.
+audit_status=0
+pnpm audit --prod > test-results/deps/after-audit.txt 2>&1 || audit_status=$?
+printf '%s\n' "$audit_status" > test-results/deps/after-audit-status.txt
+cat test-results/deps/after-audit.txt
+EOF
+```
+
+Compare every captured check and artifact below. Run these comparisons individually: `diff` returns 1 for differences, which need review rather than an automatic failure. Timing, audit totals, and test durations may vary.
+
+```bash
+diff -ru test-results/deps/before-dist test-results/deps/after-dist
+diff test-results/deps/before-lint.txt test-results/deps/after-lint.txt
+diff test-results/deps/before-check-types.txt test-results/deps/after-check-types.txt
+diff test-results/deps/before-tests.txt test-results/deps/after-tests.txt
+diff test-results/deps/before-build-log.txt test-results/deps/after-build-log.txt
+diff test-results/deps/before-site-files.txt test-results/deps/after-site-files.txt
+diff test-results/deps/before-llms.txt test-results/deps/after-llms.txt
+diff test-results/deps/before-pack-files.txt test-results/deps/after-pack-files.txt
+diff test-results/deps/before-audit.txt test-results/deps/after-audit.txt
+diff test-results/deps/before-audit-status.txt test-results/deps/after-audit-status.txt
+diff test-results/deps/before-sitemap.xml test-results/deps/after-sitemap.xml
 ```
 
 What to look for:
 
 - **`dist/` diffs.** Compiler output churn is normal after a Svelte bump. Changes to public `.d.ts` signatures are not. Investigate those, since they can break consumers' type checking.
-- **Pack contents.** The file list should be identical apart from content hashes. `publint` has already run inside `pnpm build`.
+- **Pack contents.** Compare the sorted file paths, which should be unchanged. Raw pack JSON is retained for inspection; sizes, shasum, and integrity can change with emitted output. `publint` has already run inside `pnpm build`.
+- **Sitemap.** A dependency-only update should leave the sitemap unchanged when Git history for the page sources is available. Investigate any differences: page-source changes or the build-date fallback when history is unavailable can alter `lastmod`.
 - **New warnings.** Svelte compiler, `svelte-check`, and Vite deprecation warnings. Fix them now or record them as follow-ups.
 - **Audit.** `pnpm audit --prod` should report the same or fewer advisories.
 
@@ -178,7 +218,7 @@ What to look for:
 pnpm preview           # http://localhost:4176
 ```
 
-Click through pages that exercise interactive and positioned components: Dropdown and Tooltip/Popover (Popper), Modal, Offcanvas, Collapse (transitions and `bezier-easing`), and the Theming page (Sass). Check the browser console for errors. Then confirm the prerendered text and Markdown files are served (local preview does not test Vercel content negotiation):
+Click through pages that exercise interactive and positioned components: Dropdown and Tooltip/Popover (Popper), Modal, Offcanvas, Carousel (slide transitions using `bezier-easing`), Collapse (transitions), and the Theming page (Sass). Check the browser console for errors. Then confirm the prerendered text and Markdown files are served (local preview does not test Vercel content negotiation):
 
 ```bash
 curl -s http://localhost:4176/llms.txt | head
@@ -191,19 +231,9 @@ Optionally, confirm the Vercel route patching still applies. See [CLAUDE.md](../
 VERCEL=1 pnpm build:site && jq '.routes | length' .vercel/output/config.json
 ```
 
-### Optional: peer floor check
+### Peer floor compatibility
 
-To confirm the library still works at its declared minimum Svelte version:
-
-```bash
-# First commit the intended dependency updates so HEAD contains them.
-git status --short       # must be clean before this temporary experiment
-pnpm add -D svelte@5.29.0
-pnpm check-types && pnpm test
-# Run cleanup even if installation or checks failed; restore the update commit.
-git restore --source=HEAD -- package.json pnpm-lock.yaml
-pnpm install --frozen-lockfile
-```
+Do not test the `^5.29.0` consumer floor by downgrading Svelte inside this repository: the installed `@sveltejs/vite-plugin-svelte` 7.2 toolchain requires Svelte `^5.46.4`. Repository checks validate the supported development toolchain, not the minimum consumer version. If minimum-version validation is needed, use a separate consumer fixture with Svelte 5.29.0 and compatible build tooling to compile and exercise the packaged library. That separate compatibility check is outside this dependency-sweep procedure; do not infer peer-floor support from the repository test results.
 
 ---
 
