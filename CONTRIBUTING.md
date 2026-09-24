@@ -21,6 +21,10 @@ pnpm build
 npm pack --dry-run
 ```
 
+## Dependency updates
+
+See [Update dependencies to latest minor versions](docs/npm/update-all-dependencies-to-latest-minor-versions.md) for the update policy, validation, and separate PR workflows for `main` (2.x) and `codex/maintenance-1.x` (1.x).
+
 ## Component guidelines
 
 - Keep components generic and reusable for Svelte 5 applications.
