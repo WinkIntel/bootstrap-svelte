@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing to Bootstrap Svelte. This project is maintained by Wink, Inc. and is in early pre-1.0 development, so public APIs may change as the package matures.
+Thanks for your interest in contributing to Bootstrap Svelte. This project is maintained by Wink, Inc. Breaking changes to public APIs ship in major releases; see [CHANGELOG.md](CHANGELOG.md) and [MIGRATION.md](MIGRATION.md).
 
 ## Local setup
 

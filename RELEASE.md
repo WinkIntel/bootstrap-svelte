@@ -4,8 +4,9 @@ This package is published to npm as `@winkintel/bootstrap-svelte`.
 
 ## Current release model
 
-- Publish pre-1.0 validation releases with the `next` dist-tag by default.
-- Promote to `latest` only when the release should be the default install target.
+- Publish 2.x releases from `main` with the `latest` dist-tag.
+- Publish 1.x releases from `codex/maintenance-1.x` with the `maintenance` dist-tag.
+- Use the `next` dist-tag for validation releases that should not become the default install target.
 - Keep `package.json`, `pnpm-lock.yaml`, `CHANGELOG.md`, and public docs in sync before publishing.
 - Use GitHub Actions trusted publishing once npm is configured for this repository/workflow.
 
