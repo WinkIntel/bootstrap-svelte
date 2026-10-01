@@ -47,7 +47,7 @@ Most components are namespaces of sub-components, built per-directory with a fix
 - `<name>.svelte`, `<name>-<part>.svelte` — the Root and sub-components
 - `<name>.svelte.ts` — runes-based shared state/logic, when needed
 
-Consumers write `<Dropdown.Root>`, `<Card.Header>`, etc. Standalone components (`Alert`, `Badge`, `Button`, `Spinner`) skip the namespace. `src/lib/index.ts` does `export * from` every component directory — new components must be added there. Intra-library imports use `.js` extensions (ESM style).
+Consumers write `<Dropdown.Root>`, `<Card.Header>`, etc. Directories without a namespace export flat instead: single components (`Alert`, `Badge`, `Button`, `CloseButton`, `Container`, `Row`/`Col`, `Spinner`, ...), small families (`ButtonGroup`/`ButtonToolbar`/`ButtonCheck`, `ProgressBar`/`ProgressStacked`), and attachments (`Collapse`, `Scrollspy`). `src/lib/index.ts` does `export * from` every component directory — new components must be added there. Intra-library imports use `.js` extensions (ESM style).
 
 Parent↔child coordination uses the `Context` class in `src/lib/common/context.ts` (type-safe wrapper over Svelte context with symbol keys). `src/lib/common/` also holds shared CSS/class utilities, DOM helpers, and runes-based utilities (`*.svelte.ts`).
 
@@ -80,6 +80,6 @@ Tests are colocated with components. Components that need a wrapper harness to t
 
 ## Conventions and constraints
 
-- Keep components generic: no app-specific assumptions, private URLs, or internal WinkIntel workflows (this repo is being prepared for public release; license is a placeholder — do not add publish steps).
+- Keep components generic: no app-specific assumptions, private URLs, or internal WinkIntel workflows (the package is public on npm under Apache-2.0; releases follow `RELEASE.md`).
 - Add/update tests for behavior changes, and update the showcase in `src/routes` when public component APIs change.
 - Formatting is Prettier-driven (4-space indent, single quotes); `pnpm lint` fails on unformatted code, so run `pnpm format` before finishing.
