@@ -42,6 +42,23 @@ const AGREEING_HEADERS = [
     'text/html;q=0.5, text/markdown;q=0.05'
 ] as const;
 
+// Keep the forgiving parameter grammar, including empty extensions, without sharing whitespace
+// between repetitions. Duplicate q parameters retain the existing static-route policy below.
+const PARAMETER_CASES = [
+    ['text/markdown; ; ; charset=utf-8 ; q=0.5 ; ', 'markdown'],
+    ['text/markdown;\t;\tcharset=utf-8\t;\tq=0\t;', 'not-acceptable'],
+    ['text/html; q = 1 ; level = 1 ;, text/markdown; q = 0.5 ; ', 'html'],
+    ['text/markdown;q=0.5; charset = utf-8, text/html;q=0.4', 'markdown'],
+    ['text/markdown;q=0.0001', 'markdown'],
+    ['text/markdown;q=0.0000', 'not-acceptable'],
+    ['text/markdown;q=1;q=0', 'not-acceptable'],
+    ['text/markdown;q=0;q=1', 'not-acceptable'],
+    ['text/markdown;q=x', 'markdown'],
+    ['text/markdown;q=0.0x', 'not-acceptable'],
+    ['text/html;q=0.5, text/html;q=0.9, text/markdown;q=0.7', 'html'],
+    ['text/markdown;q=0.7, text/html;q=0.9, text/html;q=0.5', 'html']
+] as const;
+
 /** Quality values are compared on their first decimal digit; finer differences tie, and a tie goes to explicit `text/markdown`. */
 const DOCUMENTED_DIVERGENCES = [
     ['text/html;q=0.95, text/markdown;q=0.9', 'markdown', 'html'],
@@ -57,6 +74,10 @@ describe('routeDecision (what the static Vercel routes decide)', () => {
         expect(routeDecision(accept)).toBe(routes);
         expect(negotiate(accept)).toBe(reference);
     });
+
+    test.each(PARAMETER_CASES)('parameter grammar: %s → %s', (accept, expected) => {
+        expect(routeDecision(accept)).toBe(expected);
+    });
 });
 
 /** Vercel rejects deployments whose route conditions exceed this many characters. */
@@ -69,11 +90,11 @@ function everyPattern(): [string, string][] {
 }
 
 describe('acceptPatterns', () => {
-    test('are anchored, lookaround-free regular expressions that compile in JavaScript', () => {
+    test('are anchored regular expressions without lookbehind that compile in JavaScript', () => {
         for (const [name, pattern] of everyPattern()) {
             expect(pattern.startsWith('^'), name).toBe(true);
             expect(pattern.endsWith('$'), name).toBe(true);
-            expect(pattern, name).not.toMatch(/\(\?[=!<]/);
+            expect(pattern, name).not.toMatch(/\(\?</);
             expect(() => new RegExp(pattern), name).not.toThrow();
         }
     });

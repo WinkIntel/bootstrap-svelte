@@ -53,7 +53,23 @@ describe('addAgentRoutes', () => {
     });
 
     test('redirects trailing-slash variants to the canonical path with a 301 before anything else', () => {
-        expect(routes[0]).toEqual({ src: '^/(.+?)/+$', status: 301, headers: { Location: '/$1' } });
+        expect(routes[0]).toEqual({ src: expect.any(String), status: 301, headers: { Location: '/$1' } });
+    });
+
+    test.each([
+        ['/about/', '/about'],
+        ['/about////', '/about'],
+        ['/components/button/', '/components/button'],
+        ['/a//b///', '/a//b']
+    ])('redirects %s to the same-origin canonical path %s', (path, expected) => {
+        const redirect = routes[0]!;
+        const match = new RegExp(redirect.src!).exec(path);
+        expect(match).not.toBeNull();
+        expect(redirect.headers!.Location!.replace('$1', match![1]!)).toBe(expected);
+    });
+
+    test.each(['/', '//', '///', '//example.test/path/', '/\\example.test/', '/about'])('does not redirect %s', (path) => {
+        expect(new RegExp(routes[0]!.src!).test(path)).toBe(false);
     });
 
     test('keeps the adapter routes, in order, ahead of the filesystem handler', () => {
