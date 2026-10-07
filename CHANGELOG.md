@@ -4,7 +4,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## Unreleased
 
-- Corrected the live Modal showcase examples, matching snippets, and interactive playground to reset visibility when hiding starts, so reopening during the outro works with event tracking enabled or disabled. Added actual-showcase regressions for repeated dismissal and reopening ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)). Library component APIs and runtime are unchanged.
+- Corrected the live Modal showcase examples, matching snippets, and interactive playground to reset visibility at the `onHide` callback, so subsequent opener clicks can reverse the outro with event tracking enabled or disabled. Generated playground snippets include their imports and event handlers. Added actual-showcase regressions for repeated dismissal and reopening ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)). Library component APIs and runtime are unchanged.
 
 - Corrected the Modal quick starts in README.md, AGENTS.md, and generated agent docs, plus the basic Toast showcase demo, so they can reopen during and after dismissal or autohide. Fixed the Toast showcase sample imports/state and its `Toast.Container` prop documentation ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)). Component APIs and runtime behavior are unchanged.
 
