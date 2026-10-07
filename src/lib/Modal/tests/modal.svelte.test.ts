@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { createRawSnippet, tick } from 'svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -545,6 +545,57 @@ describe('Modal Component', () => {
     });
 
     describe('README quick start', () => {
+        it.each(['Escape', 'backdrop', 'header close', 'footer close'])('reopens after %s dismissal', async (dismissal) => {
+            const user = userEvent.setup();
+            render(ModalQuickStartTest);
+
+            for (let cycle = 0; cycle < 3; cycle++) {
+                await user.click(screen.getByTestId('open'));
+                const modal = screen.getByTestId('modal');
+                expect(modal).toBeInTheDocument();
+
+                if (dismissal === 'Escape') await user.keyboard('{Escape}');
+                else if (dismissal === 'backdrop') await fireEvent.mouseDown(modal);
+                else if (dismissal === 'header close') await user.click(within(modal).getByLabelText('Close'));
+                else await user.click(screen.getByTestId('close'));
+
+                await waitFor(() => expect(screen.queryByTestId('modal')).not.toBeInTheDocument());
+            }
+        });
+
+        it.each(['Escape', 'backdrop', 'header close', 'footer close'])('reopens during the %s outro', async (dismissal) => {
+            vi.useFakeTimers();
+            try {
+                render(ModalQuickStartTest);
+                await fireEvent.click(screen.getByTestId('open'));
+                await vi.advanceTimersByTimeAsync(350);
+                const modal = screen.getByTestId('modal');
+                const outroStarted = vi.fn();
+                modal.addEventListener('outrostart', outroStarted);
+
+                if (dismissal === 'Escape') await fireEvent.keyDown(document, { key: 'Escape' });
+                else if (dismissal === 'backdrop') await fireEvent.mouseDown(modal);
+                else if (dismissal === 'header close') await fireEvent.click(within(modal).getByLabelText('Close'));
+                else await fireEvent.click(screen.getByTestId('close'));
+
+                await vi.advanceTimersByTimeAsync(50);
+                // Still mounted, but already hiding: exercise the actual transition window.
+                expect(modal).toBeInTheDocument();
+                expect(outroStarted).toHaveBeenCalledOnce();
+                await fireEvent.click(screen.getByTestId('open'));
+                await vi.advanceTimersByTimeAsync(400);
+                expect(screen.getByTestId('modal')).toHaveClass('show');
+
+                // Query the live modal after reopening; the original node may have been replaced.
+                await fireEvent.click(within(screen.getByTestId('modal')).getByLabelText('Close'));
+                await vi.advanceTimersByTimeAsync(400);
+                expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+            } finally {
+                cleanup();
+                vi.useRealTimers();
+            }
+        });
+
         // Regression test for issue #22: Modal.Title's registration effect must not
         // depend on the `titleId` state it writes, or Svelte >= 5.56.5 throws
         // "Maximum update depth exceeded" when the modal opens...
