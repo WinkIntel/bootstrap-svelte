@@ -61,6 +61,7 @@
     }
 
     function handleHide(): void {
+        isShown = false;
         if (trackEvents) {
             eventLog = [...eventLog, 'Modal is hiding'];
         }
@@ -75,9 +76,6 @@
     function handleHidden(): void {
         if (trackEvents) {
             eventLog = [...eventLog, 'Modal is fully hidden'];
-            isShown = false;
-        } else {
-            isShown = false;
         }
     }
 
@@ -88,11 +86,29 @@
     // Generate code snippet based on current props
     function getCodeSnippet(): string {
         let code = '<script>\n';
+        code += "  import { Button, Modal } from '@winkintel/bootstrap-svelte';\n\n";
         code += '  let isShown = $state(false);\n';
+        if (trackEvents) code += '  let eventLog = $state([]);\n';
         code += '  \n';
         code += '  function toggleModal() {\n';
         code += '    isShown = !isShown;\n';
         code += '  }\n';
+        code += '\n  function handleHide() {\n';
+        code += '    isShown = false;\n';
+        if (trackEvents) code += "    eventLog = [...eventLog, 'Modal is hiding'];\n";
+        code += '  }\n';
+        if (trackEvents) {
+            for (const [handler, message] of [
+                ['handleShow', 'Modal is showing'],
+                ['handleShown', 'Modal is fully shown'],
+                ['handleHidePrevented', 'Modal hide was prevented'],
+                ['handleHidden', 'Modal is fully hidden']
+            ]) {
+                code += `\n  function ${handler}() {\n`;
+                code += `    eventLog = [...eventLog, '${message}'];\n`;
+                code += '  }\n';
+            }
+        }
         code += '\u003c/script>\n\n';
 
         code += '<Button onclick={toggleModal} colorVariant="primary">\n';
@@ -110,14 +126,12 @@
             code += `\n  useBackdrop={${typeof useBackdrop === 'string' ? `"${useBackdrop}"` : useBackdrop}}`;
         }
 
+        code += `\n  onHide={handleHide}`;
         if (trackEvents) {
             code += `\n  onShow={handleShow}`;
             code += `\n  onShown={handleShown}`;
-            code += `\n  onHide={handleHide}`;
             code += `\n  onHidePrevented={handleHidePrevented}`;
             code += `\n  onHidden={handleHidden}`;
-        } else {
-            code += `\n  onHidden={() => isShown = false}`;
         }
 
         code += '>\n';
@@ -174,6 +188,13 @@
         code += '    </Modal.Content>\n';
         code += '  </Modal.Dialog>\n';
         code += '</Modal.Root>';
+        if (trackEvents) {
+            code += '\n\n<ul>\n';
+            code += '  {#each eventLog as event, index (index)}\n';
+            code += '    <li>{event}</li>\n';
+            code += '  {/each}\n';
+            code += '</ul>';
+        }
 
         return code;
     }
@@ -284,7 +305,7 @@
                             {isShown}
                             {useBackdrop}
                             {useFade}
-                            onHide={trackEvents ? handleHide : undefined}
+                            onHide={handleHide}
                             onHidePrevented={trackEvents ? handleHidePrevented : undefined}
                             onHidden={trackEvents ? handleHidden : undefined}
                             onShow={trackEvents ? handleShow : undefined}

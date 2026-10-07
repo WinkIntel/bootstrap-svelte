@@ -25,7 +25,7 @@
     Launch demo modal
 </Button>
 
-<Modal.Root isShown={isModalShown} onHidden={() => isModalShown = false}>
+<Modal.Root isShown={isModalShown} onHide={() => isModalShown = false}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -50,7 +50,7 @@
     Launch static backdrop modal
 </Button>
 
-<Modal.Root useBackdrop="static" isShown={isModalShown} onHidden={() => isModalShown = false}>
+<Modal.Root useBackdrop="static" isShown={isModalShown} onHide={() => isModalShown = false}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -77,7 +77,7 @@
     Launch long content modal
 </Button>
 
-<Modal.Root isShown={isLongContentModalShown} onHidden={() => isLongContentModalShown = false}>
+<Modal.Root isShown={isLongContentModalShown} onHide={() => isLongContentModalShown = false}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -100,7 +100,7 @@
     Launch scrollable modal
 </Button>
 
-<Modal.Root isShown={isLongContentWithScrollableModalShown} onHidden={() => isLongContentWithScrollableModalShown = false}>
+<Modal.Root isShown={isLongContentWithScrollableModalShown} onHide={() => isLongContentWithScrollableModalShown = false}>
     <Modal.Dialog isScrollable={true}>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -128,7 +128,7 @@
     Vertically centered modal
 </Button>
 
-<Modal.Root isShown={isVerticallyCenteredModalShown} onHidden={() => isVerticallyCenteredModalShown = false}>
+<Modal.Root isShown={isVerticallyCenteredModalShown} onHide={() => isVerticallyCenteredModalShown = false}>
     <Modal.Dialog isVerticallyCentered={true}>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -150,7 +150,7 @@
     Vertically centered scrollable modal
 </Button>
 
-<Modal.Root isShown={isVerticallyCenteredWithScrollableModalShown} onHidden={() => isVerticallyCenteredWithScrollableModalShown = false}>
+<Modal.Root isShown={isVerticallyCenteredWithScrollableModalShown} onHide={() => isVerticallyCenteredWithScrollableModalShown = false}>
     <Modal.Dialog isVerticallyCentered={true} isScrollable={true}>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -176,7 +176,7 @@
     Launch modal with grid
 </Button>
 
-<Modal.Root isShown={isGridModalShown} onHidden={() => isGridModalShown = false}>
+<Modal.Root isShown={isGridModalShown} onHide={() => isGridModalShown = false}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -223,7 +223,7 @@
     Open first modal
 </Button>
 
-<Modal.Root isShown={isToggleBetweenTwoModals1Shown} onHidden={() => isToggleBetweenTwoModals1Shown = false}>
+<Modal.Root isShown={isToggleBetweenTwoModals1Shown} onHide={() => isToggleBetweenTwoModals1Shown = false}>
     <Modal.Dialog isVerticallyCentered={true}>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -239,7 +239,7 @@
     </Modal.Dialog>
 </Modal.Root>
 
-<Modal.Root isShown={isToggleBetweenTwoModals2Shown} onHidden={() => isToggleBetweenTwoModals2Shown = false}>
+<Modal.Root isShown={isToggleBetweenTwoModals2Shown} onHide={() => isToggleBetweenTwoModals2Shown = false}>
     <Modal.Dialog isVerticallyCentered={true}>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -263,7 +263,7 @@
     Launch modal without fade
 </Button>
 
-<Modal.Root isShown={isWithoutFadeModalShown} useFade={false} onHidden={() => isWithoutFadeModalShown = false}>
+<Modal.Root isShown={isWithoutFadeModalShown} useFade={false} onHide={() => isWithoutFadeModalShown = false}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -288,7 +288,7 @@
     Launch fullscreen modal
 </Button>
 
-<Modal.Root isShown={isFullscreenModalShown} onHidden={() => isFullscreenModalShown = false}>
+<Modal.Root isShown={isFullscreenModalShown} onHide={() => isFullscreenModalShown = false}>
     <Modal.Dialog fullscreenOnBreakpoint="lg">
         <Modal.Content>
             <Modal.Header isDismissible={true}>
@@ -347,7 +347,7 @@
             <div class="card-body">
                 <Button colorVariant="primary" onclick={() => (isBasicModalShown = true)}>Launch demo modal</Button>
 
-                <Modal.Root isShown={isBasicModalShown} onHidden={() => (isBasicModalShown = false)}>
+                <Modal.Root isShown={isBasicModalShown} onHide={() => (isBasicModalShown = false)}>
                     <Modal.Dialog>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -380,7 +380,7 @@
             <div class="card-body">
                 <Button colorVariant="primary" onclick={() => (isStaticModalShown = true)}>Launch static backdrop modal</Button>
 
-                <Modal.Root isShown={isStaticModalShown} useBackdrop="static" onHidden={() => (isStaticModalShown = false)}>
+                <Modal.Root isShown={isStaticModalShown} useBackdrop="static" onHide={() => (isStaticModalShown = false)}>
                     <Modal.Dialog>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -417,7 +417,7 @@
                 <Button colorVariant="primary" class="me-2" onclick={() => (isLongContentModalShown = true)}>Long content modal</Button>
                 <Button colorVariant="primary" onclick={() => (isLongContentWithScrollableModalShown = true)}>Scrollable modal</Button>
 
-                <Modal.Root isShown={isLongContentModalShown} onHidden={() => (isLongContentModalShown = false)}>
+                <Modal.Root isShown={isLongContentModalShown} onHide={() => (isLongContentModalShown = false)}>
                     <Modal.Dialog>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -439,7 +439,7 @@
                     </Modal.Dialog>
                 </Modal.Root>
 
-                <Modal.Root isShown={isLongContentWithScrollableModalShown} onHidden={() => (isLongContentWithScrollableModalShown = false)}>
+                <Modal.Root isShown={isLongContentWithScrollableModalShown} onHide={() => (isLongContentWithScrollableModalShown = false)}>
                     <Modal.Dialog isScrollable={true}>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -482,7 +482,7 @@
                 <Button colorVariant="primary" onclick={() => (isVerticallyCenteredWithScrollableModalShown = true)}
                     >Vertically centered scrollable</Button>
 
-                <Modal.Root isShown={isVerticallyCenteredModalShown} onHidden={() => (isVerticallyCenteredModalShown = false)}>
+                <Modal.Root isShown={isVerticallyCenteredModalShown} onHide={() => (isVerticallyCenteredModalShown = false)}>
                     <Modal.Dialog isVerticallyCentered={true}>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -501,7 +501,7 @@
 
                 <Modal.Root
                     isShown={isVerticallyCenteredWithScrollableModalShown}
-                    onHidden={() => (isVerticallyCenteredWithScrollableModalShown = false)}>
+                    onHide={() => (isVerticallyCenteredWithScrollableModalShown = false)}>
                     <Modal.Dialog isVerticallyCentered={true} isScrollable={true}>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -541,7 +541,7 @@
             <div class="card-body">
                 <Button colorVariant="primary" onclick={() => (isGridModalShown = true)}>Launch modal with grid</Button>
 
-                <Modal.Root isShown={isGridModalShown} onHidden={() => (isGridModalShown = false)}>
+                <Modal.Root isShown={isGridModalShown} onHide={() => (isGridModalShown = false)}>
                     <Modal.Dialog>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -595,7 +595,7 @@
             <div class="card-body">
                 <Button colorVariant="primary" onclick={() => (isToggleBetweenTwoModals1Shown = true)}>Open first modal</Button>
 
-                <Modal.Root isShown={isToggleBetweenTwoModals1Shown} onHidden={() => (isToggleBetweenTwoModals1Shown = false)}>
+                <Modal.Root isShown={isToggleBetweenTwoModals1Shown} onHide={() => (isToggleBetweenTwoModals1Shown = false)}>
                     <Modal.Dialog isVerticallyCentered={true}>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -616,7 +616,7 @@
                     </Modal.Dialog>
                 </Modal.Root>
 
-                <Modal.Root isShown={isToggleBetweenTwoModals2Shown} onHidden={() => (isToggleBetweenTwoModals2Shown = false)}>
+                <Modal.Root isShown={isToggleBetweenTwoModals2Shown} onHide={() => (isToggleBetweenTwoModals2Shown = false)}>
                     <Modal.Dialog isVerticallyCentered={true}>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -652,7 +652,7 @@
             <div class="card-body">
                 <Button colorVariant="primary" onclick={() => (isWithoutFadeModalShown = true)}>Modal without fade</Button>
 
-                <Modal.Root isShown={isWithoutFadeModalShown} useFade={false} onHidden={() => (isWithoutFadeModalShown = false)}>
+                <Modal.Root isShown={isWithoutFadeModalShown} useFade={false} onHide={() => (isWithoutFadeModalShown = false)}>
                     <Modal.Dialog>
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>
@@ -684,7 +684,7 @@
             <div class="card-body">
                 <Button colorVariant="primary" onclick={() => (isFullscreenModalShown = true)}>Full screen below lg</Button>
 
-                <Modal.Root isShown={isFullscreenModalShown} onHidden={() => (isFullscreenModalShown = false)}>
+                <Modal.Root isShown={isFullscreenModalShown} onHide={() => (isFullscreenModalShown = false)}>
                     <Modal.Dialog fullscreenOnBreakpoint="lg">
                         <Modal.Content>
                             <Modal.Header isDismissible={true}>

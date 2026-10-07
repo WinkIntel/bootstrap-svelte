@@ -52,6 +52,17 @@ describe('renderPageMarkdown', { timeout: PAGE_RENDER_TIMEOUT }, () => {
         expect(page.markdown).toContain('```html');
     });
 
+    test('keeps Modal showcase samples synchronized at the start of dismissal', async () => {
+        const { markdown } = await renderPageMarkdown('/components/modal');
+        const samples = [...markdown.matchAll(/```html\n([^]*?)```/g)].map((match) => match[1] ?? '');
+        const roots = samples.flatMap((sample) => [...sample.matchAll(/<Modal\.Root[^]*?>\s*<Modal\.Dialog/g)].map((match) => match[0]));
+        expect(roots).toHaveLength(11);
+        for (const root of roots) {
+            expect(root).toMatch(/onHide=\{\(\) => \w+ = false\}/);
+            expect(root).not.toContain('onHidden=');
+        }
+    });
+
     test('omits live demo wrappers inside example cards but keeps their prose and code', async () => {
         const page = await renderPageMarkdown('/form/form-controls');
         expect(page.markdown).not.toMatch(/^Output:/m);
