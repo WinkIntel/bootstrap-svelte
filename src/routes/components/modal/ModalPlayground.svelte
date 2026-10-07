@@ -61,6 +61,7 @@
     }
 
     function handleHide(): void {
+        isShown = false;
         if (trackEvents) {
             eventLog = [...eventLog, 'Modal is hiding'];
         }
@@ -75,9 +76,6 @@
     function handleHidden(): void {
         if (trackEvents) {
             eventLog = [...eventLog, 'Modal is fully hidden'];
-            isShown = false;
-        } else {
-            isShown = false;
         }
     }
 
@@ -113,11 +111,11 @@
         if (trackEvents) {
             code += `\n  onShow={handleShow}`;
             code += `\n  onShown={handleShown}`;
-            code += `\n  onHide={handleHide}`;
+            code += `\n  onHide={() => { isShown = false; handleHide(); }}`;
             code += `\n  onHidePrevented={handleHidePrevented}`;
             code += `\n  onHidden={handleHidden}`;
         } else {
-            code += `\n  onHidden={() => isShown = false}`;
+            code += `\n  onHide={() => isShown = false}`;
         }
 
         code += '>\n';
@@ -284,7 +282,7 @@
                             {isShown}
                             {useBackdrop}
                             {useFade}
-                            onHide={trackEvents ? handleHide : undefined}
+                            onHide={handleHide}
                             onHidePrevented={trackEvents ? handleHidePrevented : undefined}
                             onHidden={trackEvents ? handleHidden : undefined}
                             onShow={trackEvents ? handleShow : undefined}
