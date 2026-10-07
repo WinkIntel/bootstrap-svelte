@@ -107,7 +107,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
     </Card.Body>
 </Card.Root>
 
-<Modal.Root isShown={showModal} onHidden={() => (showModal = false)}>
+<Modal.Root isShown={showModal} onHide={() => (showModal = false)}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header>

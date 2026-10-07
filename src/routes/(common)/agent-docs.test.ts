@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { buildAgentsMd, buildLlmsFullTxt, buildLlmsTxt, buildNotAcceptableTxt, buildRobotsTxt, buildSitemapXml } from './agent-docs.js';
 import { sitePages } from './site.js';
@@ -62,7 +63,7 @@ describe('buildAgentsMd', () => {
         expect(text).toContain("import { Button, Card, Modal } from '@winkintel/bootstrap-svelte';");
         expect(text).toContain('<Card.Root>');
         expect(text).toContain('</Card.Root>');
-        expect(text).toContain('<Modal.Root isShown={showModal} onHidden={() => (showModal = false)}>');
+        expect(text).toContain('<Modal.Root isShown={showModal} onHide={() => (showModal = false)}>');
         expect(text).toContain('</Modal.Root>');
         expect(text).toContain('`ButtonRootProps`');
         expect(text).toContain('`Card.RootProps`');
@@ -76,6 +77,28 @@ describe('buildAgentsMd', () => {
         expect(text).not.toContain('ModalProps');
         expect(text).not.toContain('`svelte ^5.29`');
         expect(text).toContain('https://bootstrap-svelte.vercel.app/llms.txt');
+    });
+});
+
+describe('Modal quick-start documentation parity', () => {
+    const fixture = readFileSync('src/lib/Modal/tests/modal-quick-start-test.svelte', 'utf8');
+    const rootTag = (source: string) =>
+        source
+            .match(/<Modal\.Root[^]*?\n/)?.[0]
+            .trim()
+            .replace(/ data-testid="modal"/, '');
+
+    test.each([
+        ['README.md', readFileSync('README.md', 'utf8')],
+        ['AGENTS.md', readFileSync('AGENTS.md', 'utf8')],
+        ['generated agents.md', buildAgentsMd()]
+    ])('%s preserves the tested state synchronization and footer dismissal', (_name, markdown) => {
+        const snippet = [...markdown.matchAll(/```svelte\n([^]*?)```/g)].map((match) => match[1]).find((code) => code?.includes('<Modal.Root'));
+        expect(snippet).toBeDefined();
+        expect(rootTag(fixture)).toBe('<Modal.Root isShown={showModal} onHide={() => (showModal = false)}>');
+        expect(rootTag(snippet!)).toBe(rootTag(fixture));
+        const footer = snippet!.match(/<Modal\.Footer>([^]*?)<\/Modal\.Footer>/)?.[1];
+        expect(footer).toContain('onclick={() => (showModal = false)}');
     });
 });
 

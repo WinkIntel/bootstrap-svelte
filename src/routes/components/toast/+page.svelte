@@ -122,6 +122,8 @@
 
     // Sample code examples for demonstration
     const basicExampleCode = `<script>
+    import { Button, Toast } from '@winkintel/bootstrap-svelte';
+
     let isBasicToastShown = $state(false);
 \u003c/script>
 
@@ -130,7 +132,7 @@
 </Button>
 
 <Toast.Container isFixed placement="bottom-end">
-    <Toast.Root isShown={isBasicToastShown} doAutohide={true} delay={5000} onHidden={() => (isBasicToastShown = false)}>
+    <Toast.Root isShown={isBasicToastShown} doAutohide={true} delay={5000} onHide={() => (isBasicToastShown = false)}>
         <Toast.Header>
             <strong class="me-auto">Bootstrap</strong>
             <small>11 mins ago</small>
@@ -283,7 +285,7 @@
                     <Button id="basic-toast-btn" colorVariant="primary" onclick={() => (isBasicToastShown = true)}>Show toast</Button>
 
                     <Toast.Container isFixed placement="bottom-end">
-                        <Toast.Root isShown={isBasicToastShown} doAutohide={true} delay={5000} onHidden={() => (isBasicToastShown = false)}>
+                        <Toast.Root isShown={isBasicToastShown} doAutohide={true} delay={5000} onHide={() => (isBasicToastShown = false)}>
                             <Toast.Header>
                                 <strong class="me-auto">Bootstrap</strong>
                                 <small>11 mins ago</small>
@@ -829,8 +831,14 @@
                                 <td>ID for the container element</td>
                             </tr>
                             <tr>
+                                <td><code>isFixed</code></td>
+                                <td><code>boolean</code></td>
+                                <td><code>true</code></td>
+                                <td>Use fixed positioning relative to the viewport</td>
+                            </tr>
+                            <tr>
                                 <td><code>placement</code></td>
-                                <td><code>string</code></td>
+                                <td><code>ToastPlacement</code></td>
                                 <td><code>'bottom-end'</code></td>
                                 <td
                                     >Position of the container in the viewport. Options include: 'top-start', 'top-center', 'top-end', 'middle-start',

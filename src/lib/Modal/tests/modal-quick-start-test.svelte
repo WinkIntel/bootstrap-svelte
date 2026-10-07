@@ -6,7 +6,7 @@
 
 <Button colorVariant="primary" data-testid="open" onclick={() => (showModal = true)}>Open Modal</Button>
 
-<Modal.Root isShown={showModal} onHidden={() => (showModal = false)} data-testid="modal">
+<Modal.Root isShown={showModal} onHide={() => (showModal = false)} data-testid="modal">
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header>
