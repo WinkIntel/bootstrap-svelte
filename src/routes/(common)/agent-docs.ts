@@ -114,7 +114,7 @@ export function buildAgentsMd(): string {
     </Card.Body>
 </Card.Root>
 
-<Modal.Root isShown={showModal}>
+<Modal.Root isShown={showModal} onHide={() => (showModal = false)}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header>

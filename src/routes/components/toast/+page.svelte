@@ -121,12 +121,18 @@
     }
 
     // Sample code examples for demonstration
-    const basicExampleCode = `<Button id="liveToastBtn" colorVariant="primary" onclick={() => isToastShown = true}>
+    const basicExampleCode = `<script>
+    import { Button, Toast } from '@winkintel/bootstrap-svelte';
+
+    let isBasicToastShown = $state(false);
+\u003c/script>
+
+<Button id="liveToastBtn" colorVariant="primary" onclick={() => (isBasicToastShown = true)}>
     Show live toast
 </Button>
 
 <Toast.Container isFixed placement="bottom-end">
-    <Toast.Root isShown={isBasicToastShown} doAutohide={true} delay={5000}>
+    <Toast.Root isShown={isBasicToastShown} doAutohide={true} delay={5000} onHide={() => (isBasicToastShown = false)}>
         <Toast.Header>
             <strong class="me-auto">Bootstrap</strong>
             <small>11 mins ago</small>
@@ -135,7 +141,7 @@
     </Toast.Root>
 </Toast.Container>`;
 
-    const stackingExampleCode = `<Toast.Container position="bottom-end">
+    const stackingExampleCode = `<Toast.Container placement="bottom-end">
     <Toast.Root isShown={true}>
         <Toast.Header>
             <strong class="me-auto">Bootstrap</strong>
@@ -203,47 +209,47 @@
 </Toast.Root>`;
 
     const placementExampleCode = `<!-- Top left -->
-<Toast.Container position="top-start">
+<Toast.Container placement="top-start">
     <Toast.Root isShown={true}>...</Toast.Root>
 </Toast.Container>
 
 <!-- Top center -->
-<Toast.Container position="top-center">
+<Toast.Container placement="top-center">
     <Toast.Root isShown={true}>...</Toast.Root>
 </Toast.Container>
 
 <!-- Top right -->
-<Toast.Container position="top-end">
+<Toast.Container placement="top-end">
     <Toast.Root isShown={true}>...</Toast.Root>
 </Toast.Container>
 
 <!-- Middle left -->
-<Toast.Container position="middle-start">
+<Toast.Container placement="middle-start">
     <Toast.Root isShown={true}>...</Toast.Root>
 </Toast.Container>
 
 <!-- Middle center -->
-<Toast.Container position="middle-center">
+<Toast.Container placement="middle-center">
     <Toast.Root isShown={true}>...</Toast.Root>
 </Toast.Container>
 
 <!-- Middle right -->
-<Toast.Container position="middle-end">
+<Toast.Container placement="middle-end">
     <Toast.Root isShown={true}>...</Toast.Root>
 </Toast.Container>
 
 <!-- Bottom left -->
-<Toast.Container position="bottom-start">
+<Toast.Container placement="bottom-start">
     <Toast.Root isShown={true}>...</Toast.Root>
 </Toast.Container>
 
 <!-- Bottom center -->
-<Toast.Container position="bottom-center">
+<Toast.Container placement="bottom-center">
     <Toast.Root isShown={true}>...</Toast.Root>
 </Toast.Container>
 
 <!-- Bottom right -->
-<Toast.Container position="bottom-end">
+<Toast.Container placement="bottom-end">
     <Toast.Root isShown={true}>...</Toast.Root>
 </Toast.Container>`;
 
@@ -279,7 +285,7 @@
                     <Button id="basic-toast-btn" colorVariant="primary" onclick={() => (isBasicToastShown = true)}>Show toast</Button>
 
                     <Toast.Container isFixed placement="bottom-end">
-                        <Toast.Root isShown={isBasicToastShown} doAutohide={true} delay={5000}>
+                        <Toast.Root isShown={isBasicToastShown} doAutohide={true} delay={5000} onHide={() => (isBasicToastShown = false)}>
                             <Toast.Header>
                                 <strong class="me-auto">Bootstrap</strong>
                                 <small>11 mins ago</small>
@@ -496,7 +502,8 @@
     <section class="mb-5">
         <h2 class="wk-quick-link">Placement</h2>
         <p>
-            Place toasts with the <code>Toast.Container</code> component using the <code>position</code> prop. The <code>position</code> prop accepts:
+            Place toasts with the <code>Toast.Container</code> component using the <code>placement</code> prop. The <code>placement</code> prop
+            accepts:
             <code>top-start</code>, <code>top-center</code>, <code>top-end</code>,
             <code>middle-start</code>, <code>middle-center</code>, <code>middle-end</code>, <code>bottom-start</code>,
             <code>bottom-center</code>, or <code>bottom-end</code>.
@@ -824,8 +831,14 @@
                                 <td>ID for the container element</td>
                             </tr>
                             <tr>
-                                <td><code>position</code></td>
-                                <td><code>string</code></td>
+                                <td><code>isFixed</code></td>
+                                <td><code>boolean</code></td>
+                                <td><code>true</code></td>
+                                <td>Use fixed positioning relative to the viewport</td>
+                            </tr>
+                            <tr>
+                                <td><code>placement</code></td>
+                                <td><code>ToastPlacement</code></td>
                                 <td><code>'bottom-end'</code></td>
                                 <td
                                     >Position of the container in the viewport. Options include: 'top-start', 'top-center', 'top-end', 'middle-start',

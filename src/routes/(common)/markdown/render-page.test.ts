@@ -28,6 +28,16 @@ describe('renderPageMarkdown', { timeout: PAGE_RENDER_TIMEOUT }, () => {
         expect(page.markdown).toContain('| `colorVariant` |');
     });
 
+    test('includes a self-contained basic Toast sample and accurate container props', async () => {
+        const { markdown } = await renderPageMarkdown('/components/toast');
+        expect(markdown).toContain("import { Button, Toast } from '@winkintel/bootstrap-svelte';");
+        expect(markdown).toContain('let isBasicToastShown = $state(false);');
+        expect(markdown).toContain('onHide={() => (isBasicToastShown = false)}');
+        expect(markdown).toContain('| `isFixed` | `boolean` | `true` |');
+        expect(markdown).toContain('| `placement` | `ToastPlacement` |');
+        expect(markdown).not.toMatch(/<Toast\.Container[^>]*\bposition=/);
+    });
+
     test('omits the interactive playground and code-copy controls', async () => {
         const page = await renderPageMarkdown('/components/button');
         expect(page.markdown).not.toContain('## Playground');
