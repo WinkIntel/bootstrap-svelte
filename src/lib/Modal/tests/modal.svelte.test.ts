@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { createRawSnippet, tick } from 'svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -545,6 +545,23 @@ describe('Modal Component', () => {
     });
 
     describe('README quick start', () => {
+        it.each(['Escape', 'backdrop', 'header close'])('reopens after %s dismissal', async (dismissal) => {
+            const user = userEvent.setup();
+            render(ModalQuickStartTest);
+
+            for (let cycle = 0; cycle < 3; cycle++) {
+                await user.click(screen.getByTestId('open'));
+                const modal = screen.getByTestId('modal');
+                expect(modal).toBeInTheDocument();
+
+                if (dismissal === 'Escape') await user.keyboard('{Escape}');
+                else if (dismissal === 'backdrop') await fireEvent.mouseDown(modal);
+                else await user.click(within(modal).getByLabelText('Close'));
+
+                await waitFor(() => expect(screen.queryByTestId('modal')).not.toBeInTheDocument());
+            }
+        });
+
         // Regression test for issue #22: Modal.Title's registration effect must not
         // depend on the `titleId` state it writes, or Svelte >= 5.56.5 throws
         // "Maximum update depth exceeded" when the modal opens...

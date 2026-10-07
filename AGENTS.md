@@ -42,7 +42,7 @@ Most components use a compound pattern with a `Root` component and sub-component
     <Card.Footer>Footer</Card.Footer>
 </Card.Root>
 
-<Modal.Root isShown={showModal}>
+<Modal.Root isShown={showModal} onHidden={() => (showModal = false)}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header>

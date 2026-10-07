@@ -62,7 +62,7 @@ describe('buildAgentsMd', () => {
         expect(text).toContain("import { Button, Card, Modal } from '@winkintel/bootstrap-svelte';");
         expect(text).toContain('<Card.Root>');
         expect(text).toContain('</Card.Root>');
-        expect(text).toContain('<Modal.Root isShown={showModal}>');
+        expect(text).toContain('<Modal.Root isShown={showModal} onHidden={() => (showModal = false)}>');
         expect(text).toContain('</Modal.Root>');
         expect(text).toContain('`ButtonRootProps`');
         expect(text).toContain('`Card.RootProps`');

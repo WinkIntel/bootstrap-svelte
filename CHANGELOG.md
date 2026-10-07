@@ -2,6 +2,10 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## Unreleased
+
+- Corrected the Modal quick-start examples and basic Toast demo so they can reopen after dismissal or autohide. Fixed the Toast sample state and documented `Toast.Container`’s `placement` prop ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)). Component APIs and runtime behavior are unchanged.
+
 ## 2.1.0 — 2026-09-19
 
 Compatible update for 2.x consumers. The Svelte peer requirement remains `^5.29.0`.
