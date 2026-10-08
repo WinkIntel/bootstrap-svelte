@@ -1,103 +1,186 @@
 name: Publish
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: npm dist-tag to publish
-        type: choice
-        required: true
-        default: next
-        options:
-          - next
-          - latest
-          - maintenance
-      dry-run:
-        description: Run publish checks without publishing to npm
-        type: boolean
-        required: true
-        default: true
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: Release channel (must match version and source)
+                type: choice
+                required: true
+                default: latest
+                options: [latest, maintenance, next]
+            dry-run:
+                description: Rehearse without publishing to npm
+                type: boolean
+                required: true
+                default: true
 
 permissions:
-  contents: read
-  id-token: write
+    contents: read
 
+# Serialize all release lines for this package, including channel updates.
 concurrency:
-  group: npm-publish-${{ github.ref }}
-  cancel-in-progress: false
+    group: npm-publish-bootstrap-svelte
+    cancel-in-progress: false
+
+defaults:
+    run:
+        shell: bash
 
 jobs:
-  publish:
-    name: Publish to npm
-    runs-on: ubuntu-latest
+    build:
+        name: Build release artifact
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        permissions:
+            contents: read
+        outputs:
+            version: ${{ steps.policy.outputs.version }}
+            sha256: ${{ steps.pack.outputs.sha256 }}
+            artifact-id: ${{ steps.upload.outputs.artifact-id }}
+        env:
+            RELEASE_CHANNEL: ${{ inputs.tag }}
+        steps:
+            - name: Checkout selected source
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+              with:
+                  fetch-depth: 0
+                  persist-credentials: false
+            - name: Setup Node.js
+              uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+              with:
+                  node-version: 26
+                  package-manager-cache: false
+            - name: Check release policy before dependency installation
+              id: policy
+              run: node scripts/release-policy.mjs guard
+            - name: Setup pinned pnpm
+              uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+              with:
+                  run_install: false
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            - name: Test release controls
+              run: node --test scripts/tests/release-*.test.mjs
+            - name: Lint
+              run: pnpm lint
+            - name: Type check
+              run: pnpm check-types
+            - name: Test
+              run: pnpm test
+            - name: Build and package lint
+              run: pnpm build
+            - name: Pack without rerunning lifecycle scripts
+              id: pack
+              env:
+                  RELEASE_DIR: ${{ runner.temp }}/release-package
+              run: node scripts/release-policy.mjs pack
+            - name: Upload the single release tarball
+              id: upload
+              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+              with:
+                  name: npm-release-${{ github.run_id }}-${{ github.run_attempt }}
+                  path: ${{ runner.temp }}/release-package/release.tgz
+                  if-no-files-found: error
+                  retention-days: 7
+                  compression-level: 0
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    rehearsal:
+        name: Rehearse protected release
+        if: ${{ inputs.dry-run }}
+        needs: build
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        environment: npm-publish
+        permissions:
+            contents: read
+        steps:
+            - &release-node
+              name: Setup Node.js without package caching
+              uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+              with:
+                  node-version: 26
+                  package-manager-cache: false
+            - &release-download
+              name: Download this run's exact artifact
+              uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+              with:
+                  artifact-ids: ${{ needs.build.outputs.artifact-id }}
+                  path: artifact
+                  merge-multiple: true
+            - &release-execute
+              name: Verify artifact and execute selected mode
+              env:
+                  RELEASE_MODE: ${{ inputs.dry-run && 'dry-run' || 'publish' }}
+                  RELEASE_CHANNEL: ${{ inputs.tag }}
+                  RELEASE_VERSION: ${{ needs.build.outputs.version }}
+                  RELEASE_SHA256: ${{ needs.build.outputs.sha256 }}
+                  NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/release-user.npmrc
+                  NPM_CONFIG_GLOBALCONFIG: ${{ runner.temp }}/release-global.npmrc
+              run: |
+                  node --input-type=module <<'NODE'
+                  import { createHash } from 'node:crypto';
+                  import { readFileSync, readdirSync, lstatSync } from 'node:fs';
+                  import { execFileSync } from 'node:child_process';
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 26
-          registry-url: https://registry.npmjs.org
+                  const env = process.env;
+                  const fail = (message) => { throw new Error(message); };
+                  const mode = env.RELEASE_MODE;
+                  if (!['dry-run', 'publish'].includes(mode)) fail('Invalid release mode');
+                  if (env.NODE_AUTH_TOKEN || env.NPM_TOKEN) fail('Token fallback is not permitted');
+                  if (env.GITHUB_REPOSITORY !== 'WinkIntel/bootstrap-svelte') fail('Unexpected repository');
+                  if (!/^[a-f0-9]{40}$/.test(env.GITHUB_SHA ?? '')) fail('Invalid source SHA');
+                  if (!/^[a-f0-9]{64}$/.test(env.RELEASE_SHA256 ?? '')) fail('Invalid artifact digest');
+                  const tarball = './artifact/release.tgz';
+                  const files = readdirSync('artifact');
+                  if (files.length !== 1 || files[0] !== 'release.tgz' || !lstatSync(tarball).isFile()) fail('Expected one regular tarball');
+                  const digest = createHash('sha256').update(readFileSync(tarball)).digest('hex');
+                  if (digest !== env.RELEASE_SHA256) fail('Artifact digest mismatch');
+                  const entries = execFileSync('tar', ['-tzf', tarball], { encoding: 'utf8' }).trim().split('\n');
+                  if (entries.filter((entry) => entry === 'package/package.json').length !== 1) fail('Expected one package manifest');
+                  const pkg = JSON.parse(execFileSync('tar', ['-xOzf', tarball, 'package/package.json'], { encoding: 'utf8' }));
+                  const name = '@winkintel/bootstrap-svelte';
+                  if (pkg.name !== name || pkg.version !== env.RELEASE_VERSION) fail('Package identity mismatch');
+                  if (pkg.publishConfig !== undefined) fail('Artifact cannot override publishing configuration');
+                  const version = pkg.version;
+                  const match = typeof version === 'string' && version.length <= 128 && /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/.exec(version);
+                  if (!match || match[4]?.split('.').some((part) => /^\d+$/.test(part) && part.length > 1 && part.startsWith('0'))) fail('Invalid release version');
+                  const channel = env.RELEASE_CHANNEL;
+                  const major = match[1];
+                  const prerelease = Boolean(match[4]);
+                  if (!((major === '2' && !prerelease && channel === 'latest') || (major === '1' && !prerelease && channel === 'maintenance') || (major === '2' && prerelease && channel === 'next'))) fail('Version/channel mismatch');
+                  const branch = major === '1' ? 'codex/maintenance-1.x' : 'main';
+                  if (env.GITHUB_REF !== `refs/heads/${branch}` && env.GITHUB_REF !== `refs/tags/v${version}`) fail('Unapproved source ref');
+                  const npmVersion = execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim().split('.').map(Number);
+                  if (!(npmVersion[0] > 11 || (npmVersion[0] === 11 && (npmVersion[1] > 5 || (npmVersion[1] === 5 && npmVersion[2] >= 1))))) fail('npm >= 11.5.1 is required');
+                  const response = await fetch(`https://registry.npmjs.org/${encodeURIComponent(name)}/${encodeURIComponent(version)}`, { redirect: 'error', signal: AbortSignal.timeout(15000) });
+                  if (response.status === 200) {
+                      const existing = await response.json();
+                      if (existing.name !== name || existing.version !== version) fail('Unexpected registry metadata');
+                      if (mode === 'publish') fail('Version is already published');
+                  } else if (response.status !== 404) {
+                      fail(`Registry lookup failed: HTTP ${response.status}`);
+                  }
+                  console.log(JSON.stringify({ mode, name, version, channel, sha: env.GITHUB_SHA, sha256: digest }));
+                  const args = ['publish', tarball, '--ignore-scripts', '--access=public', '--registry=https://registry.npmjs.org', `--tag=${channel}`];
+                  if (mode === 'dry-run') args.push('--dry-run');
+                  execFileSync('npm', args, { stdio: 'inherit' });
+                  NODE
 
-      - name: Setup pnpm with Corepack
-        run: |
-          corepack enable
-          corepack prepare pnpm@11.5.2 --activate
-          pnpm --version
-          npm --version
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Type check
-        run: pnpm check-types
-
-      - name: Test
-        run: pnpm test
-
-      - name: Build and package lint
-        run: pnpm build
-
-      - name: Inspect npm package contents
-        run: npm pack --dry-run
-
-      - name: Check package version status
-        id: package-version
-        run: |
-          PKG=$(node -p "require('./package.json').name")
-          VERSION=$(node -p "require('./package.json').version")
-          echo "package=$PKG" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          if npm view "$PKG@$VERSION" version >/dev/null 2>&1; then
-            echo "published=true" >> "$GITHUB_OUTPUT"
-            echo "Package $PKG@$VERSION is already published."
-          else
-            echo "published=false" >> "$GITHUB_OUTPUT"
-            echo "Package $PKG@$VERSION is not published yet."
-          fi
-
-      - name: Fail if package version is already published
-        if: ${{ !inputs.dry-run && steps.package-version.outputs.published == 'true' }}
-        run: |
-          echo "Package ${{ steps.package-version.outputs.package }}@${{ steps.package-version.outputs.version }} is already published. Bump package.json before publishing."
-          exit 1
-
-      - name: Publish dry run
-        if: ${{ inputs.dry-run && steps.package-version.outputs.published != 'true' }}
-        run: npm publish --access public --tag "${{ inputs.tag }}" --dry-run
-
-      - name: Skip publish dry run for existing version
-        if: ${{ inputs.dry-run && steps.package-version.outputs.published == 'true' }}
-        run: echo "Skipping npm publish --dry-run because ${{ steps.package-version.outputs.package }}@${{ steps.package-version.outputs.version }} already exists. Build, package lint, and npm pack dry run completed successfully."
-
-      - name: Publish to npm
-        if: ${{ !inputs.dry-run && steps.package-version.outputs.published != 'true' }}
-        run: npm publish --access public --tag "${{ inputs.tag }}"
+    publish:
+        name: Publish approved tarball
+        if: ${{ !inputs.dry-run }}
+        needs: build
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        environment: npm-publish
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+            - *release-node
+            - *release-download
+            - *release-execute
