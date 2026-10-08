@@ -1,46 +1,45 @@
 name: CI
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+    push:
+        branches: [main, codex/maintenance-1.x]
+    pull_request:
+
+permissions:
+    contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 26
-
-      - name: Setup pnpm with Corepack
-        run: |
-          corepack enable
-          corepack prepare pnpm@11.5.2 --activate
-          pnpm --version
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Type check
-        run: pnpm check-types
-
-      - name: Test
-        run: pnpm test
-
-      - name: Build
-        run: pnpm build
-
-      - name: Inspect npm package contents
-        run: npm pack --dry-run
+    build:
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        steps:
+            - name: Checkout
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+              with:
+                  persist-credentials: false
+            - name: Setup Node.js
+              uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+              with:
+                  node-version: 26
+                  package-manager-cache: false
+            - name: Setup pinned pnpm
+              uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+              with:
+                  run_install: false
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            - name: Test release controls
+              run: node --test scripts/tests/release-*.test.mjs
+            - name: Lint
+              run: pnpm lint
+            - name: Type check
+              run: pnpm check-types
+            - name: Test
+              run: pnpm test
+            - name: Build
+              run: pnpm build
+            - name: Inspect npm package contents
+              run: npm pack --dry-run
