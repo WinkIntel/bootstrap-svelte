@@ -61,7 +61,11 @@ in `packageManager`; publishing checks for npm CLI 11.5.1 or newer.
 1. Choose the release line, version, source commit and channel with the owner.
    For an actual package release, update `package.json`, `pnpm-lock.yaml` and
    `CHANGELOG.md` together through review. Workflow-only changes need no version bump.
-2. Run all checks in the release worktree:
+2. Use Node 26, pnpm 11.5.2 (the pinned `packageManager`), and npm >= 11.5.1
+   before running the checks below. Confirm with `node --version`, `pnpm --version`,
+   and `npm --version`; the real-npm release test deliberately enforces the publishing
+   toolchain requirement instead of silently skipping on older npm.
+   Run all checks in the release worktree:
 
     ```bash
     pnpm install --frozen-lockfile
@@ -91,11 +95,13 @@ It has `contents: read` and no OIDC permission.
 
 The rehearsal job waits for `npm-publish` environment approval on a fresh runner.
 It downloads that exact artifact, checks its hash and package/ref/channel identity,
-checks registry status, and runs `npm publish ./artifact/release.tgz --dry-run
---ignore-scripts` with explicit registry, access and channel. It does not check out
-source, install dependencies, or run lifecycle scripts. It also has no OIDC permission.
-Already-published versions still exercise this structural dry run; registry errors
-other than a definite 404 fail closed.
+checks registry status, and, for an unpublished version (HTTP 404), runs
+`npm publish ./artifact/release.tgz --dry-run --ignore-scripts` with explicit registry,
+access and channel. For an already-published version (HTTP 200 with matching metadata),
+it logs that artifact validation passed and skips the npm call: npm rejects publishing
+an existing version even during a dry run. Artifact verification still runs in full.
+Other registry responses fail closed. The job does not check out source, install
+dependencies, run lifecycle scripts, or receive OIDC permission.
 
 A rehearsal verifies packaging and the approval path. It **does not prove** npm's
 OIDC authorization, published provenance, or a successful registry write. Local
@@ -109,7 +115,12 @@ channel and `dry-run: false`. This is a new run: inspect and approve its exact s
 version, tarball SHA256 and artifact ID, rather than assuming an earlier rehearsal's
 artifact was reused. Environment reviewers can inspect the build logs/artifact
 before approval. Runs serialize across both release lines without cancelling a
-running release.
+running release. This is not a durable queue: with the current default concurrency
+queue, GitHub retains at most one pending run and replaces it when another is queued.
+A run waiting for environment approval can hold the package-wide lock and block both
+release lines. Finish or explicitly cancel stale approval waits before dispatching
+another run, and check the status of any queued run before relying on it. Do not queue
+multiple releases or split the lock by channel; both lines publish the same package.
 
 Only the protected publish job receives `id-token: write`. It downloads and verifies
 this run's tarball using the same inline checks as rehearsal, then publishes that

@@ -165,9 +165,13 @@ jobs:
                       fail(`Registry lookup failed: HTTP ${response.status}`);
                   }
                   console.log(JSON.stringify({ mode, name, version, channel, sha: env.GITHUB_SHA, sha256: digest }));
-                  const args = ['publish', tarball, '--ignore-scripts', '--access=public', '--registry=https://registry.npmjs.org', `--tag=${channel}`];
-                  if (mode === 'dry-run') args.push('--dry-run');
-                  execFileSync('npm', args, { stdio: 'inherit' });
+                  if (mode === 'dry-run' && response.status === 200) {
+                      console.log('Version is already published; artifact checks passed; skipping npm publish --dry-run');
+                  } else {
+                      const args = ['publish', tarball, '--ignore-scripts', '--access=public', '--registry=https://registry.npmjs.org', `--tag=${channel}`];
+                      if (mode === 'dry-run') args.push('--dry-run');
+                      execFileSync('npm', args, { stdio: 'inherit' });
+                  }
                   NODE
 
     publish:

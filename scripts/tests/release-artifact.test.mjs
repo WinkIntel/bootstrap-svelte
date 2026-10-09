@@ -5,6 +5,7 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { releasePolicy } from '../release-policy.mjs';
 
 // Execute the actual inline code used by both protected jobs; never a copied verifier.
 function workflowScript() {
@@ -71,9 +72,17 @@ function run(f, { env = {}, response = { status: 404 }, networkError = false } =
     });
 }
 
-test('dry run verifies tarball and invokes npm with dry-run and ignore-scripts even for an existing version', (t) => {
+test('existing-version rehearsal validates the artifact without invoking npm publish', (t) => {
     const f = fixture(t);
     const result = run(f, { response: { status: 200, body: { name: '@winkintel/bootstrap-svelte', version: '2.1.1' } } });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(existsSync(join(f.cwd, 'npm-arguments')), false);
+    assert.match(result.stdout, /already published; artifact checks passed; skipping npm publish --dry-run/);
+});
+
+test('unpublished-version rehearsal invokes npm with dry-run and ignore-scripts', (t) => {
+    const f = fixture(t);
+    const result = run(f);
     assert.equal(result.status, 0, result.stderr);
     const args = readFileSync(join(f.cwd, 'npm-arguments'), 'utf8').split('\n');
     assert.ok(args.includes('--dry-run'));
@@ -174,3 +183,54 @@ test('rejects corrupt registry success metadata', (t) => {
     assert.notEqual(run(f, { response: { status: 200, body: { name: 'other', version: '2.1.1' } } }).status, 0);
     assert.equal(existsSync(join(f.cwd, 'npm-arguments')), false);
 });
+
+// The protected job intentionally does not import repository code. Run each policy
+// case through both real implementations so edits to only one copy fail CI.
+const policyInput = { name: '@winkintel/bootstrap-svelte', version: '2.1.1', channel: 'latest', ref: 'refs/heads/main', sha: 'a'.repeat(40) };
+const policyCases = [
+    ['2.x branch', {}, true],
+    ['2.x tag', { ref: 'refs/tags/v2.1.1' }, true],
+    ['1.x branch', { version: '1.1.1', channel: 'maintenance', ref: 'refs/heads/codex/maintenance-1.x' }, true],
+    ['1.x tag', { version: '1.1.1', channel: 'maintenance', ref: 'refs/tags/v1.1.1' }, true],
+    ['prerelease branch', { version: '2.2.0-rc.1', channel: 'next' }, true],
+    ['prerelease tag', { version: '2.2.0-rc.1', channel: 'next', ref: 'refs/tags/v2.2.0-rc.1' }, true],
+    ['wrong name', { name: 'other' }, false],
+    ['1.x on latest', { version: '1.1.1' }, false],
+    ['2.x on maintenance', { channel: 'maintenance' }, false],
+    ['stable on next', { channel: 'next' }, false],
+    ['prerelease on latest', { version: '2.2.0-rc.1' }, false],
+    ['1.x prerelease', { version: '1.2.0-rc.1', channel: 'next', ref: 'refs/heads/codex/maintenance-1.x' }, false],
+    ['unknown major', { version: '3.0.0' }, false],
+    ['unknown channel', { channel: 'beta' }, false],
+    ['feature branch', { ref: 'refs/heads/feature' }, false],
+    ['wrong branch', { ref: 'refs/heads/codex/maintenance-1.x' }, false],
+    ['tag mismatch', { ref: 'refs/tags/v2.1.2' }, false],
+    ['pull request ref', { ref: 'refs/pull/1/merge' }, false],
+    ['leading zero', { version: '2.01.1' }, false],
+    ['missing patch', { version: '2.1' }, false],
+    ['leading zero prerelease', { version: '2.1.1-01', channel: 'next' }, false],
+    ['build metadata', { version: '2.1.1+build' }, false],
+    ['overlong version', { version: '2.1.1-' + 'a'.repeat(123), channel: 'next' }, false],
+    ['non-string version', { version: 2 }, false],
+    ['invalid SHA', { sha: 'HEAD' }, false],
+    ['missing SHA', { sha: undefined }, false]
+];
+for (const [description, patch, accepted] of policyCases) {
+    test(`release policy parity: ${description}`, (t) => {
+        const input = { ...policyInput, ...patch };
+        let buildAccepted = false;
+        try {
+            releasePolicy(input);
+            buildAccepted = true;
+        } catch {
+            // A rejected policy case must also be rejected by the protected job.
+        }
+        const f = fixture(t, { packagePatch: { name: input.name, version: input.version } });
+        const result = run(f, {
+            env: { RELEASE_VERSION: input.version, RELEASE_CHANNEL: input.channel, GITHUB_REF: input.ref, GITHUB_SHA: input.sha }
+        });
+        assert.equal(buildAccepted, accepted, 'build policy result');
+        assert.equal(result.status === 0, buildAccepted, result.stderr);
+        assert.equal(existsSync(join(f.cwd, 'npm-arguments')), accepted);
+    });
+}
