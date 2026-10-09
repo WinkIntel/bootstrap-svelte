@@ -45,3 +45,8 @@ test('both workflows pin actions, avoid stored checkout credentials, and retain 
     assert.match(ci, /branches: \[main, codex\/maintenance-1.x\]/);
     assert.match(ci, /^ +build:/m);
 });
+
+test('maintenance dispatch defaults to the maintenance channel and remains a rehearsal', () => {
+    assert.match(publish, /tag:\n[\s\S]*?default: maintenance\n/);
+    assert.match(publish, /dry-run:\n[\s\S]*?default: true\n/);
+});
