@@ -30,7 +30,6 @@ test('both protected modes use the same verification and same-run artifact downl
     assert.match(job('rehearsal'), /artifact-ids: \$\{\{ needs.build.outputs.artifact-id \}\}/);
     assert.doesNotMatch(job('rehearsal'), /github-token:|run-id:|repository:/);
     assert.match(publish, /group: npm-publish-bootstrap-svelte\n +cancel-in-progress: false/);
-    assert.match(publish, /default: true/);
 });
 test('both workflows pin actions, avoid stored checkout credentials, and retain build CI on both branches', () => {
     for (const workflow of [ci, publish]) {
@@ -47,6 +46,6 @@ test('both workflows pin actions, avoid stored checkout credentials, and retain 
 });
 
 test('main dispatch defaults to the latest channel and remains a rehearsal', () => {
-    assert.match(publish, /tag:\n[\s\S]*?default: latest\n/);
-    assert.match(publish, /dry-run:\n[\s\S]*?default: true\n/);
+    assert.match(publish, /^ {12}tag:\n(?: {16}.*\n)*? {16}default: latest\n/m);
+    assert.match(publish, /^ {12}dry-run:\n(?: {16}.*\n)*? {16}default: true\n/m);
 });

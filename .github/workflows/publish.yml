@@ -157,7 +157,8 @@ jobs:
                   const npmVersion = execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim().split('.').map(Number);
                   if (!(npmVersion[0] > 11 || (npmVersion[0] === 11 && (npmVersion[1] > 5 || (npmVersion[1] === 5 && npmVersion[2] >= 1))))) fail('npm >= 11.5.1 is required');
                   const response = await fetch(`https://registry.npmjs.org/${encodeURIComponent(name)}/${encodeURIComponent(version)}`, { redirect: 'error', signal: AbortSignal.timeout(15000) });
-                  if (response.status === 200) {
+                  const published = response.status === 200;
+                  if (published) {
                       const existing = await response.json();
                       if (existing.name !== name || existing.version !== version) fail('Unexpected registry metadata');
                       if (mode === 'publish') fail('Version is already published');
@@ -165,8 +166,8 @@ jobs:
                       fail(`Registry lookup failed: HTTP ${response.status}`);
                   }
                   console.log(JSON.stringify({ mode, name, version, channel, sha: env.GITHUB_SHA, sha256: digest }));
-                  if (mode === 'dry-run' && response.status === 200) {
-                      console.log('Version is already published; artifact checks passed; skipping npm publish --dry-run');
+                  if (mode === 'dry-run' && published) {
+                      console.log('::warning title=Already published::Current-run artifact validation passed; published tarball equality was not checked. Skipping npm publish --dry-run. Live publishing this version will fail; select a new version before a live release.');
                   } else {
                       const args = ['publish', tarball, '--ignore-scripts', '--access=public', '--registry=https://registry.npmjs.org', `--tag=${channel}`];
                       if (mode === 'dry-run') args.push('--dry-run');
