@@ -5,6 +5,8 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { releasePolicy } from '../release-policy.mjs';
+import { policyInput, policyCases } from './release-policy-cases.mjs';
 
 // Execute the actual inline code used by both protected jobs; never a copied verifier.
 function workflowScript() {
@@ -71,9 +73,19 @@ function run(f, { env = {}, response = { status: 404 }, networkError = false } =
     });
 }
 
-test('dry run verifies tarball and invokes npm with dry-run and ignore-scripts even for an existing version', (t) => {
+test('existing-version rehearsal validates the artifact without invoking npm publish', (t) => {
     const f = fixture(t);
     const result = run(f, { response: { status: 200, body: { name: '@winkintel/bootstrap-svelte', version: '2.1.1' } } });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(existsSync(join(f.cwd, 'npm-arguments')), false);
+    assert.match(result.stdout, /::warning title=Already published::/);
+    assert.match(result.stdout, /Current-run artifact validation passed; published tarball equality was not checked/);
+    assert.match(result.stdout, /Live publishing this version will fail; select a new version before a live release/);
+});
+
+test('unpublished-version rehearsal invokes npm with dry-run and ignore-scripts', (t) => {
+    const f = fixture(t);
+    const result = run(f);
     assert.equal(result.status, 0, result.stderr);
     const args = readFileSync(join(f.cwd, 'npm-arguments'), 'utf8').split('\n');
     assert.ok(args.includes('--dry-run'));
@@ -156,21 +168,25 @@ test('real npm dry-run cannot execute package lifecycle scripts', (t) => {
     assert.equal(existsSync(join(f.cwd, 'LIFECYCLE_EXECUTED')), false);
 });
 
-for (const [version, channel, ref] of [
-    ['1.1.1', 'maintenance', 'refs/heads/codex/maintenance-1.x'],
-    ['1.1.1', 'maintenance', 'refs/tags/v1.1.1'],
-    ['2.1.1', 'latest', 'refs/tags/v2.1.1'],
-    ['2.2.0-rc.1', 'next', 'refs/heads/main'],
-    ['2.2.0-rc.1', 'next', 'refs/tags/v2.2.0-rc.1']
-]) {
-    test(`protected verifier accepts ${channel} from ${ref}`, (t) => {
-        const f = fixture(t, { packagePatch: { version } });
-        const result = run(f, { env: { RELEASE_VERSION: version, RELEASE_CHANNEL: channel, GITHUB_REF: ref } });
-        assert.equal(result.status, 0, result.stderr);
-    });
-}
 test('rejects corrupt registry success metadata', (t) => {
     const f = fixture(t);
     assert.notEqual(run(f, { response: { status: 200, body: { name: 'other', version: '2.1.1' } } }).status, 0);
     assert.equal(existsSync(join(f.cwd, 'npm-arguments')), false);
 });
+
+// The protected job intentionally does not import repository code. Run each policy
+// case through both real implementations so edits to only one copy fail CI.
+for (const [description, patch, accepted, buildError, workflowError] of policyCases) {
+    test(`release policy parity: ${description}`, (t) => {
+        const input = { ...policyInput, ...patch };
+        if (accepted) assert.doesNotThrow(() => releasePolicy(input));
+        else assert.throws(() => releasePolicy(input), buildError);
+        const f = fixture(t, { packagePatch: { name: input.name, version: input.version } });
+        const result = run(f, {
+            env: { RELEASE_VERSION: input.version, RELEASE_CHANNEL: input.channel, GITHUB_REF: input.ref, GITHUB_SHA: input.sha }
+        });
+        assert.equal(result.status === 0, accepted, result.stderr);
+        if (!accepted) assert.match(result.stderr, workflowError);
+        assert.equal(existsSync(join(f.cwd, 'npm-arguments')), accepted);
+    });
+}

@@ -5,44 +5,18 @@ import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test';
 import { releasePolicy, verifySourceHistory } from '../release-policy.mjs';
+import { policyInput, policyCases } from './release-policy-cases.mjs';
 
-const name = '@winkintel/bootstrap-svelte';
-const sha = 'a'.repeat(40);
-const valid = { name, version: '2.1.1', channel: 'latest', ref: 'refs/heads/main', sha };
-for (const [version, channel, branch] of [
-    ['2.1.1', 'latest', 'main'],
-    ['1.1.1', 'maintenance', 'codex/maintenance-1.x'],
-    ['2.2.0-rc.1', 'next', 'main']
-]) {
-    for (const ref of [`refs/heads/${branch}`, `refs/tags/v${version}`]) {
-        test(`allows ${version} on ${channel} from ${ref}`, () => {
-            assert.deepEqual(releasePolicy({ name, version, channel, ref, sha }), { branch, name, version, channel, sha });
-        });
-    }
-}
-for (const [description, patch] of [
-    ['wrong package', { name: 'other' }],
-    ['1.x on latest', { version: '1.1.1' }],
-    ['2.x on maintenance', { channel: 'maintenance' }],
-    ['stable on next', { channel: 'next' }],
-    ['prerelease on latest', { version: '2.2.0-rc.1' }],
-    ['1.x prerelease', { version: '1.2.0-rc.1', channel: 'next' }],
-    ['unknown major', { version: '3.0.0' }],
-    ['unknown channel', { channel: 'beta' }],
-    ['feature branch', { ref: 'refs/heads/feature' }],
-    ['wrong release branch', { ref: 'refs/heads/codex/maintenance-1.x' }],
-    ['tag mismatch', { ref: 'refs/tags/v2.1.2' }],
-    ['pull request', { ref: 'refs/pull/1/merge' }],
-    ['leading zero', { version: '2.01.1' }],
-    ['missing patch', { version: '2.1' }],
-    ['prerelease leading zero', { version: '2.1.1-01', channel: 'next' }],
-    ['build metadata', { version: '2.1.1+build' }],
-    ['shell input', { version: '2.1.1;touch /tmp/not-allowed' }],
-    ['newline channel', { channel: 'latest\nother=value' }],
-    ['invalid SHA', { sha: 'HEAD' }],
-    ['missing SHA', { sha: undefined }]
-]) {
-    test(`rejects ${description}`, () => assert.throws(() => releasePolicy({ ...valid, ...patch })));
+for (const [description, patch, accepted, buildError] of policyCases) {
+    test(`build release policy: ${description}`, () => {
+        const input = { ...policyInput, ...patch };
+        if (accepted) {
+            const branch = input.version.startsWith('1.') ? 'codex/maintenance-1.x' : 'main';
+            assert.deepEqual(releasePolicy(input), { branch, name: input.name, version: input.version, channel: input.channel, sha: input.sha });
+        } else {
+            assert.throws(() => releasePolicy(input), buildError);
+        }
+    });
 }
 
 test('requires the release commit to contain the policy introduction and belong to the approved branch', () => {
