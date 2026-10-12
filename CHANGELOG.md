@@ -6,13 +6,13 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 Documentation-only npm patch. Library component APIs, runtime, and the Svelte peer requirement (`^5.29.0`) are unchanged.
 
-- Corrected the packaged README Modal quick start to reset visibility in `onHide`, allowing the example to reopen during and after dismissal ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)). Publication verification remains tracked separately in [#82](https://github.com/WinkIntel/bootstrap-svelte/issues/82); its other example and fixture work is not included.
+- Corrected the packaged README Modal quick start to reset visibility in `onHide`, allowing the example to reopen during and after dismissal ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)).
 
-### Website documentation already deployed
+### Website and agent documentation already available
 
-- Corrected the live Modal showcase examples, matching snippets, and interactive playground to reset visibility at the `onHide` callback, so subsequent opener clicks can reverse the outro with event tracking enabled or disabled. Generated playground snippets include their imports and event handlers. Added actual-showcase regressions for repeated dismissal and reopening ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)). Library component APIs and runtime are unchanged.
+- Corrected the live Modal showcase examples, matching snippets, and interactive playground to reset visibility at the `onHide` callback, so subsequent opener clicks can reverse the outro with event tracking enabled or disabled. Generated playground snippets include their imports and event handlers. Added actual-showcase regressions for repeated dismissal and reopening ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)).
 
-- Corrected the Modal quick starts in README.md, AGENTS.md, and generated agent docs, plus the basic Toast showcase demo, so they can reopen during and after dismissal or autohide. Fixed the Toast showcase sample imports/state and its `Toast.Container` prop documentation ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)). Component APIs and runtime behavior are unchanged.
+- Corrected the Modal quick starts in AGENTS.md and generated agent docs, plus the basic Toast showcase demo, so they can reopen during and after dismissal or autohide. Fixed the Toast showcase sample imports/state and its `Toast.Container` prop documentation ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)).
 
 ## 2.1.0 — 2026-09-19
 
