@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.1.1 — 2026-10-12
+
+Documentation-only npm patch. Library component APIs, runtime, and the Svelte peer requirement (`^5.29.0`) are unchanged.
+
+- Corrected the packaged README Modal quick start to reset visibility in `onHide`, allowing the example to reopen during and after dismissal ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)).
+
 ## 1.1.0 — 2026-09-19
 
 Compatible maintenance update for 1.x consumers. Existing 1.x Navbar and breakpoint behavior is retained; the Svelte peer requirement remains `^5.29.0`.
