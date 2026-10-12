@@ -6,7 +6,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 Documentation-only npm patch. Library component APIs, runtime, and the Svelte peer requirement (`^5.29.0`) are unchanged.
 
-- Corrected the packaged README Modal quick start to reset visibility in `onHide`, allowing the example to reopen during and after dismissal ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)). Publication verification remains tracked separately in [#82](https://github.com/WinkIntel/bootstrap-svelte/issues/82); its other example and fixture work is not included.
+- Corrected the packaged README Modal quick start to reset visibility in `onHide`, allowing the example to reopen during and after dismissal ([#42](https://github.com/WinkIntel/bootstrap-svelte/issues/42)).
 
 ## 1.1.0 — 2026-09-19
 

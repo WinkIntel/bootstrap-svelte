@@ -62,8 +62,19 @@ in `packageManager`; publishing checks for npm CLI 11.5.1 or newer.
 ## Prepare the release
 
 1. Choose the release line, version, source commit and channel with the owner.
-   For an actual package release, update `package.json`, `pnpm-lock.yaml` and
-   `CHANGELOG.md` together through review. Workflow-only changes need no version bump.
+   For an actual package release, update `package.json` and `CHANGELOG.md` together
+   through review. Update `pnpm-lock.yaml` only when dependency specifications,
+   resolutions, or lockfile metadata need to change; this lockfile has no root
+   package-version field, so a version-only bump needs no lockfile edit. Verify
+   consistency with `pnpm install --frozen-lockfile` rather than making a no-op edit.
+   Workflow-only changes need no version bump.
+
+   Keep a preparation PR in draft with an `Unreleased` heading until the owner
+   agrees the release window. Before merge, replace that version's `Unreleased`
+   heading with the agreed release date (`YYYY-MM-DD`) in the same PR, review the
+   final diff, and verify CI on its final head. If the window moves, update the date
+   before proceeding. The Publish workflow does not enforce changelog dates; this
+   is a required manual checklist item.
 2. Use Node 26, pnpm 11.5.2 (the pinned `packageManager`), and npm >= 11.5.1
    before running the checks below. Confirm with `node --version`, `pnpm --version`,
    and `npm --version`; the real-npm release test runs the workflow's version guard
@@ -82,9 +93,24 @@ in `packageManager`; publishing checks for npm CLI 11.5.1 or newer.
 
     Also validate workflow YAML/expressions with `actionlint` when editing workflows.
 
-3. Obtain owner merge approval, then verify the merged tree and successful CI on
-   the exact commit. Apply and review maintenance workflow backports separately.
-   Check effective environment and trusted-publisher settings before a release run.
+3. Obtain owner merge approval for the agreed release window, then verify the
+   merged tree and successful CI on the exact commit. Do not merge a version bump
+   ahead of that window: the website auto-deploys from `main`, and its About page,
+   generated agent documentation, structured metadata, and footer use the working
+   tree's package version, including wording that calls it published. A merge can
+   therefore advertise the new version before npm has it. Keep the merge, merged
+   CI, rehearsal, separate live-release approval, and publication coordinated in
+   the same window; a short mismatch may still occur. If any gate fails or the
+   window lapses, stop and notify the owner to agree corrective website/version
+   handling rather than leaving the mismatch open-ended or publishing without
+   approval. Maintenance does not deploy the website, but still needs its own
+   agreed release window and dated changelog.
+
+   Apply and review maintenance workflow backports separately. Check effective
+   environment and trusted-publisher settings before a release run. Record the
+   exact merged commit selected for rehearsal and publication. Any separately
+   authorized release tag must point to that final approved commit, including the
+   dated changelog, rather than an earlier preparation commit.
 
 ## Rehearse without publishing
 
