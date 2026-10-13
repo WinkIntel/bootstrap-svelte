@@ -1,3 +1,4 @@
+import { mockMatchMedia } from '$lib/common/tests/mock-match-media.js';
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -13,6 +14,35 @@ function expectControls(toggler: HTMLElement, ids: string[]) {
 }
 
 describe('Navbar Offcanvas ownership', () => {
+    it.each([
+        { showOnBreakpoint: undefined, useBackdrop: true },
+        { showOnBreakpoint: undefined, useBackdrop: 'static' },
+        { showOnBreakpoint: 'lg', useBackdrop: true },
+        { showOnBreakpoint: 'lg', useBackdrop: 'static' }
+    ] as const)('keeps inside presses from collapsing a narrow Navbar: %j', async ({ showOnBreakpoint, useBackdrop }) => {
+        mockMatchMedia(800);
+        const onShown = vi.fn();
+        const onHidden = vi.fn();
+        const onHidePrevented = vi.fn();
+        const onInsideClick = vi.fn();
+        const { getByTestId } = render(OffcanvasNavbarTest, { showOnBreakpoint, useBackdrop, onShown, onHidden, onHidePrevented, onInsideClick });
+        const user = userEvent.setup();
+        const toggler = getByTestId('navbar-toggler');
+        await user.click(toggler);
+        await waitFor(() => expect(onShown).toHaveBeenCalledTimes(1));
+        const panel = getByTestId('navbar-offcanvas');
+        // Inherited Navbar mode keeps .offcanvas; only an explicit panel breakpoint changes its class.
+        expect(panel).toHaveClass(showOnBreakpoint ? 'offcanvas-lg' : 'offcanvas');
+        await fireEvent.mouseDown(getByTestId('navbar-inside-action'));
+        await user.click(getByTestId('navbar-inside-action'));
+        expect(onInsideClick).toHaveBeenCalledTimes(1);
+        expect(panel).toBeInTheDocument();
+        expect(panel).not.toHaveAttribute('inert');
+        expect(toggler).toHaveAttribute('aria-expanded', 'true');
+        expect(onHidden).not.toHaveBeenCalled();
+        expect(onHidePrevented).not.toHaveBeenCalled();
+    });
+
     it.each([true, false, 'static'] as const)('toggles once per full pointer click with backdrop %s', async (useBackdrop) => {
         const user = userEvent.setup();
         const onShown = vi.fn();

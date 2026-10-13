@@ -92,6 +92,12 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 
     // Initialize the root state of the offcanvas component...
     let bodyElement: HTMLElement | null = $state(null);
+    let panelElement: HTMLDivElement | null = $state(null);
+    // Keep containment private while preserving the public ref, including bind:this cleanup.
+    function setPanelElement(element: HTMLDivElement | null) {
+        panelElement = element;
+        if (elementRef !== element) elementRef = element;
+    }
     let holdsScrollLock = false;
     let overlayZIndex: number | undefined = $state(undefined);
     let backdropZIndex: number | undefined = $state(undefined);
@@ -234,9 +240,9 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     // Dismiss the offcanvas when the backdrop is clicked...
     const handleBackdropMouseDown = (event: MouseEvent) => {
         if (!isTopOverlay(overlayEntry) || useBackdrop === false) return;
+        const path = event.composedPath();
         // Read current refs for each press; there are no registrations or deferred toggles to clean up.
         if (event.button === 0) {
-            const path = event.composedPath();
             if (
                 triggerElements?.some(
                     (trigger) => trigger?.isConnected && path.includes(trigger) && !trigger.matches(':disabled, [aria-disabled="true"]')
@@ -247,7 +253,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         // Its click handler owns this state change; mousedown must not dismiss it first.
         if (rootState.isControllingTogglerEvent(event)) return;
 
-        if (elementRef && event.composedPath().includes(elementRef)) {
+        if (panelElement && path.includes(panelElement)) {
             event.stopPropagation();
             return;
         }
@@ -280,7 +286,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     <div
         {@attach () => rootState.registerControlledPanel()}
         aria-modal={rootState.isShown}
-        bind:this={elementRef}
+        bind:this={() => panelElement, setPanelElement}
         class={classes}
         {id}
         onintrostart={onShow}
