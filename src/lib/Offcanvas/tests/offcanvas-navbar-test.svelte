@@ -5,6 +5,7 @@
         onShown,
         onHidden,
         onHidePrevented,
+        onInsideClick,
         useBackdrop = false,
         showOnBreakpoint,
         isShown,
@@ -17,6 +18,7 @@
         renderCollapse = false,
         renderFollowingCollapse = false
     }: Pick<Offcanvas.RootProps, 'id' | 'onShown' | 'onHidden' | 'onHidePrevented' | 'useBackdrop' | 'showOnBreakpoint' | 'isShown'> & {
+        onInsideClick?: () => void;
         ariaControls?: string;
         togglerDisabled?: boolean;
         fieldsetDisabled?: boolean;
@@ -41,7 +43,7 @@
         {#if renderOffcanvas}
             <Offcanvas.Root {id} {isShown} {useBackdrop} {showOnBreakpoint} {onShown} {onHidden} {onHidePrevented} data-testid="navbar-offcanvas">
                 <Offcanvas.Header isDismissible={true}><Offcanvas.Title>Menu</Offcanvas.Title></Offcanvas.Header>
-                <Offcanvas.Body>Body</Offcanvas.Body>
+                <Offcanvas.Body><button onclick={onInsideClick} data-testid="navbar-inside-action">Inside action</button></Offcanvas.Body>
             </Offcanvas.Root>
         {/if}
         {#if renderFollowingCollapse}
