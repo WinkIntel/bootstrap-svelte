@@ -1,18 +1,18 @@
 import { createHash } from 'node:crypto';
-import { releasePolicy } from './release-policy.mjs';
+import { releasePolicy, changelogSection } from './release-policy.mjs';
 
 export const repository = 'WinkIntel/bootstrap-svelte';
 export const packageName = '@winkintel/bootstrap-svelte';
 const fail = (message) => {
     throw new Error(message);
 };
-const positiveId = (value) => typeof value === 'string' && /^[1-9][0-9]{0,19}$/.test(value);
+export const positiveId = (value) => typeof value === 'string' && /^[1-9][0-9]{0,19}$/.test(value);
 const digest = (bytes, algorithm, encoding = 'hex') => createHash(algorithm).update(bytes).digest(encoding);
 export function releaseIdentity({ version, sha, ref }) {
     const channel = version?.startsWith('1.') ? 'maintenance' : version?.includes('-') ? 'next' : 'latest';
     return { ...releasePolicy({ name: packageName, version, channel, sha, ref }), ref };
 }
-export function verifyRun(run, jobs, runId, attempt) {
+function verifyJobRun(run, jobs, runId, attempt, jobName) {
     if (
         !positiveId(runId) ||
         !positiveId(attempt) ||
@@ -26,11 +26,16 @@ export function verifyRun(run, jobs, runId, attempt) {
         fail('Unexpected publish run identity');
     if (!['main', 'codex/maintenance-1.x'].includes(run.head_branch) && !/^v[12]\./.test(run.head_branch ?? '')) fail('Unapproved publish run ref');
     const published = jobs.filter(
-        (job) =>
-            job.name === 'Publish approved tarball' && job.status === 'completed' && job.conclusion === 'success' && job.head_sha === run.head_sha
+        (job) => job.name === jobName && job.status === 'completed' && job.conclusion === 'success' && job.head_sha === run.head_sha
     );
-    if (published.length !== 1) fail('A successful live Publish approved tarball job is required; dry runs cannot create releases');
+    if (published.length !== 1) fail(`A successful ${jobName} job is required; dry runs cannot create releases`);
     return { sha: run.head_sha, ref: run.head_branch.startsWith('v') ? `refs/tags/${run.head_branch}` : `refs/heads/${run.head_branch}` };
+}
+export function verifyRun(run, jobs, runId, attempt) {
+    return verifyJobRun(run, jobs, runId, attempt, 'Publish approved tarball');
+}
+export function verifyBuildRun(run, jobs, runId, attempt) {
+    return verifyJobRun(run, jobs, runId, attempt, 'Build release artifact');
 }
 function validDate(value) {
     return (
@@ -42,15 +47,7 @@ function validDate(value) {
 }
 export function changelogNotes(text, release, publishedAt, runId, attempt) {
     if (!validDate(publishedAt) || !positiveId(runId) || !positiveId(attempt)) fail('Invalid publication date/run');
-    const sections = text.split(/^## /m).slice(1),
-        prefix = `${release.version} — `;
-    const matches = sections.filter((section) => section.split('\n')[0].startsWith(prefix));
-    if (matches.length !== 1) fail('Expected one exact-version dated changelog section');
-    const [heading, ...lines] = matches[0].split('\n'),
-        date = heading.slice(prefix.length).trim();
-    if (!validDate(`${date}T00:00:00.000Z`)) fail('Changelog release date must be YYYY-MM-DD, not Unreleased');
-    const body = lines.join('\n').trim();
-    if (!body || body.length > 24000) fail('Changelog notes missing or too long');
+    const body = changelogSection(text, release.version);
     return `${body}\n\nPublished to npm: ${publishedAt} (UTC). [${packageName}@${release.version}](https://www.npmjs.com/package/${packageName}/v/${release.version}).\n\nSource: [${release.sha}](https://github.com/${repository}/commit/${release.sha}). [Publish run ${runId}, attempt ${attempt}](https://github.com/${repository}/actions/runs/${runId}/attempts/${attempt}).\n`;
 }
 export function verifyPublication({ release, tarball, metadata, audit, runId, attempt }) {
@@ -107,6 +104,8 @@ export function validateReport(report) {
         report.branch !== release.branch ||
         !positiveId(report.runId) ||
         !positiveId(report.attempt) ||
+        !positiveId(report.buildAttempt) ||
+        BigInt(report.buildAttempt) > BigInt(report.attempt) ||
         !/^[a-f0-9]{64}$/.test(report.sha256 ?? '') ||
         !/^[a-f0-9]{128}$/.test(report.sha512 ?? '') ||
         !validDate(report.publishedAt) ||
@@ -124,6 +123,20 @@ export async function retryRegistry(read, sleep = (ms) => new Promise((resolve) 
         if (index + 1 < attempts) await sleep(15000);
     }
     fail('Registry propagation timeout; retry release-page recovery, never npm publish');
+}
+export async function registryRead(url, kind = 'json', fetcher = fetch) {
+    const parsed = new URL(url);
+    if (parsed.origin !== 'https://registry.npmjs.org' || parsed.username || parsed.password) fail('Unexpected package registry host');
+    let response;
+    try {
+        response = await fetcher(url, { redirect: 'error', signal: AbortSignal.timeout(kind === 'bytes' ? 30000 : 15000) });
+        if (response.status === 404 || response.status === 429 || (response.status >= 500 && response.status <= 599)) return null;
+        if (!response.ok) fail(`Registry HTTP ${response.status}`);
+        return kind === 'bytes' ? Buffer.from(await response.arrayBuffer()) : await response.json();
+    } catch (error) {
+        if (error.name === 'TimeoutError' || ['ETIMEDOUT', 'ECONNRESET', 'EAI_AGAIN'].includes(error.cause?.code)) return null;
+        throw error;
+    }
 }
 async function tagCommit(api, tag) {
     let value = await api(`/git/ref/tags/${encodeURIComponent(tag)}`);
@@ -157,19 +170,22 @@ function checkLatest(report, latest, expectedLatest) {
     if ((expectedLatest && !isLatest) || (report.channel !== 'latest' && isLatest))
         fail('GitHub latest status conflict; preserve existing releases for owner review');
 }
+function normalizedBody(body) {
+    return typeof body === 'string' ? body.replace(/\r\n/g, '\n').replace(/\n+$/, '') : body;
+}
 function matchingRelease(existing, expected) {
     if (!existing) fail('GitHub release record missing after creation');
     if (
         existing.tag_name !== expected.tag_name ||
         existing.name !== expected.name ||
-        existing.body !== expected.body ||
+        normalizedBody(existing.body) !== normalizedBody(expected.body) ||
         existing.draft !== false ||
         existing.prerelease !== expected.prerelease
     )
         fail('Existing release conflict; preserve it for owner review');
     return existing;
 }
-export async function ensureRelease(report, api, npmLatest) {
+export async function ensureRelease(report, api, npmLatest, { sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) } = {}) {
     validateReport(report);
     const tag = `v${report.version}`,
         expected = {
@@ -209,6 +225,14 @@ export async function ensureRelease(report, api, npmLatest) {
     }
     if ((await tagCommit(api, tag)) !== report.sha) fail('Release tag source conflict');
     const result = matchingRelease(await api(`/releases/tags/${encodeURIComponent(tag)}`), expected);
-    checkLatest(report, await api('/releases/latest'), expected.make_latest === 'true');
-    return result;
+    for (let index = 0; index < 5; index++) {
+        const current = await api('/releases/latest');
+        try {
+            checkLatest(report, current, expected.make_latest === 'true');
+            return result;
+        } catch (error) {
+            if (index === 4) throw error;
+            await sleep(2000);
+        }
+    }
 }

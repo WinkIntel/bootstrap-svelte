@@ -177,6 +177,8 @@ jobs:
                   NODE
 
     publish:
+        outputs:
+            run-attempt: ${{ steps.publication.outputs.run-attempt }}
         name: Publish approved tarball
         if: ${{ !inputs.dry-run }}
         needs: build
@@ -199,6 +201,9 @@ jobs:
             - *release-node
             - *release-download
             - *release-execute
+            - name: Record successful publication attempt
+              id: publication
+              run: echo "run-attempt=$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"
 
     releasepage:
         needs: [build, publish]
@@ -209,4 +214,5 @@ jobs:
         uses: ./.github/workflows/release-page.yml
         with:
             publish-run-id: ${{ github.run_id }}
-            publish-run-attempt: ${{ needs.build.outputs.run-attempt }}
+            publish-run-attempt: ${{ needs.publish.outputs.run-attempt }}
+            build-run-attempt: ${{ needs.build.outputs.run-attempt }}

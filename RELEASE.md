@@ -72,8 +72,9 @@ in `packageManager`; publishing checks for npm CLI 11.5.1 or newer.
     agrees the release window. Before merge, replace that version's `Unreleased`
     heading with the agreed release date (`YYYY-MM-DD`) in the same PR, review the
     final diff, and verify CI on its final head. If the window moves, update the date
-    before proceeding. The release-page verifier requires a dated exact-version section after publication;
-    checking it before publication remains a required manual checklist item.
+    before proceeding. The build guard and release-page verifier share the same dated exact-version
+    changelog validation. Both dry runs and live runs fail before publication when
+    the section is missing, invalid, duplicated, empty or still `Unreleased`.
 
 2. Use Node 26, pnpm 11.5.2 (the pinned `packageManager`), and npm >= 11.5.1
    before running the checks below. Confirm with `node --version`, `pnpm --version`,
@@ -183,13 +184,19 @@ as pending; never treat a successful dry run as end-to-end publication verificat
 
 After a successful live `Publish approved tarball` job, Publish calls
 `.github/workflows/release-page.yml`. Dry runs never call it. A read-only job
-verifies the original run and attempt, successful live job, approved branch history,
+verifies the original run, separate build and publish attempts, successful build
+and live publish jobs, approved branch history,
 source package version, original unexpired artifact, and byte-for-byte equality
 with the npm tarball. `npm audit signatures --json --include-attestations` verifies
 cryptographic provenance; the verifier then checks its source commit, workflow,
-ref, original run/attempt and artifact digest. Registry propagation retries are
-bounded. Verification installs only in a temporary directory with lifecycle scripts
-disabled; it does not execute the published package.
+ref, successful publish run/attempt and artifact digest. The artifact comes from
+the successful build attempt, which can precede a rerun of the publish job. Each
+attempt must identify the same source. Saved job outputs retain both attempts when
+only page jobs are rerun. Registry propagation retries are bounded, including
+429/5xx responses and timeouts; authorization and malformed-data errors fail closed. Verification installs only in a temporary directory with lifecycle scripts
+disabled and peer packages omitted; it does not execute the published package.
+Signature failures in the remaining installed dependency tree still fail closed;
+minimizing that tree does not bypass npm verification failures.
 
 The write job uses the existing `npm-publish` environment and a short-lived,
 repository-scoped GitHub App token. **This separate job may require a second
@@ -204,9 +211,13 @@ publication timestamp, exact source commit and original publish-run link. Stable
 2.x becomes GitHub latest only when npm latest matches and this does not demote a
 newer GitHub release. Stable 1.x stays non-latest; 2.x prereleases stay non-latest
 and are marked prerelease. A lagging npm latest tag is retried before writes.
-Read-back checks verify the tag, page and applicable latest status. Existing
+Read-back checks verify the tag, page and applicable latest status, allowing a
+short bounded retry for GitHub latest-pointer propagation after creation. Existing
 conflicting tags, notes or latest status stop for owner review; nothing is
-silently overwritten and version tags are never moved or deleted.
+silently overwritten and version tags are never moved or deleted. Body comparisons
+normalize CRLF line endings and terminal newlines only; Markdown spaces and actual
+content remain significant. Confirm API read-back behavior during the separately
+approved first live App write.
 
 ### Proposed App setup — separate owner authorization required
 
@@ -247,8 +258,11 @@ separately approved setup. Dry runs do not require the App.
 
 If npm succeeded but the page failed, **never dispatch Publish again for that
 version**. After correcting the cause, dispatch **GitHub release page** from a
-reviewed release branch, supplying the original `publish-run-id` and
-`publish-run-attempt`. Obtain the protected write-job approval if requested.
+reviewed release branch, supplying the original `publish-run-id`, successful
+`publish-run-attempt`, and artifact `build-run-attempt`. For example, if attempt 1
+built the artifact and attempt 2 successfully published it, provide build attempt
+`1` and publish attempt `2`; neither input is the later recovery run attempt.
+Obtain the protected write-job approval if requested.
 Recovery re-verifies the original successful live publication; it has no npm
 publish path. It can finish a missing page after the tag was already created and
 accepts an exactly matching completed release without additional writes.
@@ -259,8 +273,14 @@ to bypass this. Expired artifacts or conflicts require an owner-reviewed manual
 recovery using preserved publication/provenance evidence. Historical releases with
 manually written notes may deliberately conflict with generated notes.
 
-Page jobs serialize across both release lines independently of the npm publishing
-lock. This is not a durable queue: do not queue multiple recovery runs. A pending
-environment approval can hold the page lock. Acceptance includes the verified
+Page jobs serialize across both release lines using their own lock. When invoked
+from Publish, they remain jobs of that Publish run: **the parent npm publishing
+lock remains held until the page jobs finish, including a second environment
+approval wait**. That wait can therefore block new Publish runs for both release
+lines. A standalone release-page recovery run holds only the page lock. Neither
+lock is a durable queue: a newly queued run can replace the existing pending run,
+even with `cancel-in-progress: false`. Finish or explicitly cancel stale approval
+waits before queuing another release; do not queue multiple recovery runs.
+Acceptance includes the verified
 source tag, release page, prerelease/latest behavior, npm evidence and consumer
 checks; publication success alone does not complete the page gate.
