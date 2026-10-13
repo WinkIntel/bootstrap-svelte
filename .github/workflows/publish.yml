@@ -38,6 +38,7 @@ jobs:
         permissions:
             contents: read
         outputs:
+            run-attempt: ${{ github.run_attempt }}
             version: ${{ steps.policy.outputs.version }}
             sha256: ${{ steps.pack.outputs.sha256 }}
             artifact-id: ${{ steps.upload.outputs.artifact-id }}
@@ -186,6 +187,26 @@ jobs:
             contents: read
             id-token: write
         steps:
+            - name: Check release-page configuration before npm write
+              env:
+                  RELEASE_APP_CLIENT_ID: ${{ vars.RELEASE_APP_CLIENT_ID }}
+                  RELEASE_APP_KEY_PRESENT: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
+              run: |
+                  if [ -z "$RELEASE_APP_CLIENT_ID" ] || [ "$RELEASE_APP_KEY_PRESENT" != true ]; then
+                      echo '::error::Release App configuration is missing. Configure the separately approved integration before live publication; see RELEASE.md.'
+                      exit 1
+                  fi
             - *release-node
             - *release-download
             - *release-execute
+
+    releasepage:
+        needs: [build, publish]
+        if: ${{ !inputs.dry-run && needs.publish.result == 'success' }}
+        permissions:
+            contents: read
+            actions: read
+        uses: ./.github/workflows/release-page.yml
+        with:
+            publish-run-id: ${{ github.run_id }}
+            publish-run-attempt: ${{ needs.build.outputs.run-attempt }}
