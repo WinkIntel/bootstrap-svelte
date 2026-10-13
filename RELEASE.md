@@ -58,6 +58,43 @@ register early or publish solely to meet that deadline. Recheck the current
 at cutover. The repository uses GitHub-hosted runners, Node 26 and the pnpm version
 in `packageManager`; publishing checks for npm CLI 11.5.1 or newer.
 
+## Check release App authentication without repository writes
+
+After separate approval to merge and dispatch the check, use **Actions → Release
+App authentication check → Run workflow**, selecting `main`, then approve its
+`npm-publish` environment job. A draft PR or green CI does not authorize dispatch.
+The job does not run on PRs, pushes, schedules or maintenance refs. It uses the
+existing protected environment without changing its reviewers or rules.
+
+The check pins App **5307158**, client ID `Iv23liEMzHfBJoQL5i2e`, installation
+**171145974** and repository `WinkIntel/bootstrap-svelte`. Replacing the App or
+installation requires a reviewed identity update. It uses the same pinned official
+token action and environment configuration as the release-page writer. It requests
+only Contents write and Workflows write for this repository, with implicit Metadata
+read. GitHub [does not grant token permissions the App lacks](https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app),
+so successful token creation tests authentication and acceptance of those requested
+grants; successful GET requests alone would not prove write grants.
+
+The helper makes only three GET requests: App identity/declared permissions, the
+installation token's accessible repositories (exactly this repository), and the
+Publish workflow file at the selected commit. It logs a fixed summary, never the
+private key, token, headers or raw API responses. No dependencies are installed and
+no npm or release writer runs. The only authentication lifecycle writes are token
+creation and its normal post-job revocation; no repository content, tag, release,
+installation setting or npm state is changed.
+
+Accept the check only after its checks pass **and the token action's post-job log
+confirms `Token revoked`**. The pinned action warns rather than fails if revocation
+fails; a green job alone is insufficient evidence of cleanup. Do not paste tokens
+or private keys into logs, PRs or chat to diagnose a failure.
+
+This check does not prove release-tag ruleset bypass, tag/release creation, npm
+trusted publishing or provenance, installation-wide access outside the narrowed
+token, or release-page completion. Those still need inspection or an explicitly
+authorized live release. An ordinary Publish dry run continues to skip the App.
+The check is available on main for the shared App/environment used by both release
+lines; maintenance needs no copy to run this main-only diagnostic.
+
 ## Prepare the release
 
 1. Choose the release line, version, source commit and channel with the owner.
