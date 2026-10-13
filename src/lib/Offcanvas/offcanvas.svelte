@@ -247,9 +247,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         // Its click handler owns this state change; mousedown must not dismiss it first.
         if (rootState.isControllingTogglerEvent(event)) return;
 
-        const target = event.target as HTMLElement;
-        const nearestOffcanvas = target.closest('.offcanvas');
-        if (nearestOffcanvas && nearestOffcanvas.id === id) {
+        if (elementRef && event.composedPath().includes(elementRef)) {
             event.stopPropagation();
             return;
         }
