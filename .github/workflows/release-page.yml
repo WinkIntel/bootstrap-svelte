@@ -1,0 +1,110 @@
+name: GitHub release page
+
+# Recovery verifies an existing live publication; it never invokes the Publish workflow.
+on:
+    workflow_call:
+        inputs:
+            publish-run-id:
+                required: true
+                type: string
+            build-run-attempt:
+                required: true
+                type: string
+            publish-run-attempt:
+                required: true
+                type: string
+    workflow_dispatch:
+        inputs:
+            build-run-attempt:
+                description: Original attempt that built the approved artifact
+                required: true
+                default: '1'
+                type: string
+            publish-run-id:
+                description: Original successful live Publish run ID (not a rehearsal)
+                required: true
+                type: string
+            publish-run-attempt:
+                description: Attempt of the successful npm publish job
+                required: true
+                default: '1'
+                type: string
+
+permissions:
+    contents: read
+    actions: read
+
+concurrency:
+    group: github-release-page-bootstrap-svelte
+    cancel-in-progress: false
+
+jobs:
+    verify:
+        if: ${{ github.repository == 'WinkIntel/bootstrap-svelte' }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        outputs:
+            report: ${{ steps.verify.outputs.report }}
+        steps:
+            - name: Checkout reviewed automation, not recovered package source
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  ref: ${{ github.workflow_sha }}
+                  fetch-depth: 0
+                  persist-credentials: false
+            - name: Setup Node.js
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 26
+                  package-manager-cache: false
+            - name: Verify original live publication, artifact and signed npm provenance
+              id: verify
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PUBLISH_RUN_ID: ${{ inputs.publish-run-id }}
+                  BUILD_RUN_ATTEMPT: ${{ inputs.build-run-attempt }}
+                  PUBLISH_RUN_ATTEMPT: ${{ inputs.publish-run-attempt }}
+              run: node scripts/release-page-verify.mjs
+
+    write:
+        needs: verify
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        environment: npm-publish
+        permissions:
+            contents: read
+        steps:
+            - name: Check release-page App configuration
+              env:
+                  RELEASE_APP_CLIENT_ID: ${{ vars.RELEASE_APP_CLIENT_ID }}
+                  RELEASE_APP_KEY_PRESENT: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
+              run: |
+                  if [ -z "$RELEASE_APP_CLIENT_ID" ] || [ "$RELEASE_APP_KEY_PRESENT" != true ]; then
+                      echo '::error::Release App configuration is missing. See RELEASE.md. Use release-page recovery; do not repeat npm publication.'
+                      exit 1
+                  fi
+            - name: Checkout reviewed writer with no stored credentials
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  ref: ${{ github.workflow_sha }}
+                  persist-credentials: false
+            - name: Setup Node.js
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 26
+                  package-manager-cache: false
+            - name: Mint short-lived repository-scoped release token
+              id: app
+              uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+              with:
+                  client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+                  private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+                  owner: WinkIntel
+                  repositories: bootstrap-svelte
+                  permission-contents: write
+                  permission-workflows: write
+            - name: Create or verify the source-pinned GitHub release
+              env:
+                  RELEASE_PAGE_TOKEN: ${{ steps.app.outputs.token }}
+                  VERIFIED_RELEASE_REPORT: ${{ needs.verify.outputs.report }}
+              run: node scripts/release-page-write.mjs

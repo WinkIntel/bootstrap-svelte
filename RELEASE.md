@@ -17,7 +17,9 @@ Tag names must equal `v` followed by the full package version. The selected comm
 must be in the corresponding approved branch's history and contain that branch's
 release-policy introduction. Feature branches, wrong majors/channels, 1.x
 prereleases, malformed versions, and build-metadata suffixes are rejected.
-Create release tags only with separate approval; the workflow does not create them.
+Once separately configured, an approved live publication also creates its matching
+source-pinned tag and GitHub release page after verification. Advance/manual tags
+still need separate approval.
 Do not reuse historical tags whose workflow predates these controls.
 
 Use `latest` for a stable 2.x dry run and `maintenance` for a stable 1.x dry run.
@@ -66,12 +68,14 @@ in `packageManager`; publishing checks for npm CLI 11.5.1 or newer.
    consistency with `pnpm install --frozen-lockfile` rather than making a no-op edit.
    Workflow-only changes need no version bump.
 
-   Keep a preparation PR in draft with an `Unreleased` heading until the owner
-   agrees the release window. Before merge, replace that version's `Unreleased`
-   heading with the agreed release date (`YYYY-MM-DD`) in the same PR, review the
-   final diff, and verify CI on its final head. If the window moves, update the date
-   before proceeding. The Publish workflow does not enforce changelog dates; this
-   is a required manual checklist item.
+    Keep a preparation PR in draft with an `Unreleased` heading until the owner
+    agrees the release window. Before merge, replace that version's `Unreleased`
+    heading with the agreed release date (`YYYY-MM-DD`) in the same PR, review the
+    final diff, and verify CI on its final head. If the window moves, update the date
+    before proceeding. The build guard and release-page verifier share the same dated exact-version
+    changelog validation. Both dry runs and live runs fail before publication when
+    the section is missing, invalid, duplicated, empty or still `Unreleased`.
+
 2. Use Node 26, pnpm 11.5.2 (the pinned `packageManager`), and npm >= 11.5.1
    before running the checks below. Confirm with `node --version`, `pnpm --version`,
    and `npm --version`; the real-npm release test runs the workflow's version guard
@@ -103,11 +107,11 @@ in `packageManager`; publishing checks for npm CLI 11.5.1 or newer.
    approval. Maintenance does not deploy the website, but still needs its own
    agreed release window and dated changelog.
 
-   Apply and review maintenance workflow backports separately. Check effective
-   environment and trusted-publisher settings before a release run. Record the
-   exact merged commit selected for rehearsal and publication. Any separately
-   authorized release tag must point to that final approved commit, including the
-   dated changelog, rather than an earlier preparation commit.
+    Apply and review maintenance workflow backports separately. Check effective
+    environment and trusted-publisher settings before a release run. Record the
+    exact merged commit selected for rehearsal and publication. Any separately
+    authorized release tag must point to that final approved commit, including the
+    dated changelog, rather than an earlier preparation commit.
 
 ## Rehearse without publishing
 
@@ -175,3 +179,108 @@ release. Before beginning another issue, obtain the owner's explicit acceptance
 of the agreed infrastructure gate, or complete the separately approved package
 release if that is the chosen gate. Record remaining live OIDC/provenance checks
 as pending; never treat a successful dry run as end-to-end publication verification.
+
+## Automatic GitHub release pages
+
+After a successful live `Publish approved tarball` job, Publish calls
+`.github/workflows/release-page.yml`. Dry runs never call it. A read-only job
+verifies the original run, separate build and publish attempts, successful build
+and live publish jobs, approved branch history,
+source package version, original unexpired artifact, and byte-for-byte equality
+with the npm tarball. `npm audit signatures --json --include-attestations` verifies
+cryptographic provenance; the verifier then checks its source commit, workflow,
+ref, successful publish run/attempt and artifact digest. The artifact comes from
+the successful build attempt, which can precede a rerun of the publish job. Each
+attempt must identify the same source. Saved job outputs retain both attempts when
+only page jobs are rerun. Registry propagation retries are bounded, including
+429/5xx responses and timeouts; authorization and malformed-data errors fail closed. Verification installs only in a temporary directory with lifecycle scripts
+disabled and peer packages omitted; it does not execute the published package.
+Signature failures in the remaining installed dependency tree still fail closed;
+minimizing that tree does not bypass npm verification failures.
+
+The write job uses the existing `npm-publish` environment and a short-lived,
+repository-scoped GitHub App token. **This separate job may require a second
+explicit environment approval after npm publication.** Until that approval and
+successful completion, npm may be published while its GitHub page is still pending.
+The job has no npm publishing step or OIDC permission. Its helper code comes from
+the reviewed workflow commit; release identity and notes come from the published
+source commit. No package installation runs with the App token.
+
+Notes contain only the dated exact-version `CHANGELOG.md` section, plus npm's actual
+publication timestamp, exact source commit and original publish-run link. Stable
+2.x becomes GitHub latest only when npm latest matches and this does not demote a
+newer GitHub release. Stable 1.x stays non-latest; 2.x prereleases stay non-latest
+and are marked prerelease. A lagging npm latest tag is retried before writes.
+Read-back checks verify the tag, page and applicable latest status, allowing a
+short bounded retry for GitHub latest-pointer propagation after creation. Existing
+conflicting tags, notes or latest status stop for owner review; nothing is
+silently overwritten and version tags are never moved or deleted. Body comparisons
+normalize CRLF line endings and terminal newlines only; Markdown spaces and actual
+content remain significant. Confirm API read-back behavior during the separately
+approved first live App write.
+
+### Proposed App setup — separate owner authorization required
+
+These PRs do not create an App, install it, configure credentials, or change rules.
+Before enabling a live publication, approve and perform this exact setup:
+
+| Setting                      | Proposed value                                                                                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Installation                 | Only `WinkIntel/bootstrap-svelte`                                                                                                                     |
+| Repository permissions       | **Contents: write**, **Workflows: write**; Metadata read is implicit                                                                                  |
+| Environment variable         | `npm-publish` → `RELEASE_APP_CLIENT_ID` (App client ID)                                                                                               |
+| Environment secret           | `npm-publish` → `RELEASE_APP_PRIVATE_KEY`                                                                                                             |
+| Release tag creation ruleset | Add the App's numeric integration ID to ruleset **24938133**, actor type `Integration`, bypass mode `always`; retain the existing administrator entry |
+| Immutable tag ruleset        | Leave **24938132** unchanged, with no App bypass                                                                                                      |
+| Branch rules                 | No App bypass and no changes                                                                                                                          |
+
+No Actions-write, Administration, organization-wide installation, PAT fallback or
+npm credential is requested. The pinned official `actions/create-github-app-token`
+action requests only Contents/Workflows write, only this repository, and retains
+its default post-job token revocation. App client ID and numeric integration ID
+serve different purposes; do not interchange them.
+
+GitHub's [Create a release API documentation](https://docs.github.com/en/rest/releases/releases#create-a-release)
+explicitly requires Workflows write when the target commit's `.github/workflows`
+files differ from the default branch; maintenance and historical recovery can have
+that difference. `GITHUB_TOKEN` cannot gain this permission. The
+[Create a reference API](https://docs.github.com/en/rest/git/refs#create-a-reference)
+also documents the Contents/Workflows permission combination. These permissions
+and the creation-only ruleset bypass need owner approval before configuration;
+no live App write has been tested by this workflow preparation.
+
+Live Publish checks that both configuration values are present before npm writes;
+missing configuration fails clearly. Presence does not prove installation,
+permissions, key validity or bypass correctness. Verify those settings during the
+separately approved setup. Dry runs do not require the App.
+
+### Release-only recovery
+
+If npm succeeded but the page failed, **never dispatch Publish again for that
+version**. After correcting the cause, dispatch **GitHub release page** from a
+reviewed release branch, supplying the original `publish-run-id`, successful
+`publish-run-attempt`, and artifact `build-run-attempt`. For example, if attempt 1
+built the artifact and attempt 2 successfully published it, provide build attempt
+`1` and publish attempt `2`; neither input is the later recovery run attempt.
+Obtain the protected write-job approval if requested.
+Recovery re-verifies the original successful live publication; it has no npm
+publish path. It can finish a missing page after the tag was already created and
+accepts an exactly matching completed release without additional writes.
+
+Publish artifacts currently expire after seven days. Missing, expired, duplicate
+or source-mismatched artifacts fail closed; do not rebuild an artifact or republish
+to bypass this. Expired artifacts or conflicts require an owner-reviewed manual
+recovery using preserved publication/provenance evidence. Historical releases with
+manually written notes may deliberately conflict with generated notes.
+
+Page jobs serialize across both release lines using their own lock. When invoked
+from Publish, they remain jobs of that Publish run: **the parent npm publishing
+lock remains held until the page jobs finish, including a second environment
+approval wait**. That wait can therefore block new Publish runs for both release
+lines. A standalone release-page recovery run holds only the page lock. Neither
+lock is a durable queue: a newly queued run can replace the existing pending run,
+even with `cancel-in-progress: false`. Finish or explicitly cancel stale approval
+waits before queuing another release; do not queue multiple recovery runs.
+Acceptance includes the verified
+source tag, release page, prerelease/latest behavior, npm evidence and consumer
+checks; publication success alone does not complete the page gate.

@@ -11,6 +11,7 @@ function fixture(t) {
     t.after(() => rmSync(cwd, { recursive: true, force: true }));
     mkdirSync(join(cwd, 'scripts'));
     copyFileSync(new URL('../release-policy.mjs', import.meta.url), join(cwd, 'scripts/release-policy.mjs'));
+    writeFileSync(join(cwd, 'CHANGELOG.md'), '## 2.1.1 — 2026-10-13\n\n- Packaging fixture.\n');
     writeFileSync(join(cwd, 'index.js'), 'export const built = true;\n');
     writeFileSync(
         join(cwd, 'package.json'),
