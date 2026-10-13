@@ -35,7 +35,7 @@ test('both workflows pin actions, avoid stored checkout credentials, and retain 
     for (const workflow of [ci, publish]) {
         const uses = [...workflow.matchAll(/uses: (\S+)/g)].map((m) => m[1]);
         assert.ok(uses.length > 0);
-        assert.ok(uses.every((value) => /^[\w-]+\/[\w-]+@[a-f0-9]{40}$/.test(value)));
+        assert.ok(uses.every((value) => value === './.github/workflows/release-page.yml' || /^[\w-]+\/[\w-]+@[a-f0-9]{40}$/.test(value)));
         assert.match(workflow, /persist-credentials: false/);
         assert.doesNotMatch(workflow, /corepack (enable|prepare)/);
         assert.match(workflow, /node --test scripts\/tests\/release-\*\.test\.mjs/);
