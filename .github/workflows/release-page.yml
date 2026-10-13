@@ -7,17 +7,25 @@ on:
             publish-run-id:
                 required: true
                 type: string
+            build-run-attempt:
+                required: true
+                type: string
             publish-run-attempt:
                 required: true
                 type: string
     workflow_dispatch:
         inputs:
+            build-run-attempt:
+                description: Original attempt that built the approved artifact
+                required: true
+                default: '1'
+                type: string
             publish-run-id:
                 description: Original successful live Publish run ID (not a rehearsal)
                 required: true
                 type: string
             publish-run-attempt:
-                description: Original attempt that built and published the artifact
+                description: Attempt of the successful npm publish job
                 required: true
                 default: '1'
                 type: string
@@ -54,6 +62,7 @@ jobs:
               env:
                   GH_TOKEN: ${{ github.token }}
                   PUBLISH_RUN_ID: ${{ inputs.publish-run-id }}
+                  BUILD_RUN_ATTEMPT: ${{ inputs.build-run-attempt }}
                   PUBLISH_RUN_ATTEMPT: ${{ inputs.publish-run-attempt }}
               run: node scripts/release-page-verify.mjs
 

@@ -8,10 +8,13 @@ import {
     repository,
     packageName,
     verifyRun,
+    verifyBuildRun,
+    positiveId,
     releaseIdentity,
     verifyPublication,
     changelogNotes,
     retryRegistry,
+    registryRead,
     validateReport
 } from './release-page.mjs';
 import { verifySourceHistory } from './release-policy.mjs';
@@ -54,34 +57,29 @@ export function selectArtifact(artifacts, run) {
     return artifact;
 }
 export async function registryJSON(path) {
-    const response = await fetch(`https://registry.npmjs.org/${path}`, { redirect: 'error', signal: AbortSignal.timeout(15000) });
-    if (response.status === 404) return null;
-    if (!response.ok) fail(`Registry HTTP ${response.status}`);
-    return response.json();
+    return registryRead(`https://registry.npmjs.org/${path}`);
 }
 async function publishedTarball(url) {
-    const parsed = new URL(url);
-    if (parsed.origin !== 'https://registry.npmjs.org' || parsed.username || parsed.password) fail('Unexpected package registry host');
-    const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(30000) });
-    if (response.status === 404) return null;
-    if (!response.ok) fail(`Registry tarball HTTP ${response.status}`);
-    return Buffer.from(await response.arrayBuffer());
+    return registryRead(url, 'bytes');
 }
 function sourceFile(path, sha) {
     const data = gh(`/contents/${path}?ref=${sha}`);
     if (data.encoding !== 'base64' || data.type !== 'file') fail('Unexpected source file');
     return Buffer.from(data.content, 'base64').toString('utf8');
 }
-export async function verifyPublishedRun(runId, attempt) {
-    if (!/^[1-9][0-9]{0,19}$/.test(runId ?? '') || !/^[1-9][0-9]{0,19}$/.test(attempt ?? ''))
-        fail('Provide the original numeric publish run ID and attempt');
+export async function verifyPublishedRun(runId, attempt, buildAttempt) {
+    if (!positiveId(runId) || !positiveId(attempt) || !positiveId(buildAttempt) || BigInt(buildAttempt) > BigInt(attempt))
+        fail('Provide the original numeric run ID, successful publish attempt and artifact build attempt');
     const run = gh(`/actions/runs/${runId}/attempts/${attempt}`);
     const identity = verifyRun(run, allPages(`/actions/runs/${runId}/attempts/${attempt}/jobs`, 'jobs'), runId, attempt);
+    const buildRun = gh(`/actions/runs/${runId}/attempts/${buildAttempt}`);
+    const buildIdentity = verifyBuildRun(buildRun, allPages(`/actions/runs/${runId}/attempts/${buildAttempt}/jobs`, 'jobs'), runId, buildAttempt);
+    if (buildIdentity.sha !== identity.sha || buildIdentity.ref !== identity.ref) fail('Build/publish source mismatch');
     const manifest = JSON.parse(sourceFile('package.json', identity.sha));
     if (manifest.name !== packageName) fail('Unexpected source package');
     const release = releaseIdentity({ ...identity, version: manifest.version });
     verifySourceHistory(release);
-    const artifact = selectArtifact(allPages(`/actions/runs/${runId}/artifacts`, 'artifacts'), run);
+    const artifact = selectArtifact(allPages(`/actions/runs/${runId}/artifacts`, 'artifacts'), buildRun);
     const temporary = mkdtempSync(join(tmpdir(), 'release-page-verify-'));
     try {
         const directory = join(temporary, 'artifact');
@@ -124,12 +122,16 @@ export async function verifyPublishedRun(runId, attempt) {
         const npmVersion = execFileSync('npm', ['--version'], { env, encoding: 'utf8' }).trim().split('.').map(Number);
         if (!(npmVersion[0] > 11 || (npmVersion[0] === 11 && (npmVersion[1] > 5 || (npmVersion[1] === 5 && npmVersion[2] >= 1)))))
             fail('npm >= 11.5.1 required for provenance verification');
-        execFileSync('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--save-exact', `${packageName}@${release.version}`], {
-            cwd: temporary,
-            env,
-            stdio: ['ignore', 'pipe', 'pipe'],
-            timeout: 180000
-        });
+        execFileSync(
+            'npm',
+            ['install', '--ignore-scripts', '--omit=peer', '--no-audit', '--no-fund', '--save-exact', `${packageName}@${release.version}`],
+            {
+                cwd: temporary,
+                env,
+                stdio: ['ignore', 'pipe', 'pipe'],
+                timeout: 180000
+            }
+        );
         const audit = JSON.parse(
             execFileSync('npm', ['audit', 'signatures', '--json', '--include-attestations'], {
                 cwd: temporary,
@@ -142,14 +144,14 @@ export async function verifyPublishedRun(runId, attempt) {
         const hashes = verifyPublication({ release, tarball, metadata, audit, runId, attempt });
         const publishedAt = await retryRegistry(async () => (await registryJSON(encoded))?.time?.[release.version] ?? null);
         const notes = changelogNotes(sourceFile('CHANGELOG.md', release.sha), release, publishedAt, runId, attempt);
-        return validateReport({ schema: 1, ...release, ...hashes, runId, attempt, publishedAt, notes });
+        return validateReport({ schema: 1, ...release, ...hashes, runId, attempt, buildAttempt, publishedAt, notes });
     } finally {
         rmSync(temporary, { recursive: true, force: true });
     }
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
     try {
-        const report = await verifyPublishedRun(process.env.PUBLISH_RUN_ID, process.env.PUBLISH_RUN_ATTEMPT);
+        const report = await verifyPublishedRun(process.env.PUBLISH_RUN_ID, process.env.PUBLISH_RUN_ATTEMPT, process.env.BUILD_RUN_ATTEMPT);
         if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `report=${JSON.stringify(report)}\n`);
         console.log(JSON.stringify(report));
     } catch (error) {

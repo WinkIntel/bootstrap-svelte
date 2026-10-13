@@ -6,12 +6,16 @@ test('live-only caller preserves npm privilege boundary and checks configuration
     const yaml = read('.github/workflows/publish.yml');
     assert.match(yaml, /releasepage:\n +needs: \[build, publish\]\n +if: \$\{\{ !inputs.dry-run && needs.publish.result == 'success' \}\}/);
     assert.match(yaml, /uses: \.\/\.github\/workflows\/release-page.yml/);
-    assert.match(yaml, /publish-run-attempt: \$\{\{ needs.build.outputs.run-attempt \}\}/);
+    assert.match(yaml, /build-run-attempt: \$\{\{ needs.build.outputs.run-attempt \}\}/);
+    assert.match(yaml, /publish-run-attempt: \$\{\{ needs.publish.outputs.run-attempt \}\}/);
     assert.equal((yaml.match(/id-token: write/g) ?? []).length, 1);
     const live = yaml.slice(yaml.indexOf('\n    publish:'));
     assert.ok(live.indexOf('Check release-page configuration') < live.indexOf('*release-execute'));
     assert.match(live, /RELEASE_APP_KEY_PRESENT: \$\{\{ secrets.RELEASE_APP_PRIVATE_KEY != '' \}\}/);
     assert.doesNotMatch(yaml, /contents: write|npm (publish|dist-tag).*--force/);
+    assert.ok(live.indexOf('Record successful publication attempt') > live.indexOf('*release-execute'));
+    assert.match(live, /steps.publication.outputs.run-attempt/);
+    assert.match(read('scripts/release-policy.mjs'), /changelogSection\(readFileSync\('CHANGELOG.md', 'utf8'\), release.version\)/);
 });
 test('recovery is run-and-attempt based, has no npm publication or OIDC, and uses protected narrow App token', () => {
     const yaml = read('.github/workflows/release-page.yml');
@@ -19,6 +23,7 @@ test('recovery is run-and-attempt based, has no npm publication or OIDC, and use
     assert.match(yaml, /workflow_dispatch:/);
     assert.match(yaml, /publish-run-id:/);
     assert.match(yaml, /publish-run-attempt:/);
+    assert.match(yaml, /build-run-attempt:/);
     assert.match(yaml, /environment: npm-publish/);
     assert.match(yaml, /needs: verify/);
     assert.doesNotMatch(yaml, /(?:^|\n)\s+(?:id-token:|contents: write)|run:.*npm publish|secrets: inherit/m);
@@ -41,5 +46,6 @@ test('privileged writer has no process execution or publication fallback', () =>
     const verifier = read('scripts/release-page-verify.mjs');
     assert.match(verifier, /'audit',\s*'signatures',\s*'--json',\s*'--include-attestations'/);
     assert.match(verifier, /'install',\s*'--ignore-scripts'/);
+    assert.match(verifier, /'--omit=peer'/);
     assert.doesNotMatch(verifier, /'publish'\s*[,\]]/);
 });

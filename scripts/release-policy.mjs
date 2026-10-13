@@ -30,6 +30,23 @@ export function releasePolicy({ name, version, channel, ref, sha }) {
     return { branch, name, version, channel, sha };
 }
 
+export function changelogSection(text, version) {
+    const prefix = `${version} — `;
+    const matches = text
+        .split(/^## /m)
+        .slice(1)
+        .filter((section) => section.split('\n')[0].startsWith(prefix));
+    if (matches.length !== 1) throw new Error('Expected one exact-version dated changelog section');
+    const [heading, ...lines] = matches[0].split('\n');
+    const date = heading.slice(prefix.length).trim();
+    const timestamp = `${date}T00:00:00.000Z`;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(timestamp)) || new Date(timestamp).toISOString() !== timestamp)
+        throw new Error('Changelog release date must be a real YYYY-MM-DD date, not Unreleased');
+    const body = lines.join('\n').trim();
+    if (!body || body.length > 24000) throw new Error('Changelog notes missing or too long');
+    return body;
+}
+
 export function verifySourceHistory({ sha, branch }, cwd = process.cwd()) {
     if (!branches.includes(branch) || !/^[a-f0-9]{40}$/.test(sha)) throw new Error('Invalid source identity');
     const git = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -60,6 +77,7 @@ function currentRelease() {
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
     const release = currentRelease();
     if (process.argv[2] === 'guard') {
+        changelogSection(readFileSync('CHANGELOG.md', 'utf8'), release.version);
         appendFileSync(process.env.GITHUB_OUTPUT, `version=${release.version}\n`);
         console.log(JSON.stringify(release));
     } else if (process.argv[2] === 'pack') {

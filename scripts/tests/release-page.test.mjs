@@ -54,6 +54,7 @@ function evidence() {
 function report() {
     return {
         schema: 1,
+        buildAttempt: '1',
         ...release,
         runId: '123',
         attempt: '1',
@@ -112,7 +113,7 @@ test('notes use only one dated exact-version section', () => {
     assert.match(notes, /Fixed panel/);
     assert.doesNotMatch(notes, /Old note/);
     assert.match(notes, /2026-10-13/);
-    assert.match(notes, /953c293|aaaaaaaa/);
+    assert.match(notes, new RegExp(`commit/${sha}`));
     for (const text of [
         '## Unreleased\nnew',
         '## 2.1.20 — 2026-10-13\nwrong',
@@ -158,6 +159,8 @@ test('untrusted report identity and lengths fail closed', () => {
         { channel: 'maintenance' },
         { runId: '1\nhello' },
         { attempt: '0' },
+        { buildAttempt: '2' },
+        { buildAttempt: 'bad' },
         { schema: 2 },
         { notes: 'a'.repeat(40000) },
         { publishedAt: 'yesterday' },
@@ -354,4 +357,87 @@ test('existing maintenance release incorrectly marked latest requires owner revi
     const g = github({ tag: { object: { type: 'commit', sha } }, existing, latest: existing });
     await assert.rejects(ensureRelease(r, g.api, '2.1.2'), /latest.*conflict/i);
     assert.equal(g.writes.length, 0);
+});
+
+test('recovery separates original build attempt from successful publish/provenance attempt', async () => {
+    const { verifyBuildRun } = await import('../release-page.mjs');
+    const buildJobs = [{ name: 'Build release artifact', status: 'completed', conclusion: 'success', head_sha: sha }];
+    const build = verifyBuildRun(run, buildJobs, '123', '1');
+    const published = verifyRun({ ...run, run_attempt: 2 }, jobs, '123', '2');
+    assert.deepEqual(build, published);
+    assert.throws(() => verifyBuildRun(run, jobs, '123', '1'));
+    assert.throws(() => verifyRun(run, [{ ...jobs[0], conclusion: 'failure' }], '123', '1'));
+    const e = evidence();
+    e.attempt = '2';
+    const envelope = e.audit.verified[0].attestationBundles[0].bundle.dsseEnvelope;
+    const statement = JSON.parse(Buffer.from(envelope.payload, 'base64'));
+    statement.predicate.runDetails.metadata.invocationId = 'https://github.com/WinkIntel/bootstrap-svelte/actions/runs/123/attempts/2';
+    envelope.payload = Buffer.from(JSON.stringify(statement)).toString('base64');
+    assert.ok(verifyPublication(e).sha512);
+    e.attempt = '1';
+    assert.throws(() => verifyPublication(e), /run\/attempt/);
+});
+
+test('registry readers retry transient status/timeouts but reject authorization and malformed data', async () => {
+    const { registryRead } = await import('../release-page.mjs');
+    for (const status of [404, 429, 500, 502, 503])
+        assert.equal(await registryRead('https://registry.npmjs.org/example', 'json', async () => new Response('', { status })), null);
+    assert.equal(
+        await registryRead('https://registry.npmjs.org/example', 'json', async () => {
+            throw new DOMException('timeout', 'TimeoutError');
+        }),
+        null
+    );
+    for (const status of [401, 403, 400])
+        await assert.rejects(
+            registryRead('https://registry.npmjs.org/example', 'json', async () => new Response('', { status })),
+            /HTTP/
+        );
+    await assert.rejects(registryRead('https://registry.npmjs.org/example', 'json', async () => new Response('invalid json')));
+    await assert.rejects(
+        registryRead('https://evil.invalid/example', 'json', async () => {
+            throw new Error('must not fetch');
+        }),
+        /host/
+    );
+    assert.deepEqual(await registryRead('https://registry.npmjs.org/example', 'bytes', async () => new Response('package')), Buffer.from('package'));
+});
+test('latest read-back tolerates bounded propagation after creation but never accepts a persistent conflict', async () => {
+    const g = github();
+    let reads = 0,
+        sleeps = 0;
+    const api = async (path, options) => {
+        if (path === '/releases/latest' && ++reads < 4) return { tag_name: 'v2.1.1' };
+        return g.api(path, options);
+    };
+    await ensureRelease(report(), api, '2.1.2', {
+        sleep: async () => {
+            sleeps++;
+        }
+    });
+    assert.equal(sleeps, 2);
+    const h = github();
+    await assert.rejects(
+        ensureRelease(report(), async (path, options) => (path === '/releases/latest' ? { tag_name: 'v2.1.1' } : h.api(path, options)), '2.1.2', {
+            sleep: async () => {}
+        }),
+        /latest.*conflict/
+    );
+    assert.equal(h.writes.length, 2);
+});
+test('release comparison tolerates CRLF/final newline transport differences but preserves meaningful whitespace and content', async () => {
+    const r = report();
+    r.notes = 'First line\nSecond line  \nThird line\n';
+    const existing = {
+        tag_name: 'v2.1.2',
+        name: 'Bootstrap Svelte 2.1.2',
+        body: r.notes.replace(/\n/g, '\r\n').replace(/\r\n$/, ''),
+        draft: false,
+        prerelease: false
+    };
+    const g = github({ tag: { object: { type: 'commit', sha } }, existing, latest: existing });
+    await ensureRelease(r, g.api, '2.1.2');
+    assert.equal(g.writes.length, 0);
+    existing.body = existing.body.replace('Second line  ', 'Second line');
+    await assert.rejects(ensureRelease(r, g.api, '2.1.2'), /conflict/);
 });

@@ -1,6 +1,6 @@
 // This entry point can only create the verified tag/release; it cannot publish npm.
 import { appendFileSync } from 'node:fs';
-import { repository, validateReport, ensureRelease, readyNpmLatest } from './release-page.mjs';
+import { repository, validateReport, ensureRelease, readyNpmLatest, registryRead } from './release-page.mjs';
 
 try {
     if (process.env.GITHUB_ACTIONS !== 'true' || process.env.GITHUB_REPOSITORY !== repository)
@@ -21,13 +21,8 @@ try {
         return response.json();
     };
     const npmLatest = await readyNpmLatest(report, async () => {
-        const response = await fetch(`https://registry.npmjs.org/-/package/${encodeURIComponent(report.name)}/dist-tags`, {
-            redirect: 'error',
-            signal: AbortSignal.timeout(15000)
-        });
-        if (!response.ok) throw new Error(`Registry tags HTTP ${response.status}`);
-        const tags = await response.json();
-        return tags.latest;
+        const tags = await registryRead(`https://registry.npmjs.org/-/package/${encodeURIComponent(report.name)}/dist-tags`);
+        return tags?.latest;
     });
     const release = await ensureRelease(report, api, npmLatest);
     console.log(`Verified GitHub release: ${release.html_url}`);
