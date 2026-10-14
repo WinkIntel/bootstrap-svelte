@@ -102,6 +102,29 @@ function elementAttributeValue(
     return undefined;
 }
 
+// Resource loads, not outbound navigation links or escaped documentation examples.
+const disclosedResourceOrigins = new Set(['https://cdn.jsdelivr.net', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com']);
+
+export function undisclosedResourceOrigins(html: string, siteUrl: string): string[] {
+    const origins = new Set<string>();
+    for (const match of html.matchAll(/<(img|script|link|iframe|source|video|audio|input)\b([^>]*)>/gi)) {
+        const tag = match[1]!.toLowerCase();
+        const attributes = match[2]!;
+        if (tag === 'link' && !/^(stylesheet|preload|modulepreload|preconnect|dns-prefetch|icon)$/i.test(attributeValue(attributes, 'rel') ?? ''))
+            continue;
+        const urls = [attributeValue(attributes, tag === 'link' ? 'href' : 'src'), attributeValue(attributes, 'poster')];
+        const srcset = attributeValue(attributes, 'srcset');
+        if (srcset) urls.push(...srcset.split(',').map((candidate) => candidate.trim().split(/\s+/)[0]));
+        for (const value of urls) {
+            if (!value) continue;
+            const url = new URL(value, siteUrl);
+            if (url.protocol !== 'http:' && url.protocol !== 'https:') continue;
+            if (url.origin !== new URL(siteUrl).origin && !disclosedResourceOrigins.has(url.origin)) origins.add(url.origin);
+        }
+    }
+    return [...origins].sort();
+}
+
 function isVisiblyHidden(attributes: string): boolean {
     const className = attributeValue(attributes, 'class')?.toLowerCase() ?? '';
     const style = attributeValue(attributes, 'style')?.toLowerCase() ?? '';
@@ -243,6 +266,8 @@ export async function crawlStaticBuild(options: StaticCrawlOptions): Promise<Sta
             return '';
         });
         if (!html) continue;
+        for (const origin of undisclosedResourceOrigins(html, options.siteUrl))
+            errors.push(`${href} loads an undisclosed resource origin: ${origin}`);
 
         const title = matchContent(html, /<title>([\s\S]*?)<\/title>/i) ?? '';
         const description = elementAttributeValue(html, 'meta', { name: 'description' }, 'content') ?? '';

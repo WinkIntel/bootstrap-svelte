@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, test } from 'vitest';
-import { crawlStaticBuild } from './static-crawl.js';
+import { crawlStaticBuild, undisclosedResourceOrigins } from './static-crawl.js';
 
 const SITE_URL = 'https://bootstrap-svelte.vercel.app';
 const TEST_ROUTES = ['/', '/components/button'];
@@ -216,4 +216,16 @@ describe('static crawl checks', () => {
 
         expect(result.errors).toEqual(expect.arrayContaining(['/ must not include visible breadcrumb navigation']));
     });
+});
+
+test('checks resource origins while ignoring navigation and escaped examples', () => {
+    const html = `<a href="https://example.com">Docs</a>&lt;img src="https://example.com/image"&gt;
+      <link rel="canonical" href="https://example.com"><link rel="stylesheet" href="https://cdn.jsdelivr.net/pinned.css">
+      <img src="/images/local.svg"><img srcset="https://images.example/one.png 1x, //images.example/two.png 2x">
+      <video poster="https://poster.example/image"><script src="https://scripts.example/file.js"></script>`;
+    expect(undisclosedResourceOrigins(html, 'https://bootstrap-svelte.vercel.app')).toEqual([
+        'https://images.example',
+        'https://poster.example',
+        'https://scripts.example'
+    ]);
 });

@@ -606,11 +606,11 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
-                    <Form.ImageInput src="https://www.w3schools.com/tags/img_submit.gif" alt="Submit" width="48" height="48" />
+                    <Form.ImageInput src="/images/showcase/submit.svg" alt="Submit" width="48" height="48" />
                     <Form.HelperText>Default</Form.HelperText>
                 </div>
                 <SyntaxHighlighter
-                    code="<Form.ImageInput src=&quot;https://www.w3schools.com/tags/img_submit.gif&quot; alt=&quot;Submit&quot; width=&quot;48&quot; height=&quot;48&quot; />" />
+                    code="<Form.ImageInput src=&quot;/images/showcase/submit.svg&quot; alt=&quot;Submit&quot; width=&quot;48&quot; height=&quot;48&quot; />" />
             </div>
         </div>
         <h2 class="wk-quick-link mb-3">Month Input</h2>

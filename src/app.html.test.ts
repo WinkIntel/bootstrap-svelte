@@ -45,3 +45,49 @@ describe('bootstrap JS bundle removal', () => {
         expect(offenders).toEqual([]);
     });
 });
+
+describe('showcase resources and pre-paint theme', () => {
+    const html = readFileSync(join(srcDirectory, 'app.html'), 'utf8');
+    test('pins every jsDelivr stylesheet with SRI and anonymous CORS', () => {
+        const links = html.match(/<link\b[^>]*cdn\.jsdelivr\.net[^>]*>/g) ?? [];
+        expect(links).toHaveLength(2);
+        for (const link of links) {
+            expect(link).toMatch(/integrity="sha384-[A-Za-z0-9+/=]+"/);
+            expect(link).toContain('crossorigin="anonymous"');
+        }
+    });
+    test.each([
+        ['light', true, 'light'],
+        ['dark', false, 'dark'],
+        ['auto', true, 'dark'],
+        [null, false, 'light'],
+        ['invalid', true, 'dark']
+    ])('resolves stored %s and system dark %s before hydration', (stored, dark, expected) => {
+        const script = html.match(/<script id="color-mode">([\s\S]*?)<\/script>/)?.[1];
+        expect(script).toBeTruthy();
+        const root = { documentElement: { dataset: { bsTheme: '' } } };
+        new Function('document', 'localStorage', 'matchMedia', script!)(root, { getItem: () => stored }, () => ({ matches: dark }));
+        expect(root.documentElement.dataset.bsTheme).toBe(expected);
+        expect(html.indexOf('id="color-mode"')).toBeLessThan(html.indexOf('rel="stylesheet"'));
+    });
+    test('uses system preference when storage is blocked', () => {
+        const script = html.match(/<script id="color-mode">([\s\S]*?)<\/script>/)?.[1];
+        expect(script).toBeTruthy();
+        const root = { documentElement: { dataset: { bsTheme: '' } } };
+        new Function('document', 'localStorage', 'matchMedia', script!)(
+            root,
+            {
+                getItem: () => {
+                    throw new Error('Blocked');
+                }
+            },
+            () => ({ matches: true })
+        );
+        expect(root.documentElement.dataset.bsTheme).toBe('dark');
+    });
+    test('showcase images and examples no longer request external placeholder hosts', () => {
+        for (const file of getSvelteFiles(routesDirectory)) {
+            expect(readFileSync(file, 'utf8')).not.toMatch(/https:\/\/(?:placehold\.co|www\.w3schools\.com\/tags\/img_submit)/);
+        }
+    });
+});

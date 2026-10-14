@@ -21,6 +21,8 @@ describe('/privacy/+page.svelte', () => {
         expect(text(container)).toContain('jsDelivr');
         expect(text(container)).toContain('Google Fonts');
         expect(text(container)).toContain('wk-color-mode');
+        expect(text(container)).toContain('images are served by this site');
+        expect(text(container)).not.toContain('does not receive that data');
         expect(text(container)).toMatch(/does not set cookies/i);
     });
 

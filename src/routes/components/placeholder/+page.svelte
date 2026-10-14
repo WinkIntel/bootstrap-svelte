@@ -126,7 +126,7 @@
             <div class="wk-placeholder-example p-4 border rounded">
                 <div class="d-flex justify-content-around gap-3">
                     <div class="card" style="width: 18rem;">
-                        <img src="https://placehold.co/300x180" class="card-img-top" alt="..." />
+                        <img src="/images/showcase/300x180.svg" class="card-img-top" alt="..." />
                         <div class="card-body">
                             <h5 class="card-title">Card title</h5>
                             <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
@@ -135,7 +135,7 @@
                     </div>
 
                     <div class="card" style="width: 18rem;" aria-hidden="true">
-                        <img src="https://placehold.co/300x180" class="card-img-top" alt="..." />
+                        <img src="/images/showcase/300x180.svg" class="card-img-top" alt="..." />
                         <div class="card-body">
                             <h5 class="card-title">
                                 <Placeholder.Root type="glow">

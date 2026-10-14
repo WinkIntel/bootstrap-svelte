@@ -104,3 +104,11 @@ describe('+layout.svelte chrome', () => {
         expect(footer).toHaveTextContent('Wink, Inc.');
     });
 });
+
+test('reserves a collapsed mobile TOC even before headings exist', () => {
+    const { container } = renderLayout('/components/button');
+    const shell = container.querySelector('.wk-mobile-toc');
+    expect(shell).toBeInTheDocument();
+    expect(shell).not.toHaveAttribute('open');
+    expect(shell?.querySelector('summary')).toHaveTextContent('On this page');
+});

@@ -5,7 +5,7 @@
 
     // Sample code examples for demonstration
     const basicExampleCode = `<Card.Root class="w-18rem">
-    <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+    <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
     <Card.Body>
         <Card.Title>Card Title</Card.Title>
         <Card.Text>Some quick example text to build on the card title and make up the bulk of the card's content.</Card.Text>
@@ -31,7 +31,7 @@
 
     const imagesCode = `<!-- Top image -->
 <Card.Root class="w-18rem">
-    <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+    <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
     <Card.Body>
         <Card.Title>Top image</Card.Title>
         <Card.Text>This card has an image at the top.</Card.Text>
@@ -44,7 +44,7 @@
         <Card.Title>Bottom image</Card.Title>
         <Card.Text>This card has an image at the bottom.</Card.Text>
     </Card.Body>
-    <Card.Img position="bottom" src="https://placehold.co/300x180" alt="Card image cap" />
+    <Card.Img position="bottom" src="/images/showcase/300x180.svg" alt="Card image cap" />
 </Card.Root>`;
 
     const listGroupsCode = `<Card.Root class="w-18rem">
@@ -56,7 +56,7 @@
 </Card.Root>`;
 
     const kitchenSinkCode = `<Card.Root class="w-18rem">
-    <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+    <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
     <Card.Body>
         <Card.Title>Card title</Card.Title>
         <Card.Text>Some quick example text to build on the card title and make up the bulk of the card's content.</Card.Text>
@@ -83,7 +83,7 @@
 </Card.Root>`;
 
     const imageOverlayCode = `<Card.Root class="text-bg-dark w-18rem">
-    <Card.Img src="https://placehold.co/300x180" alt="Card image" />
+    <Card.Img src="/images/showcase/300x180.svg" alt="Card image" />
     <Card.ImgOverlay>
         <Card.Title>Card title</Card.Title>
         <Card.Text>This is a wider card with supporting text below as a natural lead-in to additional content.</Card.Text>
@@ -94,7 +94,7 @@
     const horizontalCardCode = `<Card.Root class="mb-3" style="max-width: 540px;">
     <div class="row g-0">
         <div class="col-md-4">
-            <Card.Img src="https://placehold.co/120x180" class="img-fluid rounded-start" alt="Card image" />
+            <Card.Img src="/images/showcase/120x180.svg" class="img-fluid rounded-start" alt="Card image" />
         </div>
         <div class="col-md-8">
             <Card.Body>
@@ -144,7 +144,7 @@
 
     const cardGroupCode = `<Card.Group>
     <Card.Root>
-        <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+        <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
         <Card.Body>
             <Card.Title>Card title</Card.Title>
             <Card.Text>This is a wider card with supporting text below as a natural lead-in to additional content.</Card.Text>
@@ -162,7 +162,7 @@
     const gridCardsCode = `<div class="row row-cols-1 row-cols-md-3 g-4">
     <div class="col">
         <Card.Root>
-            <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+            <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
             <Card.Body>
                 <Card.Title>Card title</Card.Title>
                 <Card.Text>This is a longer card with supporting text below as a natural lead-in to additional content.</Card.Text>
@@ -200,7 +200,7 @@
 
             <div class="wk-card-example p-4 border rounded">
                 <Card.Root class="w-18rem">
-                    <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                    <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                     <Card.Body>
                         <Card.Title>Card Title</Card.Title>
                         <Card.Text>Some quick example text to build on the card title and make up the bulk of the card's content.</Card.Text>
@@ -257,7 +257,7 @@
             <div class="wk-card-example p-4 border rounded">
                 <div class="d-flex gap-3">
                     <Card.Root class="w-18rem">
-                        <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                        <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                         <Card.Body>
                             <Card.Title>Top image</Card.Title>
                             <Card.Text>This card has an image at the top.</Card.Text>
@@ -269,7 +269,7 @@
                             <Card.Title>Bottom image</Card.Title>
                             <Card.Text>This card has an image at the bottom.</Card.Text>
                         </Card.Body>
-                        <Card.Img position="bottom" src="https://placehold.co/300x180" alt="Card image cap" />
+                        <Card.Img position="bottom" src="/images/showcase/300x180.svg" alt="Card image cap" />
                     </Card.Root>
                 </div>
             </div>
@@ -296,7 +296,7 @@
 
             <div class="wk-card-example p-4 border rounded">
                 <Card.Root class="w-18rem">
-                    <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                    <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                     <Card.Body>
                         <Card.Title>Card title</Card.Title>
                         <Card.Text>Some quick example text to build on the card title and make up the bulk of the card's content.</Card.Text>
@@ -341,7 +341,7 @@
 
             <div class="wk-card-example p-4 border rounded">
                 <Card.Root class="text-bg-dark w-18rem">
-                    <Card.Img src="https://placehold.co/300x180/000000/FFF" alt="Card image" />
+                    <Card.Img src="/images/showcase/300x180-000000-fff.svg" alt="Card image" />
                     <Card.ImgOverlay>
                         <Card.Title>Card title</Card.Title>
                         <Card.Text>This is a wider card with supporting text below as a natural lead-in to additional content.</Card.Text>
@@ -363,7 +363,7 @@
                 <Card.Root class="mb-3" style="max-width: 540px;">
                     <div class="row g-0">
                         <div class="col-md-4">
-                            <Card.Img src="https://placehold.co/120x180" class="img-fluid rounded-start" alt="Card image" />
+                            <Card.Img src="/images/showcase/120x180.svg" class="img-fluid rounded-start" alt="Card image" />
                         </div>
                         <div class="col-md-8">
                             <Card.Body>
@@ -463,7 +463,7 @@
             <div class="wk-card-example p-4 border rounded">
                 <Card.Group>
                     <Card.Root>
-                        <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                        <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                         <Card.Body>
                             <Card.Title>Card title</Card.Title>
                             <Card.Text>This is a wider card with supporting text below as a natural lead-in to additional content.</Card.Text>
@@ -471,7 +471,7 @@
                         </Card.Body>
                     </Card.Root>
                     <Card.Root>
-                        <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                        <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                         <Card.Body>
                             <Card.Title>Card title</Card.Title>
                             <Card.Text>This card has supporting text below as a natural lead-in to additional content.</Card.Text>
@@ -479,7 +479,7 @@
                         </Card.Body>
                     </Card.Root>
                     <Card.Root>
-                        <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                        <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                         <Card.Body>
                             <Card.Title>Card title</Card.Title>
                             <Card.Text>This is a wider card with supporting text below as a natural lead-in to additional content.</Card.Text>
@@ -498,7 +498,7 @@
                 <div class="row row-cols-1 row-cols-md-3 g-4">
                     <div class="col">
                         <Card.Root>
-                            <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                            <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                             <Card.Body>
                                 <Card.Title>Card title</Card.Title>
                                 <Card.Text>This is a longer card with supporting text below as a natural lead-in to additional content.</Card.Text>
@@ -507,7 +507,7 @@
                     </div>
                     <div class="col">
                         <Card.Root>
-                            <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                            <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                             <Card.Body>
                                 <Card.Title>Card title</Card.Title>
                                 <Card.Text>This is a longer card with supporting text below as a natural lead-in to additional content.</Card.Text>
@@ -516,7 +516,7 @@
                     </div>
                     <div class="col">
                         <Card.Root>
-                            <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                            <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                             <Card.Body>
                                 <Card.Title>Card title</Card.Title>
                                 <Card.Text>This is a longer card with supporting text below as a natural lead-in to additional content.</Card.Text>

@@ -141,7 +141,7 @@
         code += '    <p>This is the offcanvas body content. You can place any content here, including forms, text, or other components.</p>';
 
         if (useCustomImage) {
-            code += '\n    <img src="https://placehold.co/600x200" class="img-fluid rounded mb-3" alt="Example Image" />';
+            code += '\n    <img src="/images/showcase/600x200.svg" class="img-fluid rounded mb-3" alt="Example Image" />';
         }
 
         code += '\n    <div class="d-grid gap-2">\n';
@@ -273,7 +273,7 @@
                                 <p>This is the offcanvas body content. You can place any content here, including forms, text, or other components.</p>
 
                                 {#if useCustomImage}
-                                    <img src="https://placehold.co/600x200" class="img-fluid rounded mb-3" alt="" />
+                                    <img src="/images/showcase/600x200.svg" class="img-fluid rounded mb-3" alt="" />
                                 {/if}
 
                                 <div class={['d-grid gap-2', { [`d-${showOnBreakpoint}-none`]: showOnBreakpoint !== undefined }]}>

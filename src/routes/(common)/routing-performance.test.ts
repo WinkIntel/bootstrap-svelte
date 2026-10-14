@@ -94,7 +94,7 @@ describe('static routing regex work stays bounded', () => {
     });
 
     test('a long nonmatching slash suffix does not rescan every partition', () => {
-        const redirect = addAgentRoutes({ version: 3 }, { pages: ['/'], markdownFiles: ['index.md'] }).routes?.[0];
+        const redirect = addAgentRoutes({ version: 3 }, { pages: ['/'], markdownFiles: ['index.md'] }).routes?.find((route) => route.status === 301);
         expect(redirect?.status).toBe(301);
         expectBoundedMatching(
             [['trailing-slash redirect', redirect!.src!]],
