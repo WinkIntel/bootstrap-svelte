@@ -67,22 +67,35 @@ After separate dispatch approval, select **Publish → Run workflow**, choose `m
 or `codex/maintenance-1.x`, and enable **configuration-check**. Approve the
 `npm-publish` job when GitHub requests it. This default-off mode takes precedence
 over **dry-run**, even if dry-run is false; channel selection does not cause a
-publication in this mode.
+publication in this mode. An unprivileged callee guard rejects unsupported
+repositories or refs with a failure before requesting environment approval. Its
+shell comparison is case-sensitive, including rejection of `MAIN` and other case
+variants; the environment's deployment-branch policy remains an additional gate.
 
-The check follows Publish's existing reusable release-page call and its named App
-key mapping. The same protected writer job runs only its configuration preflight,
+The check follows Publish's existing reusable release-page call with its required
+named App-key contract. The same protected writer job runs only its configuration preflight,
 which receives presence booleans for the client ID and private key and prints a
 fixed success or failure message. It skips the build, artifact verification,
 rehearsal, npm publication, checkout/setup in the writer, token minting and every
 tag/release write. No token is created, so no token cleanup is needed.
 
-A pass establishes configuration availability through this caller/callee path.
+A pass establishes effective configuration availability inside the called protected
+job. The environment supplies its secret value; a pass does not establish the
+origin or value of the caller expression. The required named-secret contract is
+still checked structurally, and omitting it is not equivalent to passing an empty
+expression. See [GitHub's environment-secret rules](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows#using-inputs-and-secrets-in-a-reusable-workflow).
 It does not establish key validity, App authentication, permissions, provenance,
 or write access. Ordinary dry runs skip the reusable call, and standalone
 recovery/App authentication checks enter directly; those cannot prove this path.
 With configuration-check left false, existing rehearsal, live publication and
 standalone recovery behavior is retained. Preparing or merging this mode does not
 authorize dispatch.
+
+Configuration checks use separate concurrency groups at both the Publish and
+reusable release-page levels, so approval waits cannot block or replace queued
+publications or recovery runs. The two diagnostic groups are distinct to avoid a
+nested-call lock conflict. Multiple diagnostic requests can still replace an older
+pending diagnostic; inspect each requested run's result.
 
 ## Prepare the release
 

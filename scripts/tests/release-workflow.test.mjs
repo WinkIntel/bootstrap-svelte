@@ -29,7 +29,10 @@ test('both protected modes use the same verification and same-run artifact downl
     }
     assert.match(job('rehearsal'), /artifact-ids: \$\{\{ needs.build.outputs.artifact-id \}\}/);
     assert.doesNotMatch(job('rehearsal'), /github-token:|run-id:|repository:/);
-    assert.match(publish, /group: npm-publish-bootstrap-svelte\n +cancel-in-progress: false/);
+    assert.match(
+        publish,
+        /group: \$\{\{ inputs.configuration-check && 'release-config-publish-bootstrap-svelte' \|\| 'npm-publish-bootstrap-svelte' \}\}\n +cancel-in-progress: false/
+    );
 });
 test('both workflows pin actions, avoid stored checkout credentials, and retain build CI on both branches', () => {
     for (const workflow of [ci, publish]) {

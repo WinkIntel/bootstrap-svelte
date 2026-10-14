@@ -26,7 +26,7 @@ test('recovery is run-and-attempt based, has no npm publication or OIDC, and use
     assert.match(yaml, /publish-run-attempt:/);
     assert.match(yaml, /build-run-attempt:/);
     assert.match(yaml, /environment: npm-publish/);
-    assert.match(yaml, /needs: verify/);
+    assert.match(yaml, /needs: \[verify, configuration\]/);
     assert.doesNotMatch(yaml, /(?:^|\n)\s+(?:id-token:|contents: write)|run:.*npm publish|secrets: inherit/m);
     assert.match(yaml, /repositories: bootstrap-svelte/);
     assert.match(yaml, /owner: WinkIntel/);
