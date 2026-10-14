@@ -1,3 +1,4 @@
+import { runInNewContext } from 'node:vm';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -90,4 +91,16 @@ describe('showcase resources and pre-paint theme', () => {
             expect(readFileSync(file, 'utf8')).not.toMatch(/https:\/\/(?:placehold\.co|www\.w3schools\.com\/tags\/img_submit)/);
         }
     });
+});
+
+test('pre-paint script leaves the global mode binding available to later scripts', () => {
+    const html = readFileSync(join(srcDirectory, 'app.html'), 'utf8');
+    const script = html.match(/<script id="color-mode">([\s\S]*?)<\/script>/)?.[1];
+    expect(() =>
+        runInNewContext(`${script}; let mode = 'independent';`, {
+            document: { documentElement: { dataset: {} } },
+            localStorage: { getItem: () => null },
+            matchMedia: () => ({ matches: false })
+        })
+    ).not.toThrow();
 });

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { SITE_URL } from './site-url.js';
     import hljs from 'highlight.js/lib/core';
     import bash from 'highlight.js/lib/languages/bash';
     import css from 'highlight.js/lib/languages/css';
@@ -25,7 +26,9 @@
         svelte: 'xml'
     };
 
-    let highlighted = $derived.by(() => hljs.highlight(code, { language: highlighterLanguages[language] }).value);
+    // Display/copy portable first-party asset URLs; live examples keep same-origin paths.
+    let portableCode = $derived(code.replace(/(["'`])\/images\/showcase\//g, `$1${SITE_URL}/images/showcase/`));
+    let highlighted = $derived.by(() => hljs.highlight(portableCode, { language: highlighterLanguages[language] }).value);
     let fenceLanguage = $derived(language === 'svelte' ? 'html' : language);
     let regionLabel = $derived(label === 'Code example' ? `Code example ${uid}` : label);
     let copyStatus: 'idle' | 'copied' | 'failed' = $state('idle');
@@ -36,10 +39,10 @@
 
         try {
             if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(code);
+                await navigator.clipboard.writeText(portableCode);
             } else {
                 const textarea = document.createElement('textarea');
-                textarea.value = code;
+                textarea.value = portableCode;
                 textarea.setAttribute('readonly', '');
                 textarea.style.position = 'fixed';
                 textarea.style.top = '-1000px';

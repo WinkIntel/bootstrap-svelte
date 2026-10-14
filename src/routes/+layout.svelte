@@ -203,6 +203,7 @@
         searchQuery = '';
     }
 
+    // Keep this key/mode behavior aligned with the pre-paint script in app.html.
     function isColorMode(value: string | null): value is ColorMode {
         return value === 'auto' || value === 'dark' || value === 'light';
     }
@@ -493,13 +494,13 @@
                 <details class="wk-mobile-toc">
                     <summary>On this page</summary>
                     <nav aria-label="Page sections compact">
-                        {#if pageHeadings.length === 0}<p>No sections on this page.</p>{/if}
                         <ul class="nav flex-column gap-1">
                             {#each pageHeadings as heading, headingIndex (`mobile-heading-${headingIndex}`)}
                                 <li class="nav-item">
                                     <a href={`#${heading.id}`} class="wk-toc-link" onclick={handleQuickLinkClick}>{heading.text}</a>
                                 </li>
                             {/each}
+                            {#if pageHeadings.length === 0}<li class="wk-toc-empty">Sections appear here.</li>{/if}
                         </ul>
                     </nav>
                 </details>
@@ -1105,7 +1106,7 @@
         color: var(--wk-heading-color);
         cursor: pointer;
         font-weight: 700;
-        height: 52px;
+        min-height: 52px;
         padding: 0.85rem 1rem;
     }
 

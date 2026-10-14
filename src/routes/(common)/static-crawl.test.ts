@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, test } from 'vitest';
@@ -228,4 +228,34 @@ test('checks resource origins while ignoring navigation and escaped examples', (
         'https://poster.example',
         'https://scripts.example'
     ]);
+});
+
+test('resource URLs report malformed input without aborting the crawl', async ({ task }) => {
+    const root = await createStaticBuild(task.id);
+    const path = join(root, 'index.html');
+    await writeFile(path, (await readFile(path, 'utf8')) + '<img src="http://"><img srcset="https://[bad 1x">');
+    const result = await crawlFixture(root);
+    expect(result.errors.filter((error) => error.includes('invalid resource URL'))).toHaveLength(2);
+    expect(result.pages).toHaveLength(2);
+});
+
+test.each(['shortcut icon', 'preload stylesheet', 'alternate stylesheet', 'apple-touch-icon', 'manifest', 'prefetch', 'STYLESHEET alternate'])(
+    'checks external link resources for rel=%s',
+    (rel) => {
+        expect(undisclosedResourceOrigins(`<link rel="${rel}" href="https://resource.example/file">`, 'https://site.example')).toEqual([
+            'https://resource.example'
+        ]);
+    }
+);
+
+test('resource attributes do not match data-prefixed names', () => {
+    expect(undisclosedResourceOrigins('<img data-src="/local.svg" src="https://tracker.example/p.gif">', 'https://site.example')).toEqual([
+        'https://tracker.example'
+    ]);
+    expect(
+        undisclosedResourceOrigins(
+            '<img data-src="https://unused.example/a.png" src="/a.png"><video data-poster="https://unused.example/p.png" poster="/p.png">',
+            'https://site.example'
+        )
+    ).toEqual([]);
 });

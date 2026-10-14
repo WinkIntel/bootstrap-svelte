@@ -72,7 +72,7 @@
         }
 
         if (hasImageOverlay) {
-            code += `\n  <Card.Img src="/images/showcase/300x180-000000-ffffff.svg" alt="Card with overlay" />`;
+            code += `\n  <Card.Img src="/images/showcase/300x180-000000-fff.svg" alt="Card with overlay" />`;
             code += `\n  <Card.ImgOverlay>`;
 
             if (includeTitleSubtitle) {
@@ -274,7 +274,7 @@
                             {/if}
 
                             {#if hasImageOverlay}
-                                <Card.Img src="/images/showcase/300x180-000000-ffffff.svg" alt="Card with overlay" />
+                                <Card.Img src="/images/showcase/300x180-000000-fff.svg" alt="Card with overlay" />
                                 <Card.ImgOverlay>
                                     {#if includeTitleSubtitle}
                                         <Card.Title level={titleHeadingLevel}>{titleText}</Card.Title>

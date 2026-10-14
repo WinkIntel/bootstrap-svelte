@@ -2,14 +2,17 @@
 <html lang="en">
     <head>
         <script id="color-mode">
-            let mode;
-            try {
-                mode = localStorage.getItem('wk-color-mode');
-            } catch {
-                /* Storage may be unavailable. */
+            // Keep key and mode resolution aligned with +layout.svelte; parity is tested there.
+            {
+                let mode;
+                try {
+                    mode = localStorage.getItem('wk-color-mode');
+                } catch {
+                    /* Storage may be unavailable. */
+                }
+                document.documentElement.dataset.bsTheme =
+                    mode === 'dark' || mode === 'light' ? mode : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             }
-            document.documentElement.dataset.bsTheme =
-                mode === 'dark' || mode === 'light' ? mode : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         </script>
         <meta charset="utf-8" />
         <meta name="google-site-verification" content="PkKWAJWa7qL8hqqtyfS-vKrsN28FDv59Uuc4s5snqv8" />
