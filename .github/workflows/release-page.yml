@@ -7,6 +7,9 @@ on:
             RELEASE_APP_PRIVATE_KEY:
                 required: true
         inputs:
+            configuration-check:
+                type: boolean
+                default: false
             publish-run-id:
                 required: true
                 type: string
@@ -38,12 +41,29 @@ permissions:
     actions: read
 
 concurrency:
-    group: github-release-page-bootstrap-svelte
+    group: ${{ inputs.configuration-check && 'release-config-page-bootstrap-svelte' || 'github-release-page-bootstrap-svelte' }}
     cancel-in-progress: false
 
 jobs:
+    configuration:
+        if: ${{ inputs.configuration-check }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 1
+        permissions: {}
+        steps:
+            - name: Reject unsupported diagnostic context before environment approval
+              shell: bash
+              run: |
+                  case "$GITHUB_REPOSITORY:$GITHUB_REF" in
+                      WinkIntel/bootstrap-svelte:refs/heads/main|WinkIntel/bootstrap-svelte:refs/heads/codex/maintenance-1.x) ;;
+                      *)
+                          echo '::error::Configuration check requires the expected repository and an approved release branch.'
+                          exit 1
+                          ;;
+                  esac
+
     verify:
-        if: ${{ github.repository == 'WinkIntel/bootstrap-svelte' }}
+        if: ${{ github.repository == 'WinkIntel/bootstrap-svelte' && !inputs.configuration-check }}
         runs-on: ubuntu-latest
         timeout-minutes: 15
         outputs:
@@ -70,7 +90,8 @@ jobs:
               run: node scripts/release-page-verify.mjs
 
     write:
-        needs: verify
+        needs: [verify, configuration]
+        if: ${{ !cancelled() && github.repository == 'WinkIntel/bootstrap-svelte' && ((inputs.configuration-check && needs.configuration.result == 'success') || (!inputs.configuration-check && needs.verify.result == 'success')) }}
         runs-on: ubuntu-latest
         timeout-minutes: 5
         environment: npm-publish
@@ -79,24 +100,33 @@ jobs:
         steps:
             - name: Check release-page App configuration
               env:
-                  RELEASE_APP_CLIENT_ID: ${{ vars.RELEASE_APP_CLIENT_ID }}
+                  CONFIGURATION_CHECK: ${{ inputs.configuration-check }}
+                  RELEASE_APP_CLIENT_ID_PRESENT: ${{ vars.RELEASE_APP_CLIENT_ID != '' }}
                   RELEASE_APP_KEY_PRESENT: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
               run: |
-                  if [ -z "$RELEASE_APP_CLIENT_ID" ] || [ "$RELEASE_APP_KEY_PRESENT" != true ]; then
-                      echo '::error::Release App configuration is missing. See RELEASE.md. Use release-page recovery; do not repeat npm publication.'
+                  if [ "$RELEASE_APP_CLIENT_ID_PRESENT" != true ] || [ "$RELEASE_APP_KEY_PRESENT" != true ]; then
+                      if [ "$CONFIGURATION_CHECK" = true ]; then
+                          echo '::error::Release App configuration is missing. See RELEASE.md.'
+                      else
+                          echo '::error::Release App configuration is missing. See RELEASE.md. Use release-page recovery; do not repeat npm publication.'
+                      fi
                       exit 1
                   fi
+                  echo 'Release App configuration is present.'
             - name: Checkout reviewed writer with no stored credentials
+              if: ${{ !inputs.configuration-check }}
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   ref: ${{ github.workflow_sha }}
                   persist-credentials: false
             - name: Setup Node.js
+              if: ${{ !inputs.configuration-check }}
               uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: 26
                   package-manager-cache: false
             - name: Mint short-lived repository-scoped release token
+              if: ${{ !inputs.configuration-check }}
               id: app
               uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
               with:
@@ -107,6 +137,7 @@ jobs:
                   permission-contents: write
                   permission-workflows: write
             - name: Create or verify the source-pinned GitHub release
+              if: ${{ !inputs.configuration-check }}
               env:
                   RELEASE_PAGE_TOKEN: ${{ steps.app.outputs.token }}
                   VERIFIED_RELEASE_REPORT: ${{ needs.verify.outputs.report }}
