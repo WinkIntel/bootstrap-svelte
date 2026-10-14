@@ -2,9 +2,14 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## Unreleased
+## 2.1.2 — 2026-10-14
 
 - Fixed presses inside responsive Offcanvas panels (`showOnBreakpoint`) incorrectly dismissing the overlay or firing `onHidePrevented` with a static backdrop. Inside buttons remain usable; outside dismissal and trigger ownership are preserved ([#43](https://github.com/WinkIntel/bootstrap-svelte/issues/43)).
+
+### Release tooling
+
+- Added verified GitHub release-page creation after successful npm publication, with source-pinned changelog notes, artifact/provenance verification, and recovery without republishing npm.
+- Added a separately approved, manual release App authentication diagnostic that checks identity, exact declared permissions, repository scope, and workflow read access without repository or npm writes.
 
 ## 2.1.1 — 2026-10-12
 
