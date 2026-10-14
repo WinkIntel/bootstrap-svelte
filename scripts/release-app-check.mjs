@@ -4,9 +4,11 @@ import { appendFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+// Keep diagnostic pins independent of the write-capable release helper dependency graph.
 const repository = 'WinkIntel/bootstrap-svelte';
 const clientId = 'Iv23liEMzHfBJoQL5i2e';
 const appId = 5307158;
+const repositoryId = 1263210535;
 const expectedInstallationId = '171145974';
 const fail = (message) => {
     throw new Error(message);
@@ -52,14 +54,19 @@ export async function checkApp({ context, installationId, appSlug, token }, fetc
     };
     const app = await get(`/apps/${appSlug}`);
     if (app?.id !== appId || app.client_id !== clientId) fail('Unexpected App identity');
-    if (app.permissions?.contents !== 'write' || app.permissions?.workflows !== 'write' || app.permissions?.metadata !== 'read')
-        fail('App does not declare the required release permissions');
+    if (
+        app.permissions?.contents !== 'write' ||
+        app.permissions?.workflows !== 'write' ||
+        app.permissions?.metadata !== 'read' ||
+        Object.keys(app.permissions).sort().join(',') !== 'contents,metadata,workflows'
+    )
+        fail('App must declare exactly Contents write, Workflows write and Metadata read');
     const scope = await get('/installation/repositories?per_page=100');
     if (
         scope?.total_count !== 1 ||
         !Array.isArray(scope.repositories) ||
         scope.repositories.length !== 1 ||
-        scope.repositories[0]?.id !== 1263210535 ||
+        scope.repositories[0]?.id !== repositoryId ||
         scope.repositories[0]?.full_name !== repository
     )
         fail('Installation token must access exactly the expected repository');

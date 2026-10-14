@@ -67,15 +67,21 @@ The job does not run on PRs, pushes, schedules or maintenance refs. It uses the
 existing protected environment without changing its reviewers or rules.
 
 The check pins App **5307158**, client ID `Iv23liEMzHfBJoQL5i2e`, installation
-**171145974** and repository `WinkIntel/bootstrap-svelte`. Replacing the App or
-installation requires a reviewed identity update. It uses the same pinned official
+**171145974** and repository `WinkIntel/bootstrap-svelte` (ID **1263210535**).
+Replacing the App or installation requires updating these diagnostic pins through
+review. These pins are enforced only by this diagnostic: Publish and the
+release-page writer check configuration presence, not this identity set, and do
+not require a successful diagnostic run before writing. This check is not a
+production authorization gate. It uses the same pinned official
 token action and environment configuration as the release-page writer. It requests
 only Contents write and Workflows write for this repository, with implicit Metadata
 read. GitHub [does not grant token permissions the App lacks](https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app),
 so successful token creation tests authentication and acceptance of those requested
 grants; successful GET requests alone would not prove write grants.
 
-The helper makes only three GET requests: App identity/declared permissions, the
+The helper requires the App to declare exactly Contents write, Workflows write
+and Metadata read; additional declared permissions fail the check.
+It makes only three GET requests: App identity/declared permissions, the
 installation token's accessible repositories (exactly this repository), and the
 Publish workflow file at the selected commit. It logs a fixed summary, never the
 private key, token, headers or raw API responses. No dependencies are installed and

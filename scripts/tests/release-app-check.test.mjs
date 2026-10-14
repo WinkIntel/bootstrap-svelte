@@ -52,8 +52,16 @@ test('preflight rejects wrong context, App identity or absent key without authen
         { GITHUB_SHA: 'main' },
         { RELEASE_APP_CLIENT_ID: 'other-app' }
     ])
-        assert.throws(() => checkContext({ ...context, ...patch }));
-    assert.throws(() => checkConfiguration({ ...context, RELEASE_APP_KEY_PRESENT: 'false' }));
+        assert.throws(() => checkContext({ ...context, ...patch }), {
+            name: 'Error',
+            message: patch.RELEASE_APP_CLIENT_ID
+                ? 'Expected release App client ID is not configured'
+                : 'Run this check through the reviewed main workflow in the expected repository'
+        });
+    assert.throws(() => checkConfiguration({ ...context, RELEASE_APP_KEY_PRESENT: 'false' }), {
+        name: 'Error',
+        message: 'Release App private-key secret is not configured'
+    });
 });
 test('checks only fixed GET endpoints and returns no credential or arbitrary response data', async () => {
     const { checkApp } = await import(source);
@@ -77,22 +85,56 @@ test('checks only fixed GET endpoints and returns no credential or arbitrary res
     assert.match(result, /5307158/);
     assert.doesNotMatch(result, /fake-secret/);
 });
-test('rejects wrong installation, insufficient grants, broader token scope and unexpected content', async () => {
+test('rejects invalid inputs at the intended guard before any API reads', async () => {
     const { checkApp } = await import(source);
-    for (const patch of [{ installationId: '171145975' }, { appSlug: '../repos/other' }, { token: '' }]) {
+    for (const [patch, message] of [
+        [{ installationId: '171145975' }, 'Unexpected release App installation'],
+        [{ appSlug: '../repos/other' }, 'Unexpected App slug'],
+        [{ token: '' }, 'App installation token is missing; no fallback is allowed']
+    ]) {
         const f = fixture();
-        await assert.rejects(checkApp({ ...input, ...patch }, f.fetcher));
+        await assert.rejects(checkApp({ ...input, ...patch }, f.fetcher), { name: 'Error', message });
         assert.equal(f.calls.length, 0);
     }
-    for (const patch of [
-        { 0: { id: 1, client_id: context.RELEASE_APP_CLIENT_ID } },
-        { 0: { id: 5307158, client_id: 'other' } },
-        { 0: { id: 5307158, client_id: context.RELEASE_APP_CLIENT_ID, permissions: { contents: 'read', workflows: 'write', metadata: 'read' } } },
-        { 1: { total_count: 2, repositories: [{ id: 1263210535, full_name: 'WinkIntel/bootstrap-svelte' }] } },
-        { 1: { total_count: 1, repositories: [{ id: 2, full_name: 'other/repo' }] } },
-        { 2: { type: 'dir', path: '.github/workflows/publish.yml' } }
-    ])
-        await assert.rejects(checkApp(input, fixture(patch).fetcher));
+});
+test('rejects incorrect API responses at the specific identity, permissions, scope or file guard', async () => {
+    const { checkApp } = await import(source);
+    const app = { id: 5307158, client_id: context.RELEASE_APP_CLIENT_ID };
+    const permissions = { contents: 'write', workflows: 'write', metadata: 'read' };
+    const repo = { id: 1263210535, full_name: 'WinkIntel/bootstrap-svelte' };
+    const file = { type: 'file', path: '.github/workflows/publish.yml', encoding: 'base64', content: 'bmFtZTogUHVibGlzaAo=' };
+    const cases = [
+        [0, { ...app, id: 1 }, 'Unexpected App identity'],
+        [0, { ...app, client_id: 'other' }, 'Unexpected App identity'],
+        ...[
+            undefined,
+            { ...permissions, contents: 'read' },
+            { ...permissions, workflows: 'read' },
+            { ...permissions, metadata: 'write' },
+            ...['administration', 'actions', 'secrets'].map((key) => ({ ...permissions, [key]: 'write' }))
+        ].map((grants) => [0, { ...app, permissions: grants }, 'App must declare exactly Contents write, Workflows write and Metadata read']),
+        ...[
+            { total_count: 2, repositories: [repo] },
+            { total_count: 1, repositories: null },
+            { total_count: 1, repositories: [] },
+            { total_count: 1, repositories: [repo, repo] },
+            { total_count: 1, repositories: [{ ...repo, id: 2 }] },
+            { total_count: 1, repositories: [{ ...repo, full_name: 'other/repo' }] }
+        ].map((scope) => [1, scope, 'Installation token must access exactly the expected repository']),
+        ...[
+            { type: 'dir' },
+            { path: '.github/workflows/other.yml' },
+            { encoding: 'utf8' },
+            { content: '' },
+            { content: '  ' },
+            { content: null }
+        ].map((patch) => [2, { ...file, ...patch }, 'Cannot verify access to the source-pinned Publish workflow'])
+    ];
+    for (const [stage, response, message] of cases) {
+        const f = fixture({ [stage]: response });
+        await assert.rejects(checkApp(input, f.fetcher), { name: 'Error', message });
+        assert.equal(f.calls.length, stage + 1, message);
+    }
 });
 test('API failures do not echo headers, token, response body or transport error details', async () => {
     const { checkApp } = await import(source);
