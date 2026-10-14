@@ -3,6 +3,9 @@ name: GitHub release page
 # Recovery verifies an existing live publication; it never invokes the Publish workflow.
 on:
     workflow_call:
+        secrets:
+            RELEASE_APP_PRIVATE_KEY:
+                required: true
         inputs:
             publish-run-id:
                 required: true

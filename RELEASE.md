@@ -238,6 +238,17 @@ Before enabling a live publication, approve and perform this exact setup:
 | Immutable tag ruleset        | Leave **24938132** unchanged, with no App bypass                                                                                                      |
 | Branch rules                 | No App bypass and no changes                                                                                                                          |
 
+The automatic Publish caller explicitly passes only `RELEASE_APP_PRIVATE_KEY` to
+this reusable workflow, which declares that secret required. GitHub permits a
+named mapping even when the key exists only in an environment; the callee's
+`npm-publish` job receives the environment value after approval. Omitting the
+mapping makes the secret empty in a reusable call. See
+[GitHub's environment-secret rules](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows#using-inputs-and-secrets-in-a-reusable-workflow).
+`required: true` validates the caller contract, not whether a value exists, so the
+writer retains its presence preflight. The key stays in the existing environment;
+no repository secret copy or broad `secrets: inherit` is needed. Standalone
+release-page recovery accesses the same protected environment directly.
+
 No Actions-write, Administration, organization-wide installation, PAT fallback or
 npm credential is requested. The pinned official `actions/create-github-app-token`
 action requests only Contents/Workflows write, only this repository, and retains
