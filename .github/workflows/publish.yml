@@ -12,6 +12,11 @@ on:
                 required: true
                 default: maintenance
                 options: [latest, maintenance, next]
+            configuration-check:
+                description: Check App configuration through the protected reusable workflow only
+                type: boolean
+                required: true
+                default: false
             dry-run:
                 description: Rehearse without publishing to npm
                 type: boolean
@@ -32,6 +37,7 @@ defaults:
 
 jobs:
     build:
+        if: ${{ !inputs.configuration-check }}
         name: Build release artifact
         runs-on: ubuntu-latest
         timeout-minutes: 20
@@ -91,7 +97,7 @@ jobs:
 
     rehearsal:
         name: Rehearse protected release
-        if: ${{ inputs.dry-run }}
+        if: ${{ !inputs.configuration-check && inputs.dry-run }}
         needs: build
         runs-on: ubuntu-latest
         timeout-minutes: 10
@@ -180,7 +186,7 @@ jobs:
         outputs:
             run-attempt: ${{ steps.publication.outputs.run-attempt }}
         name: Publish approved tarball
-        if: ${{ !inputs.dry-run }}
+        if: ${{ !inputs.configuration-check && !inputs.dry-run }}
         needs: build
         runs-on: ubuntu-latest
         timeout-minutes: 10
@@ -207,7 +213,7 @@ jobs:
 
     releasepage:
         needs: [build, publish]
-        if: ${{ !inputs.dry-run && needs.publish.result == 'success' }}
+        if: ${{ !cancelled() && ((inputs.configuration-check && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/maintenance-1.x')) || (!inputs.configuration-check && !inputs.dry-run && needs.publish.result == 'success')) }}
         permissions:
             contents: read
             actions: read
@@ -216,6 +222,7 @@ jobs:
         secrets:
             RELEASE_APP_PRIVATE_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
         with:
+            configuration-check: ${{ inputs.configuration-check }}
             publish-run-id: ${{ github.run_id }}
             publish-run-attempt: ${{ needs.publish.outputs.run-attempt }}
             build-run-attempt: ${{ needs.build.outputs.run-attempt }}

@@ -61,6 +61,29 @@ register early or publish solely to meet that deadline. Recheck the current
 at cutover. The repository uses GitHub-hosted runners, Node 26 and the pnpm version
 in `packageManager`; publishing checks for npm CLI 11.5.1 or newer.
 
+## Check the reusable release configuration
+
+After separate dispatch approval, select **Publish → Run workflow**, choose `main`
+or `codex/maintenance-1.x`, and enable **configuration-check**. Approve the
+`npm-publish` job when GitHub requests it. This default-off mode takes precedence
+over **dry-run**, even if dry-run is false; channel selection does not cause a
+publication in this mode.
+
+The check follows Publish's existing reusable release-page call and its named App
+key mapping. The same protected writer job runs only its configuration preflight,
+which receives presence booleans for the client ID and private key and prints a
+fixed success or failure message. It skips the build, artifact verification,
+rehearsal, npm publication, checkout/setup in the writer, token minting and every
+tag/release write. No token is created, so no token cleanup is needed.
+
+A pass establishes configuration availability through this caller/callee path.
+It does not establish key validity, App authentication, permissions, provenance,
+or write access. Ordinary dry runs skip the reusable call, and standalone
+recovery/App authentication checks enter directly; those cannot prove this path.
+With configuration-check left false, existing rehearsal, live publication and
+standalone recovery behavior is retained. Preparing or merging this mode does not
+authorize dispatch.
+
 ## Prepare the release
 
 1. Choose the release line, version, source commit and channel with the owner.
