@@ -212,6 +212,9 @@ jobs:
             contents: read
             actions: read
         uses: ./.github/workflows/release-page.yml
+        # Pass only the named key; the protected callee resolves its environment value.
+        secrets:
+            RELEASE_APP_PRIVATE_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
         with:
             publish-run-id: ${{ github.run_id }}
             publish-run-attempt: ${{ needs.publish.outputs.run-attempt }}
