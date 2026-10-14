@@ -42,6 +42,18 @@ describe('addAgentRoutes', () => {
     const beforeFilesystem = routes.slice(0, filesystemIndex(routes));
     const afterFilesystem = routes.slice(filesystemIndex(routes) + 1);
 
+    test('adds security headers before redirects without changing framing policy', () => {
+        expect(routes[0]).toEqual({
+            src: '^/.*$',
+            headers: {
+                'X-Content-Type-Options': 'nosniff',
+                'Referrer-Policy': 'strict-origin-when-cross-origin'
+            },
+            continue: true
+        });
+        expect(JSON.stringify(routes)).not.toMatch(/X-Frame-Options|frame-ancestors/);
+    });
+
     test('does not mutate the input config', () => {
         const input = baseConfig();
         addAgentRoutes(input, manifest);
@@ -53,7 +65,7 @@ describe('addAgentRoutes', () => {
     });
 
     test('redirects trailing-slash variants to the canonical path with a 301 before anything else', () => {
-        expect(routes[0]).toEqual({ src: expect.any(String), status: 301, headers: { Location: '/$1' } });
+        expect(routes[1]).toEqual({ src: expect.any(String), status: 301, headers: { Location: '/$1' } });
     });
 
     test.each([
@@ -62,14 +74,14 @@ describe('addAgentRoutes', () => {
         ['/components/button/', '/components/button'],
         ['/a//b///', '/a//b']
     ])('redirects %s to the same-origin canonical path %s', (path, expected) => {
-        const redirect = routes[0]!;
+        const redirect = routes[1]!;
         const match = new RegExp(redirect.src!).exec(path);
         expect(match).not.toBeNull();
         expect(redirect.headers!.Location!.replace('$1', match![1]!)).toBe(expected);
     });
 
     test.each(['/', '//', '///', '//example.test/path/', '/\\example.test/', '/about'])('does not redirect %s', (path) => {
-        expect(new RegExp(routes[0]!.src!).test(path)).toBe(false);
+        expect(new RegExp(routes[1]!.src!).test(path)).toBe(false);
     });
 
     test('keeps the adapter routes, in order, ahead of the filesystem handler', () => {

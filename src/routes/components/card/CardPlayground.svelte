@@ -63,7 +63,7 @@
 
         // Add image if enabled and position is top
         if (hasImage && imagePosition === 'top') {
-            code += `\n  <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />`;
+            code += `\n  <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />`;
         }
 
         // Add header if enabled
@@ -72,7 +72,7 @@
         }
 
         if (hasImageOverlay) {
-            code += `\n  <Card.Img src="https://placehold.co/300x180/000000/FFFFFF" alt="Card with overlay" />`;
+            code += `\n  <Card.Img src="/images/showcase/300x180-000000-fff.svg" alt="Card with overlay" />`;
             code += `\n  <Card.ImgOverlay>`;
 
             if (includeTitleSubtitle) {
@@ -112,7 +112,7 @@
 
         // Add image if enabled and position is bottom
         if (hasImage && imagePosition === 'bottom') {
-            code += `\n  <Card.Img position="bottom" src="https://placehold.co/300x180" alt="Card image cap" />`;
+            code += `\n  <Card.Img position="bottom" src="/images/showcase/300x180.svg" alt="Card image cap" />`;
         }
 
         // Add footer if enabled
@@ -266,7 +266,7 @@
                     <div class="p-4 border rounded bg-light">
                         <Card.Root class="w-{cardWidth}rem{cardBgColor ? ` text-bg-${cardBgColor}` : ''} {cardClass}">
                             {#if hasImage && imagePosition === 'top'}
-                                <Card.Img position="top" src="https://placehold.co/300x180" alt="Card image cap" />
+                                <Card.Img position="top" src="/images/showcase/300x180.svg" alt="Card image cap" />
                             {/if}
 
                             {#if hasHeader}
@@ -274,7 +274,7 @@
                             {/if}
 
                             {#if hasImageOverlay}
-                                <Card.Img src="https://placehold.co/300x180/000000/FFFFFF" alt="Card with overlay" />
+                                <Card.Img src="/images/showcase/300x180-000000-fff.svg" alt="Card with overlay" />
                                 <Card.ImgOverlay>
                                     {#if includeTitleSubtitle}
                                         <Card.Title level={titleHeadingLevel}>{titleText}</Card.Title>
@@ -301,7 +301,7 @@
                             {/if}
 
                             {#if hasImage && imagePosition === 'bottom'}
-                                <Card.Img position="bottom" src="https://placehold.co/300x180" alt="Card image cap" />
+                                <Card.Img position="bottom" src="/images/showcase/300x180.svg" alt="Card image cap" />
                             {/if}
 
                             {#if hasFooter}

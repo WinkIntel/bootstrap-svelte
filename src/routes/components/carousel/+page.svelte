@@ -42,13 +42,13 @@
     const basicExampleCode = `<Carousel.Root animation="none">
     <Carousel.Inner>
         <Carousel.Item isActive={true}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
         </Carousel.Item>
     </Carousel.Inner>
     <Carousel.ControlPrev />
@@ -58,13 +58,13 @@
     const withControlsCode = `<Carousel.Root animation="slide">
     <Carousel.Inner>
         <Carousel.Item isActive={true}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
         </Carousel.Item>
     </Carousel.Inner>
     <Carousel.ControlPrev />
@@ -79,13 +79,13 @@
     </Carousel.Indicators>
     <Carousel.Inner>
         <Carousel.Item isActive={true}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
         </Carousel.Item>
     </Carousel.Inner>
     <Carousel.ControlPrev />
@@ -100,21 +100,21 @@
     </Carousel.Indicators>
     <Carousel.Inner>
         <Carousel.Item isActive={true}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
             <Carousel.Caption>
                 <h5>First slide label</h5>
                 <p>Some representative placeholder content for the first slide.</p>
             </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
             <Carousel.Caption>
                 <h5>Second slide label</h5>
                 <p>Some representative placeholder content for the second slide.</p>
             </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
             <Carousel.Caption>
                 <h5>Third slide label</h5>
                 <p>Some representative placeholder content for the third slide.</p>
@@ -128,13 +128,13 @@
     const fadeTransitionCode = `<Carousel.Root animation="fade">
     <Carousel.Inner>
         <Carousel.Item isActive={true}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
         </Carousel.Item>
     </Carousel.Inner>
     <Carousel.ControlPrev />
@@ -144,13 +144,13 @@
     const crossfadeTransitionCode = `<Carousel.Root animation="crossfade">
     <Carousel.Inner>
         <Carousel.Item isActive={true}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
         </Carousel.Item>
     </Carousel.Inner>
     <Carousel.ControlPrev />
@@ -160,13 +160,13 @@
     const autoPlayCode = `<Carousel.Root ride="carousel" animation="slide" transitionDuration={1000}>
     <Carousel.Inner>
         <Carousel.Item isActive={true}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
         </Carousel.Item>
     </Carousel.Inner>
     <Carousel.ControlPrev />
@@ -176,13 +176,13 @@
     const autoPlayAfterInteractionCode = `<Carousel.Root ride={true} animation="slide" transitionDuration={1000}>
     <Carousel.Inner>
         <Carousel.Item isActive={true}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
         </Carousel.Item>
         <Carousel.Item>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
         </Carousel.Item>
     </Carousel.Inner>
     <Carousel.ControlPrev />
@@ -195,7 +195,7 @@
             isActive={true}
             interval={10000}
             onSlide={() => { carouselItemDelay = 10000; startCountdown(); }}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
             <Carousel.Caption>
                 <h5>First slide label</h5>
                 <p>This slide stays for 10 seconds.</p>
@@ -205,7 +205,7 @@
         <Carousel.Item
             interval={2000}
             onSlide={() => { carouselItemDelay = 2000; startCountdown(); }}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
             <Carousel.Caption>
                 <h5>Second slide label</h5>
                 <p>This slide stays for 2 seconds.</p>
@@ -213,7 +213,7 @@
             </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item onSlide={() => { carouselItemDelay = 5000; startCountdown(); }}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
             <Carousel.Caption>
                 <h5>Third slide label</h5>
                 <p>This slide uses the default interval of 5 seconds.</p>
@@ -234,21 +234,21 @@
         </Carousel.Indicators>
         <Carousel.Inner>
             <Carousel.Item isActive={true}>
-                <img src="https://placehold.co/800x400/f5f5f5/aaa?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                <img src="/images/showcase/800x400-f5f5f5-aaa-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                 <Carousel.Caption>
                     <h5>First slide label</h5>
                     <p>Some representative placeholder content for the first slide.</p>
                 </Carousel.Caption>
             </Carousel.Item>
             <Carousel.Item>
-                <img src="https://placehold.co/800x400/f5f5f5/aaa?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                <img src="/images/showcase/800x400-f5f5f5-aaa-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                 <Carousel.Caption>
                     <h5>Second slide label</h5>
                     <p>Some representative placeholder content for the second slide.</p>
                 </Carousel.Caption>
             </Carousel.Item>
             <Carousel.Item>
-                <img src="https://placehold.co/800x400/f5f5f5/aaa?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                <img src="/images/showcase/800x400-f5f5f5-aaa-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                 <Carousel.Caption>
                     <h5>Third slide label</h5>
                     <p>Some representative placeholder content for the third slide.</p>
@@ -277,13 +277,13 @@
                 <Carousel.Root animation="none">
                     <Carousel.Inner>
                         <Carousel.Item isActive={true}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                         </Carousel.Item>
                     </Carousel.Inner>
                     <Carousel.ControlPrev />
@@ -304,13 +304,13 @@
                 <Carousel.Root animation="slide">
                     <Carousel.Inner>
                         <Carousel.Item isActive={true}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                         </Carousel.Item>
                     </Carousel.Inner>
                     <Carousel.ControlPrev />
@@ -336,13 +336,13 @@
                     </Carousel.Indicators>
                     <Carousel.Inner>
                         <Carousel.Item isActive={true}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                         </Carousel.Item>
                     </Carousel.Inner>
                     <Carousel.ControlPrev />
@@ -368,21 +368,21 @@
                     </Carousel.Indicators>
                     <Carousel.Inner>
                         <Carousel.Item isActive={true}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                             <Carousel.Caption>
                                 <h5>First slide label</h5>
                                 <p>Some representative placeholder content for the first slide.</p>
                             </Carousel.Caption>
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                             <Carousel.Caption>
                                 <h5>Second slide label</h5>
                                 <p>Some representative placeholder content for the second slide.</p>
                             </Carousel.Caption>
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                             <Carousel.Caption>
                                 <h5>Third slide label</h5>
                                 <p>Some representative placeholder content for the third slide.</p>
@@ -410,13 +410,13 @@
                 <Carousel.Root animation="fade">
                     <Carousel.Inner>
                         <Carousel.Item isActive={true}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                         </Carousel.Item>
                     </Carousel.Inner>
                     <Carousel.ControlPrev />
@@ -437,13 +437,13 @@
                 <Carousel.Root animation="crossfade">
                     <Carousel.Inner>
                         <Carousel.Item isActive={true}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                         </Carousel.Item>
                     </Carousel.Inner>
                     <Carousel.ControlPrev />
@@ -467,13 +467,13 @@
                 <Carousel.Root ride="carousel" animation="slide" transitionDuration={1000}>
                     <Carousel.Inner>
                         <Carousel.Item isActive={true}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                         </Carousel.Item>
                     </Carousel.Inner>
                     <Carousel.ControlPrev />
@@ -491,13 +491,13 @@
                 <Carousel.Root ride={true} animation="slide" transitionDuration={1000}>
                     <Carousel.Inner>
                         <Carousel.Item isActive={true}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                         </Carousel.Item>
                     </Carousel.Inner>
                     <Carousel.ControlPrev />
@@ -524,7 +524,7 @@
                                 carouselItemDelay = 10000;
                                 startCountdown();
                             }}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                             <Carousel.Caption>
                                 <h5>First slide label</h5>
                                 <p>This slide stays for 10 seconds.</p>
@@ -537,7 +537,7 @@
                                 carouselItemDelay = 2000;
                                 startCountdown();
                             }}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                             <Carousel.Caption>
                                 <h5>Second slide label</h5>
                                 <p>This slide stays for 2 seconds.</p>
@@ -549,7 +549,7 @@
                                 carouselItemDelay = 5000;
                                 startCountdown();
                             }}>
-                            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                             <Carousel.Caption>
                                 <h5>Third slide label</h5>
                                 <p>This slide uses the default interval of 5 seconds.</p>
@@ -583,21 +583,21 @@
                     </Carousel.Indicators>
                     <Carousel.Inner>
                         <Carousel.Item isActive={true}>
-                            <img src="https://placehold.co/800x400/f5f5f5/aaa?text=Slide+1" class="d-block w-100" alt="Slide 1" />
+                            <img src="/images/showcase/800x400-f5f5f5-aaa-slide-1.svg" class="d-block w-100" alt="Slide 1" />
                             <Carousel.Caption>
                                 <h5>First slide label</h5>
                                 <p>Some representative placeholder content for the first slide.</p>
                             </Carousel.Caption>
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/f5f5f5/aaa?text=Slide+2" class="d-block w-100" alt="Slide 2" />
+                            <img src="/images/showcase/800x400-f5f5f5-aaa-slide-2.svg" class="d-block w-100" alt="Slide 2" />
                             <Carousel.Caption>
                                 <h5>Second slide label</h5>
                                 <p>Some representative placeholder content for the second slide.</p>
                             </Carousel.Caption>
                         </Carousel.Item>
                         <Carousel.Item>
-                            <img src="https://placehold.co/800x400/f5f5f5/aaa?text=Slide+3" class="d-block w-100" alt="Slide 3" />
+                            <img src="/images/showcase/800x400-f5f5f5-aaa-slide-3.svg" class="d-block w-100" alt="Slide 3" />
                             <Carousel.Caption>
                                 <h5>Third slide label</h5>
                                 <p>Some representative placeholder content for the third slide.</p>

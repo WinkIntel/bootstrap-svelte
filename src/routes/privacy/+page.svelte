@@ -7,7 +7,7 @@
         <h1>Privacy</h1>
         <p class="lead">
             This notice describes what the Bootstrap Svelte documentation site at <code>{site.url.replace('https://', '')}</code> does, and does not, collect
-            about its visitors. Last updated 2026-08-21.
+            about its visitors. Last updated 2026-10-14.
         </p>
         <hr />
     </div>
@@ -36,18 +36,19 @@
             IP address, user agent, the requested URL, and timestamps, under the
             <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noreferrer"
                 >Vercel privacy policy<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a
-            >. {site.organization.name}
-            does not receive that data in a form that identifies individual visitors.
+            >. Hosting logs and access to them are governed by the hosting configuration and provider policies.
         </p>
     </section>
 
     <section class="mb-5" id="third-party-resources">
         <h2 class="wk-quick-link">Third-party resources</h2>
         <p>
-            Pages load Bootstrap CSS and Bootstrap Icons from the jsDelivr CDN and the Inter and JetBrains Mono typefaces from Google Fonts. Your
-            browser requests those files directly, so jsDelivr and Google receive your IP address and user agent for those requests, as described in
-            the <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank" rel="noreferrer"
-                >jsDelivr privacy policy<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
+            Showcase placeholder and submit-button images are served by this site. Pages load Bootstrap CSS and Bootstrap Icons from the jsDelivr CDN
+            and the Inter and JetBrains Mono typefaces from Google Fonts. Your browser requests those files directly, so jsDelivr and Google receive
+            your IP address and user agent for those requests, as described in the <a
+                href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net"
+                target="_blank"
+                rel="noreferrer">jsDelivr privacy policy<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
             and the
             <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer"
                 >Google privacy policy<i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a

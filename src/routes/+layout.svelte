@@ -1,4 +1,5 @@
 <script lang="ts">
+    import './(common)/highlight.css';
     import { page } from '$app/state';
     import { Button, Dropdown } from '$lib/index.js';
     import { onMount, tick, type Snippet } from 'svelte';
@@ -82,8 +83,12 @@
 
     onMount(() => {
         updateSidebarViewport();
-        const savedColorMode = localStorage.getItem('wk-color-mode');
-        if (isColorMode(savedColorMode)) colorMode = savedColorMode;
+        try {
+            const savedColorMode = localStorage.getItem('wk-color-mode');
+            if (isColorMode(savedColorMode)) colorMode = savedColorMode;
+        } catch {
+            /* Keep the system preference when storage is unavailable. */
+        }
 
         colorModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         colorModeMediaQuery.addEventListener('change', handleSystemColorModeChange);
@@ -198,6 +203,7 @@
         searchQuery = '';
     }
 
+    // Keep this key/mode behavior aligned with the pre-paint script in app.html.
     function isColorMode(value: string | null): value is ColorMode {
         return value === 'auto' || value === 'dark' || value === 'light';
     }
@@ -217,7 +223,11 @@
 
     function setColorMode(mode: ColorMode): void {
         colorMode = mode;
-        localStorage.setItem('wk-color-mode', mode);
+        try {
+            localStorage.setItem('wk-color-mode', mode);
+        } catch {
+            /* The selected mode still applies for this visit. */
+        }
         applyColorMode(mode);
     }
 
@@ -481,20 +491,19 @@
 
         <div class="wk-docs-grid">
             <main id="main-content" class="wk-content" tabindex="-1">
-                {#if pageHeadings.length > 0}
-                    <details class="wk-mobile-toc">
-                        <summary>On this page</summary>
-                        <nav aria-label="Page sections compact">
-                            <ul class="nav flex-column gap-1">
-                                {#each pageHeadings as heading, headingIndex (`mobile-heading-${headingIndex}`)}
-                                    <li class="nav-item">
-                                        <a href={`#${heading.id}`} class="wk-toc-link" onclick={handleQuickLinkClick}>{heading.text}</a>
-                                    </li>
-                                {/each}
-                            </ul>
-                        </nav>
-                    </details>
-                {/if}
+                <details class="wk-mobile-toc">
+                    <summary>On this page</summary>
+                    <nav aria-label="Page sections compact">
+                        <ul class="nav flex-column gap-1">
+                            {#each pageHeadings as heading, headingIndex (`mobile-heading-${headingIndex}`)}
+                                <li class="nav-item">
+                                    <a href={`#${heading.id}`} class="wk-toc-link" onclick={handleQuickLinkClick}>{heading.text}</a>
+                                </li>
+                            {/each}
+                            {#if pageHeadings.length === 0}<li class="wk-toc-empty">Sections appear here.</li>{/if}
+                        </ul>
+                    </nav>
+                </details>
                 {@render children()}
 
                 <footer class="wk-docs-footer">
@@ -1097,7 +1106,7 @@
         color: var(--wk-heading-color);
         cursor: pointer;
         font-weight: 700;
-        min-height: 44px;
+        min-height: 52px;
         padding: 0.85rem 1rem;
     }
 

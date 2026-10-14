@@ -110,6 +110,7 @@ export function addAgentRoutes(config, manifest) {
     return {
         ...config,
         routes: [
+            { src: '^/.*$', headers: { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin' }, continue: true },
             // End the capture before the slash run without retrying every partition of that run.
             // Only canonical single-leading-slash paths redirect; never emit a scheme-relative target.
             { src: '^/([^/\\\\](?:.*[^/])?)/+$', status: 301, headers: { Location: '/$1' } },

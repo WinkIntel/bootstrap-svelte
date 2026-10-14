@@ -47,7 +47,7 @@
     }
     <Carousel.Inner>
         <Carousel.Item isActive={true}${trackEvents ? ` onSlide={() => console.log('Slide 1 changing')} onSlid={() => console.log('Slide 1 changed')}` : ''}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+1" class="d-block w-100" alt="Slide 1">${
+            <img src="/images/showcase/800x400-777-555-slide-1.svg" class="d-block w-100" alt="Slide 1">${
                 showCaptions
                     ? `
             <Carousel.Caption>
@@ -58,7 +58,7 @@
             }
         </Carousel.Item>
         <Carousel.Item${trackEvents ? ` onSlide={() => console.log('Slide 2 changing')} onSlid={() => console.log('Slide 2 changed')}` : ''}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+2" class="d-block w-100" alt="Slide 2">${
+            <img src="/images/showcase/800x400-777-555-slide-2.svg" class="d-block w-100" alt="Slide 2">${
                 showCaptions
                     ? `
             <Carousel.Caption>
@@ -69,7 +69,7 @@
             }
         </Carousel.Item>
         <Carousel.Item${trackEvents ? ` onSlide={() => console.log('Slide 3 changing')} onSlid={() => console.log('Slide 3 changed')}` : ''}>
-            <img src="https://placehold.co/800x400/777/555?text=Slide+3" class="d-block w-100" alt="Slide 3">${
+            <img src="/images/showcase/800x400-777-555-slide-3.svg" class="d-block w-100" alt="Slide 3">${
                 showCaptions
                     ? `
             <Carousel.Caption>
@@ -120,7 +120,7 @@
                                     onSlide={() => logEvent('Slide 1 is going to slide')}
                                     onSlid={() => logEvent('Slide 1 has slid')}>
                                     <img
-                                        src="https://placehold.co/800x400/777/555?text=Slide+1"
+                                        src="/images/showcase/800x400-777-555-slide-1.svg"
                                         class="d-block w-100"
                                         alt="Slide 1"
                                         fetchpriority="high" />
@@ -133,7 +133,7 @@
                                 </Carousel.Item>
                                 <Carousel.Item onSlide={() => logEvent('Slide 2 is going to slide')} onSlid={() => logEvent('Slide 2 has slid')}>
                                     <img
-                                        src="https://placehold.co/800x400/777/555?text=Slide+2"
+                                        src="/images/showcase/800x400-777-555-slide-2.svg"
                                         class="d-block w-100"
                                         alt="Slide 2"
                                         fetchpriority="high" />
@@ -146,7 +146,7 @@
                                 </Carousel.Item>
                                 <Carousel.Item onSlide={() => logEvent('Slide 3 is going to slide')} onSlid={() => logEvent('Slide 3 has slid')}>
                                     <img
-                                        src="https://placehold.co/800x400/777/555?text=Slide+3"
+                                        src="/images/showcase/800x400-777-555-slide-3.svg"
                                         class="d-block w-100"
                                         alt="Slide 3"
                                         fetchpriority="high" />

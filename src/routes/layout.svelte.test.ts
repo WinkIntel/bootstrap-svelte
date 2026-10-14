@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 /// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom/vitest';
 import { render } from '@testing-library/svelte';
@@ -104,3 +105,42 @@ describe('+layout.svelte chrome', () => {
         expect(footer).toHaveTextContent('Wink, Inc.');
     });
 });
+
+test('reserves a collapsed mobile TOC even before headings exist', () => {
+    const { container } = renderLayout('/components/button');
+    const shell = container.querySelector('.wk-mobile-toc');
+    expect(shell).toBeInTheDocument();
+    expect(shell).not.toHaveAttribute('open');
+    expect(shell?.querySelector('summary')).toHaveTextContent('On this page');
+    expect(shell).toHaveTextContent('Sections appear here.');
+    expect(shell).not.toHaveTextContent('No sections on this page.');
+});
+
+test.each([false, true].flatMap((dark) => ['light', 'dark', 'auto', 'invalid', null].map((stored) => ({ dark, stored }))))(
+    'pre-paint and hydrated themes agree for $stored with dark=$dark',
+    ({ stored, dark }) => {
+        const script = readFileSync('src/app.html', 'utf8').match(/<script id="color-mode">([\s\S]*?)<\/script>/)![1]!;
+        const media = vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+            matches: dark && query.includes('prefers-color-scheme'),
+            media: query,
+            onchange: null,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+            addListener: vi.fn(),
+            removeListener: vi.fn(),
+            dispatchEvent: vi.fn()
+        }));
+        try {
+            localStorage.clear();
+            if (stored !== null) localStorage.setItem('wk-color-mode', stored);
+            new Function('document', 'localStorage', 'matchMedia', script)(document, localStorage, window.matchMedia);
+            const before = document.documentElement.dataset.bsTheme;
+            renderLayout('/components/button');
+            expect(document.documentElement.dataset.bsTheme).toBe(before);
+            expect(before).toBe(stored === 'light' || stored === 'dark' ? stored : dark ? 'dark' : 'light');
+        } finally {
+            media.mockRestore();
+            localStorage.clear();
+        }
+    }
+);

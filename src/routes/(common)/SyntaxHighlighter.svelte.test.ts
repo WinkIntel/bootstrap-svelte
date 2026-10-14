@@ -53,3 +53,19 @@ describe('SyntaxHighlighter', () => {
         expect(screen.getByText('Code copied to clipboard.')).toBeInTheDocument();
     });
 });
+
+test('displayed and copied local-image snippets use portable first-party URLs', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    const { container } = render(SyntaxHighlighter, { props: { code: '<img src="/images/showcase/300x180.svg">' } });
+    const expected = '<img src="https://bootstrap-svelte.vercel.app/images/showcase/300x180.svg">';
+    expect(container.querySelector('code')).toHaveTextContent(expected);
+    await fireEvent.click(screen.getByRole('button', { name: 'Copy code example' }));
+    expect(writeText).toHaveBeenCalledWith(expected);
+});
+
+test('keeps already absolute image URLs unchanged', () => {
+    const code = '<img src="https://bootstrap-svelte.vercel.app/images/showcase/300x180.svg">';
+    const { container } = render(SyntaxHighlighter, { props: { code } });
+    expect(container.querySelector('code')).toHaveTextContent(code);
+});

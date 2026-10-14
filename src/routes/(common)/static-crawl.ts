@@ -81,7 +81,7 @@ function displayValue(value: unknown): string {
 
 function attributeValue(attributes: string, name: string): string | undefined {
     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const match = new RegExp(`\\b${escapedName}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i').exec(attributes);
+    const match = new RegExp(`(?:^|\\s)${escapedName}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i').exec(attributes);
     return match?.[1] ?? match?.[2] ?? match?.[3];
 }
 
@@ -100,6 +100,46 @@ function elementAttributeValue(
         if (matchesRequiredAttributes) return attributeValue(attributes, valueAttribute)?.trim();
     }
     return undefined;
+}
+
+// Resource loads, not outbound navigation links or escaped documentation examples.
+const resourceLinkRelations = new Set([
+    'stylesheet',
+    'preload',
+    'modulepreload',
+    'preconnect',
+    'dns-prefetch',
+    'icon',
+    'apple-touch-icon',
+    'manifest',
+    'prefetch'
+]);
+const disclosedResourceOrigins = new Set(['https://cdn.jsdelivr.net', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com']);
+
+export function undisclosedResourceOrigins(html: string, siteUrl: string, invalidUrls: string[] = []): string[] {
+    const origins = new Set<string>();
+    for (const match of html.matchAll(/<(img|script|link|iframe|source|video|audio|input)\b([^>]*)>/gi)) {
+        const tag = match[1]!.toLowerCase();
+        const attributes = match[2]!;
+        const relTokens = (attributeValue(attributes, 'rel') ?? '').toLowerCase().split(/\s+/);
+        if (tag === 'link' && !relTokens.some((rel) => resourceLinkRelations.has(rel))) continue;
+        const urls = [attributeValue(attributes, tag === 'link' ? 'href' : 'src'), attributeValue(attributes, 'poster')];
+        const srcset = attributeValue(attributes, 'srcset');
+        if (srcset) urls.push(...srcset.split(',').map((candidate) => candidate.trim().split(/\s+/)[0]));
+        for (const value of urls) {
+            if (!value) continue;
+            let url: URL;
+            try {
+                url = new URL(value, siteUrl);
+            } catch {
+                invalidUrls.push(value);
+                continue;
+            }
+            if (url.protocol !== 'http:' && url.protocol !== 'https:') continue;
+            if (url.origin !== new URL(siteUrl).origin && !disclosedResourceOrigins.has(url.origin)) origins.add(url.origin);
+        }
+    }
+    return [...origins].sort();
 }
 
 function isVisiblyHidden(attributes: string): boolean {
@@ -243,6 +283,10 @@ export async function crawlStaticBuild(options: StaticCrawlOptions): Promise<Sta
             return '';
         });
         if (!html) continue;
+        const invalidResourceUrls: string[] = [];
+        for (const origin of undisclosedResourceOrigins(html, options.siteUrl, invalidResourceUrls))
+            errors.push(`${href} loads an undisclosed resource origin: ${origin}`);
+        for (const value of invalidResourceUrls) errors.push(`${href} has an invalid resource URL: ${value}`);
 
         const title = matchContent(html, /<title>([\s\S]*?)<\/title>/i) ?? '';
         const description = elementAttributeValue(html, 'meta', { name: 'description' }, 'content') ?? '';
