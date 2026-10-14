@@ -19,8 +19,8 @@ test('only the live protected job can request OIDC', () => {
         assert.match(job(name), /needs: build/);
         assert.doesNotMatch(job(name), /actions\/checkout|pnpm\/action-setup|pnpm (install|build|test)|run:.*scripts\//);
     }
-    assert.match(job('rehearsal'), /if: \$\{\{ inputs.dry-run \}\}/);
-    assert.match(job('publish'), /if: \$\{\{ !inputs.dry-run \}\}/);
+    assert.match(job('rehearsal'), /if: \$\{\{ !inputs.configuration-check && inputs.dry-run \}\}/);
+    assert.match(job('publish'), /if: \$\{\{ !inputs.configuration-check && !inputs.dry-run \}\}/);
 });
 test('both protected modes use the same verification and same-run artifact download', () => {
     for (const anchor of ['release-node', 'release-download', 'release-execute']) {

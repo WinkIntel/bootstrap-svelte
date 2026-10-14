@@ -4,7 +4,8 @@ import { test } from 'node:test';
 const read = (path) => readFileSync(new URL('../../' + path, import.meta.url), 'utf8');
 test('live-only caller preserves npm privilege boundary and checks configuration before publishing', () => {
     const yaml = read('.github/workflows/publish.yml');
-    assert.match(yaml, /releasepage:\n +needs: \[build, publish\]\n +if: \$\{\{ !inputs.dry-run && needs.publish.result == 'success' \}\}/);
+    assert.match(yaml, /releasepage:\n +needs: \[build, publish\]/);
+    assert.match(yaml, /!inputs.configuration-check && !inputs.dry-run && needs.publish.result == 'success'/);
     assert.match(yaml, /uses: \.\/\.github\/workflows\/release-page.yml/);
     assert.match(yaml, /build-run-attempt: \$\{\{ needs.build.outputs.run-attempt \}\}/);
     assert.match(yaml, /publish-run-attempt: \$\{\{ needs.publish.outputs.run-attempt \}\}/);
