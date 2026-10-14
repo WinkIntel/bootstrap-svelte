@@ -49,3 +49,29 @@ test('privileged writer has no process execution or publication fallback', () =>
     assert.match(verifier, /'--omit=peer'/);
     assert.doesNotMatch(verifier, /'publish'\s*[,\]]/);
 });
+
+test('automatic release-page call forwards only the required environment App key by name', () => {
+    const caller = read('.github/workflows/publish.yml').split('\n    releasepage:')[1];
+    assert.ok(caller, 'Expected the automatic release-page caller');
+    const mapping = caller.match(/\n        secrets:\n((?: {12}[^\n]+\n?)+)/)?.[1];
+    assert.equal(mapping?.trim(), 'RELEASE_APP_PRIVATE_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}');
+    assert.doesNotMatch(caller, /secrets: inherit|environment:/);
+    const callee = read('.github/workflows/release-page.yml');
+    const contract = callee.split('    workflow_call:')[1]?.split('    workflow_dispatch:')[0];
+    assert.ok(contract, 'Expected reusable workflow contract');
+    assert.match(contract, /\n        secrets:\n            RELEASE_APP_PRIVATE_KEY:\n                required: true(?:\n|$)/);
+});
+test('environment App key stays behind the writer approval and is never passed through inputs or outputs', () => {
+    const yaml = read('.github/workflows/release-page.yml');
+    const verifier = yaml.split('\n    verify:')[1]?.split('\n    write:')[0];
+    const writer = yaml.split('\n    write:')[1];
+    assert.ok(verifier && writer);
+    assert.doesNotMatch(verifier, /RELEASE_APP_PRIVATE_KEY|environment: npm-publish/);
+    assert.match(writer, /environment: npm-publish/);
+    assert.match(writer, /RELEASE_APP_KEY_PRESENT: \$\{\{ secrets.RELEASE_APP_PRIVATE_KEY != '' \}\}/);
+    assert.match(writer, /private-key: \$\{\{ secrets.RELEASE_APP_PRIVATE_KEY \}\}/);
+    assert.ok(writer.indexOf('Check release-page App configuration') < writer.indexOf('Mint short-lived repository-scoped release token'));
+    for (const source of [yaml, read('.github/workflows/publish.yml')]) {
+        assert.doesNotMatch(source, /inputs\.RELEASE_APP_PRIVATE_KEY|outputs\.RELEASE_APP_PRIVATE_KEY|secrets: inherit/);
+    }
+});
