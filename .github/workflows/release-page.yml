@@ -41,10 +41,27 @@ permissions:
     actions: read
 
 concurrency:
-    group: github-release-page-bootstrap-svelte
+    group: ${{ inputs.configuration-check && 'release-config-page-bootstrap-svelte' || 'github-release-page-bootstrap-svelte' }}
     cancel-in-progress: false
 
 jobs:
+    configuration:
+        if: ${{ inputs.configuration-check }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 1
+        permissions: {}
+        steps:
+            - name: Reject unsupported diagnostic context before environment approval
+              shell: bash
+              run: |
+                  case "$GITHUB_REPOSITORY:$GITHUB_REF" in
+                      WinkIntel/bootstrap-svelte:refs/heads/main|WinkIntel/bootstrap-svelte:refs/heads/codex/maintenance-1.x) ;;
+                      *)
+                          echo '::error::Configuration check requires the expected repository and an approved release branch.'
+                          exit 1
+                          ;;
+                  esac
+
     verify:
         if: ${{ github.repository == 'WinkIntel/bootstrap-svelte' && !inputs.configuration-check }}
         runs-on: ubuntu-latest
@@ -73,8 +90,8 @@ jobs:
               run: node scripts/release-page-verify.mjs
 
     write:
-        needs: verify
-        if: ${{ !cancelled() && github.repository == 'WinkIntel/bootstrap-svelte' && ((inputs.configuration-check && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/maintenance-1.x')) || (!inputs.configuration-check && needs.verify.result == 'success')) }}
+        needs: [verify, configuration]
+        if: ${{ !cancelled() && github.repository == 'WinkIntel/bootstrap-svelte' && ((inputs.configuration-check && needs.configuration.result == 'success') || (!inputs.configuration-check && needs.verify.result == 'success')) }}
         runs-on: ubuntu-latest
         timeout-minutes: 5
         environment: npm-publish
@@ -83,11 +100,16 @@ jobs:
         steps:
             - name: Check release-page App configuration
               env:
+                  CONFIGURATION_CHECK: ${{ inputs.configuration-check }}
                   RELEASE_APP_CLIENT_ID_PRESENT: ${{ vars.RELEASE_APP_CLIENT_ID != '' }}
                   RELEASE_APP_KEY_PRESENT: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
               run: |
                   if [ "$RELEASE_APP_CLIENT_ID_PRESENT" != true ] || [ "$RELEASE_APP_KEY_PRESENT" != true ]; then
-                      echo '::error::Release App configuration is missing. See RELEASE.md. Do not repeat npm publication.'
+                      if [ "$CONFIGURATION_CHECK" = true ]; then
+                          echo '::error::Release App configuration is missing. See RELEASE.md.'
+                      else
+                          echo '::error::Release App configuration is missing. See RELEASE.md. Use release-page recovery; do not repeat npm publication.'
+                      fi
                       exit 1
                   fi
                   echo 'Release App configuration is present.'
