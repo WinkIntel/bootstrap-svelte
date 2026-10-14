@@ -342,7 +342,7 @@
                         <td>Horizontal alignment of the pagination component.</td>
                     </tr>
                     <tr>
-                        <td><code>ariaLabel</code></td>
+                        <td><code>aria-label</code></td>
                         <td><code>string</code></td>
                         <td><code>'pagination'</code></td>
                         <td>ARIA label for the pagination navigation.</td>
@@ -434,7 +434,7 @@
                 </thead>
                 <tbody class="table-group-divider">
                     <tr>
-                        <td><code>ariaLabel</code></td>
+                        <td><code>aria-label</code></td>
                         <td><code>string</code></td>
                         <td><code>undefined</code></td>
                         <td>ARIA label for the link.</td>

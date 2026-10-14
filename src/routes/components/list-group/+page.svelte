@@ -606,12 +606,6 @@
                             <td>Indicates the current active selection</td>
                         </tr>
                         <tr>
-                            <td><code>isDisabled</code></td>
-                            <td><code>boolean</code></td>
-                            <td><code>false</code></td>
-                            <td>Makes the item appear disabled</td>
-                        </tr>
-                        <tr>
                             <td><code>colorVariant</code></td>
                             <td><code>'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | undefined</code></td>
                             <td>-</td>

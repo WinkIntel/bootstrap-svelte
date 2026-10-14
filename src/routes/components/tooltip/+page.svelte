@@ -387,26 +387,7 @@
                 <h3 class="h5 mb-0">Tooltip.Inner Props</h3>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm table-striped mb-0">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Default</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-group-divider">
-                            <tr>
-                                <td>All <code>div</code> element props</td>
-                                <td>Various</td>
-                                <td>-</td>
-                                <td>The Inner component accepts all standard HTML div element attributes</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <p class="mb-0">The Inner component accepts all standard HTML <code>div</code> element attributes.</p>
             </div>
         </div>
 

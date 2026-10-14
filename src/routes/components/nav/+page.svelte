@@ -377,8 +377,8 @@
     <section class="mb-5" id="different-elements">
         <h2 class="wk-quick-link">Different Element Types</h2>
         <p>
-            The Nav component can be rendered as different HTML elements using the <code>as</code> prop. The default is <code>"ul"</code>, but you can
-            also use <code>"ol"</code> or <code>"nav"</code>.
+            The Nav component can be rendered as different HTML elements using the <code>elementType</code> prop. The default is <code>"ul"</code>,
+            but you can also use <code>"ol"</code> or <code>"nav"</code>.
         </p>
 
         <div class="card">
@@ -508,7 +508,7 @@
                         <td>ARIA orientation attribute. Automatically set to 'vertical' when verticalBreakpoint is defined.</td>
                     </tr>
                     <tr>
-                        <td><code>as</code></td>
+                        <td><code>elementType</code></td>
                         <td><code>'nav' | 'ol' | 'ul'</code></td>
                         <td><code>'ul'</code></td>
                         <td>Element type to render</td>
