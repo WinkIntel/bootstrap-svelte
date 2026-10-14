@@ -12,6 +12,11 @@ on:
                 required: true
                 default: maintenance
                 options: [latest, maintenance, next]
+            configuration-check:
+                description: Check App configuration through the protected reusable workflow only
+                type: boolean
+                required: true
+                default: false
             dry-run:
                 description: Rehearse without publishing to npm
                 type: boolean
@@ -23,7 +28,7 @@ permissions:
 
 # Serialize all release lines for this package, including channel updates.
 concurrency:
-    group: npm-publish-bootstrap-svelte
+    group: ${{ inputs.configuration-check && 'release-config-publish-bootstrap-svelte' || 'npm-publish-bootstrap-svelte' }}
     cancel-in-progress: false
 
 defaults:
@@ -32,6 +37,7 @@ defaults:
 
 jobs:
     build:
+        if: ${{ !inputs.configuration-check }}
         name: Build release artifact
         runs-on: ubuntu-latest
         timeout-minutes: 20
@@ -91,7 +97,7 @@ jobs:
 
     rehearsal:
         name: Rehearse protected release
-        if: ${{ inputs.dry-run }}
+        if: ${{ !inputs.configuration-check && inputs.dry-run }}
         needs: build
         runs-on: ubuntu-latest
         timeout-minutes: 10
@@ -180,7 +186,7 @@ jobs:
         outputs:
             run-attempt: ${{ steps.publication.outputs.run-attempt }}
         name: Publish approved tarball
-        if: ${{ !inputs.dry-run }}
+        if: ${{ !inputs.configuration-check && !inputs.dry-run }}
         needs: build
         runs-on: ubuntu-latest
         timeout-minutes: 10
@@ -191,10 +197,10 @@ jobs:
         steps:
             - name: Check release-page configuration before npm write
               env:
-                  RELEASE_APP_CLIENT_ID: ${{ vars.RELEASE_APP_CLIENT_ID }}
+                  RELEASE_APP_CLIENT_ID_PRESENT: ${{ vars.RELEASE_APP_CLIENT_ID != '' }}
                   RELEASE_APP_KEY_PRESENT: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
               run: |
-                  if [ -z "$RELEASE_APP_CLIENT_ID" ] || [ "$RELEASE_APP_KEY_PRESENT" != true ]; then
+                  if [ "$RELEASE_APP_CLIENT_ID_PRESENT" != true ] || [ "$RELEASE_APP_KEY_PRESENT" != true ]; then
                       echo '::error::Release App configuration is missing. Configure the separately approved integration before live publication; see RELEASE.md.'
                       exit 1
                   fi
@@ -207,7 +213,7 @@ jobs:
 
     releasepage:
         needs: [build, publish]
-        if: ${{ !inputs.dry-run && needs.publish.result == 'success' }}
+        if: ${{ !cancelled() && (inputs.configuration-check || (!inputs.configuration-check && !inputs.dry-run && needs.publish.result == 'success')) }}
         permissions:
             contents: read
             actions: read
@@ -216,6 +222,7 @@ jobs:
         secrets:
             RELEASE_APP_PRIVATE_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
         with:
+            configuration-check: ${{ inputs.configuration-check }}
             publish-run-id: ${{ github.run_id }}
             publish-run-attempt: ${{ needs.publish.outputs.run-attempt }}
             build-run-attempt: ${{ needs.build.outputs.run-attempt }}

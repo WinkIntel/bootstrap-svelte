@@ -4,7 +4,8 @@ import { test } from 'node:test';
 const read = (path) => readFileSync(new URL('../../' + path, import.meta.url), 'utf8');
 test('live-only caller preserves npm privilege boundary and checks configuration before publishing', () => {
     const yaml = read('.github/workflows/publish.yml');
-    assert.match(yaml, /releasepage:\n +needs: \[build, publish\]\n +if: \$\{\{ !inputs.dry-run && needs.publish.result == 'success' \}\}/);
+    assert.match(yaml, /releasepage:\n +needs: \[build, publish\]/);
+    assert.match(yaml, /!inputs.configuration-check && !inputs.dry-run && needs.publish.result == 'success'/);
     assert.match(yaml, /uses: \.\/\.github\/workflows\/release-page.yml/);
     assert.match(yaml, /build-run-attempt: \$\{\{ needs.build.outputs.run-attempt \}\}/);
     assert.match(yaml, /publish-run-attempt: \$\{\{ needs.publish.outputs.run-attempt \}\}/);
@@ -25,7 +26,7 @@ test('recovery is run-and-attempt based, has no npm publication or OIDC, and use
     assert.match(yaml, /publish-run-attempt:/);
     assert.match(yaml, /build-run-attempt:/);
     assert.match(yaml, /environment: npm-publish/);
-    assert.match(yaml, /needs: verify/);
+    assert.match(yaml, /needs: \[verify, configuration\]/);
     assert.doesNotMatch(yaml, /(?:^|\n)\s+(?:id-token:|contents: write)|run:.*npm publish|secrets: inherit/m);
     assert.match(yaml, /repositories: bootstrap-svelte/);
     assert.match(yaml, /owner: WinkIntel/);
