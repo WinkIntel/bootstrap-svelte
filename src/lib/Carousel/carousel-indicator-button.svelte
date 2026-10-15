@@ -6,13 +6,13 @@ Button for carousel indicators. Should be placed inside a Carousel.Indicators co
 @example
 ```svelte
 <Carousel.Indicators>
-    <Carousel.IndicatorButton ariaLabel="Slide 1" />
-    <Carousel.IndicatorButton ariaLabel="Slide 2" />
-    <Carousel.IndicatorButton ariaLabel="Slide 3" />
+    <Carousel.IndicatorButton />
+    <Carousel.IndicatorButton />
+    <Carousel.IndicatorButton />
 </Carousel.Indicators>
 ```
 ### Props
-- `ariaLabel` (string): Required. Screen reader text for accessibility.
+- `ariaLabel` (string): Optional. Screen reader text; defaults to "Slide N", where N is the one-based slide position.
 - `class` (string): Optional. Additional CSS classes to apply to the component.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
 -->

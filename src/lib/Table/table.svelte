@@ -87,8 +87,8 @@ A component to render a Bootstrap table.
 - `isResponsive` (boolean): Optional. If true, makes the table responsive. Default is false.
 - `isStriped` (boolean): Optional. If true, adds zebra-striping to the table rows. Default is false.
 - `isStripedColumns` (boolean): Optional. If true, adds zebra-striping to the table columns. Default is false.
-- `responsiveProps` (object): Optional. Props for responsive behavior, including:
-  - `breakpoint` (string): Breakpoint for responsive table. Options: 'sm', 'md', 'lg', 'xl', 'xxl'. Omit for responsive behavior at all widths.
+- `responsiveProps` (object): Optional. Props for responsive behavior. Requires `isResponsive`. Includes:
+  - `breakpoint` (string): Breakpoint for responsive table. Options: 'sm', 'md', 'lg', 'xl', 'xxl'. Omit for responsive behavior at all widths when `isResponsive` is true.
 - `size` (string): Optional. Size variant for the table. Options: 'sm'. Default is undefined.
 - `verticalAlign` (string): Optional. Vertical alignment for table cells. Options: 'top', 'middle', 'bottom'. Default is undefined.
 -->

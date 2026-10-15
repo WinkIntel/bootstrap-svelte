@@ -7,9 +7,9 @@ Container for indicator buttons. Place inside Carousel.Root; buttons correspond 
 ```svelte
 <Carousel.Root id="myCarousel">
     <Carousel.Indicators>
-        <Carousel.IndicatorButton ariaLabel="Slide 1" />
-        <Carousel.IndicatorButton ariaLabel="Slide 2" />
-        <Carousel.IndicatorButton ariaLabel="Slide 3" />
+        <Carousel.IndicatorButton />
+        <Carousel.IndicatorButton />
+        <Carousel.IndicatorButton />
     </Carousel.Indicators>
     <Carousel.Inner>
         Slides...
