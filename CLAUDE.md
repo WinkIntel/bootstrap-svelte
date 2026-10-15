@@ -47,7 +47,7 @@ Most components are namespaces of sub-components, built per-directory with a fix
 - `<name>.svelte`, `<name>-<part>.svelte` — the Root and sub-components
 - `<name>.svelte.ts` — runes-based shared state/logic, when needed
 
-Consumers write `<Dropdown.Root>`, `<Card.Header>`, etc. Directories without a namespace export flat instead: single components (`Alert`, `Badge`, `Button`, `CloseButton`, `Container`, `Row`/`Col`, `Spinner`, ...), small families (`ButtonGroup`/`ButtonToolbar`/`ButtonCheck`, `ProgressBar`/`ProgressStacked`), and attachments (`Collapse`, `Scrollspy`). `src/lib/index.ts` does `export * from` every component directory — new components must be added there. Intra-library imports use `.js` extensions (ESM style).
+Consumers write `<Dropdown.Root>`, `<Card.Header>`, etc. Directories without a namespace export flat instead: single components (`Alert`, `Badge`, `Button`, `CloseButton`, `Container`, `Row`/`Col`, `Spinner`, ...), small families (`ButtonGroup`/`ButtonToolbar`/`ButtonCheck`, `ProgressBar`/`ProgressStacked`), the `Collapse` component, and attachments (`collapseAria`, `scrollspy`). `src/lib/index.ts` does `export * from` every component directory — new components must be added there. Intra-library imports use `.js` extensions (ESM style).
 
 Parent↔child coordination uses the `Context` class in `src/lib/common/context.ts` (type-safe wrapper over Svelte context with symbol keys). `src/lib/common/` also holds shared CSS/class utilities, DOM helpers, and runes-based utilities (`*.svelte.ts`).
 
@@ -75,7 +75,7 @@ Tests are colocated with components. Components that need a wrapper harness to t
 ### Build/packaging notes
 
 - Runes mode is enforced globally (`compilerOptions.runes: true` in `svelte.config.js`); preprocessing uses `svelte-preprocess` with sass.
-- The package ships only `dist/` and declares `svelte`/`types` exports; `svelte ^5.29.0` is a peer dependency. Consumers install with `pnpm add @winkintel/bootstrap-svelte bootstrap`; Bootstrap CSS is NOT bundled — consumers import it themselves.
+- The package ships only `dist/` and declares `svelte`/`types` exports; `svelte ^5.29.0` is a peer dependency. Consumers install with `pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3`; Requires Bootstrap ≥ 5.3 and < 6. Bootstrap CSS is NOT bundled — consumers import it themselves.
 - `publint` runs as part of `prepack`/`build` and will fail the build on packaging mistakes.
 
 ## Conventions and constraints

@@ -8,7 +8,7 @@ A comprehensive Svelte 5 component library implementing the Bootstrap design sys
 
 Package name: `@winkintel/bootstrap-svelte`.
 
-Consumer install command: `pnpm add @winkintel/bootstrap-svelte bootstrap`.
+Consumer install command: `pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3`.
 
 Svelte peer dependency: `svelte ^5.29.0`.
 
@@ -82,6 +82,8 @@ When using `Dropdown.Root` inline with other elements, prefer `d-inline-block` s
 ```
 
 ## CSS Import
+
+Requires Bootstrap ≥ 5.3 and < 6. Bootstrap CSS is supplied by the consuming application.
 
 Consumers must import Bootstrap CSS in their application:
 

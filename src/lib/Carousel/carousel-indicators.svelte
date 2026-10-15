@@ -1,15 +1,15 @@
 <!--
 @component
 ## Carousel.Indicators
-Container for indicator buttons. Should be placed inside a Carousel.Root component.
+Container for indicator buttons. Place inside Carousel.Root; buttons correspond to slides in DOM order.
 
 @example
 ```svelte
 <Carousel.Root id="myCarousel">
     <Carousel.Indicators>
-        <Carousel.IndicatorButton slideTo={0} ariaLabel="Slide 1" />
-        <Carousel.IndicatorButton slideTo={1} ariaLabel="Slide 2" />
-        <Carousel.IndicatorButton slideTo={2} ariaLabel="Slide 3" />
+        <Carousel.IndicatorButton ariaLabel="Slide 1" />
+        <Carousel.IndicatorButton ariaLabel="Slide 2" />
+        <Carousel.IndicatorButton ariaLabel="Slide 3" />
     </Carousel.Indicators>
     <Carousel.Inner>
         Slides...

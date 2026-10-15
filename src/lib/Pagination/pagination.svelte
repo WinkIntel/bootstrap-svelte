@@ -25,9 +25,8 @@ Root pagination component that contains pagination items and links.
 ```
 ### Props
 - `alignment` (string): Optional. Horizontal alignment, one of: 'start', 'center', 'end'.
-- `ariaLabel` (string): Optional. ARIA label for the pagination navigation. Defaults to "pagination".
+- `aria-label` (string): Optional. ARIA label for the pagination navigation. Defaults to "Pagination navigation".
 - `class` (string): Optional. Additional CSS classes.
-- `disabled` (boolean): Optional. Whether the pagination is disabled. Defaults to false.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
 - `id` (string): Optional. Unique ID for the pagination element.
 - `size` (string): Optional. Size of pagination component, one of: 'sm', 'lg'.

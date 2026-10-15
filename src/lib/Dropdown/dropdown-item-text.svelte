@@ -1,11 +1,11 @@
 <!--
 @component
-## Dropdown.Text
+## Dropdown.ItemText
 Text content within a dropdown menu.
 
 @example
 ```svelte
-<Dropdown.Text>Some text here</Dropdown.Text>
+<Dropdown.ItemText>Some text here</Dropdown.ItemText>
 ```
 
 ### Props

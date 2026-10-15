@@ -11,6 +11,6 @@ describe('/guides/sveltekit-bootstrap-5/+page.svelte', () => {
         const installSection = screen.getByRole('heading', { name: 'Install' }).closest('section');
         expect(installSection?.querySelector('.wk-code-lang')).toHaveTextContent('bash');
         expect(installSection?.querySelector('pre')).toHaveAttribute('data-language', 'bash');
-        expect(installSection).toHaveTextContent('pnpm add @winkintel/bootstrap-svelte bootstrap');
+        expect(installSection).toHaveTextContent('pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3');
     });
 });

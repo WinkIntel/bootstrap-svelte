@@ -1,19 +1,19 @@
 <!--
 @component
 ## Form.Root
-Bootstrap-styled hidden input component for passing data in forms without visual representation.
+Form container with optional progressive enhancement and Bootstrap validation classes.
 
 @example
 ```svelte
 <Form.Root action="/submit" method="post">
-    <Form.Input name="username" placeholder="Enter your username" />
-    <Form.Input name="password" type="password" placeholder="Enter your password" />
-    <Form.Button type="submit">Submit</Form.Button>
+    <Form.TextInput name="username" placeholder="Enter your username" />
+    <Form.PasswordInput name="password" placeholder="Enter your password" />
+    <Button type="submit">Submit</Button>
 </Form.Root>
 ```
 ### Props
 - `class` (string): Optional. Additional CSS classes to apply to the form.
-- `elementRef` (HTMLInputElement): Optional. Reference to the input DOM element.
+- `elementRef` (HTMLFormElement): Optional. Reference to the form DOM element.
 - `enhance` (function): Optional. Function to enhance the form with additional behavior, such as validation.
 - `needsValidation` (boolean): Optional. Indicates if the form needs validation styles.
 - `wasValidated` (boolean): Optional. Indicates if the form has been validated.

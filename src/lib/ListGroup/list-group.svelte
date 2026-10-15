@@ -31,7 +31,7 @@ A component that serves as a container for list group items. It can be used to c
 
 #### Horizontal list group
 ```svelte
-<ListGroup.Root isHorizontal={true}>
+<ListGroup.Root horizontalOnBreakpoint="xs">
     <ListGroup.Item>Horizontal item 1</ListGroup.Item>
     <ListGroup.Item>Horizontal item 2</ListGroup.Item>
     <ListGroup.Item>Horizontal item 3</ListGroup.Item>
@@ -60,7 +60,7 @@ A component that serves as a container for list group items. It can be used to c
 - `elementRef` (HTMLElement): Optional. Reference to the list group DOM element
 - `id` (string): Optional. ID for the list group element
 - `isFlush` (boolean): Optional. Removes outer borders and rounded corners
-- `isHorizontal` (boolean): Optional. Changes list group direction to horizontal
+- `horizontalOnBreakpoint` (string): Optional. Horizontal from this breakpoint upward; use 'xs' for all widths
 - `isNumbered` (boolean): Optional. Creates a numbered list with `<ol>` instead of `<ul>`
 -->
 <script lang="ts">

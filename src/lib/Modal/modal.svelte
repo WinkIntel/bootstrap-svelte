@@ -5,7 +5,13 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 
 @example
 ```svelte
-<Modal.Root isShown={true}>
+<script>
+    import { Button, Modal } from '@winkintel/bootstrap-svelte';
+
+    let showModal = $state(true);
+</script>
+
+<Modal.Root isShown={showModal} onHide={() => (showModal = false)}>
     <Modal.Dialog>
         <Modal.Content>
             <Modal.Header>
@@ -15,7 +21,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
                 Modal content goes here.
             </Modal.Body>
             <Modal.Footer>
-                <Button onclick={() => setIsShown(false)}>Close</Button>
+                <Button onclick={() => (showModal = false)}>Close</Button>
             </Modal.Footer>
         </Modal.Content>
     </Modal.Dialog>

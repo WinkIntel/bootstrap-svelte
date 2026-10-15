@@ -23,7 +23,7 @@ const WHEN_NOT_TO_USE = [
 ];
 
 const HOW_TO_USE = [
-    `Install the package together with Bootstrap CSS: \`${INSTALL_COMMAND}\`. The package does not bundle CSS, so import Bootstrap once in your app entry (\`${CSS_IMPORT}\`) or include it through your Sass pipeline.`,
+    `Requires Bootstrap ≥ 5.3 and < 6. Install the package together with Bootstrap CSS: \`${INSTALL_COMMAND}\`. The package does not bundle CSS, so import Bootstrap once in your app entry (\`${CSS_IMPORT}\`) or include it through your Sass pipeline.`,
     "Import components from the package root: `import { Button, Card, Modal } from '@winkintel/bootstrap-svelte'`. Compound namespaces start at their `Root` component (`<Card.Root>`, `<Modal.Root>`, `<Dropdown.Root>`) and then use sub-components such as `<Card.Header>`, `<Modal.Dialog>`, and `<Dropdown.Item>`; `Alert`, `Badge`, `Button`, and `Spinner` are standalone.",
     'Props are typed. Import flat public types such as `ButtonRootProps` from the package root. For compound namespaces, import the namespace type and use exported part aliases such as `Card.RootProps` or `Modal.RootProps`; read each component page for its props table, CSS classes, and accessibility notes.'
 ];
@@ -156,7 +156,8 @@ export function buildAgentsMd(): string {
         '## Conventions',
         '',
         ...bulletList([
-            'Appearance props follow Bootstrap names: `colorVariant="primary"`, `size="sm"`, `isPill`, `isDismissible`, `isShown`, `isStriped`.',
+            'Appearance props follow Bootstrap names: `colorVariant="primary"`, `isPill`, `isDismissible`, `isShown`, `isStriped`.',
+            'Use `size="sm"` for Button, ButtonGroup, Pagination, and Table. Form controls such as Form.TextInput, Form.Select, and Form.TextArea use `sizing="sm"`; Form.InputGroup also uses `sizing`. Native `size` attributes do not select Bootstrap form sizing.',
             'Every component accepts `class` for additional CSS classes and most expose `elementRef` for the underlying DOM element.',
             'Compound components share state through context; keep sub-components inside their `Root` (for example `Dropdown.Toggle` and `Dropdown.Menu` inside `Dropdown.Root`).',
             'Wrap inline `Dropdown.Root` usage with `class="d-inline-block"` so the menu gets a positioning box.',
