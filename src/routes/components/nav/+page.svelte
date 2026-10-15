@@ -377,8 +377,8 @@
     <section class="mb-5" id="different-elements">
         <h2 class="wk-quick-link">Different Element Types</h2>
         <p>
-            The Nav component can be rendered as different HTML elements using the <code>as</code> prop. The default is <code>"ul"</code>, but you can
-            also use <code>"ol"</code> or <code>"nav"</code>.
+            The Nav component can be rendered as different HTML elements using the <code>elementType</code> prop. The default is <code>"ul"</code>,
+            but you can also use <code>"ol"</code> or <code>"nav"</code>.
         </p>
 
         <div class="card">
@@ -491,7 +491,7 @@
 
         <h3 class="h5 mt-4">Nav.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -508,7 +508,7 @@
                         <td>ARIA orientation attribute. Automatically set to 'vertical' when verticalBreakpoint is defined.</td>
                     </tr>
                     <tr>
-                        <td><code>as</code></td>
+                        <td><code>elementType</code></td>
                         <td><code>'nav' | 'ol' | 'ul'</code></td>
                         <td><code>'ul'</code></td>
                         <td>Element type to render</td>
@@ -567,7 +567,7 @@
 
         <h3 class="h5 mt-4">Nav.Item Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavItemProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -595,7 +595,7 @@
 
         <h3 class="h5 mt-4">Nav.Link Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavLinkProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>

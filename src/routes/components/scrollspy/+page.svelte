@@ -632,7 +632,7 @@ export type ScrollspyOptions = {
         </div>
         <h4>Options</h4>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="ScrollspyOptions" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Option</th>

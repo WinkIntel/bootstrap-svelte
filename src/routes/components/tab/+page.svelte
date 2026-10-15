@@ -454,7 +454,7 @@
 
         <h3 class="h5 mt-4">Tab.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="TabRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -488,7 +488,7 @@
 
         <h3 class="h5 mt-4">Tab.Content Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="TabContentProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -516,7 +516,7 @@
 
         <h3 class="h5 mt-4">Tab.NavLink Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="TabNavLinkProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -572,9 +572,9 @@
             </table>
         </div>
 
-        <h3 class="h5 mt-4">Tab.NavLink Props</h3>
+        <h3 class="h5 mt-4">Tab.Pane Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="TabPaneProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>

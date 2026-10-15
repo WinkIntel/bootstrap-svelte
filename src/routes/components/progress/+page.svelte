@@ -235,7 +235,7 @@
 
         <h3 class="h5 mt-4">ProgressBar Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="ProgressProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -308,7 +308,7 @@
 
         <h3 class="h5 mt-4">barProps Object</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="ProgressBarProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -348,7 +348,7 @@
 
         <h3 class="h5 mt-4">ProgressStacked Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="ProgressStackedProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>

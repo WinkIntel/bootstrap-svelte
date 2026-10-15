@@ -633,7 +633,7 @@
 
         <h3 class="h5 mt-4">Navbar.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavbarRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -689,7 +689,7 @@
 
         <h3 class="h5 mt-4">Navbar.Brand Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavbarBrandProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -729,7 +729,7 @@
 
         <h3 class="h5 mt-4">Navbar.Toggler Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavbarTogglerProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -791,7 +791,7 @@
 
         <h3 class="h5 mt-4">Navbar.TogglerIcon Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavbarTogglerIconProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -819,7 +819,7 @@
 
         <h3 class="h5 mt-4">Navbar.Collapse Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavbarCollapseProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -877,7 +877,7 @@
 
         <h3 class="h5 mt-4">Navbar.Nav Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavbarNavProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -917,7 +917,7 @@
 
         <h3 class="h5 mt-4">Navbar.Text Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavbarTextProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>

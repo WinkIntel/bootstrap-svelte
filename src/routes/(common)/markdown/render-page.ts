@@ -42,40 +42,50 @@ function stripLiveDemos(root: Element): void {
     }
 }
 
+/** Server-render a registered page without docs chrome. The caller owns and closes the returned DOM. */
+export async function renderPageDom(href: string) {
+    const load = pageModules[moduleKey(href)];
+    if (!findPage(href) || !load) throw new Error(`Unknown page: ${href}`);
+    const { default: component } = await load();
+    const { body } = render(component);
+    const { JSDOM } = await import('jsdom');
+    return new JSDOM(body);
+}
+
 /**
  * Server-renders a showcase page (without the docs chrome) and converts it to Markdown.
  * The result is headed by the page title, its lead paragraph, and a pointer back to the canonical HTML page.
  */
 export async function renderPageMarkdown(href: string): Promise<RenderedPage> {
     const page = findPage(href);
-    const load = pageModules[moduleKey(href)];
-    if (!page || !load) throw new Error(`Unknown page: ${href}`);
+    if (!page) throw new Error(`Unknown page: ${href}`);
+    const dom = await renderPageDom(href);
+    try {
+        const root = dom.window.document.body;
 
-    const { default: component } = await load();
-    const { body } = render(component);
-    const { JSDOM } = await import('jsdom');
-    const root = new JSDOM(body).window.document.body;
+        const canonical = absoluteUrl(href);
+        const heading = root.querySelector('[data-page-title], h1');
+        const title = collapseWhitespace(heading?.textContent ?? '') || page.label;
+        const lead = extractLead(root);
+        const leadElement = root.querySelector('p.lead');
+        const leadMarkdown = leadElement ? collapseWhitespace(htmlToMarkdown(leadElement, { baseUrl: canonical })) : '';
+        const rule = leadElement?.nextElementSibling;
 
-    const canonical = absoluteUrl(href);
-    const heading = root.querySelector('[data-page-title], h1');
-    const title = collapseWhitespace(heading?.textContent ?? '') || page.label;
-    const lead = extractLead(root);
-    const leadElement = root.querySelector('p.lead');
-    const leadMarkdown = leadElement ? collapseWhitespace(htmlToMarkdown(leadElement, { baseUrl: canonical })) : '';
-    const rule = leadElement?.nextElementSibling;
+        heading?.remove();
+        if (rule?.tagName === 'HR') rule.remove();
+        leadElement?.remove();
+        stripPlaygrounds(root);
+        stripLiveDemos(root);
 
-    heading?.remove();
-    if (rule?.tagName === 'HR') rule.remove();
-    leadElement?.remove();
-    stripPlaygrounds(root);
-    stripLiveDemos(root);
+        const content = htmlToMarkdown(root, { baseUrl: canonical, skip: SKIPPED_SECTIONS });
+        const header = [
+            `# ${title}`,
+            leadMarkdown ? `> ${leadMarkdown}` : '',
+            `Source: ${canonical} — part of the ${site.name} documentation (index: ${absoluteUrl('/llms.txt')}).`
+        ].filter((part) => part.length > 0);
 
-    const content = htmlToMarkdown(root, { baseUrl: canonical, skip: SKIPPED_SECTIONS });
-    const header = [
-        `# ${title}`,
-        leadMarkdown ? `> ${leadMarkdown}` : '',
-        `Source: ${canonical} — part of the ${site.name} documentation (index: ${absoluteUrl('/llms.txt')}).`
-    ].filter((part) => part.length > 0);
-
-    return { href, title, lead, markdown: `${header.join('\n\n')}\n\n${content}`.trim() + '\n' };
+        return { href, title, lead, markdown: `${header.join('\n\n')}\n\n${content}`.trim() + '\n' };
+    } finally {
+        dom.window.close();
+    }
 }

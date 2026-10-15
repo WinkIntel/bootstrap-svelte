@@ -114,6 +114,7 @@
     const apiComponents = [
         {
             name: 'Root',
+            propsType: 'AccordionRootProps',
             description: 'The main accordion container component',
             props: [
                 { name: 'class', type: 'string', default: 'undefined', description: 'Additional CSS classes to apply' },
@@ -125,6 +126,7 @@
         },
         {
             name: 'Item',
+            propsType: 'AccordionItemProps',
             description: 'Container for an individual accordion item',
             props: [
                 { name: 'class', type: 'string', default: 'undefined', description: 'Additional CSS classes to apply' },
@@ -135,6 +137,7 @@
         },
         {
             name: 'Header',
+            propsType: 'AccordionHeaderProps',
             description: 'The heading container for the accordion item',
             props: [
                 { name: 'class', type: 'string', default: 'undefined', description: 'Additional CSS classes to apply' },
@@ -144,6 +147,7 @@
         },
         {
             name: 'Button',
+            propsType: 'AccordionButtonProps',
             description: 'The clickable button that toggles the accordion item',
             props: [
                 { name: 'class', type: 'string', default: 'undefined', description: 'Additional CSS classes to apply' },
@@ -153,6 +157,7 @@
         },
         {
             name: 'Collapse',
+            propsType: 'AccordionCollapseProps',
             description: 'The collapsible container that wraps the accordion body',
             props: [
                 { name: 'class', type: 'string', default: 'undefined', description: 'Additional CSS classes to apply' },
@@ -162,6 +167,7 @@
         },
         {
             name: 'Body',
+            propsType: 'AccordionBodyProps',
             description: 'The content container for the accordion item',
             props: [
                 { name: 'class', type: 'string', default: 'undefined', description: 'Additional CSS classes to apply' },
@@ -368,7 +374,7 @@
 
             <h4 class="h6 mt-3">Props</h4>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type={apiComponent.propsType} class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>

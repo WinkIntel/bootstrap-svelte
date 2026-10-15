@@ -328,7 +328,7 @@
 
         <h3 class="h5 mt-4">ButtonGroup Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="ButtonGroupRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -380,7 +380,7 @@
 
         <h3 class="h5 mt-4">ButtonCheck Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="ButtonCheckRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -456,7 +456,7 @@
 
         <h3 class="h5 mt-4">ButtonToolbar Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="ButtonToolbarRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
