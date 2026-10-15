@@ -28,7 +28,7 @@ describe('buildLlmsTxt', () => {
         expect(preamble).toContain('When to use');
         expect(preamble).toContain('When not to use');
         expect(preamble).toContain('Accept: text/markdown');
-        expect(preamble).toContain('pnpm add @winkintel/bootstrap-svelte bootstrap');
+        expect(preamble).toContain('pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3');
     });
 
     test('lists every page as a Markdown link with its lead as the note', () => {
@@ -54,6 +54,13 @@ describe('buildLlmsTxt', () => {
 
 describe('buildAgentsMd', () => {
     const text = buildAgentsMd();
+
+    test('states the Bootstrap compatibility range and distinguishes form sizing', () => {
+        expect(text).toContain('Bootstrap ≥ 5.3 and < 6');
+        expect(text).toContain('bootstrap@^5.3');
+        expect(text).toContain('Form controls such as Form.TextInput, Form.Select, and Form.TextArea use `sizing="sm"`');
+        expect(text).toContain('Form.InputGroup also uses `sizing`');
+    });
 
     test('is a Markdown document with when-to-use guidance and integration rules', () => {
         expect(text.startsWith('# Bootstrap Svelte — agent instructions\n')).toBe(true);

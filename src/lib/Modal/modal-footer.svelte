@@ -5,10 +5,22 @@ Footer component for the Modal content.
 
 @example
 ```svelte
-<Modal.Footer>
-    <Button colorVariant="secondary" onclick={() => setIsShown(false)}>Close</Button>
-    <Button colorVariant="primary" onclick={() => handleSave()}>Save changes</Button>
-</Modal.Footer>
+<script>
+    import { Button, Modal } from '@winkintel/bootstrap-svelte';
+
+    let showModal = $state(true);
+</script>
+
+<Modal.Root isShown={showModal} onHide={() => (showModal = false)}>
+    <Modal.Dialog>
+        <Modal.Content>
+            <Modal.Body>Modal content goes here.</Modal.Body>
+            <Modal.Footer>
+                <Button colorVariant="secondary" onclick={() => (showModal = false)}>Close</Button>
+            </Modal.Footer>
+        </Modal.Content>
+    </Modal.Dialog>
+</Modal.Root>
 ```
 ### Props
 - `children` (slot): Content to display inside the footer

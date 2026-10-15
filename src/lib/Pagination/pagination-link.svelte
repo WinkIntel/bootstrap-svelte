@@ -10,14 +10,14 @@ Pagination link component that is typically used inside a Pagination.Item.
 
 @example
 ```svelte
-<Pagination.Link href="#!" ariaLabel="Go to previous page">Previous</Pagination.Link>
+<Pagination.Link href="#!" aria-label="Go to previous page">Previous</Pagination.Link>
 ```
 
 ### Props
-- `ariaLabel` (string): Optional. ARIA label for the link.
+- `aria-label` (string): Optional. ARIA label for the link.
 - `class` (string): Optional. Additional CSS classes.
 - `elementRef` (HTMLElement): Optional. Reference to the link DOM element.
-- `href` (string): Optional. The URL to link to. Defaults to "#".
+- `href` (string): Optional. The URL to link to. Defaults to "#!".
 - `isDisabled` (boolean): Optional. Whether the link is disabled (pagination item should also be set to disabled). Defaults to false.
 -->
 <script lang="ts">

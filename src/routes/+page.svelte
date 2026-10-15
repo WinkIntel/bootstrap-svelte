@@ -16,7 +16,7 @@
         Form: 'bi-ui-checks'
     };
 
-    const installExample = `pnpm add @winkintel/bootstrap-svelte bootstrap`;
+    const installExample = `pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3`;
     const peerDependencyExample = `svelte: ^5.29.0`;
     const importExample = `<script>
   import { Alert, Button, Card, Modal } from '@winkintel/bootstrap-svelte';

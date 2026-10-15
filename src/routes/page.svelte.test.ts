@@ -34,6 +34,6 @@ describe('/+page.svelte', () => {
         const installPanel = installHeading.parentElement;
         expect(installPanel?.querySelector('.wk-code-lang')).toHaveTextContent('bash');
         expect(installPanel?.querySelector('pre')).toHaveAttribute('data-language', 'bash');
-        expect(container).toHaveTextContent('pnpm add @winkintel/bootstrap-svelte bootstrap');
+        expect(container).toHaveTextContent('pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3');
     });
 });

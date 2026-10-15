@@ -51,19 +51,19 @@ It is not trying to replace Tailwind, shadcn-style workflows, or fully custom de
 ## Requirements
 
 - Svelte 5
-- Bootstrap 5 CSS supplied by the consuming application
+- Bootstrap ≥ 5.3 and < 6 CSS supplied by the consuming application
 - A modern Svelte/Vite/SvelteKit-style build pipeline
 
 ## Installation
 
 ```bash
-pnpm add @winkintel/bootstrap-svelte bootstrap
+pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3
 
 # or
-npm install @winkintel/bootstrap-svelte bootstrap
+npm install @winkintel/bootstrap-svelte bootstrap@^5.3
 
 # or
-yarn add @winkintel/bootstrap-svelte bootstrap
+yarn add @winkintel/bootstrap-svelte bootstrap@^5.3
 ```
 
 ### Peer dependency
@@ -130,6 +130,7 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
 - `Row`
 - `Col`
 - `Collapse`
+- `collapseAria` attachment
 
 ### Content
 
@@ -139,7 +140,8 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
 - `Card`
 - `ListGroup`
 - `Placeholder`
-- `Progress`
+- `ProgressBar`
+- `ProgressStacked`
 - `Spinner`
 - `Table`
 
@@ -149,13 +151,15 @@ Or use Bootstrap SCSS from your app stylesheet/build pipeline:
 - `Nav`
 - `Navbar`
 - `Pagination`
-- `Scrollspy`
+- `scrollspy` attachment
 - `Tab`
 
 ### Interactive
 
 - `Button`
 - `ButtonGroup`
+- `ButtonToolbar`
+- `ButtonCheck`
 - `Carousel`
 - `CloseButton`
 - `Dropdown`

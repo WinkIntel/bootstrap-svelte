@@ -1,7 +1,7 @@
 <script lang="ts">
     import SyntaxHighlighter from '../../(common)/SyntaxHighlighter.svelte';
 
-    const installCode = `pnpm add @winkintel/bootstrap-svelte bootstrap`;
+    const installCode = `pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3`;
     const cssCode = `// src/routes/+layout.ts
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -95,7 +95,10 @@ import '../app.scss';`;
 
     <section class="mb-4">
         <h2 class="wk-quick-link mb-3">Install</h2>
-        <p>Install Bootstrap Svelte and Bootstrap together. Svelte <code>^5.29.0</code> is a peer dependency supplied by your SvelteKit app.</p>
+        <p>
+            Install Bootstrap Svelte and Bootstrap together. Requires Bootstrap ≥ 5.3 and &lt; 6. Svelte <code>^5.29.0</code> is a peer dependency supplied
+            by your SvelteKit app.
+        </p>
         <SyntaxHighlighter code={installCode} language="bash" />
     </section>
 

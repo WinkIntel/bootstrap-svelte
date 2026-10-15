@@ -1,11 +1,17 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
+import * as publicExports from '$lib/index.js';
 import { JSDOM } from 'jsdom';
 import { describe, expect, test } from 'vitest';
 import { createPropsCatalog } from './props-types.js';
 import { renderPageDom, renderPageMarkdown } from './markdown/render-page.js';
 import { sitePages } from './site.js';
-import { validatePropsTables } from './props-validation.js';
+import { createHoverPropsAliases, validateHoverProps, validatePropsTables } from './props-validation.js';
 
-const catalog = createPropsCatalog();
+const root = resolve(import.meta.dirname, '../../..');
+const catalog = createPropsCatalog(root);
+const aliases = createHoverPropsAliases(root);
+const validateHover = (source: string) => validateHoverProps(source, catalog.names, aliases);
 const table = (name: string) =>
     `<h2>API Reference</h2><h3>Toast.Container Props</h3><table data-props-type="ToastContainerProps"><thead><tr><th>Name</th><th>Type</th></tr></thead><tbody><tr><td>${name}</td><td>string</td></tr></tbody></table>`;
 const validate = (html: string) => {
@@ -196,4 +202,89 @@ describe('showcase props validation', () => {
           }
         `);
     }, 120_000);
+});
+
+function components(directory: string): string[] {
+    return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+        const path = join(directory, entry.name);
+        if (entry.isDirectory()) return entry.name === 'tests' ? [] : components(path);
+        return entry.name.endsWith('.svelte') ? [path] : [];
+    });
+}
+
+describe('component hover documentation', () => {
+    test('rejects obsolete props while accepting inherited HTML props', () => {
+        const fixture = (name: string) =>
+            `<!--\n@component\n### Props\n- \`${name}\`: Optional.\n-->\n<script lang="ts">let { ...props }: Pagination.RootProps = $props();</script>`;
+        expect(validateHover(fixture('ariaLabel')).errors).toEqual(['ariaLabel is absent from PaginationRootProps']);
+        expect(validateHover(fixture('disabled')).errors).toEqual(['disabled is absent from PaginationRootProps']);
+        expect(validateHover(fixture('aria-label')).errors).toEqual([]);
+        expect(validateHover(fixture('class')).errors).toEqual([]);
+        expect(validateHover(fixture('class').replace('Pagination.RootProps', 'UnknownProps')).errors).toEqual([
+            'Documented props have no resolved $props() type'
+        ]);
+    });
+
+    test('ignores nested option keys and non-prop lists', () => {
+        const source =
+            '<!--\n@component\n### Sub-components\n- `Table.Data`: cell\n### Props\n- `responsiveProps`: options\n  - `breakpoint`: width\n-->\n<script>let { ...props }: Table.RootProps = $props();</script>';
+        expect(validateHover(source).errors).toEqual([]);
+    });
+
+    test('checks level-four Props headings and rejects missing or empty prop sections', () => {
+        const fixture = (section: string) => `<!--
+@component
+${section}
+-->
+<script>let { ...props }: Form.FeedbackProps = $props();</script>`;
+        expect(validateHover(fixture('#### Props\n- `madeUp`: invalid')).errors).toEqual(['madeUp is absent from FormFeedbackProps']);
+        expect(validateHover(fixture('Summary only')).errors).toEqual(['@component block has no Props section']);
+        expect(validateHover(fixture('### Props\nNo bullets')).errors).toEqual(['Props section has no top-level prop bullets']);
+    });
+
+    test.each([1, 2, 3, 4, 5, 6])('ends the Props section at a level-%i heading', (level) => {
+        const source = `<!--
+@component
+### Props
+- \`class\`: classes
+${'#'.repeat(level)} Events
+- \`onfoo\`: event
+-->
+<script>let { ...props }: Form.FeedbackProps = $props();</script>`;
+        expect(validateHover(source)).toEqual({ blocks: 1, props: 1, errors: [] });
+    });
+
+    test('rejects an example comment that truncates the actual Svelte hover block', () => {
+        const source =
+            '<!--\n@component\n@example\n```svelte\n<!-- example -->\n```\n### Props\n- `madeUp`: invalid\n-->\n<script>let { ...props }: Form.FeedbackProps = $props();</script>';
+        expect(validateHover(source).errors).toContain('Nested HTML comment in @component block; escape example comment delimiters');
+    });
+
+    test('README component names are real public exports', () => {
+        const readme = readFileSync(join(root, 'README.md'), 'utf8');
+        const section = readme.split('## Available components')[1]?.split('## Notes for SvelteKit')[0];
+        expect(section).toBeDefined();
+        const names = [...section!.matchAll(/^- `([^`]+)`/gm)].map(([, name]) => name!);
+        expect(names).toEqual(
+            expect.arrayContaining(['ProgressBar', 'ProgressStacked', 'scrollspy', 'collapseAria', 'ButtonToolbar', 'ButtonCheck'])
+        );
+        expect(names.filter((name) => !Object.hasOwn(publicExports, name))).toEqual([]);
+    });
+
+    test('every documented component prop exists in its resolved props type', () => {
+        const total = { blocks: 0, props: 0 };
+        const errors = components(join(root, 'src/lib')).flatMap((file) => {
+            const result = validateHover(readFileSync(file, 'utf8'));
+            total.blocks += result.blocks;
+            total.props += result.props;
+            return result.errors.map((error) => `${relative(root, file)}: ${error}`);
+        });
+        expect(errors).toEqual([]);
+        expect(total).toEqual({ blocks: 114, props: 642 });
+        expect(validateHover(readFileSync(join(root, 'src/lib/Form/form-feedback.svelte'), 'utf8'))).toEqual({
+            blocks: 1,
+            props: 5,
+            errors: []
+        });
+    });
 });

@@ -5,10 +5,10 @@ Bootstrap-styled label component specifically for switch inputs.
 
 @example
 ```svelte
-// Radio with label
+// Switch with label
 <Form.Check isSwitch>
     <Form.SwitchInput id="switchExample" name="switchExample" value="option1" />
-    <Form.SwitchLabel for="switchExample">Radio example</Form.RadioLabel>
+    <Form.SwitchLabel for="switchExample">Switch example</Form.SwitchLabel>
 </Form.Check>
 ```
 ### Props

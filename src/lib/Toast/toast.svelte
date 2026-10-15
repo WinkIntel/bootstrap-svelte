@@ -18,7 +18,10 @@ Lightweight notifications designed to mimic push notifications that modern web a
 #### Basic Toast
 ```svelte
 <Toast.Root isShown={true}>
-    <Toast.Header titleText="Toast Title" subText="11 mins ago" />
+    <Toast.Header>
+        <strong class="me-auto">Toast Title</strong>
+        <small>11 mins ago</small>
+    </Toast.Header>
     <Toast.Body>Hello, world! This is a toast message.</Toast.Body>
 </Toast.Root>
 ```
@@ -26,13 +29,14 @@ Lightweight notifications designed to mimic push notifications that modern web a
 #### Autohide Options
 ```svelte
 <Toast.Root doAutohide={false}>...</Toast.Root>
-<Toast.Root doAutohide={8000}>...</Toast.Root>
+<Toast.Root doAutohide delay={8000}>...</Toast.Root>
 ```
 
-#### Custom Container
+#### Positioned Container
 ```svelte
-<div id="toast-container"></div>
-<Toast.Root container="#toast-container">...</Toast.Root>
+<Toast.Container placement="bottom-end">
+    <Toast.Root isShown>...</Toast.Root>
+</Toast.Container>
 ```
 
 ### Props

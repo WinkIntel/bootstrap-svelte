@@ -17,9 +17,9 @@ A component to render a Bootstrap table.
     <Table.Body>
         <Table.Row>
             <Table.Header>1</Table.Header>
-            <Table.Cell>Mark</Table.Cell>
-            <Table.Cell>Otto</Table.Cell>
-            <Table.Cell>@mdo</Table.Cell>
+            <Table.Data>Mark</Table.Data>
+            <Table.Data>Otto</Table.Data>
+            <Table.Data>@mdo</Table.Data>
         </Table.Row>
     </Table.Body>
 </Table.Root>
@@ -78,18 +78,17 @@ A component to render a Bootstrap table.
 ### Props
 - `borderColorVariant` (string): Optional. Border color variant class (e.g., 'border-primary').
 - `colorVariant` (string): Optional. Color variant for the table (e.g., 'dark', 'light').
-- `containerProps` (object): Optional. Props for the container div when `isContained` is true.
+- `containerProps` (object): Optional. Props for the always-rendered outer container div.
 - `elementRef` (HTMLTableElement): Optional. Reference to the table element.
 - `isBordered` (boolean): Optional. If true, adds borders to all table cells. Default is false.
 - `isBorderless` (boolean): Optional. If true, removes borders from the table. Default is false.
 - `isCaptionTop` (boolean): Optional. If true, places the caption at the top of the table. Default is false.
-- `isContained` (boolean): Optional. If true, wraps the table in a container div. Default is false.
 - `isHoverable` (boolean): Optional. If true, enables hover state on table rows. Default is false.
 - `isResponsive` (boolean): Optional. If true, makes the table responsive. Default is false.
 - `isStriped` (boolean): Optional. If true, adds zebra-striping to the table rows. Default is false.
 - `isStripedColumns` (boolean): Optional. If true, adds zebra-striping to the table columns. Default is false.
-- `responsiveProps` (object): Optional. Props for responsive behavior, including:
-  - `breakpoint` (string): Breakpoint for responsive table. Options: 'sm', 'md', 'lg', 'xl', 'xxl'. Default is 'md'.
+- `responsiveProps` (object): Optional. Props for responsive behavior. Requires `isResponsive`. Includes:
+  - `breakpoint` (string): Breakpoint for responsive table. Options: 'sm', 'md', 'lg', 'xl', 'xxl'. Omit for responsive behavior at all widths when `isResponsive` is true.
 - `size` (string): Optional. Size variant for the table. Options: 'sm'. Default is undefined.
 - `verticalAlign` (string): Optional. Vertical alignment for table cells. Options: 'top', 'middle', 'bottom'. Default is undefined.
 -->
