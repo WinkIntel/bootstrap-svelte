@@ -519,7 +519,7 @@
 
             <h3 class="h5 mt-4">ListGroup.Root Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="ListGroupRootProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -571,7 +571,7 @@
 
             <h3 class="h5 mt-4">ListGroup.Item Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="ListGroupItemProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -606,12 +606,6 @@
                             <td>Indicates the current active selection</td>
                         </tr>
                         <tr>
-                            <td><code>isDisabled</code></td>
-                            <td><code>boolean</code></td>
-                            <td><code>false</code></td>
-                            <td>Makes the item appear disabled</td>
-                        </tr>
-                        <tr>
                             <td><code>colorVariant</code></td>
                             <td><code>'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | undefined</code></td>
                             <td>-</td>
@@ -623,7 +617,7 @@
 
             <h3 class="h5 mt-4">ListGroup.ItemAction Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="ListGroupItemActionProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>

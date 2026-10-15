@@ -628,7 +628,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-sm table-striped mb-0">
+                    <table data-props-type="ToastRootProps" class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -716,7 +716,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-sm table-striped mb-0">
+                    <table data-props-type="ToastHeaderProps" class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -762,7 +762,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-sm table-striped mb-0">
+                    <table data-props-type="ToastBodyProps" class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -802,7 +802,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-sm table-striped mb-0">
+                    <table data-props-type="ToastContainerProps" class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>

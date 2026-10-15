@@ -303,7 +303,7 @@
 
             <h3 class="h5 mt-4">Placeholder.Root Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="PlaceholderRootProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -337,7 +337,7 @@
 
             <h3 class="h5 mt-4">Placeholder.Item Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="PlaceholderItemProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>

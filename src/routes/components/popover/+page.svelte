@@ -542,7 +542,7 @@
         <section class="mb-4">
             <h3>Popover.Root Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="PopoverRootProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -642,7 +642,7 @@
         <section class="mb-4">
             <h3>Popover.Header Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="PopoverHeaderProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>

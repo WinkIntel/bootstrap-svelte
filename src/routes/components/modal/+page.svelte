@@ -729,7 +729,7 @@
             <h3>Modal.Root Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Root props API table">
-                <table class="table table-sm">
+                <table data-props-type="ModalRootProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -828,7 +828,7 @@
             <h3>Modal.Content Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Content props API table">
-                <table class="table table-sm">
+                <table data-props-type="ModalContentProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -865,7 +865,7 @@
             <h3>Modal.Dialog Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Dialog props API table">
-                <table class="table table-sm">
+                <table data-props-type="ModalDialogProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -926,7 +926,7 @@
             <h3>Modal.Footer Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Footer props API table">
-                <table class="table table-sm">
+                <table data-props-type="ModalFooterProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -963,7 +963,7 @@
             <h3>Modal.Header Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Header props API table">
-                <table class="table table-sm">
+                <table data-props-type="ModalHeaderProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
@@ -1006,7 +1006,7 @@
             <h3>Modal.Title Props</h3>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
             <div class="table-responsive" tabindex="0" role="region" aria-label="Modal Title props API table">
-                <table class="table table-sm">
+                <table data-props-type="ModalTitleProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Prop</th>
