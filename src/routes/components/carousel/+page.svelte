@@ -619,7 +619,7 @@
 
             <h3 class="h5 mt-4">Carousel.Root Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="CarouselRootProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -689,7 +689,7 @@
 
             <h3 class="h5 mt-4">Carousel.Item Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="CarouselItemProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -753,7 +753,7 @@
 
             <h3 class="h5 mt-4">Carousel.IndicatorButton Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="CarouselIndicatorButtonProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -787,7 +787,7 @@
 
             <h3 class="h5 mt-4">Carousel.ControlPrev/ControlNext Props</h3>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table data-props-type="CarouselControlProps" class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>

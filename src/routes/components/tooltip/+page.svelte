@@ -302,7 +302,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-sm table-striped mb-0">
+                    <table data-props-type="TooltipRootProps" class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>

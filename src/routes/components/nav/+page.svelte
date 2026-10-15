@@ -491,7 +491,7 @@
 
         <h3 class="h5 mt-4">Nav.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -567,7 +567,7 @@
 
         <h3 class="h5 mt-4">Nav.Item Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavItemProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -595,7 +595,7 @@
 
         <h3 class="h5 mt-4">Nav.Link Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="NavLinkProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>

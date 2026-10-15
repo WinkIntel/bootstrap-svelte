@@ -162,7 +162,7 @@
 
         <h3 class="h5 mt-4">Breadcrumb.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="BreadcrumbRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -208,7 +208,7 @@
 
         <h3 class="h5 mt-4">Breadcrumb.Item Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="BreadcrumbItemProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>

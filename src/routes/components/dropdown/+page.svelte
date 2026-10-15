@@ -1001,7 +1001,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1085,7 +1085,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Toggle Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownToggleProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1150,7 +1150,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Menu Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownMenuProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1210,7 +1210,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Item Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownItemProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1274,7 +1274,7 @@
 
         <h3 class="h5 mt-4">Dropdown.ItemText Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownTextProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1308,7 +1308,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Header Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownHeaderProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1348,7 +1348,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Divider Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownDividerProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
