@@ -2,6 +2,18 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 2.1.3 — Unreleased
+
+Documentation-only npm patch. Library runtime, public APIs, dependencies, and the Svelte peer requirement (`^5.29.0`) are unchanged.
+
+- Corrected packaged component hover documentation and examples to use existing props and exports, including ListGroup, Pagination, Table, Toast, Form, Modal, Carousel, and Dropdown. Corrected easing descriptions and clarified responsive-table prerequisites and optional carousel indicator labels ([#63](https://github.com/WinkIntel/bootstrap-svelte/issues/63), [#108](https://github.com/WinkIntel/bootstrap-svelte/pull/108)).
+- Corrected the README component/export list and documented Bootstrap ≥ 5.3 and < 6, with consumer install commands using `bootstrap@^5.3`. This is compatibility guidance, not a new package peer constraint; optional Bootstrap peer metadata remains a separate evaluation ([#109](https://github.com/WinkIntel/bootstrap-svelte/issues/109)).
+
+### Website and documentation validation already available
+
+- Updated website and agent install instructions and clarified that form controls use `sizing` for Bootstrap sizing.
+- Added validation of documented hover prop names and README exports using the shared TypeScript props catalog. Hover checks cover 114 blocks and 642 top-level prop bullets, reject missing or empty Props sections and nested comments, and recognize Markdown heading boundaries. These checks validate names, not example compilation, prop values, or runtime defaults.
+
 ## 2.1.2 — 2026-10-14
 
 - Fixed presses inside responsive Offcanvas panels (`showOnBreakpoint`) incorrectly dismissing the overlay or firing `onHidePrevented` with a static backdrop. Inside buttons remain usable; outside dismissal and trigger ownership are preserved ([#43](https://github.com/WinkIntel/bootstrap-svelte/issues/43)).
