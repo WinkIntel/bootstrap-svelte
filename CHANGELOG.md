@@ -9,10 +9,37 @@ Documentation-only npm patch. Library runtime, public APIs, dependencies, and th
 - Corrected packaged component hover documentation and examples to use existing props and exports, including ListGroup, Pagination, Table, Toast, Form, Modal, Carousel, and Dropdown. Corrected easing descriptions and clarified responsive-table prerequisites and optional carousel indicator labels ([#63](https://github.com/WinkIntel/bootstrap-svelte/issues/63), [#108](https://github.com/WinkIntel/bootstrap-svelte/pull/108)).
 - Corrected the README component/export list and documented Bootstrap ≥ 5.3 and < 6, with consumer install commands using `bootstrap@^5.3`. This is compatibility guidance, not a new package peer constraint; optional Bootstrap peer metadata remains a separate evaluation ([#109](https://github.com/WinkIntel/bootstrap-svelte/issues/109)).
 
-### Website and documentation validation already available
+### Correcting copied examples
 
-- Updated website and agent install instructions and clarified that form controls use `sizing` for Bootstrap sizing.
-- Added validation of documented hover prop names and README exports using the shared TypeScript props catalog. Hover checks cover 114 blocks and 642 top-level prop bullets, reject missing or empty Props sections and nested comments, and recognize Markdown heading boundaries. These checks validate names, not example compilation, prop values, or runtime defaults.
+These are corrections to previously inaccurate examples, not API renames or removals. If you copied them, update the affected usage:
+
+| Previous example                                      | Correct usage                                                                                              |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `ariaLabel` on `Pagination.Root` or `Pagination.Link` | `aria-label`                                                                                               |
+| `ListGroup.Root isHorizontal`                         | `horizontalOnBreakpoint="xs"` for all widths, or another breakpoint; `Collapse.isHorizontal` remains valid |
+| `Toast.Root doAutohide={8000}`                        | `doAutohide delay={8000}`                                                                                  |
+| `Toast.Root container="..."`                          | Nest the toast in `Toast.Container` and set its `placement`                                                |
+| `Toast.Header titleText` / `subText`                  | Supply header children, such as a title and timestamp                                                      |
+| `Table.Cell` / `Table.Root isContained`               | Use `Table.Data`; omit the unsupported `isContained` prop (the outer container is always rendered)         |
+| `Dropdown.Text`                                       | `Dropdown.ItemText`                                                                                        |
+| `Pagination.Root disabled`                            | Set `isDisabled` on the relevant `Pagination.Item` / `Pagination.Link`                                     |
+
+### Website and agent documentation already available
+
+- Updated website and agent install instructions and clarified that form controls use `sizing` for Bootstrap sizing ([#108](https://github.com/WinkIntel/bootstrap-svelte/pull/108)).
+- Served showcase images locally, updated resource disclosures and response headers, added integrity metadata for the pinned icon stylesheet, and stabilized initial theme and mobile table-of-contents rendering ([#104](https://github.com/WinkIntel/bootstrap-svelte/pull/104)).
+- Corrected showcase prop-table entries and the Pagination accessible-label default ([#105](https://github.com/WinkIntel/bootstrap-svelte/pull/105)).
+
+### Documentation testing
+
+- Added TypeScript-backed validation of showcase table prop names and a documented local props-manifest experiment; a public manifest endpoint and generated tables remain deferred ([#105](https://github.com/WinkIntel/bootstrap-svelte/pull/105)).
+- Reused the props catalog to validate hover prop names and README exports, reject missing or empty Props sections and nested comments, and recognize Markdown heading boundaries ([#108](https://github.com/WinkIntel/bootstrap-svelte/pull/108)). These repository tests validate names, not example compilation, prop values, or runtime defaults; they are not shipped in the npm package.
+
+### Release tooling
+
+- Corrected the named protected App-key contract for the reusable release-page workflow ([#100](https://github.com/WinkIntel/bootstrap-svelte/pull/100)).
+- Added an explicitly dispatched configuration-only check through the protected reusable workflow; it does not publish packages or create releases ([#102](https://github.com/WinkIntel/bootstrap-svelte/pull/102)).
+- Updated pinned setup-node, upload-artifact, and download-artifact actions ([#107](https://github.com/WinkIntel/bootstrap-svelte/pull/107)).
 
 ## 2.1.2 — 2026-10-14
 
