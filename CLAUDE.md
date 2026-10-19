@@ -22,6 +22,7 @@ pnpm check-types          # svelte-kit sync + svelte-check
 pnpm lint                 # prettier --check ./src + eslint ./src
 pnpm format               # prettier --write on changed/untracked files only
 pnpm test                 # vitest run --silent (alias: test:unit)
+pnpm test:coverage        # full client/server suite + library coverage floors (CI)
 pnpm test:unit-watch      # vitest watch mode
 npm pack --dry-run        # inspect what would be published
 ```
@@ -33,7 +34,7 @@ pnpm vitest run src/lib/Button/button.svelte.test.ts
 pnpm vitest run src/lib/Dropdown            # everything under a directory
 ```
 
-CI (`.github/workflows/ci.yml`) runs: lint → check-types → test → build → `npm pack --dry-run`. All must pass.
+CI (`.github/workflows/ci.yml`) runs: release-control tests (`node --test scripts/tests/release-*.test.mjs`) → lint → check-types → test:coverage → build → `npm pack --dry-run`. All must pass. See `CONTRIBUTING.md` for coverage scope and the reviewed toolchain re-baselining policy.
 
 ## Architecture
 

@@ -20,6 +20,7 @@ pnpm build                # Build showcase + package output
 pnpm check-types          # Svelte + TypeScript checks
 pnpm lint                 # Prettier check + ESLint
 pnpm test:unit            # Run unit tests
+pnpm test:coverage        # Full suite + library coverage floors (CI)
 npm pack --dry-run        # Inspect npm package contents
 ```
 

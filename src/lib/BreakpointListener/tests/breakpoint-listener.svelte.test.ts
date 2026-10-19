@@ -1,6 +1,8 @@
 import { mockMatchMedia } from '$lib/common/tests/mock-match-media.js';
 import { render, screen, waitFor } from '@testing-library/svelte';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { tick } from 'svelte';
+import BreakpointListenerDisabledTest from './breakpoint-listener-disabled-test.svelte';
 import { BreakpointEnum } from '../types.js';
 import BreakpointListenerBasicTest from './breakpoint-listener-basic-test.svelte';
 
@@ -39,12 +41,36 @@ describe('BreakpointListener Component', () => {
         await waitFor(() => {
             expect(screen.getByTestId('current-breakpoint-value').textContent).toBe(BreakpointEnum.XS.toString());
         });
-        // Depending on implementation detail, a direct jump md -> xs should trigger breakDown.
-        // If it does, from should be 'md', else it may remain 'undefined'. Accept either.
-        const breakdownFrom = screen.getByTestId('breakdown-from').textContent;
-        expect([BreakpointEnum.MD.toString(), 'undefined']).toContain(breakdownFrom);
-        const breakdownTo = screen.getByTestId('breakdown-to').textContent;
-        expect([BreakpointEnum.XS.toString(), 'undefined']).toContain(breakdownTo);
+        expect(screen.getByTestId('breakdown-from').textContent).toBe(BreakpointEnum.MD.toString());
+        expect(screen.getByTestId('breakdown-to').textContent).toBe(BreakpointEnum.XS.toString());
+    });
+
+    it('suppresses callbacks while disabled and catches up when re-enabled', async () => {
+        const onChange = vi.fn();
+        const onBreakUp = vi.fn();
+        const onBreakDown = vi.fn();
+        const { rerender } = render(BreakpointListenerDisabledTest, { isDisabled: true, onChange, onBreakUp, onBreakDown });
+        await tick();
+        setActiveBreakpoint(BreakpointEnum.MD);
+        await tick();
+        expect(screen.queryByTestId('disabled-content')).not.toBeInTheDocument();
+        expect(screen.getByTestId('disabled-breakpoint')).toHaveTextContent('undefined');
+        expect(onChange).not.toHaveBeenCalled();
+        expect(onBreakUp).not.toHaveBeenCalled();
+        expect(onBreakDown).not.toHaveBeenCalled();
+        await rerender({ isDisabled: false });
+        expect(onChange).toHaveBeenLastCalledWith({ current: BreakpointEnum.MD, previous: null });
+        expect(onBreakUp).toHaveBeenLastCalledWith({ from: null, to: BreakpointEnum.MD });
+        expect(screen.getByTestId('disabled-content')).toBeInTheDocument();
+        await rerender({ isDisabled: true });
+        expect(screen.queryByTestId('disabled-content')).not.toBeInTheDocument();
+        setActiveBreakpoint(BreakpointEnum.XS);
+        await tick();
+        expect(onChange).toHaveBeenCalledOnce();
+        expect(onBreakDown).not.toHaveBeenCalled();
+        await rerender({ isDisabled: false });
+        expect(onChange).toHaveBeenLastCalledWith({ current: BreakpointEnum.XS, previous: BreakpointEnum.MD });
+        expect(onBreakDown).toHaveBeenCalledExactlyOnceWith({ from: BreakpointEnum.MD, to: BreakpointEnum.XS });
     });
 
     it('conditionally renders children for single and multiple breakpoints', async () => {

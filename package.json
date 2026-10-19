@@ -34,6 +34,7 @@
         "prepack": "svelte-kit sync && svelte-package && publint",
         "preview": "vite preview --port 4176",
         "test": "pnpm test:unit",
+        "test:coverage": "vitest run --coverage --silent=true",
         "test:unit": "vitest run --silent",
         "test:unit-watch": "vitest --watch"
     },

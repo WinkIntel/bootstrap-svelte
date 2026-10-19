@@ -9,6 +9,19 @@ export default defineConfig({
             // Ignore invalid_raw_snippet_render errors...
             return !(log.startsWith('[svelte] invalid_raw_snippet_render') && type === 'stderr');
         },
+        coverage: {
+            provider: 'v8',
+            // Gate the shipped library only; all client/server tests still run, including showcase routes.
+            include: ['src/lib/**'],
+            exclude: ['src/lib/**/*.{test,spec}.{js,ts}', 'src/lib/**/tests/**'],
+            // Keep a machine-readable local baseline at coverage/coverage-summary.json.
+            reporter: ['text', 'json-summary'],
+            // Combined client/server baseline on 732c1d7 (Node 26):
+            // 94.20% lines, 85.73% branches. Svelte source-map lines are approximate;
+            // use aggregate coverage as a regression floor, not a substitute for behavior tests.
+            // Toolchain drift requires the reviewed re-baselining process in CONTRIBUTING.md.
+            thresholds: { lines: 94, branches: 85 }
+        },
         projects: [
             {
                 extends: './vite.config.ts',

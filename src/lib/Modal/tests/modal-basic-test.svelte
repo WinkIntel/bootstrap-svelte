@@ -54,30 +54,6 @@
     </Modal.Dialog>
 </Modal.Root>
 
-<!-- Test with static backdrop -->
-<Modal.Root isShown={true} id="static-backdrop" useBackdrop="static" data-testid="static-backdrop">
-    <Modal.Dialog data-testid="static-dialog">
-        <Modal.Content data-testid="static-content">
-            <Modal.Header data-testid="static-header">
-                <Modal.Title data-testid="static-title">Static Backdrop</Modal.Title>
-            </Modal.Header>
-            <Modal.Body data-testid="static-body">Static backdrop content</Modal.Body>
-        </Modal.Content>
-    </Modal.Dialog>
-</Modal.Root>
-
-<!-- Test with no backdrop -->
-<Modal.Root isShown={true} id="no-backdrop" useBackdrop={false} data-testid="no-backdrop">
-    <Modal.Dialog data-testid="no-backdrop-dialog">
-        <Modal.Content data-testid="no-backdrop-content">
-            <Modal.Header data-testid="no-backdrop-header">
-                <Modal.Title data-testid="no-backdrop-title">No Backdrop</Modal.Title>
-            </Modal.Header>
-            <Modal.Body data-testid="no-backdrop-body">No backdrop content</Modal.Body>
-        </Modal.Content>
-    </Modal.Dialog>
-</Modal.Root>
-
 <!-- Test dialog options -->
 <Modal.Root isShown={true} id="centered-modal" data-testid="centered-modal">
     <Modal.Dialog isVerticallyCentered={true} data-testid="centered-dialog">
