@@ -9,6 +9,16 @@ export default defineConfig({
             // Ignore invalid_raw_snippet_render errors...
             return !(log.startsWith('[svelte] invalid_raw_snippet_render') && type === 'stderr');
         },
+        coverage: {
+            provider: 'v8',
+            include: ['src/lib/**'],
+            exclude: ['src/lib/**/*.{test,spec}.{js,ts}', 'src/lib/**/tests/**'],
+            reporter: ['text', 'json-summary'],
+            // Combined client/server baseline on 732c1d7 (Node 26):
+            // 94.20% lines, 85.73% branches. Svelte source-map lines are approximate;
+            // use aggregate coverage as a regression floor, not a substitute for behavior tests.
+            thresholds: { lines: 94, branches: 85 }
+        },
         projects: [
             {
                 extends: './vite.config.ts',

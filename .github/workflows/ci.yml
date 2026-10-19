@@ -37,8 +37,8 @@ jobs:
               run: pnpm lint
             - name: Type check
               run: pnpm check-types
-            - name: Test
-              run: pnpm test
+            - name: Test with coverage
+              run: pnpm test:coverage
             - name: Build
               run: pnpm build
             - name: Inspect npm package contents

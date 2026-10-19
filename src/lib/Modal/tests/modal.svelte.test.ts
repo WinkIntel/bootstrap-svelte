@@ -89,16 +89,28 @@ describe('Modal Component', () => {
         expect(xlDialog).toHaveClass('modal-xl');
     });
 
-    it('should render with different backdrop options', () => {
-        render(ModalBasicTest);
-
-        // Static backdrop option
-        const staticBackdrop = screen.getByTestId('static-backdrop');
-        expect(staticBackdrop).toHaveClass('modal');
-
-        // No backdrop option
-        const noBackdrop = screen.getByTestId('no-backdrop');
-        expect(noBackdrop).toHaveClass('modal');
+    it.each([true, 'static', false] as const)('renders and handles useBackdrop=%s', async (useBackdrop) => {
+        const onHide = vi.fn();
+        const onHidePrevented = vi.fn();
+        render(Modal.Root, { isShown: true, useBackdrop, useFade: false, onHide, onHidePrevented });
+        await tick();
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (useBackdrop === false) {
+            expect(backdrop).toBeNull();
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        } else {
+            expect(backdrop).toBeInTheDocument();
+            await fireEvent.mouseDown(backdrop!);
+            if (useBackdrop === 'static') {
+                expect(onHidePrevented).toHaveBeenCalledOnce();
+                expect(onHide).not.toHaveBeenCalled();
+                expect(screen.getByRole('dialog')).toBeInTheDocument();
+            } else {
+                await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+                expect(onHide).toHaveBeenCalledOnce();
+                expect(onHidePrevented).not.toHaveBeenCalled();
+            }
+        }
     });
 
     it('should render dialog with different display options', () => {
