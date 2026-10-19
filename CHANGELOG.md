@@ -2,7 +2,7 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## 2.1.3 — 2026-10-16
+## 2.1.3 — 2026-10-19
 
 Documentation-only npm patch. Library runtime, public APIs, dependencies, and the Svelte peer requirement (`^5.29.0`) are unchanged.
 
