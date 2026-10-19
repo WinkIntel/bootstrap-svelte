@@ -100,7 +100,8 @@ describe('Modal Component', () => {
             expect(screen.getByRole('dialog')).toBeInTheDocument();
         } else {
             expect(backdrop).toBeInTheDocument();
-            await fireEvent.mouseDown(backdrop!);
+            // The full-viewport modal surface sits above the backdrop in Bootstrap.
+            await fireEvent.mouseDown(screen.getByRole('dialog'));
             if (useBackdrop === 'static') {
                 expect(onHidePrevented).toHaveBeenCalledOnce();
                 expect(onHide).not.toHaveBeenCalled();

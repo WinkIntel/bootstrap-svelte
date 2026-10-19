@@ -16,10 +16,34 @@ Run these before opening a pull request:
 ```bash
 pnpm lint
 pnpm check-types
-pnpm test
+node --test scripts/tests/release-*.test.mjs
+pnpm test:coverage
 pnpm build
 npm pack --dry-run
 ```
+
+`pnpm test:coverage` is the CI-equivalent full client/server test run with library
+coverage enforcement. `pnpm test` remains a faster full-suite check without coverage.
+The floor deliberately measures shipped `src/lib/**` code only; showcase/server
+route tests still run, but their source is outside this library coverage denominator.
+Tests and `tests/` fixtures are excluded. The text report is visible in CI logs;
+`coverage/coverage-summary.json` is an ignored local artifact for comparing baseline
+and proposed measurements, not a CI upload or a committed file.
+
+### Coverage changes and toolchain updates
+
+The measured baseline at `732c1d7` is 94.20% lines and 85.73% branches, with reviewed
+floors of 94% and 85%. Svelte source-map coverage is approximate: changes to Svelte,
+Vite, its Svelte plugin, Vitest or the coverage provider can change attribution.
+If a toolchain update fails the floor, compare the full coverage reports on the
+base and proposed revisions using the same Node version, frozen lockfiles and
+unchanged include/exclude rules. Record versions, totals and affected files in the
+PR; distinguish newly uncovered behavior from source-map/counting drift. Add tests
+for genuine gaps. A justified floor adjustment requires explicit reviewer approval
+in that PR, supporting before/after measurements, and an updated baseline comment.
+Do not automatically lower floors, exclude affected production files, or accept a
+new baseline merely because CI fails. Retain behavioral regression tests regardless
+of any approved attribution adjustment.
 
 ## Dependency updates
 

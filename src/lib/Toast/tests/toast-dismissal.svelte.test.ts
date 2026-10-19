@@ -7,6 +7,7 @@ describe('Toast dismissal', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => {
         cleanup();
+        vi.restoreAllMocks();
         vi.useRealTimers();
     });
 
@@ -39,15 +40,23 @@ describe('Toast dismissal', () => {
     });
 
     it('header close cancels the pending autohide instead of reopening at the old deadline', async () => {
+        const schedule = vi.spyOn(globalThis, 'setTimeout');
+        const cancel = vi.spyOn(globalThis, 'clearTimeout');
         const onHide = vi.fn();
         const onHidden = vi.fn();
         render(ToastDismissalTest, { isShown: true, delay: 1000, onHide, onHidden });
         await tick();
+        // Identify the autohide timeout by its configured delay, not unrelated
+        // animation/scheduler timers. Both spies still execute the real fake timers.
+        const autohideCalls = schedule.mock.calls.flatMap((args, index) => (args[1] === 1000 ? [index] : []));
+        expect(autohideCalls).toHaveLength(1);
+        const timer = schedule.mock.results[autohideCalls[0]!]!.value;
+        expect(cancel).not.toHaveBeenCalledWith(timer);
         await vi.advanceTimersByTimeAsync(200);
         await fireEvent.click(screen.getByLabelText('Close'));
         await vi.advanceTimersByTimeAsync(200);
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-        expect(vi.getTimerCount()).toBe(0);
+        expect(cancel).toHaveBeenCalledWith(timer);
         await vi.advanceTimersByTimeAsync(1000);
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();
         expect(onHide).toHaveBeenCalledOnce();
@@ -55,13 +64,20 @@ describe('Toast dismissal', () => {
     });
 
     it('clears the autohide timer on unmount without firing dismissal callbacks', async () => {
+        const schedule = vi.spyOn(globalThis, 'setTimeout');
+        const cancel = vi.spyOn(globalThis, 'clearTimeout');
         const onHide = vi.fn();
         const onHidden = vi.fn();
         const { unmount } = render(ToastDismissalTest, { isShown: true, delay: 1000, onHide, onHidden });
         await tick();
-        expect(vi.getTimerCount()).toBe(1);
+        // Identify the autohide timeout by its configured delay, not unrelated
+        // animation/scheduler timers. Both spies still execute the real fake timers.
+        const autohideCalls = schedule.mock.calls.flatMap((args, index) => (args[1] === 1000 ? [index] : []));
+        expect(autohideCalls).toHaveLength(1);
+        const timer = schedule.mock.results[autohideCalls[0]!]!.value;
+        expect(cancel).not.toHaveBeenCalledWith(timer);
         unmount();
-        expect(vi.getTimerCount()).toBe(0);
+        expect(cancel).toHaveBeenCalledWith(timer);
         await vi.advanceTimersByTimeAsync(1200);
         expect(onHide).not.toHaveBeenCalled();
         expect(onHidden).not.toHaveBeenCalled();
