@@ -58,11 +58,12 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 - `onShown` (function): Optional. Callback function when the offcanvas is completely shown.
 -->
 <script lang="ts">
+    import { initialShow } from '$lib/common/initial-show.js';
     import { noop, uniqueClsx } from '$lib/common/index.js';
     import { initOffcanvasRootState, OffcanvasRootState } from '$lib/common/navbar-offcanvas.svelte.js';
     import { isTopOverlay, registerOverlay, unregisterOverlay, type OverlayStackEntry } from '$lib/common/overlay-stack.js';
     import { acquireBodyScrollLock, releaseBodyScrollLock } from '$lib/common/scrollbar.js';
-    import { onDestroy, onMount, tick } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import type { Offcanvas } from './index.js';
 
@@ -162,11 +163,8 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     // Listen changes to the isShown prop and update the root state accordingly...
     $effect(() => {
         if (previousIsShown !== unset && previousIsShown !== isShown) {
-            const nextIsShown = isShown;
             // Sync the explicit value, even when a matching breakpoint already makes the panel visible.
-            tick().then(() => {
-                rootState.isShown = nextIsShown;
-            });
+            rootState.isShown = isShown;
         }
 
         previousIsShown = isShown;
@@ -278,6 +276,11 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
             rootState.toggleIsShown();
         }
     }
+    const showTransition = initialShow(
+        () => rootState.isShown && !rootState.isMediaQueryMatched,
+        () => elementRef,
+        fly
+    );
 </script>
 
 <svelte:body on:mousedown={handleBackdropMouseDown} />
@@ -296,7 +299,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         role={rootState.isShown ? 'dialog' : undefined}
         style:z-index={overlayZIndex}
         tabindex="-1"
-        transition:fly={{ duration: rootState.transitionDuration, x: flyX, y: flyY, opacity: 1 }}
+        transition:showTransition={{ duration: rootState.transitionDuration, x: flyX, y: flyY, opacity: 1 }}
         {...restOfProps}>
         {@render children?.()}
     </div>
