@@ -126,14 +126,11 @@ Lightweight notifications designed to mimic push notifications that modern web a
             classValues
         )
     );
-    const showLifecycle = initialShow(
+    const showTransition = initialShow(
         () => rootState.isShown,
         () => elementRef,
-        (event) => onShow(event),
-        (event) => onShown(event),
         fade
     );
-    const showTransition = showLifecycle.transition;
 </script>
 
 {#if rootState.isShown}
@@ -144,8 +141,8 @@ Lightweight notifications designed to mimic push notifications that modern web a
         class={classes}
         role="alert"
         {id}
-        onintrostart={showLifecycle.start}
-        onintroend={showLifecycle.end}
+        onintrostart={onShow}
+        onintroend={onShown}
         onoutrostart={onHide}
         onoutroend={onHidden}
         transition:showTransition={{ duration: useFade ? 150 : 0 }}

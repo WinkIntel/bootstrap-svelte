@@ -5,18 +5,20 @@ import { createServer } from 'vite';
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest';
 import Overlay from './overlay-initial-test.svelte';
 
+const projectRoot = resolve(import.meta.dirname, '../../../..');
 const kinds = ['Modal', 'Offcanvas', 'Toast', 'Tooltip'] as const;
 const html = new Map<string, string>();
 beforeAll(async () => {
     const server = await createServer({
+        root: projectRoot,
         configFile: false,
-        plugins: [svelte({ configFile: false })],
-        resolve: { alias: { $lib: resolve('src/lib') } },
+        plugins: [svelte({ configFile: resolve(projectRoot, 'svelte.config.js') })],
+        resolve: { alias: { $lib: resolve(projectRoot, 'src/lib') } },
         server: { middlewareMode: true, hmr: false },
         appType: 'custom'
     });
     try {
-        const { default: Fixture } = await server.ssrLoadModule('/src/lib/common/tests/overlay-initial-test.svelte');
+        const { default: Fixture } = await server.ssrLoadModule(resolve(import.meta.dirname, 'overlay-initial-test.svelte'));
         const { render } = await server.ssrLoadModule('svelte/server');
         const onShow = vi.fn();
         const onShown = vi.fn();

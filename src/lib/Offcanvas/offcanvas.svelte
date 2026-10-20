@@ -63,7 +63,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     import { initOffcanvasRootState, OffcanvasRootState } from '$lib/common/navbar-offcanvas.svelte.js';
     import { isTopOverlay, registerOverlay, unregisterOverlay, type OverlayStackEntry } from '$lib/common/overlay-stack.js';
     import { acquireBodyScrollLock, releaseBodyScrollLock } from '$lib/common/scrollbar.js';
-    import { onDestroy, onMount, tick } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import type { Offcanvas } from './index.js';
 
@@ -163,11 +163,8 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     // Listen changes to the isShown prop and update the root state accordingly...
     $effect(() => {
         if (previousIsShown !== unset && previousIsShown !== isShown) {
-            const nextIsShown = isShown;
             // Sync the explicit value, even when a matching breakpoint already makes the panel visible.
-            tick().then(() => {
-                rootState.isShown = nextIsShown;
-            });
+            rootState.isShown = isShown;
         }
 
         previousIsShown = isShown;
@@ -279,14 +276,11 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
             rootState.toggleIsShown();
         }
     }
-    const showLifecycle = initialShow(
-        () => rootState.isShown,
+    const showTransition = initialShow(
+        () => rootState.isShown && !rootState.isMediaQueryMatched,
         () => elementRef,
-        (event) => onShow(event),
-        (event) => onShown(event),
         fly
     );
-    const showTransition = showLifecycle.transition;
 </script>
 
 <svelte:body on:mousedown={handleBackdropMouseDown} />
@@ -298,8 +292,8 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         bind:this={() => panelElement, setPanelElement}
         class={classes}
         {id}
-        onintrostart={showLifecycle.start}
-        onintroend={showLifecycle.end}
+        onintrostart={onShow}
+        onintroend={onShown}
         onoutrostart={onHide}
         onoutroend={handleOnHidden}
         role={rootState.isShown ? 'dialog' : undefined}

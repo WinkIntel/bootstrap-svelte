@@ -336,14 +336,11 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
             }
         }
     }
-    const showLifecycle = initialShow(
+    const showTransition = initialShow(
         () => rootState.isShown,
         () => elementRef,
-        (event) => onShow(event),
-        (event) => onShown(event),
         fly
     );
-    const showTransition = showLifecycle.transition;
 </script>
 
 {#if rootState.isShown}
@@ -357,8 +354,8 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         style:z-index={overlayZIndex}
         tabindex={isFocusable ? -1 : undefined}
         onmousedown={handleBackdropMouseDown}
-        onintrostart={showLifecycle.start}
-        onintroend={showLifecycle.end}
+        onintrostart={onShow}
+        onintroend={onShown}
         onoutrostart={onHide}
         onoutroend={handleOnHidden}
         transition:showTransition={{ duration: useFade ? 300 : 0, y: '-50px', opacity: 0 }}

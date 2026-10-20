@@ -3,6 +3,7 @@ import { mount, tick, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Overlay from './overlay-initial-test.svelte';
 import NativeIntro from './initial-show-native-test.svelte';
+import { mockMatchMedia } from './mock-match-media.js';
 import { Modal } from '../../Modal/index.js';
 
 const kinds = ['Modal', 'Offcanvas', 'Toast', 'Tooltip'] as const;
@@ -55,6 +56,18 @@ describe.each(kinds)('%s initial visibility', (kind) => {
         await rerender({ isShown: true });
         await vi.advanceTimersByTimeAsync(400);
         expect(events).toEqual(['show', 'shown', 'hide', 'hidden', 'show', 'shown']);
+    });
+
+    it('uses native transitions once when first opened after mounting hidden', async () => {
+        const { events, props } = callbacks();
+        const { rerender } = render(Overlay, { kind, isShown: false, ...props });
+        await vi.advanceTimersByTimeAsync(400);
+        expect(events).toEqual([]);
+        await rerender({ isShown: true });
+        await vi.advanceTimersByTimeAsync(1);
+        expect(events).toEqual(['show']);
+        await vi.advanceTimersByTimeAsync(400);
+        expect(events).toEqual(['show', 'shown']);
     });
 
     it('handles conditional mounting already shown and cleans up on removal', async () => {
@@ -158,4 +171,15 @@ it('cancels the initial shown callback when onShow starts an unmount outro', asy
     expect(onShown).not.toHaveBeenCalled();
     expect(target).toBeEmptyDOMElement();
     target.remove();
+});
+
+it.each([false, true])('does not synthesize overlay callbacks for inline responsive Offcanvas (Navbar=%s)', async (responsiveNavbar) => {
+    mockMatchMedia(1200);
+    const { events, props } = callbacks();
+    render(Overlay, { kind: 'Offcanvas', isShown: false, responsiveNavbar, showOnBreakpoint: responsiveNavbar ? undefined : 'lg', ...props });
+    await vi.advanceTimersByTimeAsync(400);
+    expect(screen.getByTestId('overlay')).toBeInTheDocument();
+    expect(events).toEqual([]);
+    expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
+    expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
 });

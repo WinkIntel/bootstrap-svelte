@@ -280,14 +280,11 @@ Add small overlay content to any element for housing secondary information or in
         });
     });
     let containerElement = $derived(container === false ? 'body' : container);
-    const showLifecycle = initialShow(
+    const showTransition = initialShow(
         () => isShown,
         () => elementRef,
-        (event) => onShow(event),
-        (event) => onShown(event),
         fade
     );
-    const showTransition = showLifecycle.transition;
 </script>
 
 <Portal target={containerElement} disabled={container === false}>
@@ -297,8 +294,8 @@ Add small overlay content to any element for housing secondary information or in
             class={classes}
             data-popper-placement={currentPopperPlacement}
             id={effectiveId}
-            onintrostart={showLifecycle.start}
-            onintroend={showLifecycle.end}
+            onintrostart={onShow}
+            onintroend={onShown}
             onoutrostart={onHide}
             onoutroend={handleOnHidden}
             role="tooltip"

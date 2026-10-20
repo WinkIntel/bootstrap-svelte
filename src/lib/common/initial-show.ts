@@ -8,23 +8,19 @@ import type { TransitionConfig } from 'svelte/transition';
 export function initialShow<Params>(
     isShown: () => boolean,
     element: () => HTMLElement | null,
-    onShow: (event: Event) => void,
-    onShown: (event: Event) => void,
     transition: (element: Element, params: Params) => TransitionConfig
 ) {
     let transitionScheduled = false;
     onMount(() => {
-        const initiallyShown = isShown();
+        if (!isShown()) return;
         let mounted = true;
         void (async () => {
             // Let refs, portals and native transition scheduling settle before falling back.
             await tick();
             const target = element();
-            if (!mounted || !initiallyShown || !isShown() || !target || transitionScheduled) return;
+            if (!mounted || !isShown() || !target || transitionScheduled) return;
             target.dispatchEvent(new CustomEvent('introstart'));
-            // onShow may close/unmount the component. Flush prop-to-state synchronization
-            // (Offcanvas synchronizes on the next tick) before reporting it as shown.
-            await tick();
+            // Flush state changes made by onShow before reporting the component as shown.
             await tick();
             if (mounted && !transitionScheduled && isShown() && element() === target) target.dispatchEvent(new CustomEvent('introend'));
         })();
@@ -32,18 +28,10 @@ export function initialShow<Params>(
             mounted = false;
         };
     });
-    return {
-        transition(target: Element, params: Params) {
-            // Transition functions run when Svelte actually schedules an intro/outro,
-            // before introstart (which can wait for an animation frame or delay).
-            transitionScheduled = true;
-            return transition(target, params);
-        },
-        start(event: Event) {
-            onShow(event);
-        },
-        end(event: Event) {
-            onShown(event);
-        }
+    return (target: Element, params: Params) => {
+        // Transition functions run when Svelte schedules an intro/outro, before
+        // introstart (which can wait for an animation frame or delay).
+        transitionScheduled = true;
+        return transition(target, params);
     };
 }
