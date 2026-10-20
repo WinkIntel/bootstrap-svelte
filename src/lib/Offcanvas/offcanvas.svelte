@@ -58,6 +58,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 - `onShown` (function): Optional. Callback function when the offcanvas is completely shown.
 -->
 <script lang="ts">
+    import { initialShow } from '$lib/common/initial-show.js';
     import { noop, uniqueClsx } from '$lib/common/index.js';
     import { initOffcanvasRootState, OffcanvasRootState } from '$lib/common/navbar-offcanvas.svelte.js';
     import { isTopOverlay, registerOverlay, unregisterOverlay, type OverlayStackEntry } from '$lib/common/overlay-stack.js';
@@ -278,6 +279,14 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
             rootState.toggleIsShown();
         }
     }
+    const showLifecycle = initialShow(
+        () => rootState.isShown,
+        () => elementRef,
+        (event) => onShow(event),
+        (event) => onShown(event),
+        fly
+    );
+    const showTransition = showLifecycle.transition;
 </script>
 
 <svelte:body on:mousedown={handleBackdropMouseDown} />
@@ -289,14 +298,14 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         bind:this={() => panelElement, setPanelElement}
         class={classes}
         {id}
-        onintrostart={onShow}
-        onintroend={onShown}
+        onintrostart={showLifecycle.start}
+        onintroend={showLifecycle.end}
         onoutrostart={onHide}
         onoutroend={handleOnHidden}
         role={rootState.isShown ? 'dialog' : undefined}
         style:z-index={overlayZIndex}
         tabindex="-1"
-        transition:fly={{ duration: rootState.transitionDuration, x: flyX, y: flyY, opacity: 1 }}
+        transition:showTransition={{ duration: rootState.transitionDuration, x: flyX, y: flyY, opacity: 1 }}
         {...restOfProps}>
         {@render children?.()}
     </div>

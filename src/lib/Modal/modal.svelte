@@ -54,6 +54,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 - `useFade` (boolean): Optional. Controls whether the modal uses a fade transition.
 -->
 <script lang="ts">
+    import { initialShow } from '$lib/common/initial-show.js';
     import { acquireBodyScrollLock, noop, releaseBodyScrollLock, uniqueClsx } from '$lib/common/index.js';
     import {
         focusTopOverlay,
@@ -183,8 +184,8 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         previousRootIsShown = rootState.isShown;
     });
 
-    const handleOnShow: EventListener = (event: Event) => {
-        if (bodyElement) {
+    $effect(() => {
+        if (rootState.isShown && bodyElement) {
             if (!holdsScrollLock) {
                 acquireBodyScrollLock(bodyElement);
                 holdsScrollLock = true;
@@ -194,8 +195,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
                 holdsModalOpenClass = true;
             }
         }
-        onShow(event);
-    };
+    });
 
     const handleOnHidden: EventListener = (event: Event) => {
         if (bodyElement && holdsModalOpenClass) {
@@ -336,6 +336,14 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
             }
         }
     }
+    const showLifecycle = initialShow(
+        () => rootState.isShown,
+        () => elementRef,
+        (event) => onShow(event),
+        (event) => onShown(event),
+        fly
+    );
+    const showTransition = showLifecycle.transition;
 </script>
 
 {#if rootState.isShown}
@@ -349,11 +357,11 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         style:z-index={overlayZIndex}
         tabindex={isFocusable ? -1 : undefined}
         onmousedown={handleBackdropMouseDown}
-        onintrostart={handleOnShow}
-        onintroend={onShown}
+        onintrostart={showLifecycle.start}
+        onintroend={showLifecycle.end}
         onoutrostart={onHide}
         onoutroend={handleOnHidden}
-        transition:fly={{ duration: useFade ? 300 : 0, y: '-50px', opacity: 0 }}
+        transition:showTransition={{ duration: useFade ? 300 : 0, y: '-50px', opacity: 0 }}
         {...restOfProps}>
         {@render children?.()}
     </div>

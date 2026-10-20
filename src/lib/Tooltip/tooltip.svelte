@@ -50,6 +50,7 @@ Add small overlay content to any element for housing secondary information or in
 - `useFade` (boolean): Optional. Controls whether the tooltip uses a fade transition. Default is true.
 -->
 <script lang="ts">
+    import { initialShow } from '$lib/common/initial-show.js';
     import { hasFocus, noop, uniqueClsx } from '$lib/common/index.js';
     import { Portal } from '$lib/index.js';
     import { createPopper, type Instance } from '@popperjs/core';
@@ -279,6 +280,14 @@ Add small overlay content to any element for housing secondary information or in
         });
     });
     let containerElement = $derived(container === false ? 'body' : container);
+    const showLifecycle = initialShow(
+        () => isShown,
+        () => elementRef,
+        (event) => onShow(event),
+        (event) => onShown(event),
+        fade
+    );
+    const showTransition = showLifecycle.transition;
 </script>
 
 <Portal target={containerElement} disabled={container === false}>
@@ -288,12 +297,12 @@ Add small overlay content to any element for housing secondary information or in
             class={classes}
             data-popper-placement={currentPopperPlacement}
             id={effectiveId}
-            onintrostart={onShow}
-            onintroend={onShown}
+            onintrostart={showLifecycle.start}
+            onintroend={showLifecycle.end}
             onoutrostart={onHide}
             onoutroend={handleOnHidden}
             role="tooltip"
-            transition:fade={{ duration: useFade ? 150 : 0 }}
+            transition:showTransition={{ duration: useFade ? 150 : 0 }}
             {...restOfProps}>
             <div class={`${type}-arrow`} data-popper-arrow></div>
             {@render children?.()}
