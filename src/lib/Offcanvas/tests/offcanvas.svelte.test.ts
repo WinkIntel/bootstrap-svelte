@@ -109,16 +109,28 @@ describe('Offcanvas Component', () => {
         expect(bottomOffcanvas).toHaveAttribute('id', 'bottom-offcanvas');
     });
 
-    it('should render with different backdrop options', () => {
-        render(OffcanvasBasicTest);
-
-        // Static backdrop option
-        const staticBackdrop = screen.getByTestId('static-backdrop');
-        expect(staticBackdrop).toHaveClass('offcanvas');
-
-        // No backdrop option
-        const noBackdrop = screen.getByTestId('no-backdrop');
-        expect(noBackdrop).toHaveClass('offcanvas');
+    it.each([true, 'static', false] as const)('renders and handles useBackdrop=%s', async (useBackdrop) => {
+        const onHide = vi.fn();
+        const onHidePrevented = vi.fn();
+        render(Offcanvas.Root, { isShown: true, useBackdrop, onHide, onHidePrevented });
+        await tick();
+        const backdrop = document.querySelector('.offcanvas-backdrop');
+        if (useBackdrop === false) {
+            expect(backdrop).toBeNull();
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        } else {
+            expect(backdrop).toBeInTheDocument();
+            await fireEvent.mouseDown(backdrop!);
+            if (useBackdrop === 'static') {
+                expect(onHidePrevented).toHaveBeenCalledOnce();
+                expect(onHide).not.toHaveBeenCalled();
+                expect(screen.getByRole('dialog')).toBeInTheDocument();
+            } else {
+                await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+                expect(onHide).toHaveBeenCalledOnce();
+                expect(onHidePrevented).not.toHaveBeenCalled();
+            }
+        }
     });
 
     it('should render responsive offcanvas with breakpoint class', () => {

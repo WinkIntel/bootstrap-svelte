@@ -34,22 +34,6 @@
     <Offcanvas.Body data-testid="bottom-body">Bottom content</Offcanvas.Body>
 </Offcanvas.Root>
 
-<!-- Test with static backdrop -->
-<Offcanvas.Root isShown={true} id="static-backdrop" useBackdrop="static" data-testid="static-backdrop">
-    <Offcanvas.Header data-testid="static-header">
-        <Offcanvas.Title data-testid="static-title">Static Backdrop</Offcanvas.Title>
-    </Offcanvas.Header>
-    <Offcanvas.Body data-testid="static-body">Static backdrop content</Offcanvas.Body>
-</Offcanvas.Root>
-
-<!-- Test with no backdrop -->
-<Offcanvas.Root isShown={true} id="no-backdrop" useBackdrop={false} data-testid="no-backdrop">
-    <Offcanvas.Header data-testid="no-backdrop-header">
-        <Offcanvas.Title data-testid="no-backdrop-title">No Backdrop</Offcanvas.Title>
-    </Offcanvas.Header>
-    <Offcanvas.Body data-testid="no-backdrop-body">No backdrop content</Offcanvas.Body>
-</Offcanvas.Root>
-
 <!-- Test with body scrollable -->
 <Offcanvas.Root isShown={true} id="scrollable" isBodyScrollable={true} data-testid="scrollable">
     <Offcanvas.Header data-testid="scrollable-header">

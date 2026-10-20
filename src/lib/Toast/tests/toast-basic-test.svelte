@@ -10,22 +10,6 @@
     <Toast.Body data-testid="toast-body">This is a toast message</Toast.Body>
 </Toast.Root>
 
-<!-- Toast with autohide disabled -->
-<Toast.Root isShown={true} id="no-autohide-toast" doAutohide={false} data-testid="no-autohide-toast">
-    <Toast.Header data-testid="no-autohide-header">
-        <span>No Autohide Toast</span>
-    </Toast.Header>
-    <Toast.Body data-testid="no-autohide-body">This toast will not hide automatically</Toast.Body>
-</Toast.Root>
-
-<!-- Toast with custom delay -->
-<Toast.Root isShown={true} id="custom-delay-toast" delay={2000} data-testid="custom-delay-toast">
-    <Toast.Header data-testid="custom-delay-header">
-        <span>Custom Delay Toast</span>
-    </Toast.Header>
-    <Toast.Body data-testid="custom-delay-body">This toast will hide after 2 seconds</Toast.Body>
-</Toast.Root>
-
 <!-- Toast without fade effect -->
 <Toast.Root isShown={true} id="no-fade-toast" useFade={false} data-testid="no-fade-toast">
     <Toast.Header data-testid="no-fade-header">
