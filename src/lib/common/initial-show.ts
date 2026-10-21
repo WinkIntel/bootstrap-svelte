@@ -8,7 +8,7 @@ import type { TransitionConfig } from 'svelte/transition';
 export function initialShow<Params>(
     isShown: () => boolean,
     element: () => HTMLElement | null,
-    transition: (element: Element, params: Params) => TransitionConfig
+    transition: (element: Element, params: Params, options: { direction: 'in' | 'out' | 'both' }) => TransitionConfig
 ) {
     let transitionScheduled = false;
     onMount(() => {
@@ -28,10 +28,10 @@ export function initialShow<Params>(
             mounted = false;
         };
     });
-    return (target: Element, params: Params) => {
+    return (target: Element, params: Params, options: { direction: 'in' | 'out' | 'both' }) => {
         // Transition functions run when Svelte schedules an intro/outro, before
         // introstart (which can wait for an animation frame or delay).
         transitionScheduled = true;
-        return transition(target, params);
+        return transition(target, params, options);
     };
 }

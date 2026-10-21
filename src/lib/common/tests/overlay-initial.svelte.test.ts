@@ -183,3 +183,44 @@ it.each([false, true])('does not synthesize overlay callbacks for inline respons
     expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
     expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
 });
+
+it('uses the private Offcanvas panel when onShow clears the consumer ref', async () => {
+    const { events, targets, props } = callbacks();
+    render(Overlay, { kind: 'Offcanvas', clearRefOnShow: true, ...props });
+    await vi.advanceTimersByTimeAsync(400);
+    expect(events).toEqual(['show', 'shown']);
+    expect(targets).toEqual([screen.getByTestId('overlay'), screen.getByTestId('overlay')]);
+});
+
+it.each([false, true])('locks Modal before native onShow with useFade=%s', async (useFade) => {
+    const onShow = vi.fn(() => {
+        expect(document.body).toHaveClass('modal-open');
+        expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1');
+    });
+    const { rerender } = render(Modal.Root, { isShown: false, useFade, onShow });
+    await rerender({ isShown: true });
+    await vi.advanceTimersByTimeAsync(400);
+    expect(onShow).toHaveBeenCalledOnce();
+});
+
+it('preserves existing callbacks when an inline responsive panel persists into overlay mode', async () => {
+    const viewport = mockMatchMedia(1200);
+    const { events, props } = callbacks();
+    render(Overlay, { kind: 'Offcanvas', showOnBreakpoint: 'lg', ...props });
+    await vi.advanceTimersByTimeAsync(400);
+    const panel = screen.getByTestId('overlay');
+    expect(events).toEqual([]);
+    viewport.setWidth(800);
+    await vi.advanceTimersByTimeAsync(400);
+    expect(screen.getByTestId('overlay')).toBe(panel);
+    expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1');
+    expect(document.querySelector('.offcanvas-backdrop')).toBeInTheDocument();
+    expect(events).toEqual([]);
+});
+
+it('forwards Svelte transition direction to the wrapped transition', async () => {
+    const onDirection = vi.fn();
+    render(NativeIntro, { props: { onShow: vi.fn(), onShown: vi.fn(), onDirection }, intro: true });
+    await vi.advanceTimersByTimeAsync(150);
+    expect(onDirection).toHaveBeenCalledExactlyOnceWith('both');
+});
