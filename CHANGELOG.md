@@ -4,7 +4,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## 2.1.4 — 2026-10-21
 
-Compatible bug-fix patch for [#45](https://github.com/WinkIntel/bootstrap-svelte/issues/45). Public component APIs, dependencies and the Svelte peer requirement (`^5.29.0`) are unchanged.
+Compatible bug-fix patch for [#45](https://github.com/WinkIntel/bootstrap-svelte/issues/45). Public component APIs, runtime dependencies and the Svelte peer requirement (`^5.29.0`) are unchanged. The Vite development dependency was updated to 8.1.6.
 
 - Fixed initially shown Modal scroll locking and `modal-open` handling, including hydration, with cleanup preserved on close and unmount.
 - Fixed initial `onShow`/`onShown` delivery for Modal, Offcanvas, Toast and Tooltip when Svelte skips a local intro. Native transition timing is preserved; closing or unmounting from `onShow` cancels synthetic completion, and responsive inline Offcanvas panels do not receive synthetic overlay callbacks.
