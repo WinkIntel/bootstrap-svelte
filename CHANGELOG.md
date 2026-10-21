@@ -2,7 +2,7 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## 1.1.3 — Unreleased
+## 1.1.3 — 2026-10-21
 
 Compatible bug-fix patch for [#45](https://github.com/WinkIntel/bootstrap-svelte/issues/45). Public component APIs, dependencies and the Svelte peer requirement (`^5.29.0`) are unchanged.
 
