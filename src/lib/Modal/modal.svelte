@@ -85,6 +85,13 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         ...restOfProps
     }: Modal.RootProps = $props();
 
+    // Keep lifecycle identity private while mirroring the consumer-bindable ref.
+    let panelElement: HTMLDivElement | null = $state(null);
+    function setPanelElement(element: HTMLDivElement | null) {
+        panelElement = element;
+        if (elementRef !== element) elementRef = element;
+    }
+
     // Initialize the root state of the modal component...
     let bodyElement: HTMLElement | null = $state(null);
     let holdsModalOpenClass = false;
@@ -332,7 +339,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
     }
     const showTransition = initialShow(
         () => rootState.isShown,
-        () => elementRef,
+        () => panelElement,
         fly
     );
 </script>
@@ -341,7 +348,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
     <div
         aria-labelledby={rootState.titleId}
         aria-modal={rootState.isShown}
-        bind:this={elementRef}
+        bind:this={() => panelElement, setPanelElement}
         class={classes}
         {id}
         role="dialog"

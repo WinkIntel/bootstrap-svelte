@@ -4,14 +4,27 @@
     let {
         onShow,
         onShown,
-        onDirection
-    }: { onShow: (event: Event) => void; onShown: (event: Event) => void; onDirection?: (direction: string | undefined) => void } = $props();
+        onDirection,
+        deferred = false,
+        onResolve
+    }: {
+        onShow: (event: Event) => void;
+        onShown: (event: Event) => void;
+        onDirection?: (direction: 'in' | 'out' | 'both') => void;
+        deferred?: boolean;
+        onResolve?: () => void;
+    } = $props();
     let element: HTMLDivElement | null = $state(null);
     const showTransition = initialShow(
         () => true,
         () => element,
-        (target, params: Parameters<typeof fade>[1], options?: { direction: string }) => {
-            onDirection?.(options?.direction);
+        (target, params: Parameters<typeof fade>[1], options) => {
+            onDirection?.(options.direction);
+            if (deferred)
+                return () => {
+                    onResolve?.();
+                    return fade(target, params);
+                };
             return fade(target, params);
         }
     );
