@@ -184,9 +184,9 @@ it.each([false, true])('does not synthesize overlay callbacks for inline respons
     expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
 });
 
-it('uses the private Offcanvas panel when onShow clears the consumer ref', async () => {
+it.each(kinds)('uses the private %s panel when onShow clears the consumer ref', async (kind) => {
     const { events, targets, props } = callbacks();
-    render(Overlay, { kind: 'Offcanvas', clearRefOnShow: true, ...props });
+    render(Overlay, { kind, clearRefOnShow: true, ...props });
     await vi.advanceTimersByTimeAsync(400);
     expect(events).toEqual(['show', 'shown']);
     expect(targets).toEqual([screen.getByTestId('overlay'), screen.getByTestId('overlay')]);
@@ -197,4 +197,44 @@ it('forwards Svelte transition direction to the wrapped transition', async () =>
     render(NativeIntro, { props: { onShow: vi.fn(), onShown: vi.fn(), onDirection }, intro: true });
     await vi.advanceTimersByTimeAsync(150);
     expect(onDirection).toHaveBeenCalledExactlyOnceWith('both');
+});
+
+it('preserves native deferred transition completion', async () => {
+    const onShow = vi.fn();
+    const onShown = vi.fn();
+    const onResolve = vi.fn();
+    render(NativeIntro, { props: { onShow, onShown, onResolve, deferred: true }, intro: true });
+    await vi.advanceTimersByTimeAsync(1);
+    expect(onResolve).toHaveBeenCalledOnce();
+    expect(onShow).toHaveBeenCalledOnce();
+    expect(onShown).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(150);
+    expect(onShown).toHaveBeenCalledOnce();
+});
+
+it('completes the lifecycle for a panel mounted into a detached target', async () => {
+    const target = document.createElement('div');
+    const onShown = vi.fn();
+    const instance = mount(Modal.Root, { target, props: { isShown: true, onShown } });
+    try {
+        await vi.advanceTimersByTimeAsync(400);
+        expect(target.isConnected).toBe(false);
+        expect(onShown).toHaveBeenCalledOnce();
+    } finally {
+        await unmount(instance);
+    }
+});
+
+it.each(kinds)('mirrors the public %s ref through close, reopen and unmount', async (kind) => {
+    const view = render(Overlay, { kind });
+    await vi.advanceTimersByTimeAsync(400);
+    expect(view.component.getElementRef()).toBe(screen.getByTestId('overlay'));
+    await view.rerender({ isShown: false });
+    await vi.advanceTimersByTimeAsync(400);
+    expect(view.component.getElementRef()).toBeNull();
+    await view.rerender({ isShown: true });
+    await vi.advanceTimersByTimeAsync(400);
+    expect(view.component.getElementRef()).toBe(screen.getByTestId('overlay'));
+    view.unmount();
+    expect(view.component.getElementRef()).toBeNull();
 });

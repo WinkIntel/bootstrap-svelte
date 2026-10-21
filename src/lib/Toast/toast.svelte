@@ -80,6 +80,13 @@ Lightweight notifications designed to mimic push notifications that modern web a
         ...restOfProps
     }: Toast.RootProps = $props();
 
+    // Keep lifecycle identity private while mirroring the consumer-bindable ref.
+    let panelElement: HTMLDivElement | null = $state(null);
+    function setPanelElement(element: HTMLDivElement | null) {
+        panelElement = element;
+        if (elementRef !== element) elementRef = element;
+    }
+
     const rootState: ToastRootState = initToastRootState({
         get isShown() {
             return isShown;
@@ -128,7 +135,7 @@ Lightweight notifications designed to mimic push notifications that modern web a
     );
     const showTransition = initialShow(
         () => rootState.isShown,
-        () => elementRef,
+        () => panelElement,
         fade
     );
 </script>
@@ -137,7 +144,7 @@ Lightweight notifications designed to mimic push notifications that modern web a
     <div
         aria-atomic="true"
         aria-live="assertive"
-        bind:this={elementRef}
+        bind:this={() => panelElement, setPanelElement}
         class={classes}
         role="alert"
         {id}

@@ -37,6 +37,9 @@
         if (clearRefOnShow) elementRef = null;
         if (closeOnShow) isShown = false;
     }
+    export function getElementRef() {
+        return elementRef;
+    }
     export function hide() {
         isShown = false;
     }
@@ -48,7 +51,7 @@
 <button id="initial-tooltip-reference">Reference</button>
 {#if mounted}
     {#if kind === 'Modal'}
-        <Modal.Root {isShown} onShow={handleShow} {onShown} {onHide} {onHidden} data-testid="overlay">
+        <Modal.Root bind:elementRef {isShown} onShow={handleShow} {onShown} {onHide} {onHidden} data-testid="overlay">
             <Modal.Dialog><Modal.Content><Modal.Body>Initially open</Modal.Body></Modal.Content></Modal.Dialog>
         </Modal.Root>
     {:else if kind === 'Offcanvas' && responsiveNavbar}
@@ -60,10 +63,11 @@
         <Offcanvas.Root bind:elementRef {isShown} {showOnBreakpoint} onShow={handleShow} {onShown} {onHide} {onHidden} data-testid="overlay"
             ><Offcanvas.Body>Initially open</Offcanvas.Body></Offcanvas.Root>
     {:else if kind === 'Toast'}
-        <Toast.Root {isShown} onShow={handleShow} {onShown} {onHide} {onHidden} doAutohide={false} data-testid="overlay"
+        <Toast.Root bind:elementRef {isShown} onShow={handleShow} {onShown} {onHide} {onHidden} doAutohide={false} data-testid="overlay"
             ><Toast.Body>Initially open</Toast.Body></Toast.Root>
     {:else}
         <Tooltip.Root
+            bind:elementRef
             container={portal ? 'body' : false}
             {isShown}
             onShow={handleShow}
