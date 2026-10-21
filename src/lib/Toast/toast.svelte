@@ -50,6 +50,7 @@ Lightweight notifications designed to mimic push notifications that modern web a
 - `useFade` (boolean): Optional. If true, applies a fade transition to the toast. Default is true.
 -->
 <script lang="ts">
+    import { initialShow } from '$lib/common/initial-show.js';
     import { uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
     import { fade } from 'svelte/transition';
@@ -121,6 +122,11 @@ Lightweight notifications designed to mimic push notifications that modern web a
             classValues
         )
     );
+    const showTransition = initialShow(
+        () => rootState.isShown,
+        () => elementRef,
+        fade
+    );
 </script>
 
 {#if rootState.isShown}
@@ -135,7 +141,7 @@ Lightweight notifications designed to mimic push notifications that modern web a
         onintroend={onShown}
         onoutrostart={onHide}
         onoutroend={onHidden}
-        transition:fade={{ duration: useFade ? 150 : 0 }}
+        transition:showTransition={{ duration: useFade ? 150 : 0 }}
         {...restOfProps}>
         {@render children?.()}
     </div>

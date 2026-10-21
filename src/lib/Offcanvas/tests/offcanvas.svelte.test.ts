@@ -1,8 +1,9 @@
+import { mockMatchMedia } from '$lib/common/tests/mock-match-media.js';
 import { BreakpointMinimumMediaQuery } from '$lib/common/types.js';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { createRawSnippet, tick } from 'svelte';
-import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Offcanvas } from '../index.js';
 import OffcanvasBasicTest from './offcanvas-basic-test.svelte';
 import OffcanvasNavbarTest from './offcanvas-navbar-test.svelte';
@@ -10,35 +11,6 @@ import OffcanvasStackedTest from './offcanvas-stacked-test.svelte';
 
 const lgQuery = BreakpointMinimumMediaQuery.lg!;
 const mdQuery = BreakpointMinimumMediaQuery.md!;
-
-function mockMatchMedia(initialMatches: Record<string, boolean> = {}) {
-    const originalMatchMedia = window.matchMedia;
-    onTestFinished(() => {
-        window.matchMedia = originalMatchMedia;
-    });
-    const queries = new Map<string, MediaQueryList>();
-    window.matchMedia = vi.fn((query: string) => {
-        let mediaQuery = queries.get(query);
-        if (!mediaQuery) {
-            mediaQuery = Object.assign(new EventTarget(), {
-                media: query,
-                matches: initialMatches[query] ?? false,
-                onchange: null,
-                addListener: vi.fn(),
-                removeListener: vi.fn()
-            });
-            queries.set(query, mediaQuery);
-        }
-        return mediaQuery;
-    });
-
-    return (query: string, matches: boolean) => {
-        const mediaQuery = queries.get(query);
-        if (!mediaQuery) throw new Error(`Expected a registered media query: ${query}`);
-        Object.defineProperty(mediaQuery, 'matches', { value: matches, configurable: true });
-        mediaQuery.dispatchEvent(new Event('change'));
-    };
-}
 
 async function openStackedOffcanvas(): Promise<void> {
     await fireEvent.click(screen.getByTestId('open-offcanvas-a'));
@@ -109,16 +81,28 @@ describe('Offcanvas Component', () => {
         expect(bottomOffcanvas).toHaveAttribute('id', 'bottom-offcanvas');
     });
 
-    it('should render with different backdrop options', () => {
-        render(OffcanvasBasicTest);
-
-        // Static backdrop option
-        const staticBackdrop = screen.getByTestId('static-backdrop');
-        expect(staticBackdrop).toHaveClass('offcanvas');
-
-        // No backdrop option
-        const noBackdrop = screen.getByTestId('no-backdrop');
-        expect(noBackdrop).toHaveClass('offcanvas');
+    it.each([true, 'static', false] as const)('renders and handles useBackdrop=%s', async (useBackdrop) => {
+        const onHide = vi.fn();
+        const onHidePrevented = vi.fn();
+        render(Offcanvas.Root, { isShown: true, useBackdrop, onHide, onHidePrevented });
+        await tick();
+        const backdrop = document.querySelector('.offcanvas-backdrop');
+        if (useBackdrop === false) {
+            expect(backdrop).toBeNull();
+            expect(screen.getByRole('dialog')).toBeInTheDocument();
+        } else {
+            expect(backdrop).toBeInTheDocument();
+            await fireEvent.mouseDown(backdrop!);
+            if (useBackdrop === 'static') {
+                expect(onHidePrevented).toHaveBeenCalledOnce();
+                expect(onHide).not.toHaveBeenCalled();
+                expect(screen.getByRole('dialog')).toBeInTheDocument();
+            } else {
+                await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+                expect(onHide).toHaveBeenCalledOnce();
+                expect(onHidePrevented).not.toHaveBeenCalled();
+            }
+        }
     });
 
     it('should render responsive offcanvas with breakpoint class', () => {
@@ -351,7 +335,7 @@ describe('Offcanvas Component', () => {
         });
 
         it('ignores the cleared query and resumes responsive behavior with a new breakpoint', async () => {
-            const setMatch = mockMatchMedia();
+            const { emit: setMatch } = mockMatchMedia();
             const { rerender } = render(Offcanvas.Root, { props: { showOnBreakpoint: 'lg' } });
             expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 

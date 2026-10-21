@@ -124,11 +124,8 @@ export class OffcanvasRootState {
             this.showOnBreakpoint = this.#navbarRootState.props.expandOnBreakpoint;
             $effect(() => {
                 if (this.#navbarRootState && this.#isShown !== this.#navbarRootState.isExpanded) {
-                    const navbarIsExpanded = this.#navbarRootState.isExpanded;
-                    // Because the transition is asynchronous, we need to wait for the next tick before toggling the state...
-                    tick().then(() => {
-                        this.#isShown = navbarIsExpanded;
-                    });
+                    // Keep visibility in sync before the initial shown callback completes.
+                    this.#isShown = this.#navbarRootState.isExpanded;
                 }
             });
         } else {

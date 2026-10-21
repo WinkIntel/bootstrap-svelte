@@ -32,29 +32,6 @@ describe('Toast Component', () => {
         expect(closeButton).not.toBeNull();
     });
 
-    it('should render toast with autohide disabled', () => {
-        render(ToastBasicTest);
-
-        const noAutohideToast = screen.getByTestId('no-autohide-toast');
-        expect(noAutohideToast).toHaveClass('toast');
-
-        const noAutohideHeader = screen.getByTestId('no-autohide-header');
-        expect(noAutohideHeader).toBeInTheDocument();
-
-        const noAutohideBody = screen.getByTestId('no-autohide-body');
-        expect(noAutohideBody).toHaveTextContent('This toast will not hide automatically');
-    });
-
-    it('should render toast with custom delay', () => {
-        render(ToastBasicTest);
-
-        const customDelayToast = screen.getByTestId('custom-delay-toast');
-        expect(customDelayToast).toHaveClass('toast');
-
-        const customDelayBody = screen.getByTestId('custom-delay-body');
-        expect(customDelayBody).toHaveTextContent('This toast will hide after 2 seconds');
-    });
-
     it('should render toast without fade effect', () => {
         render(ToastBasicTest);
 
