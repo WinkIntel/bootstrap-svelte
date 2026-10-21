@@ -278,7 +278,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
     }
     const showTransition = initialShow(
         () => rootState.isShown && !rootState.isMediaQueryMatched,
-        () => elementRef,
+        () => panelElement,
         fly
     );
 </script>

@@ -10,6 +10,7 @@
         mounted = true,
         closeOnShow = false,
         portal = false,
+        clearRefOnShow = false,
         responsiveNavbar = false,
         showOnBreakpoint,
         onShow,
@@ -22,6 +23,7 @@
         mounted?: boolean;
         closeOnShow?: boolean;
         portal?: boolean;
+        clearRefOnShow?: boolean;
         responsiveNavbar?: boolean;
         showOnBreakpoint?: Offcanvas.RootProps['showOnBreakpoint'];
         onShow?: (event: Event) => void;
@@ -29,8 +31,10 @@
         onHide?: (event: Event) => void;
         onHidden?: (event: Event) => void;
     } = $props();
+    let elementRef: HTMLDivElement | null = $state(null);
     function handleShow(event: Event) {
         onShow?.(event);
+        if (clearRefOnShow) elementRef = null;
         if (closeOnShow) isShown = false;
     }
     export function hide() {
@@ -53,7 +57,7 @@
                 ><Offcanvas.Body>Inline navigation</Offcanvas.Body></Offcanvas.Root
             ></Navbar.Root>
     {:else if kind === 'Offcanvas'}
-        <Offcanvas.Root {isShown} {showOnBreakpoint} onShow={handleShow} {onShown} {onHide} {onHidden} data-testid="overlay"
+        <Offcanvas.Root bind:elementRef {isShown} {showOnBreakpoint} onShow={handleShow} {onShown} {onHide} {onHidden} data-testid="overlay"
             ><Offcanvas.Body>Initially open</Offcanvas.Body></Offcanvas.Root>
     {:else if kind === 'Toast'}
         <Toast.Root {isShown} onShow={handleShow} {onShown} {onHide} {onHidden} doAutohide={false} data-testid="overlay"
