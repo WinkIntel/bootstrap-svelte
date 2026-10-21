@@ -14,6 +14,8 @@ beforeAll(async () => {
         configFile: false,
         plugins: [svelte({ configFile: resolve(projectRoot, 'svelte.config.js') })],
         resolve: { alias: { $lib: resolve(projectRoot, 'src/lib') } },
+        // Render SSR directly: this one-shot server cannot reload an invalidated pre-bundle.
+        ssr: { optimizeDeps: { noDiscovery: true, exclude: ['svelte'] } },
         server: { middlewareMode: true, hmr: false },
         appType: 'custom'
     });
