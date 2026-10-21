@@ -2,6 +2,20 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 2.1.4 — Unreleased
+
+Compatible bug-fix patch for [#45](https://github.com/WinkIntel/bootstrap-svelte/issues/45). Public component APIs, dependencies and the Svelte peer requirement (`^5.29.0`) are unchanged.
+
+- Fixed initially shown Modal scroll locking and `modal-open` handling, including hydration, with cleanup preserved on close and unmount.
+- Fixed initial `onShow`/`onShown` delivery for Modal, Offcanvas, Toast and Tooltip when Svelte skips a local intro. Native transition timing is preserved; closing or unmounting from `onShow` cancels synthetic completion, and responsive inline Offcanvas panels do not receive synthetic overlay callbacks.
+- Kept lifecycle DOM identity private across all four overlays so clearing a consumer-bound `elementRef` inside `onShow` no longer suppresses `onShown`. Public ref assignment and cleanup remain intact.
+- Preserved Svelte transition direction and deferred transition results through the internal lifecycle wrapper.
+
+### Testing
+
+- Added overlay dismissal coverage and library coverage floors ([#44](https://github.com/WinkIntel/bootstrap-svelte/issues/44), [#112](https://github.com/WinkIntel/bootstrap-svelte/pull/112)).
+- Added initial lifecycle, SSR/hydration, ref-cleanup and deferred-transition regressions ([#113](https://github.com/WinkIntel/bootstrap-svelte/pull/113), [#115](https://github.com/WinkIntel/bootstrap-svelte/pull/115)).
+
 ## 2.1.3 — 2026-10-19
 
 Documentation-only npm patch. Library runtime, public APIs, dependencies, and the Svelte peer requirement (`^5.29.0`) are unchanged.
