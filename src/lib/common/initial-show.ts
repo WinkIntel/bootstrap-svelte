@@ -1,14 +1,18 @@
 import { onMount, tick } from 'svelte';
 import type { TransitionConfig } from 'svelte/transition';
 
+type TransitionOptions = { direction: 'in' | 'out' | 'both' };
+type TransitionResult = TransitionConfig | (() => TransitionConfig);
+
 /** Complete the first visible lifecycle when Svelte skips a local initial intro.
  * Native intros keep their timing; subsequent opens are handled only by their events.
+ * The element getter must return the component-owned DOM reference.
  * Internal helper: deliberately not exported from the package entry point.
  */
 export function initialShow<Params>(
     isShown: () => boolean,
     element: () => HTMLElement | null,
-    transition: (element: Element, params: Params) => TransitionConfig
+    transition: (element: Element, params: Params, options: TransitionOptions) => TransitionResult
 ) {
     let transitionScheduled = false;
     onMount(() => {
@@ -28,10 +32,10 @@ export function initialShow<Params>(
             mounted = false;
         };
     });
-    return (target: Element, params: Params) => {
+    return (target: Element, params: Params, options: TransitionOptions) => {
         // Transition functions run when Svelte schedules an intro/outro, before
         // introstart (which can wait for an animation frame or delay).
         transitionScheduled = true;
-        return transition(target, params);
+        return transition(target, params, options);
     };
 }

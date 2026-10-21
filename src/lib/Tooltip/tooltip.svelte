@@ -80,6 +80,13 @@ Add small overlay content to any element for housing secondary information or in
         ...restOfProps
     }: Tooltip.RootProps = $props();
 
+    // Keep lifecycle identity private while mirroring the consumer-bindable ref.
+    let panelElement: HTMLDivElement | null = $state(null);
+    function setPanelElement(element: HTMLDivElement | null) {
+        panelElement = element;
+        if (elementRef !== element) elementRef = element;
+    }
+
     // Set defaults based on type
     let effectiveId: string = $derived(id || `${type}-${uid}`);
     let effectivePlacement: Tooltip.RootProps['placement'] = $derived(placement || (type === 'tooltip' ? 'top' : 'right'));
@@ -282,7 +289,7 @@ Add small overlay content to any element for housing secondary information or in
     let containerElement = $derived(container === false ? 'body' : container);
     const showTransition = initialShow(
         () => isShown,
-        () => elementRef,
+        () => panelElement,
         fade
     );
 </script>
@@ -290,7 +297,7 @@ Add small overlay content to any element for housing secondary information or in
 <Portal target={containerElement} disabled={container === false}>
     {#if isShown}
         <div
-            bind:this={elementRef}
+            bind:this={() => panelElement, setPanelElement}
             class={classes}
             data-popper-placement={currentPopperPlacement}
             id={effectiveId}
