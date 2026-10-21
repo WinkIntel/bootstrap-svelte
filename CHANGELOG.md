@@ -2,6 +2,25 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 1.1.3 — Unreleased
+
+Compatible bug-fix patch for [#45](https://github.com/WinkIntel/bootstrap-svelte/issues/45). Public component APIs, dependencies and the Svelte peer requirement (`^5.29.0`) are unchanged.
+
+- Fixed initially shown Modal scroll locking and `modal-open` handling, including hydration, with cleanup preserved on close and unmount.
+- Fixed initial `onShow`/`onShown` delivery for Modal, Offcanvas, Toast and Tooltip when Svelte skips a local intro. Native transition timing is preserved; closing or unmounting from `onShow` cancels synthetic completion, and responsive inline Offcanvas panels do not receive synthetic overlay callbacks.
+- Kept lifecycle DOM identity private across all four overlays so clearing a consumer-bound `elementRef` inside `onShow` no longer suppresses `onShown`. Public ref assignment and cleanup remain intact.
+- Preserved Svelte transition direction and deferred transition results through the internal lifecycle wrapper.
+- Synchronized the existing 1.x Navbar-to-Offcanvas visibility update so a conditionally mounted panel does not report shown after its `onShow` callback closes it. Existing 1.x breakpoint behavior is retained.
+
+### Testing
+
+- Backported applicable overlay dismissal tests from #44 and added lifecycle, SSR/hydration, ref-cleanup, deferred-transition and Navbar cancellation regressions ([#114](https://github.com/WinkIntel/bootstrap-svelte/pull/114), [#116](https://github.com/WinkIntel/bootstrap-svelte/pull/116)). No 2.x coverage tooling or gates were added.
+
+### Release tooling
+
+- Corrected the protected reusable App-key contract and added the separately approved configuration-only check ([#101](https://github.com/WinkIntel/bootstrap-svelte/pull/101), [#103](https://github.com/WinkIntel/bootstrap-svelte/pull/103)).
+- Updated pinned setup-node, upload-artifact and download-artifact actions ([#106](https://github.com/WinkIntel/bootstrap-svelte/pull/106)).
+
 ## 1.1.2 — 2026-10-14
 
 - Fixed presses inside responsive Offcanvas panels (`showOnBreakpoint`) incorrectly dismissing the overlay or firing `onHidePrevented` with a static backdrop. Inside buttons remain usable; outside dismissal and trigger ownership are preserved ([#43](https://github.com/WinkIntel/bootstrap-svelte/issues/43)).
