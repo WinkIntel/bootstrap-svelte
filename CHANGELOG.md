@@ -2,7 +2,7 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## 2.1.4 — 2026-10-21
+## 2.1.4 — 2026-10-22
 
 Compatible bug-fix patch for [#45](https://github.com/WinkIntel/bootstrap-svelte/issues/45). Public component APIs, runtime dependencies and the Svelte peer requirement (`^5.29.0`) are unchanged. The Vite development dependency was updated to 8.1.6.
 
