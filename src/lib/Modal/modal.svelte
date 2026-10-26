@@ -32,9 +32,9 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 <Modal.Root isKeyboardDismissible={true}>...</Modal.Root>
 ```
 
-### DOM event handlers and accessibility
-DOM transition handlers (`onintrostart`, `onintroend`, `onoutrostart`, `onoutroend`)
-run after the corresponding component lifecycle callback and internal cleanup.
+### Lifecycle callbacks and accessibility
+Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
+These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
 The root `onmousedown` callback runs after internal backdrop handling.
 The component owns its `role` and `aria-modal`; consumer accessible names and other attributes remain configurable.
 
