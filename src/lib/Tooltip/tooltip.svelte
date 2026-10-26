@@ -32,6 +32,11 @@ Add small overlay content to any element for housing secondary information or in
 <div id="custom-container"></div>
 <Tooltip.Root container="#custom-container" referenceElementId="container-button">...</Tooltip.Root>
 ```
+### DOM event handlers and accessibility
+DOM transition handlers (`onintrostart`, `onintroend`, `onoutrostart`, `onoutroend`)
+run after the corresponding component lifecycle callback and internal cleanup.
+The component owns its `role`; consumer accessible names and other attributes remain configurable.
+
 ### Props
 - `children` (slot): Content to display inside the tooltip.
 - `class` (string): Optional. Additional CSS classes.
@@ -68,6 +73,10 @@ Add small overlay content to any element for housing secondary information or in
         elementRef = $bindable(null),
         id,
         isShown = false,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
         onHide = noop,
         onHidden = noop,
         onShow = noop,
@@ -301,13 +310,25 @@ Add small overlay content to any element for housing secondary information or in
             class={classes}
             data-popper-placement={currentPopperPlacement}
             id={effectiveId}
-            onintrostart={onShow}
-            onintroend={onShown}
-            onoutrostart={onHide}
-            onoutroend={handleOnHidden}
-            role="tooltip"
             transition:showTransition={{ duration: useFade ? 150 : 0 }}
-            {...restOfProps}>
+            {...restOfProps}
+            onintrostart={(event) => {
+                onShow.call(event.currentTarget, event);
+                onIntroStart?.call(event.currentTarget, event);
+            }}
+            onintroend={(event) => {
+                onShown.call(event.currentTarget, event);
+                onIntroEnd?.call(event.currentTarget, event);
+            }}
+            onoutrostart={(event) => {
+                onHide.call(event.currentTarget, event);
+                onOutroStart?.call(event.currentTarget, event);
+            }}
+            onoutroend={(event) => {
+                handleOnHidden(event);
+                onOutroEnd?.call(event.currentTarget, event);
+            }}
+            role="tooltip">
             <div class={`${type}-arrow`} data-popper-arrow></div>
             {@render children?.()}
         </div>

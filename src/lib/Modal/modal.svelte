@@ -32,6 +32,12 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 <Modal.Root isKeyboardDismissible={true}>...</Modal.Root>
 ```
 
+### DOM event handlers and accessibility
+DOM transition handlers (`onintrostart`, `onintroend`, `onoutrostart`, `onoutroend`)
+run after the corresponding component lifecycle callback and internal cleanup.
+The root `onmousedown` callback runs after internal backdrop handling.
+The component owns its `role` and `aria-modal`; consumer accessible names and other attributes remain configurable.
+
 ### Props
 - `children` (slot): Content to display inside the modal.
 - `class` (string): Optional. Additional CSS classes.
@@ -75,6 +81,11 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         isShown = false,
         isKeyboardDismissible = true,
         isFocusable = true,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
+        onmousedown: onMouseDown,
         onHide = noop,
         onHidePrevented = noop,
         onHidden = noop,
@@ -347,20 +358,35 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 {#if rootState.isShown}
     <div
         aria-labelledby={rootState.titleId}
-        aria-modal={rootState.isShown}
         bind:this={() => panelElement, setPanelElement}
         class={classes}
         {id}
-        role="dialog"
         style:z-index={overlayZIndex}
         tabindex={isFocusable ? -1 : undefined}
-        onmousedown={handleBackdropMouseDown}
-        onintrostart={onShow}
-        onintroend={onShown}
-        onoutrostart={onHide}
-        onoutroend={handleOnHidden}
         transition:showTransition={{ duration: useFade ? 300 : 0, y: '-50px', opacity: 0 }}
-        {...restOfProps}>
+        {...restOfProps}
+        aria-modal={rootState.isShown}
+        role="dialog"
+        onintrostart={(event) => {
+            onShow.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onShown.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
+        onoutrostart={(event) => {
+            onHide.call(event.currentTarget, event);
+            onOutroStart?.call(event.currentTarget, event);
+        }}
+        onoutroend={(event) => {
+            handleOnHidden(event);
+            onOutroEnd?.call(event.currentTarget, event);
+        }}
+        onmousedown={(event) => {
+            handleBackdropMouseDown(event);
+            onMouseDown?.call(event.currentTarget, event);
+        }}>
         {@render children?.()}
     </div>
 {/if}

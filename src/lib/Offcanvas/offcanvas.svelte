@@ -38,6 +38,11 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 <Offcanvas.Root showOnBreakpoint="lg">...</Offcanvas.Root>
 ```
 
+### DOM event handlers and accessibility
+DOM transition handlers (`onintrostart`, `onintroend`, `onoutrostart`, `onoutroend`)
+run after the corresponding component lifecycle callback and internal cleanup.
+The component owns its `role` and `aria-modal`; consumer accessible names and other attributes remain configurable.
+
 ### Props
 - `children` (slot): Content to display inside the offcanvas.
 - `class` (string): Optional. Additional CSS classes.
@@ -83,6 +88,10 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         showOnBreakpoint,
         triggerElements = [],
         useBackdrop = true,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
         onHide = noop,
         onHidePrevented = noop,
         onHidden = noop,
@@ -297,19 +306,31 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 
 {#if rootState.isShown}
     <div
-        aria-modal={rootState.isShown}
         bind:this={() => panelElement, setPanelElement}
         class={classes}
         {id}
-        onintrostart={onShow}
-        onintroend={onShown}
-        onoutrostart={onHide}
-        onoutroend={handleOnHidden}
-        role={rootState.isShown ? 'dialog' : undefined}
         style:z-index={overlayZIndex}
         tabindex="-1"
         transition:showTransition={{ duration: rootState.transitionDuration, x: flyX, y: flyY, opacity: 1 }}
-        {...restOfProps}>
+        {...restOfProps}
+        aria-modal={rootState.isShown}
+        onintrostart={(event) => {
+            onShow.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onShown.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
+        onoutrostart={(event) => {
+            onHide.call(event.currentTarget, event);
+            onOutroStart?.call(event.currentTarget, event);
+        }}
+        onoutroend={(event) => {
+            handleOnHidden(event);
+            onOutroEnd?.call(event.currentTarget, event);
+        }}
+        role={rootState.isShown ? 'dialog' : undefined}>
         {@render children?.()}
     </div>
 {/if}
