@@ -32,6 +32,12 @@ Add small overlay content to any element for housing secondary information or in
 <div id="custom-container"></div>
 <Tooltip.Root container="#custom-container" referenceElementId="container-button">...</Tooltip.Root>
 ```
+### Lifecycle callbacks and accessibility
+Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
+These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
+Tooltips retain `role="tooltip"`. When used by Popover, the role remains consumer-configurable
+for the supplied content. Consumer accessible names and other attributes remain configurable.
+
 ### Props
 - `children` (slot): Content to display inside the tooltip.
 - `class` (string): Optional. Additional CSS classes.
@@ -68,6 +74,10 @@ Add small overlay content to any element for housing secondary information or in
         elementRef = $bindable(null),
         id,
         isShown = false,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
         onHide = noop,
         onHidden = noop,
         onShow = noop,
@@ -75,6 +85,7 @@ Add small overlay content to any element for housing secondary information or in
         placement,
         referenceElementId,
         trigger,
+        role = 'tooltip',
         type = 'tooltip',
         useFade = true,
         ...restOfProps
@@ -215,7 +226,7 @@ Add small overlay content to any element for housing secondary information or in
 
     const handleOnHidden: EventListener = (event: Event) => {
         destroyPopper();
-        onHidden(event);
+        onHidden.call(event.currentTarget, event);
     };
 
     onMount(() => {
@@ -301,13 +312,25 @@ Add small overlay content to any element for housing secondary information or in
             class={classes}
             data-popper-placement={currentPopperPlacement}
             id={effectiveId}
-            onintrostart={onShow}
-            onintroend={onShown}
-            onoutrostart={onHide}
-            onoutroend={handleOnHidden}
-            role="tooltip"
             transition:showTransition={{ duration: useFade ? 150 : 0 }}
-            {...restOfProps}>
+            {...restOfProps}
+            onintrostart={(event) => {
+                onShow.call(event.currentTarget, event);
+                onIntroStart?.call(event.currentTarget, event);
+            }}
+            onintroend={(event) => {
+                onShown.call(event.currentTarget, event);
+                onIntroEnd?.call(event.currentTarget, event);
+            }}
+            onoutrostart={(event) => {
+                onHide.call(event.currentTarget, event);
+                onOutroStart?.call(event.currentTarget, event);
+            }}
+            onoutroend={(event) => {
+                handleOnHidden(event);
+                onOutroEnd?.call(event.currentTarget, event);
+            }}
+            role={type === 'popover' ? role : 'tooltip'}>
             <div class={`${type}-arrow`} data-popper-arrow></div>
             {@render children?.()}
         </div>
