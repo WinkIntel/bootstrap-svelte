@@ -58,6 +58,8 @@ Bootstrap-styled alert component for displaying messages.
         isOpen = $bindable(true),
         onClose = noop,
         onClosed = noop,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
         ...restOfProps
     }: AlertRootProps = $props();
 
@@ -86,8 +88,14 @@ Bootstrap-styled alert component for displaying messages.
     <div
         bind:this={elementRef}
         class={classes}
-        onoutrostart={onClose}
-        onoutroend={onClosed}
+        onoutrostart={(event) => {
+            onClose.call(event.currentTarget, event);
+            onOutroStart?.call(event.currentTarget, event);
+        }}
+        onoutroend={(event) => {
+            onClosed.call(event.currentTarget, event);
+            onOutroEnd?.call(event.currentTarget, event);
+        }}
         role="alert"
         transition:fade={{ duration: isAnimated ? 150 : 0 }}
         {...restOfProps}>

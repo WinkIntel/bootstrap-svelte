@@ -57,6 +57,10 @@ Supports both vertical and horizontal collapse directions.
         onCollapsed = noop,
         onExpand = noop,
         onExpanded = noop,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
         ...restOfProps
     }: CollapseRootProps = $props();
 
@@ -67,10 +71,22 @@ Supports both vertical and horizontal collapse directions.
     <div
         bind:this={elementRef}
         class={classes}
-        onintrostart={onExpand}
-        onintroend={onExpanded}
-        onoutrostart={onCollapse}
-        onoutroend={onCollapsed}
+        onintrostart={(event) => {
+            onExpand.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onExpanded.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
+        onoutrostart={(event) => {
+            onCollapse.call(event.currentTarget, event);
+            onOutroStart?.call(event.currentTarget, event);
+        }}
+        onoutroend={(event) => {
+            onCollapsed.call(event.currentTarget, event);
+            onOutroEnd?.call(event.currentTarget, event);
+        }}
         in:collapseIn={{ isHorizontal, transitionDuration }}
         out:collapseOut={{ isHorizontal, transitionDuration }}
         {...restOfProps}>
