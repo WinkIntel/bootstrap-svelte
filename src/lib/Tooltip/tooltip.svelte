@@ -32,9 +32,9 @@ Add small overlay content to any element for housing secondary information or in
 <div id="custom-container"></div>
 <Tooltip.Root container="#custom-container" referenceElementId="container-button">...</Tooltip.Root>
 ```
-### DOM event handlers and accessibility
-DOM transition handlers (`onintrostart`, `onintroend`, `onoutrostart`, `onoutroend`)
-run after the corresponding component lifecycle callback and internal cleanup.
+### Lifecycle callbacks and accessibility
+Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
+These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
 The component owns its `role`; consumer accessible names and other attributes remain configurable.
 
 ### Props

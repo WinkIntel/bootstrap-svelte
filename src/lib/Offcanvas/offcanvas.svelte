@@ -38,9 +38,9 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 <Offcanvas.Root showOnBreakpoint="lg">...</Offcanvas.Root>
 ```
 
-### DOM event handlers and accessibility
-DOM transition handlers (`onintrostart`, `onintroend`, `onoutrostart`, `onoutroend`)
-run after the corresponding component lifecycle callback and internal cleanup.
+### Lifecycle callbacks and accessibility
+Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
+These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
 The component owns its `role` and `aria-modal`; consumer accessible names and other attributes remain configurable.
 
 ### Props
