@@ -47,6 +47,8 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         onSlide = noop,
         onSlid = noop,
         style,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
         ...restOfProps
     }: Carousel.ItemProps = $props();
     let orderElementRef: HTMLSpanElement | null = $state(null);
@@ -124,8 +126,14 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         bind:this={elementRef}
         class={classes}
         {id}
-        onintrostart={onSlide}
-        onintroend={onSlid}
+        onintrostart={(event) => {
+            onSlide.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onSlid.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
         style={styles}
         in:fly={{
             duration: itemState.root.transitionDuration,
@@ -145,8 +153,14 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         bind:this={elementRef}
         class={classes}
         {id}
-        onintrostart={onSlide}
-        onintroend={onSlid}
+        onintrostart={(event) => {
+            onSlide.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onSlid.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
         style={styles}
         transition:fade={{
             delay: itemState.order ? itemState.root.transitionDuration / 2 : 0,
@@ -164,8 +178,14 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         bind:this={elementRef}
         class={classes}
         {id}
-        onintrostart={onSlide}
-        onintroend={onSlid}
+        onintrostart={(event) => {
+            onSlide.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onSlid.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
         in:fly={{
             duration: itemState.root.transitionDuration,
             x: '0%',
@@ -184,8 +204,14 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         bind:this={elementRef}
         class={classes}
         {id}
-        onintrostart={onSlide}
-        onintroend={onSlid}
+        onintrostart={(event) => {
+            onSlide.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onSlid.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
         transition:fade={{ duration: 0 }}
         onmouseenter={handleMouseEnter}
         onmouseleave={handleMouseLeave}
