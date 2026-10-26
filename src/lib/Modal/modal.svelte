@@ -36,7 +36,8 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
 These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
 The root `onmousedown` callback runs after internal backdrop handling.
-The component owns its `role` and `aria-modal`; consumer accessible names and other attributes remain configurable.
+The component supports `role="dialog"` (default) or `role="alertdialog"` and owns `aria-modal`.
+Consumer accessible names and other attributes remain configurable.
 
 ### Props
 - `children` (slot): Content to display inside the modal.
@@ -78,6 +79,7 @@ The component owns its `role` and `aria-modal`; consumer accessible names and ot
         class: classValues,
         elementRef = $bindable(null),
         id = `modal-${uid}`,
+        role,
         isShown = false,
         isKeyboardDismissible = true,
         isFocusable = true,
@@ -218,7 +220,7 @@ The component owns its `role` and `aria-modal`; consumer accessible names and ot
             releaseBodyScrollLock(bodyElement);
             holdsScrollLock = false;
         }
-        onHidden(event);
+        onHidden.call(event.currentTarget, event);
     };
 
     async function focusModal(): Promise<void> {
@@ -356,6 +358,7 @@ The component owns its `role` and `aria-modal`; consumer accessible names and ot
 </script>
 
 {#if rootState.isShown}
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex (role is restricted to dialog or alertdialog) -->
     <div
         aria-labelledby={rootState.titleId}
         bind:this={() => panelElement, setPanelElement}
@@ -366,7 +369,7 @@ The component owns its `role` and `aria-modal`; consumer accessible names and ot
         transition:showTransition={{ duration: useFade ? 300 : 0, y: '-50px', opacity: 0 }}
         {...restOfProps}
         aria-modal={rootState.isShown}
-        role="dialog"
+        role={role === 'alertdialog' ? 'alertdialog' : 'dialog'}
         onintrostart={(event) => {
             onShow.call(event.currentTarget, event);
             onIntroStart?.call(event.currentTarget, event);

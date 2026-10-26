@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { mockMatchMedia } from './mock-match-media.js';
 import Overlay from './overlay-owned-props-test.svelte';
 
 const poppers = vi.hoisted(() => ({ destroyers: [] as ReturnType<typeof vi.fn>[] }));
@@ -52,7 +53,10 @@ describe.each(kinds)('%s owned props', (kind) => {
                     expect(this).toBe(event.currentTarget);
                     events.push('hide');
                 },
-                onHidden: () => events.push('hidden'),
+                onHidden: function (this: HTMLDivElement, event: Event) {
+                    expect(this).toBe(event.currentTarget);
+                    events.push('hidden');
+                },
                 rootProps: {
                     onintrostart: consumer('introstart'),
                     onintroend: consumer('introend'),
@@ -154,4 +158,59 @@ it.each(['Modal', 'Offcanvas'] as const)('releases %s locks on unmount with cons
     unmount();
     expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
     expect(document.body).not.toHaveClass('modal-open');
+});
+
+it('retains the documented status/polite Toast pattern', async () => {
+    const { rerender } = render(Overlay, { kind: 'Toast', rootProps: { role: 'status', 'aria-live': 'polite' } });
+    await tick();
+    expect(screen.getByTestId('overlay')).toHaveAttribute('role', 'status');
+    expect(screen.getByTestId('overlay')).toHaveAttribute('aria-live', 'polite');
+    await rerender({ rootProps: { role: 'alert', 'aria-live': 'assertive' } });
+    expect(screen.getByTestId('overlay')).toHaveAttribute('role', 'alert');
+    expect(screen.getByTestId('overlay')).toHaveAttribute('aria-live', 'assertive');
+});
+
+it('retains alertdialog Modal semantics while protecting aria-modal', async () => {
+    const { rerender } = render(Overlay, { kind: 'Modal', rootProps: { role: 'alertdialog', 'aria-modal': false } });
+    await tick();
+    expect(screen.getByTestId('overlay')).toHaveAttribute('role', 'alertdialog');
+    expect(screen.getByTestId('overlay')).toHaveAttribute('aria-modal', 'true');
+    await rerender({ rootProps: { role: 'dialog' } });
+    expect(screen.getByTestId('overlay')).toHaveAttribute('role', 'dialog');
+});
+
+it('retains interactive Popover role and onHidden receiver through Tooltip', async () => {
+    const onHidden = vi.fn(function (this: HTMLDivElement, event: Event) {
+        expect(this).toBe(panel);
+        expect(event.currentTarget).toBe(panel);
+    });
+    const { rerender } = render(Overlay, { kind: 'Popover', onHidden, rootProps: { role: 'dialog', 'aria-label': 'Filters' } });
+    await vi.advanceTimersByTimeAsync(400);
+    const panel = screen.getByTestId('overlay');
+    expect(panel).toHaveAttribute('role', 'dialog');
+    expect(panel).toHaveAttribute('aria-label', 'Filters');
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument();
+    await rerender({ isShown: false });
+    await vi.advanceTimersByTimeAsync(400);
+    expect(onHidden).toHaveBeenCalledOnce();
+});
+
+it('only exposes Offcanvas dialog semantics below its inline breakpoint', async () => {
+    const media = mockMatchMedia(1200);
+    render(Overlay, { kind: 'Offcanvas', showOnBreakpoint: 'lg', rootProps: { 'aria-modal': true } });
+    await vi.advanceTimersByTimeAsync(400);
+    const panel = screen.getByTestId('overlay');
+    expect(panel).not.toHaveAttribute('role');
+    expect(panel).not.toHaveAttribute('aria-modal');
+    expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
+    media.setWidth(800);
+    await vi.advanceTimersByTimeAsync(400);
+    expect(panel).toHaveAttribute('role', 'dialog');
+    expect(panel).toHaveAttribute('aria-modal', 'true');
+    expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1');
+    media.setWidth(1200);
+    await vi.advanceTimersByTimeAsync(400);
+    expect(panel).not.toHaveAttribute('role');
+    expect(panel).not.toHaveAttribute('aria-modal');
+    expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
 });
