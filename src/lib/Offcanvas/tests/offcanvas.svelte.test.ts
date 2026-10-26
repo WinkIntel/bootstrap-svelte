@@ -309,22 +309,26 @@ describe('Offcanvas Component', () => {
     describe('changing responsive breakpoints', () => {
         it('hides an implicitly shown offcanvas when its matched breakpoint is cleared', async () => {
             mockMatchMedia({ [lgQuery]: true });
-            const { rerender } = render(Offcanvas.Root, { props: { showOnBreakpoint: 'lg' } });
+            const { rerender } = render(Offcanvas.Root, { props: { 'data-testid': 'responsive-panel', showOnBreakpoint: 'lg' } });
 
-            expect(screen.getByRole('dialog')).toHaveClass('offcanvas-lg', 'show');
+            expect(screen.getByTestId('responsive-panel')).toHaveClass('offcanvas-lg', 'show');
+            expect(screen.getByTestId('responsive-panel')).not.toHaveAttribute('role');
+            expect(screen.getByTestId('responsive-panel')).not.toHaveAttribute('aria-modal');
             expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
 
             await rerender({ showOnBreakpoint: undefined });
 
-            await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+            await waitFor(() => expect(screen.queryByTestId('responsive-panel')).not.toBeInTheDocument());
             expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
         });
 
         it('keeps an explicitly shown offcanvas open with a backdrop when its matched breakpoint is cleared', async () => {
             mockMatchMedia({ [lgQuery]: true });
-            const { rerender } = render(Offcanvas.Root, { props: { isShown: true, showOnBreakpoint: 'lg' } });
+            const { rerender } = render(Offcanvas.Root, { props: { 'data-testid': 'responsive-panel', isShown: true, showOnBreakpoint: 'lg' } });
 
-            expect(screen.getByRole('dialog')).toHaveClass('offcanvas-lg', 'show');
+            expect(screen.getByTestId('responsive-panel')).toHaveClass('offcanvas-lg', 'show');
+            expect(screen.getByTestId('responsive-panel')).not.toHaveAttribute('role');
+            expect(screen.getByTestId('responsive-panel')).not.toHaveAttribute('aria-modal');
             expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
 
             await rerender({ showOnBreakpoint: undefined });
@@ -336,31 +340,33 @@ describe('Offcanvas Component', () => {
 
         it('ignores the cleared query and resumes responsive behavior with a new breakpoint', async () => {
             const { emit: setMatch } = mockMatchMedia();
-            const { rerender } = render(Offcanvas.Root, { props: { showOnBreakpoint: 'lg' } });
-            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+            const { rerender } = render(Offcanvas.Root, { props: { 'data-testid': 'responsive-panel', showOnBreakpoint: 'lg' } });
+            expect(screen.queryByTestId('responsive-panel')).not.toBeInTheDocument();
 
             await rerender({ showOnBreakpoint: undefined });
             setMatch(lgQuery, true);
             await tick();
-            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+            expect(screen.queryByTestId('responsive-panel')).not.toBeInTheDocument();
 
             await rerender({ showOnBreakpoint: 'md' });
-            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+            expect(screen.queryByTestId('responsive-panel')).not.toBeInTheDocument();
             setMatch(mdQuery, true);
-            await waitFor(() => expect(screen.getByRole('dialog')).toHaveClass('offcanvas-md', 'show'));
+            await waitFor(() => expect(screen.getByTestId('responsive-panel')).toHaveClass('offcanvas-md', 'show'));
+            expect(screen.getByTestId('responsive-panel')).not.toHaveAttribute('role');
+            expect(screen.getByTestId('responsive-panel')).not.toHaveAttribute('aria-modal');
             expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
 
             setMatch(lgQuery, false);
             await tick();
-            expect(screen.getByRole('dialog')).toHaveClass('show');
+            expect(screen.getByTestId('responsive-panel')).toHaveClass('show');
 
             setMatch(mdQuery, false);
-            await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+            await waitFor(() => expect(screen.queryByTestId('responsive-panel')).not.toBeInTheDocument());
         });
 
         it.each([true, false])('preserves a prop changed to %s while the breakpoint matched', async (isShown) => {
             mockMatchMedia({ [lgQuery]: true });
-            const { rerender } = render(Offcanvas.Root, { props: { isShown: false, showOnBreakpoint: 'lg' } });
+            const { rerender } = render(Offcanvas.Root, { props: { 'data-testid': 'responsive-panel', isShown: false, showOnBreakpoint: 'lg' } });
             await rerender({ isShown: true });
             if (!isShown) await rerender({ isShown: false });
 
@@ -370,14 +376,16 @@ describe('Offcanvas Component', () => {
                 await waitFor(() => expect(document.querySelector('.offcanvas-backdrop')).toBeInTheDocument());
                 expect(screen.getByRole('dialog')).toHaveClass('show');
             } else {
-                await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+                await waitFor(() => expect(screen.queryByTestId('responsive-panel')).not.toBeInTheDocument());
                 expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
             }
         });
 
         it('locks once when a shown panel becomes an overlay and releases when it becomes inline', async () => {
             mockMatchMedia({ [lgQuery]: true });
-            const { rerender, unmount } = render(Offcanvas.Root, { props: { isShown: true, showOnBreakpoint: 'lg' } });
+            const { rerender, unmount } = render(Offcanvas.Root, {
+                props: { 'data-testid': 'responsive-panel', isShown: true, showOnBreakpoint: 'lg' }
+            });
             await tick();
             expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
 
@@ -390,7 +398,9 @@ describe('Offcanvas Component', () => {
             await rerender({ showOnBreakpoint: 'lg' });
             await waitFor(() => expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count'));
             expect(document.body.style.overflow).toBe('');
-            expect(screen.getByRole('dialog')).toHaveClass('show');
+            expect(screen.getByTestId('responsive-panel')).toHaveClass('show');
+            expect(screen.getByTestId('responsive-panel')).not.toHaveAttribute('role');
+            expect(screen.getByTestId('responsive-panel')).not.toHaveAttribute('aria-modal');
 
             await rerender({ showOnBreakpoint: undefined, isBodyScrollable: true });
             expect(document.querySelector('.offcanvas-backdrop')).toBeInTheDocument();

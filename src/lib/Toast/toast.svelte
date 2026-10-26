@@ -39,6 +39,12 @@ Lightweight notifications designed to mimic push notifications that modern web a
 </Toast.Container>
 ```
 
+### Lifecycle callbacks and accessibility
+Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
+These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
+Use `role="status"` with `aria-live="polite"` for routine confirmations, or the default
+`role="alert"` with `aria-live="assertive"` for urgent messages. Consumer accessible names remain configurable.
+
 ### Props
 - `children` (slot): Content to display inside the toast.
 - `class` (string): Optional. Additional CSS classes.
@@ -68,10 +74,15 @@ Lightweight notifications designed to mimic push notifications that modern web a
         children,
         class: classValues,
         delay = ToastRootState.DELAY_DEFAULT,
+        role,
         doAutohide = ToastRootState.DO_AUTOHIDE_DEFAULT,
         elementRef = $bindable(null),
         id = `toast-${uid}`,
         isShown = ToastRootState.IS_SHOWN_DEFAULT,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
         onHide = noop,
         onHidden = noop,
         onShow = noop,
@@ -146,14 +157,26 @@ Lightweight notifications designed to mimic push notifications that modern web a
         aria-live="assertive"
         bind:this={() => panelElement, setPanelElement}
         class={classes}
-        role="alert"
         {id}
-        onintrostart={onShow}
-        onintroend={onShown}
-        onoutrostart={onHide}
-        onoutroend={onHidden}
         transition:showTransition={{ duration: useFade ? 150 : 0 }}
-        {...restOfProps}>
+        {...restOfProps}
+        role={role === 'status' ? 'status' : 'alert'}
+        onintrostart={(event) => {
+            onShow.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onShown.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
+        onoutrostart={(event) => {
+            onHide.call(event.currentTarget, event);
+            onOutroStart?.call(event.currentTarget, event);
+        }}
+        onoutroend={(event) => {
+            onHidden.call(event.currentTarget, event);
+            onOutroEnd?.call(event.currentTarget, event);
+        }}>
         {@render children?.()}
     </div>
 {/if}

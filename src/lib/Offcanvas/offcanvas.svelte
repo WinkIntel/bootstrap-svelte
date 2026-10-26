@@ -38,6 +38,12 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 <Offcanvas.Root showOnBreakpoint="lg">...</Offcanvas.Root>
 ```
 
+### Lifecycle callbacks and accessibility
+Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
+These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
+The component owns `role="dialog"` and `aria-modal` in overlay mode and omits them when shown inline
+at its responsive breakpoint. Consumer accessible names and other attributes remain configurable.
+
 ### Props
 - `children` (slot): Content to display inside the offcanvas.
 - `class` (string): Optional. Additional CSS classes.
@@ -83,6 +89,10 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
         showOnBreakpoint,
         triggerElements = [],
         useBackdrop = true,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
         onHide = noop,
         onHidePrevented = noop,
         onHidden = noop,
@@ -221,7 +231,7 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
             releaseBodyScrollLock(bodyElement);
             holdsScrollLock = false;
         }
-        onHidden(event);
+        onHidden.call(event.currentTarget, event);
     };
 
     // Release a held scroll lock if the offcanvas is destroyed while shown,
@@ -288,19 +298,31 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 {#if rootState.isShown}
     <div
         {@attach () => rootState.registerControlledPanel()}
-        aria-modal={rootState.isShown}
         bind:this={() => panelElement, setPanelElement}
         class={classes}
         {id}
-        onintrostart={onShow}
-        onintroend={onShown}
-        onoutrostart={onHide}
-        onoutroend={handleOnHidden}
-        role={rootState.isShown ? 'dialog' : undefined}
         style:z-index={overlayZIndex}
         tabindex="-1"
         transition:showTransition={{ duration: rootState.transitionDuration, x: flyX, y: flyY, opacity: 1 }}
-        {...restOfProps}>
+        {...restOfProps}
+        aria-modal={rootState.isShown && !rootState.isMediaQueryMatched ? true : undefined}
+        onintrostart={(event) => {
+            onShow.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onShown.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
+        onoutrostart={(event) => {
+            onHide.call(event.currentTarget, event);
+            onOutroStart?.call(event.currentTarget, event);
+        }}
+        onoutroend={(event) => {
+            handleOnHidden(event);
+            onOutroEnd?.call(event.currentTarget, event);
+        }}
+        role={rootState.isShown && !rootState.isMediaQueryMatched ? 'dialog' : undefined}>
         {@render children?.()}
     </div>
 {/if}

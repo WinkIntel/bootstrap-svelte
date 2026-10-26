@@ -38,6 +38,13 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 <Modal.Root isKeyboardDismissible={true}>...</Modal.Root>
 ```
 
+### Lifecycle callbacks and accessibility
+Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
+These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
+The root `onmousedown` callback runs after internal backdrop handling.
+The component supports `role="dialog"` (default) or `role="alertdialog"` and owns `aria-modal`.
+Consumer accessible names and other attributes remain configurable.
+
 ### Props
 - `children` (slot): Content to display inside the modal.
 - `class` (string): Optional. Additional CSS classes.
@@ -78,9 +85,15 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
         class: classValues,
         elementRef = $bindable(null),
         id = `modal-${uid}`,
+        role,
         isShown = false,
         isKeyboardDismissible = true,
         isFocusable = true,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
+        onmousedown: onMouseDown,
         onHide = noop,
         onHidePrevented = noop,
         onHidden = noop,
@@ -213,7 +226,7 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
             releaseBodyScrollLock(bodyElement);
             holdsScrollLock = false;
         }
-        onHidden(event);
+        onHidden.call(event.currentTarget, event);
     };
 
     async function focusModal(): Promise<void> {
@@ -351,22 +364,38 @@ Add dialogs to your site for lightboxes, user notifications, or completely custo
 </script>
 
 {#if rootState.isShown}
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex (role is restricted to dialog or alertdialog) -->
     <div
         aria-labelledby={rootState.titleId}
-        aria-modal={rootState.isShown}
         bind:this={() => panelElement, setPanelElement}
         class={classes}
         {id}
-        role="dialog"
         style:z-index={overlayZIndex}
         tabindex={isFocusable ? -1 : undefined}
-        onmousedown={handleBackdropMouseDown}
-        onintrostart={onShow}
-        onintroend={onShown}
-        onoutrostart={onHide}
-        onoutroend={handleOnHidden}
         transition:showTransition={{ duration: useFade ? 300 : 0, y: '-50px', opacity: 0 }}
-        {...restOfProps}>
+        {...restOfProps}
+        aria-modal={rootState.isShown}
+        role={role === 'alertdialog' ? 'alertdialog' : 'dialog'}
+        onintrostart={(event) => {
+            onShow.call(event.currentTarget, event);
+            onIntroStart?.call(event.currentTarget, event);
+        }}
+        onintroend={(event) => {
+            onShown.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
+        onoutrostart={(event) => {
+            onHide.call(event.currentTarget, event);
+            onOutroStart?.call(event.currentTarget, event);
+        }}
+        onoutroend={(event) => {
+            handleOnHidden(event);
+            onOutroEnd?.call(event.currentTarget, event);
+        }}
+        onmousedown={(event) => {
+            handleBackdropMouseDown(event);
+            onMouseDown?.call(event.currentTarget, event);
+        }}>
         {@render children?.()}
     </div>
 {/if}

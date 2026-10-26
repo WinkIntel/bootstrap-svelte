@@ -351,8 +351,9 @@
     <section class="mb-5">
         <h2 class="wk-quick-link">Responsive Behaviors</h2>
         <p>
-            The Offcanvas component can be configured to behave responsively using the <code>showOnBreakpoint</code> prop. When set, the component will
-            be visible as a regular element at or above the specified breakpoint, and will behave as an offcanvas below it.
+            The Offcanvas component can be configured to behave responsively using the <code>showOnBreakpoint</code> prop. When set, the component
+            will be visible as a regular element at or above the specified breakpoint, and will behave as an offcanvas below it. The inline panel
+            omits <code>role="dialog"</code> and <code>aria-modal</code>; those attributes apply only while it is shown as an overlay.
         </p>
         <p>
             Supported breakpoints are <code>sm</code> through <code>xxl</code>. Omit <code>showOnBreakpoint</code> for a standalone dismissible

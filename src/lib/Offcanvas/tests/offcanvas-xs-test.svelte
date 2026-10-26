@@ -4,7 +4,7 @@
     let { showOnBreakpoint, isShown = false }: Pick<Offcanvas.RootProps, 'showOnBreakpoint' | 'isShown'> = $props();
 </script>
 
-<Offcanvas.Root {showOnBreakpoint} {isShown}>
+<Offcanvas.Root {showOnBreakpoint} {isShown} data-testid="xs-panel">
     <Offcanvas.Header isDismissible><Offcanvas.Title>Panel</Offcanvas.Title></Offcanvas.Header>
     <Offcanvas.Body>Panel content</Offcanvas.Body>
 </Offcanvas.Root>
