@@ -35,7 +35,8 @@ Add small overlay content to any element for housing secondary information or in
 ### Lifecycle callbacks and accessibility
 Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
 These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
-The component owns its `role`; consumer accessible names and other attributes remain configurable.
+Tooltips retain `role="tooltip"`. When used by Popover, the role remains consumer-configurable
+for the supplied content. Consumer accessible names and other attributes remain configurable.
 
 ### Props
 - `children` (slot): Content to display inside the tooltip.
@@ -84,6 +85,7 @@ The component owns its `role`; consumer accessible names and other attributes re
         placement,
         referenceElementId,
         trigger,
+        role = 'tooltip',
         type = 'tooltip',
         useFade = true,
         ...restOfProps
@@ -224,7 +226,7 @@ The component owns its `role`; consumer accessible names and other attributes re
 
     const handleOnHidden: EventListener = (event: Event) => {
         destroyPopper();
-        onHidden(event);
+        onHidden.call(event.currentTarget, event);
     };
 
     onMount(() => {
@@ -328,7 +330,7 @@ The component owns its `role`; consumer accessible names and other attributes re
                 handleOnHidden(event);
                 onOutroEnd?.call(event.currentTarget, event);
             }}
-            role="tooltip">
+            role={type === 'popover' ? role : 'tooltip'}>
             <div class={`${type}-arrow`} data-popper-arrow></div>
             {@render children?.()}
         </div>

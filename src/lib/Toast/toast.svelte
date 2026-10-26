@@ -42,7 +42,8 @@ Lightweight notifications designed to mimic push notifications that modern web a
 ### Lifecycle callbacks and accessibility
 Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
 These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
-The component owns its `role`; consumer accessible names and other attributes remain configurable.
+Use `role="status"` with `aria-live="polite"` for routine confirmations, or the default
+`role="alert"` with `aria-live="assertive"` for urgent messages. Consumer accessible names remain configurable.
 
 ### Props
 - `children` (slot): Content to display inside the toast.
@@ -73,6 +74,7 @@ The component owns its `role`; consumer accessible names and other attributes re
         children,
         class: classValues,
         delay = ToastRootState.DELAY_DEFAULT,
+        role,
         doAutohide = ToastRootState.DO_AUTOHIDE_DEFAULT,
         elementRef = $bindable(null),
         id = `toast-${uid}`,
@@ -158,7 +160,7 @@ The component owns its `role`; consumer accessible names and other attributes re
         {id}
         transition:showTransition={{ duration: useFade ? 150 : 0 }}
         {...restOfProps}
-        role="alert"
+        role={role === 'status' ? 'status' : 'alert'}
         onintrostart={(event) => {
             onShow.call(event.currentTarget, event);
             onIntroStart?.call(event.currentTarget, event);

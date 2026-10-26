@@ -14,7 +14,7 @@ describe('legacy Offcanvas xs normalization', () => {
     it.each([390, 575.98, 576, 1280])('behaves as a dismissible standalone overlay at %spx', async (width) => {
         mockMatchMedia(width);
         const { rerender } = render(OffcanvasXsTest, { showOnBreakpoint: legacyXs });
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('xs-panel')).not.toBeInTheDocument();
         expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
         await rerender({ isShown: true });
         expect(screen.getByRole('dialog')).toHaveClass('offcanvas', 'show');
@@ -22,7 +22,7 @@ describe('legacy Offcanvas xs normalization', () => {
         expect(document.querySelector('.offcanvas-backdrop')).toBeInTheDocument();
         await waitFor(() => expect(document.body).toHaveAttribute('data-scrollbar-lock-count', '1'));
         await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-        await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        await waitFor(() => expect(screen.queryByTestId('xs-panel')).not.toBeInTheDocument());
         expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
     });
 
@@ -82,22 +82,28 @@ describe('legacy Offcanvas xs normalization', () => {
     it('closes an implicitly inline panel when its breakpoint becomes legacy xs', async () => {
         const viewport = mockMatchMedia(1280);
         const { rerender } = render(OffcanvasXsTest, { showOnBreakpoint: 'lg' });
-        expect(screen.getByRole('dialog')).toHaveClass('offcanvas-lg');
+        expect(screen.getByTestId('xs-panel')).toHaveClass('offcanvas-lg');
+        expect(screen.getByTestId('xs-panel')).not.toHaveAttribute('role');
+        expect(screen.getByTestId('xs-panel')).not.toHaveAttribute('aria-modal');
         await rerender({ showOnBreakpoint: legacyXs });
-        await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        await waitFor(() => expect(screen.queryByTestId('xs-panel')).not.toBeInTheDocument());
         expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count');
         viewport.emit(BreakpointMinimumMediaQuery.lg!, false);
         viewport.emit(BreakpointMinimumMediaQuery.lg!, true);
         await tick();
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('xs-panel')).not.toBeInTheDocument();
         await rerender({ showOnBreakpoint: 'lg' });
-        expect(screen.getByRole('dialog')).toHaveClass('offcanvas-lg');
+        expect(screen.getByTestId('xs-panel')).toHaveClass('offcanvas-lg');
+        expect(screen.getByTestId('xs-panel')).not.toHaveAttribute('role');
+        expect(screen.getByTestId('xs-panel')).not.toHaveAttribute('aria-modal');
     });
 
     it('clears the old query when lg changes to legacy xs and preserves explicit visibility', async () => {
         const viewport = mockMatchMedia(1280);
         const { rerender } = render(OffcanvasXsTest, { showOnBreakpoint: 'lg', isShown: true });
-        expect(screen.getByRole('dialog')).toHaveClass('offcanvas-lg');
+        expect(screen.getByTestId('xs-panel')).toHaveClass('offcanvas-lg');
+        expect(screen.getByTestId('xs-panel')).not.toHaveAttribute('role');
+        expect(screen.getByTestId('xs-panel')).not.toHaveAttribute('aria-modal');
         expect(document.querySelector('.offcanvas-backdrop')).not.toBeInTheDocument();
         await rerender({ showOnBreakpoint: legacyXs });
         expect(screen.getByRole('dialog')).toHaveClass('offcanvas');
@@ -109,6 +115,8 @@ describe('legacy Offcanvas xs normalization', () => {
         expect(document.querySelector('.offcanvas-backdrop')).toBeInTheDocument();
         await rerender({ showOnBreakpoint: 'lg' });
         await waitFor(() => expect(document.body).not.toHaveAttribute('data-scrollbar-lock-count'));
-        expect(screen.getByRole('dialog')).toHaveClass('offcanvas-lg');
+        expect(screen.getByTestId('xs-panel')).toHaveClass('offcanvas-lg');
+        expect(screen.getByTestId('xs-panel')).not.toHaveAttribute('role');
+        expect(screen.getByTestId('xs-panel')).not.toHaveAttribute('aria-modal');
     });
 });

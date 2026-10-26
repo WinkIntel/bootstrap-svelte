@@ -41,7 +41,8 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 ### Lifecycle callbacks and accessibility
 Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
 These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
-The component owns its `role` and `aria-modal`; consumer accessible names and other attributes remain configurable.
+The component owns `role="dialog"` and `aria-modal` in overlay mode and omits them when shown inline
+at its responsive breakpoint. Consumer accessible names and other attributes remain configurable.
 
 ### Props
 - `children` (slot): Content to display inside the offcanvas.
@@ -230,7 +231,7 @@ The component owns its `role` and `aria-modal`; consumer accessible names and ot
             releaseBodyScrollLock(bodyElement);
             holdsScrollLock = false;
         }
-        onHidden(event);
+        onHidden.call(event.currentTarget, event);
     };
 
     // Release a held scroll lock if the offcanvas is destroyed while shown,
@@ -304,7 +305,7 @@ The component owns its `role` and `aria-modal`; consumer accessible names and ot
         tabindex="-1"
         transition:showTransition={{ duration: rootState.transitionDuration, x: flyX, y: flyY, opacity: 1 }}
         {...restOfProps}
-        aria-modal={rootState.isShown}
+        aria-modal={rootState.isShown && !rootState.isMediaQueryMatched ? true : undefined}
         onintrostart={(event) => {
             onShow.call(event.currentTarget, event);
             onIntroStart?.call(event.currentTarget, event);
@@ -321,7 +322,7 @@ The component owns its `role` and `aria-modal`; consumer accessible names and ot
             handleOnHidden(event);
             onOutroEnd?.call(event.currentTarget, event);
         }}
-        role={rootState.isShown ? 'dialog' : undefined}>
+        role={rootState.isShown && !rootState.isMediaQueryMatched ? 'dialog' : undefined}>
         {@render children?.()}
     </div>
 {/if}
