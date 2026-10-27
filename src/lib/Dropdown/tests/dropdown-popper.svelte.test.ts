@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { createPopper } from '@popperjs/core';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { DropdownMenuState } from '../dropdown.svelte.js';
 import Fixture from './dropdown-popper-test.svelte';
 vi.mock('@popperjs/core', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@popperjs/core')>();
@@ -69,4 +70,37 @@ it('updates offset while shown, ignores equal tuples and retains hidden updates 
     await fireEvent.click(screen.getByTestId('toggle'));
     expect(mock).toHaveBeenCalledTimes(3);
     expect(offsetOption()).toEqual([6, 9]);
+});
+
+it('forwards each offset prop change once without subscribing to internal state', async () => {
+    const setter = vi.spyOn(DropdownMenuState.prototype, 'popperOffset', 'set');
+    try {
+        const { rerender } = render(Fixture, { offset: [0, 2] });
+        setter.mockClear();
+        await rerender({ offset: [4, 8] });
+        expect(setter).toHaveBeenCalledTimes(1);
+    } finally {
+        setter.mockRestore();
+    }
+});
+it('switches display while open and restores dynamic Popper options', async () => {
+    const { rerender } = render(Fixture);
+    await fireEvent.click(screen.getByTestId('toggle'));
+    const first = mock.mock.results[0]!.value;
+    await rerender({ display: 'static' });
+    expect(first.destroy).toHaveBeenCalledOnce();
+    expect(mock).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId('menu')).toHaveAttribute('data-bs-popper', 'static');
+    expect(mock.mock.calls.at(-1)![2]?.modifiers).toContainEqual({ name: 'applyStyles', enabled: false });
+    await rerender({ display: 'dynamic' });
+    expect(mock).toHaveBeenCalledTimes(3);
+    expect(screen.getByTestId('menu')).not.toHaveAttribute('data-bs-popper');
+    expect(mock.mock.calls.at(-1)![2]?.modifiers?.some((m) => m.name === 'offset')).toBe(true);
+});
+
+it('uses the same static positioning contract inside a navbar', async () => {
+    render(Fixture, { inNavbar: true });
+    await fireEvent.click(screen.getByTestId('toggle'));
+    expect(screen.getByTestId('menu')).toHaveAttribute('data-bs-popper', 'static');
+    expect(mock.mock.calls.at(-1)![2]?.modifiers).toContainEqual({ name: 'applyStyles', enabled: false });
 });
