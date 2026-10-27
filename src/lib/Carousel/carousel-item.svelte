@@ -127,11 +127,11 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         class={classes}
         {id}
         onintrostart={(event) => {
-            onSlide.call(event.currentTarget, event);
+            onSlide?.call(event.currentTarget, event);
             onIntroStart?.call(event.currentTarget, event);
         }}
         onintroend={(event) => {
-            onSlid.call(event.currentTarget, event);
+            onSlid?.call(event.currentTarget, event);
             onIntroEnd?.call(event.currentTarget, event);
         }}
         style={styles}
@@ -154,11 +154,11 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         class={classes}
         {id}
         onintrostart={(event) => {
-            onSlide.call(event.currentTarget, event);
+            onSlide?.call(event.currentTarget, event);
             onIntroStart?.call(event.currentTarget, event);
         }}
         onintroend={(event) => {
-            onSlid.call(event.currentTarget, event);
+            onSlid?.call(event.currentTarget, event);
             onIntroEnd?.call(event.currentTarget, event);
         }}
         style={styles}
@@ -179,11 +179,11 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         class={classes}
         {id}
         onintrostart={(event) => {
-            onSlide.call(event.currentTarget, event);
+            onSlide?.call(event.currentTarget, event);
             onIntroStart?.call(event.currentTarget, event);
         }}
         onintroend={(event) => {
-            onSlid.call(event.currentTarget, event);
+            onSlid?.call(event.currentTarget, event);
             onIntroEnd?.call(event.currentTarget, event);
         }}
         in:fly={{
@@ -205,11 +205,11 @@ Represents a slide in the carousel. Should be placed inside a Carousel.Inner.
         class={classes}
         {id}
         onintrostart={(event) => {
-            onSlide.call(event.currentTarget, event);
+            onSlide?.call(event.currentTarget, event);
             onIntroStart?.call(event.currentTarget, event);
         }}
         onintroend={(event) => {
-            onSlid.call(event.currentTarget, event);
+            onSlid?.call(event.currentTarget, event);
             onIntroEnd?.call(event.currentTarget, event);
         }}
         transition:fade={{ duration: 0 }}

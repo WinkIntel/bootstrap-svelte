@@ -72,19 +72,19 @@ Supports both vertical and horizontal collapse directions.
         bind:this={elementRef}
         class={classes}
         onintrostart={(event) => {
-            onExpand.call(event.currentTarget, event);
+            onExpand?.call(event.currentTarget, event);
             onIntroStart?.call(event.currentTarget, event);
         }}
         onintroend={(event) => {
-            onExpanded.call(event.currentTarget, event);
+            onExpanded?.call(event.currentTarget, event);
             onIntroEnd?.call(event.currentTarget, event);
         }}
         onoutrostart={(event) => {
-            onCollapse.call(event.currentTarget, event);
+            onCollapse?.call(event.currentTarget, event);
             onOutroStart?.call(event.currentTarget, event);
         }}
         onoutroend={(event) => {
-            onCollapsed.call(event.currentTarget, event);
+            onCollapsed?.call(event.currentTarget, event);
             onOutroEnd?.call(event.currentTarget, event);
         }}
         in:collapseIn={{ isHorizontal, transitionDuration }}

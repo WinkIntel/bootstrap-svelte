@@ -5,7 +5,7 @@
         itemProps = {}
     }: {
         animation: Carousel.RootProps['animation'];
-        itemProps?: Pick<Carousel.ItemProps, 'onSlide' | 'onSlid' | 'onintrostart' | 'onintroend' | 'onoutrostart' | 'onoutroend'>;
+        itemProps?: Pick<Carousel.ItemProps, 'onSlide' | 'onSlid' | 'onintrostart' | 'onintroend'>;
     } = $props();
 </script>
 

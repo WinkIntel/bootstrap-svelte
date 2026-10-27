@@ -89,11 +89,11 @@ Bootstrap-styled alert component for displaying messages.
         bind:this={elementRef}
         class={classes}
         onoutrostart={(event) => {
-            onClose.call(event.currentTarget, event);
+            onClose?.call(event.currentTarget, event);
             onOutroStart?.call(event.currentTarget, event);
         }}
         onoutroend={(event) => {
-            onClosed.call(event.currentTarget, event);
+            onClosed?.call(event.currentTarget, event);
             onOutroEnd?.call(event.currentTarget, event);
         }}
         role="alert"
