@@ -88,7 +88,7 @@ describe('showcase props validation', () => {
         }
         expect(errors).toEqual([]);
         expect(tables).toBe(84);
-        expect(rows).toBe(434);
+        expect(rows).toBe(435);
         expect(covered).toMatchInlineSnapshot(`
           {
             "/components/accordion": {
@@ -96,7 +96,7 @@ describe('showcase props validation', () => {
               "tables": 6,
             },
             "/components/alert": {
-              "rows": 5,
+              "rows": 6,
               "tables": 1,
             },
             "/components/badge": {

@@ -4,6 +4,10 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## Unreleased
 
+### Compatibility / custom-theme migration
+
+- Badge and Alert accept `colorVariant="none"` to omit library color classes. Custom themes must opt out explicitly: `<Badge class="badge-brand" colorVariant="none">` and `<Alert class="brand-alert" colorVariant="none">`. Arbitrary custom classes, including `bg-brand` / `alert-brand`, are no longer treated as known Bootstrap color overrides. Existing custom themes may otherwise acquire primary colors. Null, empty and omitted variants retain their previous fallback semantics. This behavior change applies to both release lines.
+
 ### Fixed
 
 - Preserve Badge and Alert default primary colors with layout-only classes. Normalize string, array and object classes before detecting explicit color overrides ([#48](https://github.com/WinkIntel/bootstrap-svelte/issues/48)).

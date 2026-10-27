@@ -282,3 +282,14 @@ export function fromStyle(cssString: string | null | undefined): CSSProperties {
 
     return styleObj;
 }
+
+// Recognize Bootstrap color utilities only; custom theme intent is explicit via colorVariant="none".
+const themeColors = 'primary|secondary|success|danger|warning|info|light|dark';
+const backgroundColorToken = new RegExp(
+    `(?:^| )(?:text-bg-(?:${themeColors})|bg-(?:(?:${themeColors})(?:-subtle)?|body(?:-secondary|-tertiary)?|white|black|transparent))(?: |$)`
+);
+const alertColorToken = new RegExp(`(?:^| )alert-(?:${themeColors})(?: |$)`);
+
+export function hasBootstrapColorClass(normalizedClasses: string, component: 'badge' | 'alert'): boolean {
+    return backgroundColorToken.test(normalizedClasses) || (component === 'alert' && alertColorToken.test(normalizedClasses));
+}
