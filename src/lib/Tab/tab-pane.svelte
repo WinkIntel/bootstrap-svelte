@@ -42,6 +42,10 @@ Content pane for a tab. Used inside Tab.Root.
         onHidden = noop,
         onShow = noop,
         onShown = noop,
+        onintrostart: onIntroStart,
+        onintroend: onIntroEnd,
+        onoutrostart: onOutroStart,
+        onoutroend: onOutroEnd,
         ...restOfProps
     }: Tab.PaneProps = $props();
 
@@ -67,13 +71,15 @@ Content pane for a tab. Used inside Tab.Root.
     );
 
     // The active class can only added or removed when the transition is complete.
-    const handleShow: EventListener = (event: Event) => {
-        elementRef?.classList.add('active');
-        onShow(event);
+    const handleShow: NonNullable<Tab.PaneProps['onintrostart']> = (event) => {
+        if (doFade) elementRef?.classList.add('active');
+        onShow?.call(event.currentTarget, event);
+        onIntroStart?.call(event.currentTarget, event);
     };
-    const handleHide: EventListener = (event: Event) => {
-        elementRef?.classList.remove('active');
-        onHide(event);
+    const handleHide: NonNullable<Tab.PaneProps['onoutrostart']> = (event) => {
+        if (doFade) elementRef?.classList.remove('active');
+        onHide?.call(event.currentTarget, event);
+        onOutroStart?.call(event.currentTarget, event);
     };
 </script>
 
@@ -85,10 +91,16 @@ Content pane for a tab. Used inside Tab.Root.
         class={classes}
         hidden={!isActiveState}
         {id}
-        onintrostart={doFade ? handleShow : onShow}
-        onintroend={onShown}
-        onoutrostart={doFade ? handleHide : onHide}
-        onoutroend={onHidden}
+        onintrostart={handleShow}
+        onintroend={(event) => {
+            onShown?.call(event.currentTarget, event);
+            onIntroEnd?.call(event.currentTarget, event);
+        }}
+        onoutrostart={handleHide}
+        onoutroend={(event) => {
+            onHidden?.call(event.currentTarget, event);
+            onOutroEnd?.call(event.currentTarget, event);
+        }}
         role="tabpanel"
         transition:fade={{ duration: doFade ? 500 : 0 }}
         {...restOfProps}>

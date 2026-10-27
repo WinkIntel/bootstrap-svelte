@@ -86,7 +86,7 @@ Collapsible container for navbar content that toggles when the navbar toggler is
     function handleOnCollapsed(event: Event) {
         // This will ensure that not transition animation will occur when the Navbar is expanded...
         collapseState.root.transitionDuration = 0;
-        onCollapsed(event);
+        onCollapsed?.call(event.currentTarget, event);
     }
 </script>
 
