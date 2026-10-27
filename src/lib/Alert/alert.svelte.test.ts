@@ -138,3 +138,39 @@ describe('Alert.svelte', () => {
         expect(onClosed).toHaveBeenCalledTimes(1);
     });
 });
+
+describe('Alert color class normalization', () => {
+    test.each([
+        'mb-3',
+        ['mb-3', false],
+        { 'mb-3': true, 'alert-warning': false },
+        ['mb-3', [null, { 'p-2': true }]],
+        'bg-gradient bg-opacity-50',
+        'alert-dismissible alert-heading alert-link'
+    ])('retains the default with non-color classes %j', (classValue) => {
+        renderAlertWithText('Color test', { class: classValue });
+        expect(screen.getByText('Color test')).toHaveClass('alert-primary');
+    });
+    test.each([
+        'alert-warning',
+        ['alert-warning'],
+        { 'alert-warning': true },
+        ['mb-3', [{ 'alert-warning': true }]],
+        'bg-danger',
+        ['text-bg-secondary']
+    ])('suppresses the default for explicit color classes %j', (classValue) => {
+        renderAlertWithText('Color test', { class: classValue });
+        expect(screen.getByText('Color test')).not.toHaveClass('alert-primary');
+    });
+    test('reacts to layout, color and disabled object-class changes', async () => {
+        const { rerender } = renderAlertWithText('Color test', { class: 'mb-3' });
+        const element = screen.getByText('Color test');
+        expect(element).toHaveClass('alert-primary');
+        await rerender({ class: ['alert-warning', 'mb-3'] });
+        expect(element).toHaveClass('alert-warning');
+        expect(element).not.toHaveClass('alert-primary');
+        await rerender({ class: { 'alert-warning': false, 'mb-3': true } });
+        expect(element).toHaveClass('alert-primary');
+        expect(element).not.toHaveClass('alert-warning');
+    });
+});

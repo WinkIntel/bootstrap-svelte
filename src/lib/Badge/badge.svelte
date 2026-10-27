@@ -24,6 +24,8 @@ A small count and labeling component that can be used to add context or notifica
 <Badge position="top-end">99+</Badge>
 ```
 
+Layout classes retain the default primary color. Explicit color classes override the default; string, array and object class values are supported.
+
 ### Props
 - `class` (string): Optional. CSS classes for styling the badge (default: 'text-bg-primary')
 - `elementRef` (HTMLElement): Optional. Reference to the badge DOM element
@@ -46,15 +48,16 @@ A small count and labeling component that can be used to add context or notifica
     }: BadgeRootProps = $props();
 
     let hasColorVariant = $derived(typeof colorVariant === 'string' && colorVariant.trim().length > 0);
-    let hasClassValues = $derived(typeof classValues === 'string' && classValues.trim().length > 0);
+    let normalizedClassValues = $derived(uniqueClsx(classValues));
+    let hasColorClasses = $derived(normalizedClassValues.split(' ').some((token) => /^(text-bg-|bg-(?!opacity-|gradient$))/.test(token)));
 
     let classes: string = $derived(
         uniqueClsx(
             'badge',
-            hasColorVariant ? colorVariant : !hasClassValues && 'text-bg-primary',
+            hasColorVariant ? colorVariant : !hasColorClasses && 'text-bg-primary',
             { 'rounded-pill': isPill },
             position && transformBadgePosition(position),
-            classValues
+            normalizedClassValues
         )
     );
 </script>
