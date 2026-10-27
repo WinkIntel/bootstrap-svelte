@@ -116,3 +116,45 @@ describe('component lifecycle handler composition', () => {
         expect(old).not.toHaveBeenCalled();
     });
 });
+
+// JavaScript callers may pass null even though lifecycle props are typed as functions.
+const nullCallback = null as unknown as (event: Event) => void;
+
+describe('null lifecycle callback compatibility', () => {
+    it('Alert still forwards both outro events', async () => {
+        const start = vi.fn();
+        const end = vi.fn();
+        const { rerender } = render(Alert, { isOpen: true, onClose: nullCallback, onClosed: nullCallback, onoutrostart: start, onoutroend: end });
+        await rerender({ isOpen: false });
+        await vi.advanceTimersByTimeAsync(200);
+        expect(start).toHaveBeenCalledOnce();
+        expect(end).toHaveBeenCalledOnce();
+    });
+    it('Collapse still forwards all four transition events', async () => {
+        const callbacks = { onintrostart: vi.fn(), onintroend: vi.fn(), onoutrostart: vi.fn(), onoutroend: vi.fn() };
+        const { rerender } = render(Collapse, {
+            isExpanded: false,
+            transitionDuration: 0,
+            onExpand: nullCallback,
+            onExpanded: nullCallback,
+            onCollapse: nullCallback,
+            onCollapsed: nullCallback,
+            ...callbacks
+        });
+        await rerender({ isExpanded: true });
+        await vi.advanceTimersByTimeAsync(200);
+        await rerender({ isExpanded: false });
+        await vi.advanceTimersByTimeAsync(200);
+        for (const callback of Object.values(callbacks)) expect(callback).toHaveBeenCalledOnce();
+    });
+    it.each(['none', 'slide', 'fade', 'crossfade'] as const)('Carousel.Item still forwards intro events in %s mode', async (animation) => {
+        const start = vi.fn();
+        const end = vi.fn();
+        render(Carousel, { animation, itemProps: { onSlide: nullCallback, onSlid: nullCallback, onintrostart: start, onintroend: end } });
+        await vi.advanceTimersByTimeAsync(300);
+        await fireEvent.click(screen.getByTestId('next'));
+        await vi.advanceTimersByTimeAsync(300);
+        expect(start).toHaveBeenCalledOnce();
+        expect(end).toHaveBeenCalledOnce();
+    });
+});
