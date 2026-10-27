@@ -92,6 +92,10 @@ The container for dropdown items.
         menuState.isEnd = isEnd;
     });
 
+    $effect(() => {
+        menuState.popperOffset = offset;
+    });
+
     const handleKeydown = (event: KeyboardEvent) => {
         menuState.onkeydown(event);
         onkeydown(event);
@@ -106,7 +110,7 @@ The container for dropdown items.
         aria-labelledby={menuState.ariaLabelledBy}
         bind:this={elementRef}
         class={classes}
-        data-bs-popper={menuState.isShown && menuState.root.isNavItem ? 'static' : undefined}
+        data-bs-popper={menuState.isShown && (menuState.root.isNavItem || menuState.root.display === 'static') ? 'static' : undefined}
         data-popper-placement={menuState.popperPlacement}
         {id}
         onkeydown={handleKeydown}
