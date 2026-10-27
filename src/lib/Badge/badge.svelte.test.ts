@@ -133,3 +133,39 @@ describe('Badge.svelte', () => {
         expect(badge).toHaveClass('test-class');
     });
 });
+
+describe('Badge color class normalization', () => {
+    test.each([
+        'ms-1',
+        ['ms-1', false],
+        { 'ms-1': true, 'text-bg-danger': false },
+        ['ms-1', [null, { 'p-2': true }]],
+        'bg-gradient bg-opacity-50',
+        'rounded-pill'
+    ])('retains the default with non-color classes %j', (classValue) => {
+        renderBadgeWithText('Color test', { class: classValue });
+        expect(screen.getByText('Color test')).toHaveClass('text-bg-primary');
+    });
+    test.each([
+        'text-bg-danger',
+        ['text-bg-danger'],
+        { 'text-bg-danger': true },
+        ['ms-1', [{ 'text-bg-danger': true }]],
+        'bg-danger',
+        ['text-bg-secondary']
+    ])('suppresses the default for explicit color classes %j', (classValue) => {
+        renderBadgeWithText('Color test', { class: classValue });
+        expect(screen.getByText('Color test')).not.toHaveClass('text-bg-primary');
+    });
+    test('reacts to layout, color and disabled object-class changes', async () => {
+        const { rerender } = renderBadgeWithText('Color test', { class: 'ms-1' });
+        const element = screen.getByText('Color test');
+        expect(element).toHaveClass('text-bg-primary');
+        await rerender({ class: ['text-bg-danger', 'ms-1'] });
+        expect(element).toHaveClass('text-bg-danger');
+        expect(element).not.toHaveClass('text-bg-primary');
+        await rerender({ class: { 'text-bg-danger': false, 'ms-1': true } });
+        expect(element).toHaveClass('text-bg-primary');
+        expect(element).not.toHaveClass('text-bg-danger');
+    });
+});

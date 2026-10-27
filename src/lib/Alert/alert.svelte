@@ -31,6 +31,8 @@ Bootstrap-styled alert component for displaying messages.
     This alert is open.
 </Alert>
 ```
+Layout classes retain the default primary color. Explicit color classes override the default; string, array and object class values are supported.
+
 ### Props
 - `class` (string): Optional. Additional CSS classes to apply to the alert.
 - `elementRef` (HTMLDivElement): Optional. Reference to the alert DOM element.
@@ -64,18 +66,21 @@ Bootstrap-styled alert component for displaying messages.
     }: AlertRootProps = $props();
 
     let hasColorVariant = $derived(typeof colorVariant === 'string' && colorVariant.trim().length > 0);
-    let hasClassValues = $derived(typeof classValues === 'string' && classValues.trim().length > 0);
+    let normalizedClassValues = $derived(uniqueClsx(classValues));
+    let hasColorClasses = $derived(
+        normalizedClassValues.split(' ').some((token) => /^(text-bg-|bg-(?!opacity-|gradient$)|alert-(?!(?:dismissible|heading|link)$))/.test(token))
+    );
 
     let classes: string = $derived(
         uniqueClsx(
             'alert',
-            hasColorVariant ? `alert-${colorVariant}` : !hasClassValues && 'alert-primary',
+            hasColorVariant ? `alert-${colorVariant}` : !hasColorClasses && 'alert-primary',
             {
                 'alert-dismissible': isDismissible,
                 fade: isAnimated,
                 show: isOpen
             },
-            classValues
+            normalizedClassValues
         )
     );
 
