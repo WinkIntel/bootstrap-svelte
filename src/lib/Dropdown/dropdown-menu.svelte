@@ -110,7 +110,7 @@ The container for dropdown items.
         aria-labelledby={menuState.ariaLabelledBy}
         bind:this={elementRef}
         class={classes}
-        data-bs-popper={menuState.isShown && (menuState.root.isNavItem || menuState.root.display === 'static') ? 'static' : undefined}
+        data-bs-popper={menuState.isShown && menuState.isStaticDisplay ? 'static' : undefined}
         data-popper-placement={menuState.popperPlacement}
         {id}
         onkeydown={handleKeydown}
