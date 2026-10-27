@@ -280,7 +280,7 @@ export class DropdownMenuState {
     ) {
         this.#elementRef = this.props.elementRef || null;
         this.#isEnd = this.props.isEnd || false;
-        this.#popperOffset = this.props.offset || [0, 2];
+        this.#popperOffset = [...(this.props.offset || [0, 2])];
         // Bind methods to ensure `this` context is correct when passed as callbacks or event handlers.
         this.bodyOnclick = this.bodyOnclick.bind(this);
         this.createPopperInstance = this.createPopperInstance.bind(this);
@@ -295,10 +295,11 @@ export class DropdownMenuState {
         this.syncIsEndWithRoot();
         // Effect to manage the Popper.js instance lifecycle.
         // It creates the instance when the menu is shown and elements are available,
-        // and implicitly handles destruction/recreation if dependencies change.
+        // and destroys it before dependencies change or the menu is hidden/unmounted.
         $effect(() => {
             if (this.#rootElementRef && this.#elementRef && this.isShown) {
                 this.createPopperInstance();
+                return this.destroyPopper;
             }
         });
     }
@@ -327,9 +328,9 @@ export class DropdownMenuState {
         return this.#popperOffset;
     }
     set popperOffset(offset: PopperOffset) {
-        this.#popperOffset = offset;
-        // Recreate the Popper instance to apply the new offset.
-        this.createPopperInstance();
+        if (this.#popperOffset[0] === offset[0] && this.#popperOffset[1] === offset[1]) return;
+        // The lifecycle effect applies changed options only while the menu is shown.
+        this.#popperOffset = [...offset];
     }
 
     get popperPlacement(): Placement | undefined {
@@ -402,10 +403,11 @@ export class DropdownMenuState {
             return;
         }
 
-        this.#popperPlacement = this.determinePopperPlacement();
+        const placement = this.determinePopperPlacement();
+        this.#popperPlacement = placement;
 
         const popperConfig = {
-            placement: this.#popperPlacement,
+            placement,
             modifiers: this.determinePopperModifiers()
         };
 
