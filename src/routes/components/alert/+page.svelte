@@ -145,13 +145,27 @@
         </div>
     </section>
 
+    <section class="mb-5" id="custom-colors">
+        <h2>Custom colors and default styling</h2>
+        <p>
+            Layout classes retain the primary default. Recognized Bootstrap color classes override it, including string, array and object class
+            values.
+        </p>
+        <p>
+            Migration: custom theme classes are not inferred from their names. Add <code>colorVariant="none"</code> to omit the library’s color
+            classes and let your CSS control the component. This also applies to custom names such as <code>bg-brand</code> or
+            <code>alert-brand</code>. Existing custom themes may change appearance until this opt-out is added. Null, empty and omitted variants
+            continue to use fallback selection.
+        </p>
+    </section>
+
     <!-- API Reference -->
     <section class="mb-5 wk-api-section" id="api">
         <h2 class="wk-quick-link">API Reference</h2>
 
         <h3 class="h5 mt-4">Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="AlertRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -162,12 +176,18 @@
                 </thead>
                 <tbody class="table-group-divider">
                     <tr>
+                        <td><code>class</code></td>
+                        <td><code>string | array | object</code></td>
+                        <td>—</td>
+                        <td>Additional CSS classes. Default color selection is handled separately.</td>
+                    </tr>
+                    <tr>
                         <td><code>colorVariant</code></td>
                         <td><code>string</code></td>
                         <td><code>'primary'</code></td>
                         <td>
                             Sets the alert's background color. Values: 'primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light',
-                            'dark'.
+                            'dark', or 'none' to omit library color classes.
                         </td>
                     </tr>
                     <tr>
@@ -203,7 +223,7 @@
             <table class="table table-sm">
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Event</th>
                         <th>Type</th>
                         <th>Description</th>
                     </tr>

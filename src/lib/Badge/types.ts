@@ -3,7 +3,7 @@ import type { BackgroundSubtleColorVariant, SpanElement, TextBackgroundColorVari
 /**
  * Available visual variants for badges, supporting both standard and subtle color schemes.
  */
-export type BadgeColorVariant = TextBackgroundColorVariant | BackgroundSubtleColorVariant;
+export type BadgeColorVariant = TextBackgroundColorVariant | BackgroundSubtleColorVariant | 'none';
 
 /**
  * Defines the possible positioning options for badges when used as positioned elements.

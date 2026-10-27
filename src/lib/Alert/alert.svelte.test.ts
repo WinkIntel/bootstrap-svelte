@@ -174,3 +174,35 @@ describe('Alert color class normalization', () => {
         expect(element).not.toHaveClass('alert-warning');
     });
 });
+
+test('retains the default for a custom Alert layout modifier', () => {
+    renderAlertWithText('Compact Alert', { class: 'alert-compact mb-3' });
+    expect(screen.getByText('Compact Alert')).toHaveClass('alert-primary');
+});
+
+describe('Alert explicit color opt-out', () => {
+    test.each(['brand-alert', ['brand-alert'], { 'brand-alert': true }, ['mb-3', [{ 'brand-alert': true }]]])(
+        'none leaves custom theme classes alone: %j',
+        (classValue) => {
+            renderAlertWithText('Custom theme', { colorVariant: 'none', class: classValue });
+            const element = screen.getByText('Custom theme');
+            expect(element).toHaveClass('brand-alert');
+            expect(element).not.toHaveClass('alert-primary', 'none', 'alert-none');
+        }
+    );
+    test('restores default for null and empty values after none or explicit colors', async () => {
+        const { rerender } = renderAlertWithText('Custom theme', { colorVariant: 'none', class: 'brand-alert' });
+        const element = screen.getByText('Custom theme');
+        expect(element).not.toHaveClass('alert-primary');
+        await rerender({ colorVariant: null as never });
+        expect(element).toHaveClass('alert-primary');
+        await rerender({ colorVariant: 'warning' });
+        expect(element).not.toHaveClass('alert-primary');
+        await rerender({ colorVariant: '' as never });
+        expect(element).toHaveClass('alert-primary');
+    });
+    test.each(['bg-brand', 'text-bg-brand', 'alert-brand'])('does not infer arbitrary custom color intent: %s', (classValue) => {
+        renderAlertWithText('Custom theme', { class: classValue });
+        expect(screen.getByText('Custom theme')).toHaveClass('alert-primary');
+    });
+});

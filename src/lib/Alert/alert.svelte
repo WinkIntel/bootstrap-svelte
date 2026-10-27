@@ -31,12 +31,12 @@ Bootstrap-styled alert component for displaying messages.
     This alert is open.
 </Alert>
 ```
-Layout classes retain the default primary color. Explicit color classes override the default; string, array and object class values are supported.
+Layout classes retain the default primary color. Recognized Bootstrap color classes override it. String, array and object class values are supported. For custom themes, use `colorVariant="none"` to omit library color classes; null and empty values retain fallback behavior.
 
 ### Props
-- `class` (string): Optional. Additional CSS classes to apply to the alert.
+- `class` (string | array | object): Optional. Additional CSS classes; default color selection is handled separately.
 - `elementRef` (HTMLDivElement): Optional. Reference to the alert DOM element.
-- `colorVariant` ('primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'): Optional. Sets the color variant of the alert.
+- `colorVariant` ('primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'none'): Optional. Sets the color variant of the alert.
 - `isDismissible` (boolean): Optional. If true, adds a close button to the alert.
 - `isAnimated` (boolean): Optional. If true, applies fade transition to the alert.
 - `isOpen` (boolean): Optional. Controls the visibility of the alert.
@@ -45,7 +45,7 @@ Layout classes retain the default primary color. Explicit color classes override
 -->
 <script lang="ts">
     import CloseButton from '$lib/CloseButton/close-button.svelte';
-    import { uniqueClsx } from '$lib/common/css.js';
+    import { hasBootstrapColorClass, uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
     import { fade } from 'svelte/transition';
     import type { AlertRootProps } from './types.js';
@@ -67,14 +67,12 @@ Layout classes retain the default primary color. Explicit color classes override
 
     let hasColorVariant = $derived(typeof colorVariant === 'string' && colorVariant.trim().length > 0);
     let normalizedClassValues = $derived(uniqueClsx(classValues));
-    let hasColorClasses = $derived(
-        normalizedClassValues.split(' ').some((token) => /^(text-bg-|bg-(?!opacity-|gradient$)|alert-(?!(?:dismissible|heading|link)$))/.test(token))
-    );
+    let hasColorClasses = $derived(hasBootstrapColorClass(normalizedClassValues, 'alert'));
 
     let classes: string = $derived(
         uniqueClsx(
             'alert',
-            hasColorVariant ? `alert-${colorVariant}` : !hasColorClasses && 'alert-primary',
+            colorVariant === 'none' ? false : hasColorVariant ? `alert-${colorVariant}` : !hasColorClasses && 'alert-primary',
             {
                 'alert-dismissible': isDismissible,
                 fade: isAnimated,
