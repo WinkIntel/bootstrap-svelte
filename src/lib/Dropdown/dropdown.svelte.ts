@@ -2,7 +2,7 @@ import { isRTL } from '$lib/common/dom.js';
 import { Context } from '$lib/common/index.js';
 import type { PopperOffset } from '$lib/common/types.js';
 import { createPopper, type Instance, type Placement } from '@popperjs/core';
-import { tick } from 'svelte';
+import { tick, untrack } from 'svelte';
 import type { Dropdown } from './index.js';
 import type { DropdownAutoClose, DropdownDirection, DropdownDisplay } from './types.js';
 
@@ -280,10 +280,9 @@ export class DropdownMenuState {
     ) {
         this.#elementRef = this.props.elementRef || null;
         this.#isEnd = this.props.isEnd || false;
-        this.#popperOffset = this.props.offset || [0, 2];
+        this.#popperOffset = [...(this.props.offset || [0, 2])];
         // Bind methods to ensure `this` context is correct when passed as callbacks or event handlers.
         this.bodyOnclick = this.bodyOnclick.bind(this);
-        this.createPopperInstance = this.createPopperInstance.bind(this);
         this.destroyPopper = this.destroyPopper.bind(this);
         this.determinePopperPlacement = this.determinePopperPlacement.bind(this);
         this.dispose = this.dispose.bind(this);
@@ -295,10 +294,11 @@ export class DropdownMenuState {
         this.syncIsEndWithRoot();
         // Effect to manage the Popper.js instance lifecycle.
         // It creates the instance when the menu is shown and elements are available,
-        // and implicitly handles destruction/recreation if dependencies change.
+        // and destroys it before dependencies change or the menu is hidden/unmounted.
         $effect(() => {
             if (this.#rootElementRef && this.#elementRef && this.isShown) {
                 this.createPopperInstance();
+                return this.destroyPopper;
             }
         });
     }
@@ -327,9 +327,14 @@ export class DropdownMenuState {
         return this.#popperOffset;
     }
     set popperOffset(offset: PopperOffset) {
-        this.#popperOffset = offset;
-        // Recreate the Popper instance to apply the new offset.
-        this.createPopperInstance();
+        const [x, y] = offset;
+        if (untrack(() => this.#popperOffset[0] === x && this.#popperOffset[1] === y)) return;
+        // The lifecycle effect applies changed options only while the menu is shown.
+        this.#popperOffset = [x, y];
+    }
+
+    get isStaticDisplay(): boolean {
+        return this.root.isNavItem || this.root.display === 'static';
     }
 
     get popperPlacement(): Placement | undefined {
@@ -402,10 +407,11 @@ export class DropdownMenuState {
             return;
         }
 
-        this.#popperPlacement = this.determinePopperPlacement();
+        const placement = this.determinePopperPlacement();
+        this.#popperPlacement = placement;
 
         const popperConfig = {
-            placement: this.#popperPlacement,
+            placement,
             modifiers: this.determinePopperModifiers()
         };
 
@@ -413,9 +419,7 @@ export class DropdownMenuState {
     }
 
     private determinePopperModifiers() {
-        const isStaticDisplay = this.root.isNavItem || this.root.display === 'static';
-
-        if (isStaticDisplay) {
+        if (this.isStaticDisplay) {
             return [
                 {
                     name: 'applyStyles', // Disables Popper.js styles, allowing Bootstrap to handle positioning.
