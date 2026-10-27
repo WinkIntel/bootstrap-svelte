@@ -71,7 +71,7 @@ The test filename suffix selects the Vitest project (`vitest.config.ts`):
 - `*.svelte.test.ts` → "client" project: jsdom, globals enabled, `@testing-library/svelte`, setup in `vitest-setup-client.ts` (mocks `matchMedia` and the Web Animations API — jsdom lacks both)
 - `*.test.ts` (non-svelte) → "server" project: plain node environment
 
-Tests are colocated with components. Components that need a wrapper harness to test composition keep `.svelte` test fixtures in a `tests/` subdirectory (e.g. `src/lib/Dropdown/tests/`). `dist/` excludes test files at pack time, so colocating is safe.
+Tests are colocated with components. Cross-component contract suites and their shared fixtures may live in `src/lib/common/tests/`; run that directory alongside a component directory when checking shared lifecycle behavior. Components that need a wrapper harness to test composition keep `.svelte` test fixtures in a `tests/` subdirectory (e.g. `src/lib/Dropdown/tests/`). `dist/` excludes test files at pack time, so colocating is safe.
 
 ### Build/packaging notes
 
