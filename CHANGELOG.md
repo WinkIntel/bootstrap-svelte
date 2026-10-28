@@ -2,7 +2,7 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## 1.1.4 — Unreleased
+## 1.1.4 — 2026-10-28
 
 ### Compatibility / custom-theme migration
 
