@@ -39,7 +39,7 @@ export const site = {
     securityPolicyUrl: 'https://github.com/WinkIntel/bootstrap-svelte/security/policy',
     npmUrl: 'https://www.npmjs.com/package/@winkintel/bootstrap-svelte',
     installCommand: 'pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3',
-    sveltePeerRange: '^5.29.0',
+    sveltePeerRange: '^5.55.7',
     bootstrapCssImport: "import 'bootstrap/dist/css/bootstrap.min.css';",
     organization: {
         name: 'Wink, Inc.',

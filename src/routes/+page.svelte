@@ -17,7 +17,7 @@
     };
 
     const installExample = `pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3`;
-    const peerDependencyExample = `svelte: ^5.29.0`;
+    const peerDependencyExample = `svelte: ^5.55.7`;
     const importExample = `<script>
   import { Alert, Button, Card, Modal } from '@winkintel/bootstrap-svelte';
 \u003c/script>
@@ -138,7 +138,7 @@
         <p class="wk-section-kicker" data-markdown="skip">Start here</p>
         <h2 class="wk-quick-link">Installation</h2>
         <p>
-            Add the package with Bootstrap. Svelte <code>^5.29.0</code> is a peer dependency, so keep your app on Svelte 5 separately from the package install
+            Add the package with Bootstrap. Svelte <code>^5.55.7</code> is a peer dependency, so keep your app on Svelte 5 separately from the package install
             command.
         </p>
     </div>

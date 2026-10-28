@@ -10,7 +10,7 @@ Package name: `@winkintel/bootstrap-svelte`.
 
 Consumer install command: `pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3`.
 
-Svelte peer dependency: `svelte ^5.29.0`.
+Svelte peer dependency: `svelte ^5.55.7`.
 
 ## Quick Reference
 

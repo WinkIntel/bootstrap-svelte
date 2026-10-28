@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import packageJson from '../../../package.json' with { type: 'json' };
 import routeJson from './routes.json' with { type: 'json' };
@@ -14,6 +15,22 @@ describe('site metadata', () => {
 
     test('site.sveltePeerRange matches the published package peer dependency', () => {
         expect(site.sveltePeerRange).toBe(packageJson.peerDependencies.svelte);
+    });
+
+    test('the package and current installation guidance declare the patched Svelte minimum', () => {
+        expect(packageJson.peerDependencies.svelte).toBe('^5.55.7');
+        for (const path of [
+            'README.md',
+            'AGENTS.md',
+            'CLAUDE.md',
+            'src/routes/+page.svelte',
+            'src/routes/guides/sveltekit-bootstrap-5/+page.svelte',
+            'src/routes/guides/compare-sveltestrap/+page.svelte'
+        ]) {
+            const source = readFileSync(path, 'utf8');
+            expect(source, path).toContain('^5.55.7');
+            expect(source, path).not.toContain('^5.29.0');
+        }
     });
 
     test('absoluteUrl joins a path onto the canonical origin', () => {

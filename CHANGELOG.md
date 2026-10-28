@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## 2.2.0 — Unreleased
+
+### Security / compatibility
+
+- Raise the Svelte peer requirement from `^5.29.0` to `^5.55.7` ([#49](https://github.com/WinkIntel/bootstrap-svelte/issues/49)). Consumers on earlier Svelte 5 versions must upgrade before installing this release. Svelte 5.55.7 includes the published [SSR spread-attribute](https://github.com/sveltejs/svelte/security/advisories/GHSA-pr6f-5x2q-rwfp) and [DOM-clobbering](https://github.com/sveltejs/svelte/security/advisories/GHSA-rcqx-6q8c-2c42) fixes, as well as earlier advisory fixes. Component APIs are unchanged. CI verifies the exact minimum alongside the normal development version. The 1.x peer range remains `^5.29.0`; its guidance recommends the patched baseline without changing compatibility metadata.
+
 ## 2.1.5 — 2026-10-28
 
 ### Compatibility / custom-theme migration

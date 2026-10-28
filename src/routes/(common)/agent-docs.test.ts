@@ -75,7 +75,7 @@ describe('buildAgentsMd', () => {
         expect(text).toContain('`ButtonRootProps`');
         expect(text).toContain('`Card.RootProps`');
         expect(text).toContain('`Modal.RootProps`');
-        expect(text).toContain('`svelte ^5.29.0`');
+        expect(text).toContain('`svelte ^5.55.7`');
         expect(text).not.toContain('<Card>');
         expect(text).not.toContain('</Card>');
         expect(text).not.toContain('<Modal isShown={showModal}>');

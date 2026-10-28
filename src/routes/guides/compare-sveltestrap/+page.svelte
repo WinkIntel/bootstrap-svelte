@@ -23,7 +23,7 @@
                 <tbody>
                     <tr>
                         <th scope="row">Svelte support</th>
-                        <td>Svelte <code>^5.29.0</code>; designed as a Svelte 5 library.</td>
+                        <td>Svelte <code>^5.55.7</code>; designed as a Svelte 5 library.</td>
                         <td>Svelte 4, Svelte 5, and the Svelte 5 prerelease range declared by its package.</td>
                     </tr>
                     <tr>

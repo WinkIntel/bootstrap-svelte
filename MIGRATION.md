@@ -2,7 +2,7 @@
 
 Version **2.0.0** includes breaking Navbar and Offcanvas changes. This guide explains how to update a 1.x application before upgrading.
 
-The Svelte peer requirement remains `^5.29.0`. Continue importing Bootstrap 5 CSS in your application.
+For the 2.0.0 release described here, the Svelte peer requirement remained `^5.29.0`. Consult the current [README requirements](README.md#requirements) when upgrading to a later 2.x release. Continue importing Bootstrap 5 CSS in your application.
 
 ## Choose the Navbar expansion mode explicitly
 
