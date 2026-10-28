@@ -69,6 +69,10 @@ yarn add @winkintel/bootstrap-svelte bootstrap
 
 This package requires Svelte `^5.29.0` as a peer dependency. Keep Svelte installed in your application; do not replace the package/bootstrap install command with a Svelte install command.
 
+### Recommended Svelte baseline
+
+The 1.x peer requirement remains `^5.29.0` for compatibility with existing applications. We recommend Svelte **5.55.7 or later within 5.x**, which includes fixes for the published [SSR spread-attribute](https://github.com/sveltejs/svelte/security/advisories/GHSA-pr6f-5x2q-rwfp) and [DOM-clobbering](https://github.com/sveltejs/svelte/security/advisories/GHSA-rcqx-6q8c-2c42) advisories and earlier Svelte 5 advisories. An older version satisfying the peer range may still be affected. Keep Svelte updated and review [upstream advisories](https://github.com/sveltejs/svelte/security/advisories); this recommendation does not change the declared peer range or guarantee protection against future vulnerabilities.
+
 ## Bootstrap CSS
 
 Bootstrap CSS is expected to be provided by your application.
