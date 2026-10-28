@@ -2,7 +2,7 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## Unreleased
+## 2.1.5 — 2026-10-28
 
 ### Compatibility / custom-theme migration
 
@@ -10,6 +10,9 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ### Fixed
 
+- Preserve overlay lifecycle callbacks and internal dismissal/cleanup when consumer DOM handlers are supplied. Keep supported Modal/Toast/Popover roles and omit dialog semantics on inline responsive Offcanvas panels ([#46](https://github.com/WinkIntel/bootstrap-svelte/issues/46)).
+- Chain Alert, Collapse, Carousel.Item and Tab.Pane lifecycle callbacks with consumer transition handlers, preserving callback order and DOM receivers. Retain Tab fade-out cleanup and Navbar collapsed-callback receivers ([#126](https://github.com/WinkIntel/bootstrap-svelte/issues/126)).
+- Destroy Dropdown Popper instances on hide/unmount, create one instance per reopen, support static positioning and apply reactive offsets without creating hidden instances ([#47](https://github.com/WinkIntel/bootstrap-svelte/issues/47)).
 - Preserve Badge and Alert default primary colors with layout-only classes. Normalize string, array and object classes before detecting explicit color overrides ([#48](https://github.com/WinkIntel/bootstrap-svelte/issues/48)).
 
 ## 2.1.4 — 2026-10-22
