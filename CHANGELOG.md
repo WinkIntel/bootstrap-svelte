@@ -2,7 +2,7 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## 2.1.5 — Unreleased
+## 2.1.5 — 2026-10-28
 
 ### Compatibility / custom-theme migration
 
