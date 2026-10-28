@@ -39,6 +39,9 @@ Complete and verify these settings before dispatching Publish. Merging the YAML
 2. Protect both release branches with PR review and the required `build` check;
    prohibit force pushes/deletion. Restrict release-tag creation and changes to
    designated maintainers. CI runs on pushes to both branches and on PRs.
+   On `main`, `build` is an always-run aggregate of development and exact-minimum
+   Svelte validation; it fails if either prerequisite fails, is cancelled or is
+   skipped. Maintenance retains its existing single `build` job.
 3. Inspect npm package **Settings → Trusted publishing** privately. The connection
    must name `WinkIntel`, `bootstrap-svelte`, `publish.yml`, and the exact environment
    `npm-publish`, with direct `npm publish` allowed. Review/remove broader legacy

@@ -28,7 +28,7 @@ describe('site metadata', () => {
             'src/routes/guides/compare-sveltestrap/+page.svelte'
         ]) {
             const source = readFileSync(path, 'utf8');
-            expect(source, path).toContain('^5.55.7');
+            expect(source, path).toContain(packageJson.peerDependencies.svelte);
             expect(source, path).not.toContain('^5.29.0');
         }
     });

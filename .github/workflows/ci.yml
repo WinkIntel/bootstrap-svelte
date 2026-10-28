@@ -12,7 +12,7 @@ permissions:
     contents: read
 
 jobs:
-    build:
+    development:
         runs-on: ubuntu-latest
         timeout-minutes: 20
         steps:
@@ -33,6 +33,8 @@ jobs:
               run: pnpm install --frozen-lockfile
             - name: Test release controls
               run: node --test scripts/tests/release-*.test.mjs
+            - name: Test Svelte support controls
+              run: node --test scripts/tests/svelte-support.test.mjs
             - name: Lint
               run: pnpm lint
             - name: Type check
@@ -66,9 +68,9 @@ jobs:
               run: pnpm install --frozen-lockfile
             - name: Install and verify the exact peer minimum in this disposable checkout
               run: |
-                  minimum=$(node -p "require('./package.json').peerDependencies.svelte.slice(1)")
+                  minimum=$(node scripts/svelte-minimum.mjs)
                   pnpm add --save-dev --save-exact "svelte@$minimum" --ignore-scripts
-                  node -e "require('node:assert/strict').equal(require('svelte/package.json').version, require('./package.json').peerDependencies.svelte.slice(1))"
+                  SVELTE_MINIMUM="$minimum" node -e "require('node:assert/strict').equal(require('svelte/package.json').version, process.env.SVELTE_MINIMUM)"
             - name: Type check at the minimum
               run: pnpm check-types
             - name: Test at the minimum
@@ -77,3 +79,18 @@ jobs:
               run: pnpm build
             - name: Test the packed consumer at the minimum
               run: pnpm test:svelte-consumer
+
+    # Preserve the existing branch-protection context and fail it when either job fails or is skipped.
+    build:
+        needs: [development, svelte-minimum]
+        if: ${{ always() }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 2
+        steps:
+            - name: Require both Svelte validations to succeed
+              env:
+                  DEVELOPMENT_RESULT: ${{ needs.development.result }}
+                  MINIMUM_RESULT: ${{ needs.svelte-minimum.result }}
+              run: |
+                  test "$DEVELOPMENT_RESULT" = success
+                  test "$MINIMUM_RESULT" = success
