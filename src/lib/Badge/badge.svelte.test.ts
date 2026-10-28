@@ -133,3 +133,66 @@ describe('Badge.svelte', () => {
         expect(badge).toHaveClass('test-class');
     });
 });
+
+describe('Badge color class normalization', () => {
+    test.each([
+        'ms-1',
+        ['ms-1', false],
+        { 'ms-1': true, 'text-bg-danger': false },
+        ['ms-1', [null, { 'p-2': true }]],
+        'bg-gradient bg-opacity-50',
+        'rounded-pill'
+    ])('retains the default with non-color classes %j', (classValue) => {
+        renderBadgeWithText('Color test', { class: classValue });
+        expect(screen.getByText('Color test')).toHaveClass('text-bg-primary');
+    });
+    test.each([
+        'text-bg-danger',
+        ['text-bg-danger'],
+        { 'text-bg-danger': true },
+        ['ms-1', [{ 'text-bg-danger': true }]],
+        'bg-danger',
+        ['text-bg-secondary']
+    ])('suppresses the default for explicit color classes %j', (classValue) => {
+        renderBadgeWithText('Color test', { class: classValue });
+        expect(screen.getByText('Color test')).not.toHaveClass('text-bg-primary');
+    });
+    test('reacts to layout, color and disabled object-class changes', async () => {
+        const { rerender } = renderBadgeWithText('Color test', { class: 'ms-1' });
+        const element = screen.getByText('Color test');
+        expect(element).toHaveClass('text-bg-primary');
+        await rerender({ class: ['text-bg-danger', 'ms-1'] });
+        expect(element).toHaveClass('text-bg-danger');
+        expect(element).not.toHaveClass('text-bg-primary');
+        await rerender({ class: { 'text-bg-danger': false, 'ms-1': true } });
+        expect(element).toHaveClass('text-bg-primary');
+        expect(element).not.toHaveClass('text-bg-danger');
+    });
+});
+
+describe('Badge explicit color opt-out', () => {
+    test.each(['badge-brand', ['badge-brand'], { 'badge-brand': true }, ['mb-3', [{ 'badge-brand': true }]]])(
+        'none leaves custom theme classes alone: %j',
+        (classValue) => {
+            renderBadgeWithText('Custom theme', { colorVariant: 'none', class: classValue });
+            const element = screen.getByText('Custom theme');
+            expect(element).toHaveClass('badge-brand');
+            expect(element).not.toHaveClass('text-bg-primary', 'none', 'alert-none');
+        }
+    );
+    test('restores default for null and empty values after none or explicit colors', async () => {
+        const { rerender } = renderBadgeWithText('Custom theme', { colorVariant: 'none', class: 'badge-brand' });
+        const element = screen.getByText('Custom theme');
+        expect(element).not.toHaveClass('text-bg-primary');
+        await rerender({ colorVariant: null as never });
+        expect(element).toHaveClass('text-bg-primary');
+        await rerender({ colorVariant: 'text-bg-danger' });
+        expect(element).not.toHaveClass('text-bg-primary');
+        await rerender({ colorVariant: '' as never });
+        expect(element).toHaveClass('text-bg-primary');
+    });
+    test.each(['bg-brand', 'text-bg-brand'])('does not infer arbitrary custom color intent: %s', (classValue) => {
+        renderBadgeWithText('Custom theme', { class: classValue });
+        expect(screen.getByText('Custom theme')).toHaveClass('text-bg-primary');
+    });
+});
