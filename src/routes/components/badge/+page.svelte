@@ -225,8 +225,8 @@
         </div>
     </section>
 
-    <section class="mb-5" id="custom-colors">
-        <h2>Custom colors and default styling</h2>
+    <section class="mb-5">
+        <h2 class="wk-quick-link" id="custom-colors">Custom colors and default styling</h2>
         <p>
             Layout classes retain the primary default. Recognized Bootstrap color classes override it, including string, array and object class
             values.
