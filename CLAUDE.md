@@ -76,7 +76,7 @@ Tests are colocated with components. Cross-component contract suites and their s
 ### Build/packaging notes
 
 - Runes mode is enforced globally (`compilerOptions.runes: true` in `svelte.config.js`); preprocessing uses `svelte-preprocess` with sass.
-- The package ships only `dist/` and declares `svelte`/`types` exports; `svelte ^5.29.0` is a peer dependency. Consumers install with `pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3`; Requires Bootstrap ≥ 5.3 and < 6. Bootstrap CSS is NOT bundled — consumers import it themselves.
+- The package ships only `dist/` and declares `svelte`/`types` exports; `svelte ^5.55.7` is a peer dependency. Consumers install with `pnpm add @winkintel/bootstrap-svelte bootstrap@^5.3`; Requires Bootstrap ≥ 5.3 and < 6. Bootstrap CSS is NOT bundled — consumers import it themselves.
 - `publint` runs as part of `prepack`/`build` and will fail the build on packaging mistakes.
 
 ## Conventions and constraints

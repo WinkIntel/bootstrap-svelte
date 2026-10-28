@@ -30,7 +30,7 @@ There is no E2E suite. Regressions show up through the CI chain, a before/after 
 Two notes:
 
 - `@types/node` uses `^`, not `~`. Review its major separately against the Node version CI runs; the current types major may differ from CI (`node-version` in [.github/workflows/ci.yml](../../.github/workflows/ci.yml)).
-- The `svelte` **peer** range (`^5.29.0`) is independent of the `svelte` devDependency. Bumping the devDependency must not raise the peer floor unless the library starts using a newer Svelte API. If it does, raising the floor is a breaking change for consumers and needs a CHANGELOG entry.
+- The `svelte` **peer** range is independent of the `svelte` devDependency: main declares `^5.55.7`, while 1.x maintenance retains `^5.29.0`. A development dependency sweep must not implicitly change either peer floor. A separate, explicitly reviewed API or security-baseline decision is required, with a compatibility CHANGELOG note for affected consumers.
 
 ---
 
@@ -233,7 +233,9 @@ VERCEL=1 pnpm build:site && jq '.routes | length' .vercel/output/config.json
 
 ### Peer floor compatibility
 
-Do not test the `^5.29.0` consumer floor by downgrading Svelte inside this repository: the installed `@sveltejs/vite-plugin-svelte` 7.2 toolchain requires Svelte `^5.46.4`. Repository checks validate the supported development toolchain, not the minimum consumer version. If minimum-version validation is needed, use a separate consumer fixture with Svelte 5.29.0 and compatible build tooling to compile and exercise the packaged library. That separate compatibility check is outside this dependency-sweep procedure; do not infer peer-floor support from the repository test results.
+Main CI runs a separate exact-minimum Svelte job alongside the normal frozen development toolchain. The job starts with the frozen lockfile, changes only its disposable checkout to the exact peer minimum, asserts the installed version, then runs types, the full suite, build and `pnpm test:svelte-consumer`. The consumer check installs the packed library with that exact Svelte version and checks its public types and production build. Do not commit the temporary manifest or lockfile changes.
+
+The 1.x peer remains `^5.29.0`, below the installed `@sveltejs/vite-plugin-svelte` 7.2 requirement of `^5.46.4`. Do not downgrade that branch’s repository toolchain to 5.29.0 or claim that its normal CI tests the consumer floor. Testing that older supported range needs a separate consumer fixture with compatible tooling; it is outside this dependency-sweep procedure. Follow the patched-version recommendation in its README and SECURITY policy.
 
 ---
 

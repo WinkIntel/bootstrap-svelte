@@ -50,7 +50,7 @@ It is not trying to replace Tailwind, shadcn-style workflows, or fully custom de
 
 ## Requirements
 
-- Svelte 5
+- Svelte ≥ 5.55.7 and < 6
 - Bootstrap ≥ 5.3 and < 6 CSS supplied by the consuming application
 - A modern Svelte/Vite/SvelteKit-style build pipeline
 
@@ -68,7 +68,9 @@ yarn add @winkintel/bootstrap-svelte bootstrap@^5.3
 
 ### Peer dependency
 
-This package requires Svelte `^5.29.0` as a peer dependency. Keep Svelte installed in your application; do not replace the package/bootstrap install command with a Svelte install command.
+This package requires Svelte `^5.55.7` as a peer dependency. Keep Svelte installed in your application; do not replace the package/bootstrap install command with a Svelte install command.
+
+Svelte 5.55.7 is the patched baseline for the published [SSR spread-attribute](https://github.com/sveltejs/svelte/security/advisories/GHSA-pr6f-5x2q-rwfp) and [DOM-clobbering](https://github.com/sveltejs/svelte/security/advisories/GHSA-rcqx-6q8c-2c42) advisories. Keep Svelte updated within the supported 5.x range; the minimum is not a guarantee against future advisories.
 
 ## Bootstrap CSS
 
@@ -263,7 +265,7 @@ import type { ButtonRootProps } from '@winkintel/bootstrap-svelte';
 
 Bootstrap Svelte targets modern browsers that support:
 
-- Svelte 5
+- Svelte ≥ 5.55.7 and < 6
 - Bootstrap 5
 - ES2020+ JavaScript features
 
