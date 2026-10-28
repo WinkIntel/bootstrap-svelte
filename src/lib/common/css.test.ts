@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { cubicBezier, ease, easeIn, easeInOut, easeOut, fromStyle, toStyle, uniqueClsx } from './css.js';
+import { cubicBezier, hasBootstrapColorClass, ease, easeIn, easeInOut, easeOut, fromStyle, toStyle, uniqueClsx } from './css.js';
 
 describe('css.js', () => {
     // Easing function tests
@@ -444,5 +444,32 @@ describe('css.js', () => {
 
             expect(fromStyle(toStyle(originalStyle))).toEqual(originalStyle);
         });
+    });
+});
+
+describe('recognized Bootstrap color tokens', () => {
+    test.each(['bg-primary-subtle', 'bg-body', 'bg-body-secondary', 'bg-body-tertiary', 'bg-white', 'bg-black', 'bg-transparent', 'text-bg-dark'])(
+        'recognizes %s on either component',
+        (token) => {
+            expect(hasBootstrapColorClass(`mb-3 ${token} p-2`, 'badge')).toBe(true);
+            expect(hasBootstrapColorClass(`mb-3 ${token} p-2`, 'alert')).toBe(true);
+        }
+    );
+    test.each([
+        'bg-opacity-50',
+        'bg-gradient',
+        'bg-brand',
+        'text-bg-brand',
+        'prefix-bg-primary',
+        'bg-primary-extra',
+        'alert-compact',
+        'alert-warning-extra'
+    ])('does not infer color from %s', (token) => {
+        expect(hasBootstrapColorClass(token, 'badge')).toBe(false);
+        expect(hasBootstrapColorClass(token, 'alert')).toBe(false);
+    });
+    test('recognizes contextual Alert colors only on Alert', () => {
+        expect(hasBootstrapColorClass('mb-3 alert-warning', 'alert')).toBe(true);
+        expect(hasBootstrapColorClass('mb-3 alert-warning', 'badge')).toBe(false);
     });
 });

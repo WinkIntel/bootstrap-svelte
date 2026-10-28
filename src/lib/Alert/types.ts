@@ -1,6 +1,6 @@
 import type { BaseColorVariant, DivElement } from '$lib/common/types.js';
 
-export type AlertColorVariant = BaseColorVariant;
+export type AlertColorVariant = BaseColorVariant | 'none';
 
 export type AlertDismissEvent = CustomEvent<void>;
 

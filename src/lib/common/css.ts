@@ -63,21 +63,21 @@ function appendClassValue(result: string[], tokens: Set<string>, value: ClassVal
 }
 
 /**
- * This easing function will match the CSS `ease-in-out` easing function using a cubic Bezier curve defined by the points (0.25, 0.1, 0.25, 1).
+ * This easing function will match the CSS `ease` easing function using a cubic Bezier curve defined by the points (0.25, 0.1, 0.25, 1).
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function#ease
  * @returns {EasingFunction} The easing function: (input: number): number;
  */
 export const ease: EasingFunction = BezierEasing(0.25, 0.1, 0.25, 1);
 
 /**
- * This easing function will match the CSS `ease-in-out` easing function using a cubic Bezier curve defined by the points (0.42, 0, 1, 1).
+ * This easing function will match the CSS `ease-in` easing function using a cubic Bezier curve defined by the points (0.42, 0, 1, 1).
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function#ease-in
  * @returns {EasingFunction} The easing function: (input: number): number;
  */
 export const easeIn: EasingFunction = BezierEasing(0.42, 0, 1, 1);
 
 /**
- * This easing function will match the CSS `ease-in-out` easing function using a cubic Bezier curve defined by the points (0, 0, 0.58, 1).
+ * This easing function will match the CSS `ease-out` easing function using a cubic Bezier curve defined by the points (0, 0, 0.58, 1).
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function#ease-out
  * @returns {EasingFunction} The easing function: (input: number): number;
  */
@@ -281,4 +281,15 @@ export function fromStyle(cssString: string | null | undefined): CSSProperties {
     }
 
     return styleObj;
+}
+
+// Recognize Bootstrap color utilities only; custom theme intent is explicit via colorVariant="none".
+const themeColors = 'primary|secondary|success|danger|warning|info|light|dark';
+const backgroundColorToken = new RegExp(
+    `(?:^| )(?:text-bg-(?:${themeColors})|bg-(?:(?:${themeColors})(?:-subtle)?|body(?:-secondary|-tertiary)?|white|black|transparent))(?: |$)`
+);
+const alertColorToken = new RegExp(`(?:^| )alert-(?:${themeColors})(?: |$)`);
+
+export function hasBootstrapColorClass(normalizedClasses: string, component: 'badge' | 'alert'): boolean {
+    return backgroundColorToken.test(normalizedClasses) || (component === 'alert' && alertColorToken.test(normalizedClasses));
 }
