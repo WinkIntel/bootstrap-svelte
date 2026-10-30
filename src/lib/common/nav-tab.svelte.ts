@@ -1,5 +1,6 @@
 import { Context } from '$lib/common/index.js';
 import type { Nav } from '../Nav/index.js';
+import type { Navbar } from '../Navbar/index.js';
 import type { Tab } from '../Tab/index.js';
 
 /**
@@ -11,7 +12,15 @@ export class NavRootState {
     #activeNavLinkId: string = $state('');
     #navLinkStates: NavLinkState[] = [];
 
-    constructor(readonly props: Nav.RootProps) {
+    get isTablist(): boolean {
+        return this.props.role === 'tablist';
+    }
+
+    constructor(
+        readonly props: Nav.RootProps | Navbar.NavProps,
+        readonly tabRoot: TabRootState | null = null,
+        readonly tabPaneRoot: TabRootState | null = null
+    ) {
         this.isNavLinkActive = this.isNavLinkActive.bind(this);
         this.registerNavLinkState = this.registerNavLinkState.bind(this);
         this.setNavLinkActive = this.setNavLinkActive.bind(this);
@@ -34,12 +43,14 @@ export class NavRootState {
  */
 export class NavLinkState {
     isActive = $derived.by(() => this.root.isNavLinkActive(this.props.id || ''));
-    ariaControls = $derived.by(() => (this.isTab ? this.props.href?.replace('#', '') : undefined));
+    hasTabRole = $derived.by(() => this.isTab && (this.tabRoles?.isTablist ?? true));
+    ariaControls = $derived.by(() => (this.hasTabRole ? this.props.href?.replace('#', '') : undefined));
     readonly isTab: boolean;
 
     constructor(
         readonly props: Nav.LinkProps,
-        readonly root: TabRootState | NavRootState
+        readonly root: TabRootState | NavRootState,
+        readonly tabRoles?: { readonly isTablist: boolean }
     ) {
         this.onclick = this.onclick.bind(this);
         this.isTab = root instanceof TabRootState;
@@ -128,21 +139,40 @@ export class TabPaneState {
 
 const NavRootContext = new Context<NavRootState>('nav-root');
 const TabRootContext = new Context<TabRootState>('tab-root');
+// Set by Tab.Pane to its root: descendants keep that real Tab root but are outside its navigation strip.
+const TabPaneRootContext = new Context<TabRootState>('tab-pane-root');
+
+/** A nested Tab.Root differs from the enclosing pane's root, so it starts its own strip. */
+function getTabStripRoot(): TabRootState | null {
+    const tabRoot = TabRootContext.getOr(null);
+    return tabRoot === TabPaneRootContext.getOr(null) ? null : tabRoot;
+}
 
 /**
- * Checks if the Tab root context exists.
- * @returns True if the Tab root context exists, false otherwise.
+ * Checks if the current component is in a Tab root's navigation strip.
+ * @returns True if a Tab root exists and the component is outside its panes, false otherwise.
  */
-export const doesTabRootContextExists = () => TabRootContext.exists();
+export const isInTabStrip = () => getTabStripRoot() !== null;
+
+/** Capture contexts during initialization; read the resolved root role reactively. */
+export function getTabRoleState(): { readonly isTablist: boolean } {
+    const tabRoot = getTabStripRoot();
+    const navRoot = NavRootContext.getOr(null);
+    return {
+        get isTablist() {
+            return tabRoot !== null && (navRoot?.tabRoot === tabRoot ? navRoot.isTablist : true);
+        }
+    };
+}
 
 /**
  * Creates and initializes the Nav root state.
  * This function is used to set up the context for the Nav component.
- * @param props - The props for the Nav root component.
+ * @param props - The props for the Nav.Root or Navbar.Nav component.
  * @returns The created NavRootState instance.
  */
-export function initNavRootState(props: Nav.RootProps): NavRootState {
-    const rootState = new NavRootState(props);
+export function initNavRootState(props: Nav.RootProps | Navbar.NavProps): NavRootState {
+    const rootState = new NavRootState(props, TabRootContext.getOr(null), TabPaneRootContext.getOr(null));
     return NavRootContext.set(rootState);
 }
 
@@ -161,12 +191,14 @@ export function initTabRootState(props: Tab.RootProps): TabRootState {
  * Creates and initializes the Nav link state.
  * This function is used to set up the context for the Nav link component.
  * @param props - The props for the Nav link component.
+ * @param isTabNavLink - Whether the link is a Tab.NavLink, which always targets the nearest Tab root if there is one.
  * @returns The created NavLinkState instance.
  */
-export function initNavLinkState(props: Nav.LinkProps): NavLinkState {
-    if (TabRootContext.exists()) {
-        const rootState = TabRootContext.get();
-        const linkState = new NavLinkState(props, rootState);
+export function initNavLinkState(props: Nav.LinkProps, isTabNavLink = false): NavLinkState {
+    const rootState = TabRootContext.getOr(null);
+    // A Nav.Link under a Nav.Root in this Tab root's pane content is ordinary navigation.
+    if (rootState && (isTabNavLink || NavRootContext.getOr(null)?.tabPaneRoot !== rootState)) {
+        const linkState = new NavLinkState(props, rootState, getTabRoleState());
         rootState.registerNavLinkState(linkState);
         return linkState;
     } else if (!NavRootContext.exists()) {
@@ -194,5 +226,6 @@ export function initTabPaneState(props: Tab.PaneProps): TabPaneState {
     const rootState = TabRootContext.get();
     const paneState = new TabPaneState(props, rootState);
     rootState.registerTabPaneState(paneState);
+    TabPaneRootContext.set(rootState);
     return paneState;
 }

@@ -124,6 +124,13 @@
     <Nav.Link href="#!">Link</Nav.Link>
 </Nav.Root>`;
 
+    const landmarkExampleCode = `<nav aria-label="Primary navigation">
+    <Nav.Root>
+        <Nav.Item><Nav.Link href="/home">Home</Nav.Link></Nav.Item>
+        <Nav.Item><Nav.Link href="/about">About</Nav.Link></Nav.Item>
+    </Nav.Root>
+</nav>`;
+
     const activeStateExampleCode = `<!-- Explicit Active State Control -->
 <Nav.Root>
     <Nav.Item>
@@ -485,6 +492,45 @@
         </p>
     </section>
 
+    <section class="mb-5" id="accessibility">
+        <h2 class="wk-quick-link">Accessibility and landmarks</h2>
+        <p>
+            Ordinary <code>Nav.Root</code> lists retain their native list semantics. Styling with <code>itemStyle="tabs"</code>, <code>"pills"</code>
+            or <code>"underline"</code> does not turn navigation links into a tab widget. In the navigation strip of <code>Tab.Root</code>, the root
+            defaults to
+            <code>role="tablist"</code> for every style. Navigation inside a <code>Tab.Pane</code> retains ordinary semantics, although a
+            <code>Tab.NavLink</code> there, or a bare <code>Nav.Link</code> with no <code>Nav.Root</code> inside that pane, still selects a pane of
+            its
+            <code>Tab.Root</code>. A bare link's click is intercepted and its <code>href</code> is read as a pane ID, so even
+            <code>href="/settings"</code> does not navigate; place links that should navigate under a <code>Nav.Root</code> inside the pane. A nested
+            <code>Tab.Root</code> creates its own tab widget. Use the Tab components when links switch associated panels.
+        </p>
+        <p>
+            For an ordinary navigation landmark, wrap the list in a named <code>&lt;nav&gt;</code>, or use <code>elementType="nav"</code> with direct
+            <code>Nav.Link</code>
+            children. Do not put <code>role="navigation"</code> on a <code>&lt;ul&gt;</code> or <code>&lt;ol&gt;</code>.
+        </p>
+        <SyntaxHighlighter code={landmarkExampleCode} />
+        <p>
+            Migration: selectors or accessibility queries that relied on the old list navigation role should target the native list or its
+            <code>&lt;nav&gt;</code> wrapper. Explicit <code>role</code> values remain under your control; <code>{'role={null}'}</code> omits the root
+            role attribute, including inside <code>Tab.Root</code>. Root overrides other than <code>tablist</code> also disable inferred child
+            tab/presentation roles and tab-specific ARIA attributes; explicit child roles are honored instead. This changes semantics, not panel
+            selection behavior. If overriding roles, provide a coherent container and child structure. Selection does change in one case: a
+            <code>Nav.Link</code> under a <code>Nav.Root</code> inside a <code>Tab.Pane</code> previously selected a pane and now follows its
+            <code>href</code>, whatever the root role. Use <code>Tab.NavLink</code> to select panes from such a container. Automatic vertical
+            orientation is emitted only for tablists with <code>verticalBreakpoint="xs"</code>. Responsive layouts do not infer a static orientation;
+            use
+            <code>ariaOrientation</code> to supply a value that tracks your layout.
+        </p>
+        <p>
+            Custom tab widgets outside <code>Tab.Root</code> must explicitly set <code>role="tablist"</code> on <code>Nav.Root</code>,
+            <code>role="presentation"</code>
+            on <code>Nav.Item</code> and <code>role="tab"</code> on <code>Nav.Link</code>, with associated panels, selection state and interaction
+            behavior managed by the consumer. Styling alone no longer supplies those semantics.
+        </p>
+    </section>
+
     <!-- API Reference -->
     <section class="mb-5 wk-api-section" id="api">
         <h2 class="wk-quick-link">API Reference</h2>
@@ -505,7 +551,9 @@
                         <td><code>ariaOrientation</code></td>
                         <td><code>'horizontal' | 'vertical'</code></td>
                         <td>-</td>
-                        <td>ARIA orientation attribute. Automatically set to 'vertical' when verticalBreakpoint is defined.</td>
+                        <td
+                            >Explicit ARIA orientation. A tablist infers 'vertical' only for verticalBreakpoint='xs'. Responsive breakpoints require
+                            explicit orientation tracking; ordinary navigation does not infer orientation.</td>
                     </tr>
                     <tr>
                         <td><code>elementType</code></td>
@@ -553,7 +601,9 @@
                         <td><code>role</code></td>
                         <td><code>'navigation' | 'tablist' | null</code></td>
                         <td>Auto-determined</td>
-                        <td>ARIA role. Defaults to 'tablist' if itemStyle is 'tabs', 'navigation' for non-nav elements, null otherwise</td>
+                        <td
+                            >Defaults to 'tablist' in a Tab.Root navigation strip, otherwise omitted. Explicit roles are honored; null omits the role
+                            attribute. Use 'navigation' only with elementType='nav', never on a ul or ol.</td>
                     </tr>
                     <tr>
                         <td><code>verticalBreakpoint</code></td>

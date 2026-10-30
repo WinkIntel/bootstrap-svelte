@@ -40,7 +40,7 @@ Root navigation component that contains navigation items and links.
 ```
 
 ### Props
-- `ariaOrientation` (string | null): Optional. Orientation for ARIA (horizontal or vertical). Defaults to `null`, which means no specific orientation is set.
+- `ariaOrientation` (string): Optional. Explicit ARIA orientation (horizontal or vertical). Always-vertical tablists (verticalBreakpoint='xs') infer 'vertical' when this prop is omitted; ordinary navigation does not infer an orientation.
 - `class` (string): Optional. Additional CSS classes. Defaults to an empty string.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element. Defaults to `null`.
 - `elementType` (string): Optional. Element type to render, one of: 'nav', 'ol', 'ul'. Defaults to 'ul'.
@@ -48,12 +48,12 @@ Root navigation component that contains navigation items and links.
 - `id` (string): Optional. Unique ID for the navigation element. Defaults to `nav-{uid}`, where `uid` is a unique identifier.
 - `itemLayout` (string): Optional. Item layout, one of: 'none', 'fill', 'justified'. Defaults to 'none'.
 - `itemStyle` (string): Optional. Item style, one of: 'none', 'pills', 'tabs', 'underline'. Defaults to 'none'.
-- `role` (string): Optional. ARIA role. If not set, defaults to 'navigation' for non-nav elements and 'tablist' for tabs.
+- `role` (string | null): Optional. Defaults to 'tablist' in a Tab.Root navigation strip, regardless of itemStyle; navigation inside Tab.Pane stays ordinary. Otherwise no role attribute is added. Explicit roles are preserved; null opts out of the default. Use a nav wrapper or elementType='nav' for an ordinary navigation landmark.
 - `verticalBreakpoint` (string): Optional. Breakpoint for vertical orientation, one of: 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'. Defaults to `null`, which means no vertical orientation is applied.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
-    import { initNavRootState, NavRootState } from '$lib/common/nav-tab.svelte.js';
+    import { initNavRootState, isInTabStrip, NavRootState } from '$lib/common/nav-tab.svelte.js';
     import type { Nav } from './index.js';
 
     // Generate a unique ID for the component, in case one is not provided...
@@ -75,14 +75,17 @@ Root navigation component that contains navigation items and links.
     }: Nav.RootProps = $props();
 
     let isVertical = $derived(!!verticalBreakpoint); // !! to convert to boolean
-    // If role is not explicitly set and element type is not 'nav', default to navigation role
-    let defaultRole = $derived(role ? role : itemStyle === 'tabs' ? 'tablist' : elementType !== 'nav' ? 'navigation' : undefined);
-    // If ariaOrientation is not provided and verticalBreakpoint is defined, set it to 'vertical'. Otherwise, use the provided ariaOrientation.
-    let ariaOrientationDerived = $derived(!ariaOrientation && isVertical ? 'vertical' : ariaOrientation);
+    // Svelte context is read during initialization, not when reactive props update.
+    const isTabNavigation = isInTabStrip();
+    let defaultRole = $derived(role !== undefined ? role : isTabNavigation ? 'tablist' : undefined);
+    let ariaOrientationDerived = $derived(ariaOrientation || (defaultRole === 'tablist' && verticalBreakpoint === 'xs' ? 'vertical' : undefined));
 
     const _rootState: NavRootState = initNavRootState({
         get id() {
             return id;
+        },
+        get role() {
+            return defaultRole;
         }
     });
 

@@ -15,12 +15,13 @@ Nav item component to wrap Nav.Link components.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
-    import { doesTabRootContextExists } from '$lib/common/nav-tab.svelte.js';
+    import { getTabRoleState } from '$lib/common/nav-tab.svelte.js';
     import type { Nav } from './index.js';
 
     let { children, class: classValues, elementRef = $bindable(null), role, ...restOfProps }: Nav.ItemProps = $props();
 
-    let defaultRole: string | null | undefined = $derived(doesTabRootContextExists() ? 'presentation' : role);
+    const tabRoles = getTabRoleState();
+    let defaultRole: string | null | undefined = $derived(tabRoles.isTablist ? 'presentation' : role);
     let classes: string = $derived(uniqueClsx('nav-item', classValues));
 </script>
 

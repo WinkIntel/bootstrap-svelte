@@ -911,6 +911,18 @@
                         <td><code>false</code></td>
                         <td>Enable vertical scrolling within the nav</td>
                     </tr>
+                    <tr>
+                        <td><code>role</code></td>
+                        <td><code>string | null</code></td>
+                        <td>-</td>
+                        <td
+                            >Rendered unchanged; no role is inferred. In a Tab.Root navigation strip, <code>'tablist'</code> gives children inferred
+                            tab roles and ARIA attributes; any other value or no role omits them. This changes semantics, not click handling: links in
+                            the strip still select panes, so an
+                            <code>href</code> such as <code>'/login'</code> does not navigate. Navigation in Tab.Pane content, other than a nested
+                            Tab.Root strip, infers no tab semantics: Nav.Link follows its <code>href</code> and Tab.NavLink still selects a pane of its
+                            Tab.Root.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>

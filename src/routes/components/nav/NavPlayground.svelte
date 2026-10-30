@@ -70,20 +70,13 @@
 
         code += `>`;
 
-        // Add nav items
+        const useItems = elementType !== 'nav';
         navItems.forEach((label, index) => {
-            code += `\n  <Nav.Item>`;
-
-            // Handle isActive based on mode
-            if (activeStateMode === 'explicit') {
-                const isActiveAttr = index === explicitActiveIndex ? ' isActive={true}' : ' isActive={false}';
-                code += `\n    <Nav.Link href="#nav-link-${index}"${isActiveAttr}>${label}</Nav.Link>`;
-            } else {
-                // Internal management - no isActive prop
-                code += `\n    <Nav.Link href="#nav-link-${index}">${label}</Nav.Link>`;
-            }
-
-            code += `\n  </Nav.Item>`;
+            const indent = useItems ? '    ' : '  ';
+            const isActiveAttr = activeStateMode === 'explicit' ? ` isActive={${index === explicitActiveIndex}}` : '';
+            if (useItems) code += `\n  <Nav.Item>`;
+            code += `\n${indent}<Nav.Link href="#nav-link-${index}"${isActiveAttr}>${label}</Nav.Link>`;
+            if (useItems) code += `\n  </Nav.Item>`;
         });
 
         code += `\n</Nav.Root>`;
@@ -194,14 +187,19 @@
                     <div class="p-4 border rounded bg-light d-flex" style="min-height: 150px;">
                         <Nav.Root {elementType} {itemStyle} {itemLayout} {horizontalAlignment} {verticalBreakpoint}>
                             {#each navItems as navItem2, navItem2Index (`navItem2-${navItem2Index}`)}
-                                <Nav.Item>
+                                {#snippet link()}
                                     {#if activeStateMode === 'explicit'}
                                         <Nav.Link href="#nav-link-{navItem2Index}" isActive={navItem2Index === explicitActiveIndex}
                                             >{navItem2}</Nav.Link>
                                     {:else}
                                         <Nav.Link href="#nav-link-{navItem2Index}">{navItem2}</Nav.Link>
                                     {/if}
-                                </Nav.Item>
+                                {/snippet}
+                                {#if elementType === 'nav'}
+                                    {@render link()}
+                                {:else}
+                                    <Nav.Item>{@render link()}</Nav.Item>
+                                {/if}
                             {/each}
                         </Nav.Root>
                     </div>
