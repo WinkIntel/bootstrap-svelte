@@ -47,6 +47,7 @@ Container for navigation items within a navbar, providing proper styling and spa
 - `elementRef` (HTMLUListElement): Optional. Reference to the DOM ul element.
 - `id` (string): Optional. Unique ID for the navigation container. Defaults to `navbar-{uid}`.
 - `isVerticalScrolling` (boolean): Optional. Enables vertical scrolling for the navigation items. Defaults to false.
+- `role` (string | null): Optional. Rendered unchanged; no role is inferred. In a Tab.Root navigation strip, 'tablist' gives children inferred tab roles and ARIA attributes; any other value or no role omits them. This changes semantics, not click handling: links in the strip still select panes, so an href such as '/login' does not navigate. Navigation in Tab.Pane content, other than a nested Tab.Root strip, infers no tab semantics: Nav.Link follows its href and Tab.NavLink still selects a pane of its Tab.Root.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/index.js';
@@ -62,18 +63,22 @@ Container for navigation items within a navbar, providing proper styling and spa
         elementRef = $bindable(null),
         id = `navbar-${uid}`,
         isVerticalScrolling = false,
+        role,
         ...restOfProps
     }: Navbar.NavProps = $props();
 
     const _rootState: NavRootState = initNavRootState({
         get id() {
             return id;
+        },
+        get role() {
+            return role;
         }
     });
 
     let classes = $derived(uniqueClsx('navbar-nav', { 'navbar-nav-scroll': isVerticalScrolling }, classValues));
 </script>
 
-<ul bind:this={elementRef} class={classes} {id} {...restOfProps}>
+<ul bind:this={elementRef} class={classes} {id} {role} {...restOfProps}>
     {@render children?.()}
 </ul>

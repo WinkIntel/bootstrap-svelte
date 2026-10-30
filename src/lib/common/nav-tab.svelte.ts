@@ -1,5 +1,6 @@
 import { Context } from '$lib/common/index.js';
 import type { Nav } from '../Nav/index.js';
+import type { Navbar } from '../Navbar/index.js';
 import type { Tab } from '../Tab/index.js';
 
 /**
@@ -16,7 +17,7 @@ export class NavRootState {
     }
 
     constructor(
-        readonly props: Nav.RootProps,
+        readonly props: Nav.RootProps | Navbar.NavProps,
         readonly tabRoot: TabRootState | null = null,
         readonly tabPaneRoot: TabRootState | null = null
     ) {
@@ -167,10 +168,10 @@ export function getTabRoleState(): { readonly isTablist: boolean } {
 /**
  * Creates and initializes the Nav root state.
  * This function is used to set up the context for the Nav component.
- * @param props - The props for the Nav root component.
+ * @param props - The props for the Nav.Root or Navbar.Nav component.
  * @returns The created NavRootState instance.
  */
-export function initNavRootState(props: Nav.RootProps): NavRootState {
+export function initNavRootState(props: Nav.RootProps | Navbar.NavProps): NavRootState {
     const rootState = new NavRootState(props, TabRootContext.getOr(null), TabPaneRootContext.getOr(null));
     return NavRootContext.set(rootState);
 }
