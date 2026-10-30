@@ -655,6 +655,7 @@
         <h3 class="h5 mt-4">Accessibility</h3>
         <p>The Tab component automatically applies proper ARIA attributes:</p>
         <ul>
+            <li><code>role="tablist"</code> - Applied to Nav.Root inside Tab.Root for tabs, pills, underline or the default visual style</li>
             <li><code>role="tabpanel"</code> - Applied to Tab.Pane components</li>
             <li><code>aria-labelledby</code> - Links the Tab.Pane to its corresponding Tab.NavLink</li>
             <li><code>aria-hidden</code> - Set to "true" for inactive panes, "false" for active panes</li>

@@ -124,6 +124,13 @@
     <Nav.Link href="#!">Link</Nav.Link>
 </Nav.Root>`;
 
+    const landmarkExampleCode = `<nav aria-label="Primary navigation">
+    <Nav.Root>
+        <Nav.Item><Nav.Link href="/home">Home</Nav.Link></Nav.Item>
+        <Nav.Item><Nav.Link href="/about">About</Nav.Link></Nav.Item>
+    </Nav.Root>
+</nav>`;
+
     const activeStateExampleCode = `<!-- Explicit Active State Control -->
 <Nav.Root>
     <Nav.Item>
@@ -485,6 +492,27 @@
         </p>
     </section>
 
+    <section class="mb-5" id="accessibility">
+        <h2 class="wk-quick-link">Accessibility and landmarks</h2>
+        <p>
+            Ordinary <code>Nav.Root</code> lists retain their native list semantics. Styling with <code>itemStyle="tabs"</code>, <code>"pills"</code>
+            or <code>"underline"</code> does not turn navigation links into a tab widget. Inside <code>Tab.Root</code>, the root defaults to
+            <code>role="tablist"</code> for every style. Use the Tab components when links switch associated panels.
+        </p>
+        <p>
+            For an ordinary navigation landmark, wrap the list in a named <code>&lt;nav&gt;</code>, or use <code>elementType="nav"</code> with direct
+            <code>Nav.Link</code>
+            children. Do not put <code>role="navigation"</code> on a <code>&lt;ul&gt;</code> or <code>&lt;ol&gt;</code>.
+        </p>
+        <SyntaxHighlighter code={landmarkExampleCode} />
+        <p>
+            Migration: selectors or accessibility queries that relied on the old list navigation role should target the native list or its
+            <code>&lt;nav&gt;</code> wrapper. Explicit <code>role</code> values remain under your control; <code>{'role={null}'}</code> omits the root
+            role attribute, including inside <code>Tab.Root</code>. If overriding roles, provide a coherent container and child structure. Automatic
+            vertical orientation is emitted only for tablists; explicit <code>ariaOrientation</code> values are preserved.
+        </p>
+    </section>
+
     <!-- API Reference -->
     <section class="mb-5 wk-api-section" id="api">
         <h2 class="wk-quick-link">API Reference</h2>
@@ -505,7 +533,8 @@
                         <td><code>ariaOrientation</code></td>
                         <td><code>'horizontal' | 'vertical'</code></td>
                         <td>-</td>
-                        <td>ARIA orientation attribute. Automatically set to 'vertical' when verticalBreakpoint is defined.</td>
+                        <td
+                            >Explicit ARIA orientation. A tablist infers 'vertical' when verticalBreakpoint is defined; ordinary navigation does not.</td>
                     </tr>
                     <tr>
                         <td><code>elementType</code></td>
@@ -553,7 +582,7 @@
                         <td><code>role</code></td>
                         <td><code>'navigation' | 'tablist' | null</code></td>
                         <td>Auto-determined</td>
-                        <td>ARIA role. Defaults to 'tablist' if itemStyle is 'tabs', 'navigation' for non-nav elements, null otherwise</td>
+                        <td>Defaults to 'tablist' inside Tab.Root, otherwise omitted. Explicit roles are honored; null omits the role attribute.</td>
                     </tr>
                     <tr>
                         <td><code>verticalBreakpoint</code></td>

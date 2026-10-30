@@ -108,11 +108,11 @@ describe('Nav Component', () => {
         expect(navContainer.querySelector('ol')).toBeNull();
     });
 
-    it('should add role="navigation" when isNavigation=true and element is not nav', () => {
+    it('preserves the native list role for ordinary navigation', () => {
         render(NavBasicTest);
         const navigationNav = screen.getByTestId('navigation-nav');
         expect(navigationNav.tagName).toBe('UL');
-        expect(navigationNav).toHaveAttribute('role', 'navigation');
+        expect(navigationNav).not.toHaveAttribute('role');
     });
 
     it('should not add role="navigation" when element is already a nav element', () => {

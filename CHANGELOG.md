@@ -2,6 +2,13 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## Unreleased
+
+### Fixed
+
+- Correct Nav.Root default roles: use `tablist` inside Tab.Root for tabs, pills, underline and unstyled navigation; leave ordinary lists and `<nav>` with their native semantics. Preserve explicit role overrides and make `role={null}` omit the root role. Infer vertical orientation only for tablists; explicit orientation values remain supported ([#50](https://github.com/WinkIntel/bootstrap-svelte/issues/50)). Keyboard behavior is unchanged.
+- Markup compatibility: code that relied on the former implicit `role="navigation"` on a list should wrap that list in a named `<nav>` or use `elementType="nav"` with direct Nav.Link children. Styling ordinary links as tabs no longer gives them a tablist role. Updated showcase guidance and playground markup accordingly.
+
 ## 2.2.0 — 2026-10-29
 
 ### Security / compatibility
