@@ -1,7 +1,7 @@
 <!--
 @component
 ## Tab.NavLink
-A tab navigation link component specifically used inside a Tab.Root component.
+A tab navigation link component specifically used inside a Tab.Root component. Inside Tab.Pane content, it still selects a pane of its Tab.Root, without tab semantics.
 
 @example
 ```svelte
@@ -38,17 +38,20 @@ A tab navigation link component specifically used inside a Tab.Root component.
         ...restOfProps
     }: Tab.NavLinkProps = $props();
 
-    const linkState: NavLinkState = initNavLinkState({
-        get href() {
-            return targetPaneId;
+    const linkState: NavLinkState = initNavLinkState(
+        {
+            get href() {
+                return targetPaneId;
+            },
+            get id() {
+                return id;
+            },
+            get isActive() {
+                return isActive;
+            }
         },
-        get id() {
-            return id;
-        },
-        get isActive() {
-            return isActive;
-        }
-    });
+        true
+    );
 
     let isActiveState = $derived(linkState.isActive);
     let classes: string = $derived(uniqueClsx('nav-link', { active: isActiveState, disabled: isDisabled }, classValues));

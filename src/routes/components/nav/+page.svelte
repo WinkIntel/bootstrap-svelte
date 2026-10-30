@@ -498,7 +498,11 @@
             Ordinary <code>Nav.Root</code> lists retain their native list semantics. Styling with <code>itemStyle="tabs"</code>, <code>"pills"</code>
             or <code>"underline"</code> does not turn navigation links into a tab widget. In the navigation strip of <code>Tab.Root</code>, the root
             defaults to
-            <code>role="tablist"</code> for every style. Navigation inside a <code>Tab.Pane</code> retains ordinary semantics; a nested
+            <code>role="tablist"</code> for every style. Navigation inside a <code>Tab.Pane</code> retains ordinary semantics, although a
+            <code>Tab.NavLink</code> there, or a bare <code>Nav.Link</code> with no <code>Nav.Root</code> inside that pane, still selects a pane of
+            its
+            <code>Tab.Root</code>. A bare link's click is intercepted and its <code>href</code> is read as a pane ID, so even
+            <code>href="/settings"</code> does not navigate; place links that should navigate under a <code>Nav.Root</code> inside the pane. A nested
             <code>Tab.Root</code> creates its own tab widget. Use the Tab components when links switch associated panels.
         </p>
         <p>
@@ -512,8 +516,11 @@
             <code>&lt;nav&gt;</code> wrapper. Explicit <code>role</code> values remain under your control; <code>{'role={null}'}</code> omits the root
             role attribute, including inside <code>Tab.Root</code>. Root overrides other than <code>tablist</code> also disable inferred child
             tab/presentation roles and tab-specific ARIA attributes; explicit child roles are honored instead. This changes semantics, not panel
-            selection behavior. If overriding roles, provide a coherent container and child structure. Automatic vertical orientation is emitted only
-            for tablists with <code>verticalBreakpoint="xs"</code>. Responsive layouts do not infer a static orientation; use
+            selection behavior. If overriding roles, provide a coherent container and child structure. Selection does change in one case: a
+            <code>Nav.Link</code> under a <code>Nav.Root</code> inside a <code>Tab.Pane</code> previously selected a pane and now follows its
+            <code>href</code>, whatever the root role. Use <code>Tab.NavLink</code> to select panes from such a container. Automatic vertical
+            orientation is emitted only for tablists with <code>verticalBreakpoint="xs"</code>. Responsive layouts do not infer a static orientation;
+            use
             <code>ariaOrientation</code> to supply a value that tracks your layout.
         </p>
         <p>

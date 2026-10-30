@@ -17,7 +17,8 @@ export class NavRootState {
 
     constructor(
         readonly props: Nav.RootProps,
-        readonly tabRoot: TabRootState | null = null
+        readonly tabRoot: TabRootState | null = null,
+        readonly tabPaneRoot: TabRootState | null = null
     ) {
         this.isNavLinkActive = this.isNavLinkActive.bind(this);
         this.registerNavLinkState = this.registerNavLinkState.bind(this);
@@ -136,20 +137,25 @@ export class TabPaneState {
 }
 
 const NavRootContext = new Context<NavRootState>('nav-root');
-const TabRootContext = new Context<TabRootState | null>('tab-root');
+const TabRootContext = new Context<TabRootState>('tab-root');
+// Set by Tab.Pane to its root: descendants keep that real Tab root but are outside its navigation strip.
+const TabPaneRootContext = new Context<TabRootState>('tab-pane-root');
+
+/** A nested Tab.Root differs from the enclosing pane's root, so it starts its own strip. */
+function getTabStripRoot(): TabRootState | null {
+    const tabRoot = TabRootContext.getOr(null);
+    return tabRoot === TabPaneRootContext.getOr(null) ? null : tabRoot;
+}
 
 /**
- * Checks if the Tab root context exists.
- * @returns True if the Tab root context exists, false otherwise.
+ * Checks if the current component is in a Tab root's navigation strip.
+ * @returns True if a Tab root exists and the component is outside its panes, false otherwise.
  */
-export const doesTabRootContextExists = () => TabRootContext.getOr(null) !== null;
-
-/** Prevent navigation in pane content from acting as the enclosing tab strip. */
-export const clearTabRootContext = () => TabRootContext.set(null);
+export const isInTabStrip = () => getTabStripRoot() !== null;
 
 /** Capture contexts during initialization; read the resolved root role reactively. */
 export function getTabRoleState(): { readonly isTablist: boolean } {
-    const tabRoot = TabRootContext.getOr(null);
+    const tabRoot = getTabStripRoot();
     const navRoot = NavRootContext.getOr(null);
     return {
         get isTablist() {
@@ -165,7 +171,7 @@ export function getTabRoleState(): { readonly isTablist: boolean } {
  * @returns The created NavRootState instance.
  */
 export function initNavRootState(props: Nav.RootProps): NavRootState {
-    const rootState = new NavRootState(props, TabRootContext.getOr(null));
+    const rootState = new NavRootState(props, TabRootContext.getOr(null), TabPaneRootContext.getOr(null));
     return NavRootContext.set(rootState);
 }
 
@@ -177,19 +183,20 @@ export function initNavRootState(props: Nav.RootProps): NavRootState {
  */
 export function initTabRootState(props: Tab.RootProps): TabRootState {
     const rootState = new TabRootState(props);
-    TabRootContext.set(rootState);
-    return rootState;
+    return TabRootContext.set(rootState);
 }
 
 /**
  * Creates and initializes the Nav link state.
  * This function is used to set up the context for the Nav link component.
  * @param props - The props for the Nav link component.
+ * @param isTabNavLink - Whether the link is a Tab.NavLink, which always targets the nearest Tab root if there is one.
  * @returns The created NavLinkState instance.
  */
-export function initNavLinkState(props: Nav.LinkProps): NavLinkState {
+export function initNavLinkState(props: Nav.LinkProps, isTabNavLink = false): NavLinkState {
     const rootState = TabRootContext.getOr(null);
-    if (rootState) {
+    // A Nav.Link under a Nav.Root in this Tab root's pane content is ordinary navigation.
+    if (rootState && (isTabNavLink || NavRootContext.getOr(null)?.tabPaneRoot !== rootState)) {
         const linkState = new NavLinkState(props, rootState, getTabRoleState());
         rootState.registerNavLinkState(linkState);
         return linkState;
@@ -212,11 +219,12 @@ export function initNavLinkState(props: Nav.LinkProps): NavLinkState {
  * @returns The created TabPaneState instance.
  */
 export function initTabPaneState(props: Tab.PaneProps): TabPaneState {
-    const rootState = TabRootContext.getOr(null);
-    if (!rootState) {
+    if (!TabRootContext.exists()) {
         throw new Error('Tab.Pane requires Tab.Root context. Please ensure Tab.Root is initialized before Tab.Pane.');
     }
+    const rootState = TabRootContext.get();
     const paneState = new TabPaneState(props, rootState);
     rootState.registerTabPaneState(paneState);
+    TabPaneRootContext.set(rootState);
     return paneState;
 }
