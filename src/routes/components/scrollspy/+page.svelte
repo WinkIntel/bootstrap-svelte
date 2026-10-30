@@ -108,15 +108,15 @@ const nestedNavCallback: IntersectionObserverCallback = (entries: IntersectionOb
 
 <div class="row">
     <div class="col-4">
-        <Nav.Root id="navbar-example3" verticalBreakpoint="xs" itemStyle="pills">
+        <Nav.Root elementType="nav" id="navbar-example3" verticalBreakpoint="xs" itemStyle="pills">
             <Nav.Link href="#item-1" isActive={activeNestedNavId?.includes('item-1')}>Item 1</Nav.Link>
-            <Nav.Root class="ms-3" verticalBreakpoint="xs">
+            <Nav.Root elementType="nav" class="ms-3" verticalBreakpoint="xs">
                 <Nav.Link href="#item-1-1" isActive={activeNestedNavId === 'item-1-1'}>Item 1-1</Nav.Link>
                 <Nav.Link href="#item-1-2" isActive={activeNestedNavId === 'item-1-2'}>Item 1-2</Nav.Link>
             </Nav.Root>
             <Nav.Link href="#item-2" isActive={activeNestedNavId === 'item-2'}>Item 2</Nav.Link>
             <Nav.Link href="#item-3" isActive={activeNestedNavId?.includes('item-3')}>Item 3</Nav.Link>
-            <Nav.Root class="ms-3" verticalBreakpoint="xs">
+            <Nav.Root elementType="nav" class="ms-3" verticalBreakpoint="xs">
                 <Nav.Link href="#item-3-1" isActive={activeNestedNavId === 'item-3-1'}>Item 3-1</Nav.Link>
                 <Nav.Link href="#item-3-2" isActive={activeNestedNavId === 'item-3-2'}>Item 3-2</Nav.Link>
             </Nav.Root>
@@ -377,18 +377,19 @@ export type ScrollspyOptions = {
                 <div class="row">
                     <div class="col-4">
                         <Nav.Root
+                            elementType="nav"
                             id="navbar-example3"
                             verticalBreakpoint="xs"
                             itemStyle="pills"
                             class="h-100 flex-column align-items-stretch pe-4 border-end">
                             <Nav.Link class="my-1" href="#item-1" isActive={activeNestedNavId?.includes('item-1')}>Item 1</Nav.Link>
-                            <Nav.Root class="ms-3" verticalBreakpoint="xs" itemStyle="pills">
+                            <Nav.Root elementType="nav" class="ms-3" verticalBreakpoint="xs" itemStyle="pills">
                                 <Nav.Link class="my-1" href="#item-1-1" isActive={activeNestedNavId === 'item-1-1'}>Item 1-1</Nav.Link>
                                 <Nav.Link class="my-1" href="#item-1-2" isActive={activeNestedNavId === 'item-1-2'}>Item 1-2</Nav.Link>
                             </Nav.Root>
                             <Nav.Link class="my-1" href="#item-2" isActive={activeNestedNavId === 'item-2'}>Item 2</Nav.Link>
                             <Nav.Link class="my-1" href="#item-3" isActive={activeNestedNavId?.includes('item-3')}>Item 3</Nav.Link>
-                            <Nav.Root class="ms-3" verticalBreakpoint="xs" itemStyle="pills">
+                            <Nav.Root elementType="nav" class="ms-3" verticalBreakpoint="xs" itemStyle="pills">
                                 <Nav.Link class="my-1" href="#item-3-1" isActive={activeNestedNavId === 'item-3-1'}>Item 3-1</Nav.Link>
                                 <Nav.Link class="my-1" href="#item-3-2" isActive={activeNestedNavId === 'item-3-2'}>Item 3-2</Nav.Link>
                             </Nav.Root>

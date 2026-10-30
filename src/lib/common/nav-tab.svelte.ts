@@ -11,7 +11,14 @@ export class NavRootState {
     #activeNavLinkId: string = $state('');
     #navLinkStates: NavLinkState[] = [];
 
-    constructor(readonly props: Nav.RootProps) {
+    get isTablist(): boolean {
+        return this.props.role === 'tablist';
+    }
+
+    constructor(
+        readonly props: Nav.RootProps,
+        readonly tabRoot: TabRootState | null = null
+    ) {
         this.isNavLinkActive = this.isNavLinkActive.bind(this);
         this.registerNavLinkState = this.registerNavLinkState.bind(this);
         this.setNavLinkActive = this.setNavLinkActive.bind(this);
@@ -34,12 +41,14 @@ export class NavRootState {
  */
 export class NavLinkState {
     isActive = $derived.by(() => this.root.isNavLinkActive(this.props.id || ''));
-    ariaControls = $derived.by(() => (this.isTab ? this.props.href?.replace('#', '') : undefined));
+    hasTabRole = $derived.by(() => this.isTab && (this.tabRoles?.isTablist ?? true));
+    ariaControls = $derived.by(() => (this.hasTabRole ? this.props.href?.replace('#', '') : undefined));
     readonly isTab: boolean;
 
     constructor(
         readonly props: Nav.LinkProps,
-        readonly root: TabRootState | NavRootState
+        readonly root: TabRootState | NavRootState,
+        readonly tabRoles?: { readonly isTablist: boolean }
     ) {
         this.onclick = this.onclick.bind(this);
         this.isTab = root instanceof TabRootState;
@@ -127,13 +136,27 @@ export class TabPaneState {
 }
 
 const NavRootContext = new Context<NavRootState>('nav-root');
-const TabRootContext = new Context<TabRootState>('tab-root');
+const TabRootContext = new Context<TabRootState | null>('tab-root');
 
 /**
  * Checks if the Tab root context exists.
  * @returns True if the Tab root context exists, false otherwise.
  */
-export const doesTabRootContextExists = () => TabRootContext.exists();
+export const doesTabRootContextExists = () => TabRootContext.getOr(null) !== null;
+
+/** Prevent navigation in pane content from acting as the enclosing tab strip. */
+export const clearTabRootContext = () => TabRootContext.set(null);
+
+/** Capture contexts during initialization; read the resolved root role reactively. */
+export function getTabRoleState(): { readonly isTablist: boolean } {
+    const tabRoot = TabRootContext.getOr(null);
+    const navRoot = NavRootContext.getOr(null);
+    return {
+        get isTablist() {
+            return tabRoot !== null && (navRoot?.tabRoot === tabRoot ? navRoot.isTablist : true);
+        }
+    };
+}
 
 /**
  * Creates and initializes the Nav root state.
@@ -142,7 +165,7 @@ export const doesTabRootContextExists = () => TabRootContext.exists();
  * @returns The created NavRootState instance.
  */
 export function initNavRootState(props: Nav.RootProps): NavRootState {
-    const rootState = new NavRootState(props);
+    const rootState = new NavRootState(props, TabRootContext.getOr(null));
     return NavRootContext.set(rootState);
 }
 
@@ -154,7 +177,8 @@ export function initNavRootState(props: Nav.RootProps): NavRootState {
  */
 export function initTabRootState(props: Tab.RootProps): TabRootState {
     const rootState = new TabRootState(props);
-    return TabRootContext.set(rootState);
+    TabRootContext.set(rootState);
+    return rootState;
 }
 
 /**
@@ -164,9 +188,9 @@ export function initTabRootState(props: Tab.RootProps): TabRootState {
  * @returns The created NavLinkState instance.
  */
 export function initNavLinkState(props: Nav.LinkProps): NavLinkState {
-    if (TabRootContext.exists()) {
-        const rootState = TabRootContext.get();
-        const linkState = new NavLinkState(props, rootState);
+    const rootState = TabRootContext.getOr(null);
+    if (rootState) {
+        const linkState = new NavLinkState(props, rootState, getTabRoleState());
         rootState.registerNavLinkState(linkState);
         return linkState;
     } else if (!NavRootContext.exists()) {
@@ -188,10 +212,10 @@ export function initNavLinkState(props: Nav.LinkProps): NavLinkState {
  * @returns The created TabPaneState instance.
  */
 export function initTabPaneState(props: Tab.PaneProps): TabPaneState {
-    if (!TabRootContext.exists()) {
+    const rootState = TabRootContext.getOr(null);
+    if (!rootState) {
         throw new Error('Tab.Pane requires Tab.Root context. Please ensure Tab.Root is initialized before Tab.Pane.');
     }
-    const rootState = TabRootContext.get();
     const paneState = new TabPaneState(props, rootState);
     rootState.registerTabPaneState(paneState);
     return paneState;

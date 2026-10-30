@@ -496,8 +496,10 @@
         <h2 class="wk-quick-link">Accessibility and landmarks</h2>
         <p>
             Ordinary <code>Nav.Root</code> lists retain their native list semantics. Styling with <code>itemStyle="tabs"</code>, <code>"pills"</code>
-            or <code>"underline"</code> does not turn navigation links into a tab widget. Inside <code>Tab.Root</code>, the root defaults to
-            <code>role="tablist"</code> for every style. Use the Tab components when links switch associated panels.
+            or <code>"underline"</code> does not turn navigation links into a tab widget. In the navigation strip of <code>Tab.Root</code>, the root
+            defaults to
+            <code>role="tablist"</code> for every style. Navigation inside a <code>Tab.Pane</code> retains ordinary semantics; a nested
+            <code>Tab.Root</code> creates its own tab widget. Use the Tab components when links switch associated panels.
         </p>
         <p>
             For an ordinary navigation landmark, wrap the list in a named <code>&lt;nav&gt;</code>, or use <code>elementType="nav"</code> with direct
@@ -508,8 +510,17 @@
         <p>
             Migration: selectors or accessibility queries that relied on the old list navigation role should target the native list or its
             <code>&lt;nav&gt;</code> wrapper. Explicit <code>role</code> values remain under your control; <code>{'role={null}'}</code> omits the root
-            role attribute, including inside <code>Tab.Root</code>. If overriding roles, provide a coherent container and child structure. Automatic
-            vertical orientation is emitted only for tablists; explicit <code>ariaOrientation</code> values are preserved.
+            role attribute, including inside <code>Tab.Root</code>. Root overrides other than <code>tablist</code> also disable inferred child
+            tab/presentation roles and tab-specific ARIA attributes; explicit child roles are honored instead. This changes semantics, not panel
+            selection behavior. If overriding roles, provide a coherent container and child structure. Automatic vertical orientation is emitted only
+            for tablists with <code>verticalBreakpoint="xs"</code>. Responsive layouts do not infer a static orientation; use
+            <code>ariaOrientation</code> to supply a value that tracks your layout.
+        </p>
+        <p>
+            Custom tab widgets outside <code>Tab.Root</code> must explicitly set <code>role="tablist"</code> on <code>Nav.Root</code>,
+            <code>role="presentation"</code>
+            on <code>Nav.Item</code> and <code>role="tab"</code> on <code>Nav.Link</code>, with associated panels, selection state and interaction
+            behavior managed by the consumer. Styling alone no longer supplies those semantics.
         </p>
     </section>
 
@@ -534,7 +545,8 @@
                         <td><code>'horizontal' | 'vertical'</code></td>
                         <td>-</td>
                         <td
-                            >Explicit ARIA orientation. A tablist infers 'vertical' when verticalBreakpoint is defined; ordinary navigation does not.</td>
+                            >Explicit ARIA orientation. A tablist infers 'vertical' only for verticalBreakpoint='xs'. Responsive breakpoints require
+                            explicit orientation tracking; ordinary navigation does not infer orientation.</td>
                     </tr>
                     <tr>
                         <td><code>elementType</code></td>
@@ -582,7 +594,9 @@
                         <td><code>role</code></td>
                         <td><code>'navigation' | 'tablist' | null</code></td>
                         <td>Auto-determined</td>
-                        <td>Defaults to 'tablist' inside Tab.Root, otherwise omitted. Explicit roles are honored; null omits the role attribute.</td>
+                        <td
+                            >Defaults to 'tablist' in a Tab.Root navigation strip, otherwise omitted. Explicit roles are honored; null omits the role
+                            attribute. Use 'navigation' only with elementType='nav', never on a ul or ol.</td>
                     </tr>
                     <tr>
                         <td><code>verticalBreakpoint</code></td>

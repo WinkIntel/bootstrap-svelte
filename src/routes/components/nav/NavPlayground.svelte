@@ -70,21 +70,13 @@
 
         code += `>`;
 
-        // Add nav items
+        const useItems = elementType !== 'nav';
         navItems.forEach((label, index) => {
-            const indent = elementType === 'nav' ? '  ' : '    ';
-            if (elementType !== 'nav') code += `\n  <Nav.Item>`;
-
-            // Handle isActive based on mode
-            if (activeStateMode === 'explicit') {
-                const isActiveAttr = index === explicitActiveIndex ? ' isActive={true}' : ' isActive={false}';
-                code += `\n${indent}<Nav.Link href="#nav-link-${index}"${isActiveAttr}>${label}</Nav.Link>`;
-            } else {
-                // Internal management - no isActive prop
-                code += `\n${indent}<Nav.Link href="#nav-link-${index}">${label}</Nav.Link>`;
-            }
-
-            if (elementType !== 'nav') code += `\n  </Nav.Item>`;
+            const indent = useItems ? '    ' : '  ';
+            const isActiveAttr = activeStateMode === 'explicit' ? ` isActive={${index === explicitActiveIndex}}` : '';
+            if (useItems) code += `\n  <Nav.Item>`;
+            code += `\n${indent}<Nav.Link href="#nav-link-${index}"${isActiveAttr}>${label}</Nav.Link>`;
+            if (useItems) code += `\n  </Nav.Item>`;
         });
 
         code += `\n</Nav.Root>`;

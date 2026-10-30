@@ -40,7 +40,7 @@ Root navigation component that contains navigation items and links.
 ```
 
 ### Props
-- `ariaOrientation` (string): Optional. Explicit ARIA orientation (horizontal or vertical). Vertical tablists infer 'vertical' when this prop is omitted; ordinary navigation does not infer an orientation.
+- `ariaOrientation` (string): Optional. Explicit ARIA orientation (horizontal or vertical). Always-vertical tablists (verticalBreakpoint='xs') infer 'vertical' when this prop is omitted; ordinary navigation does not infer an orientation.
 - `class` (string): Optional. Additional CSS classes. Defaults to an empty string.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element. Defaults to `null`.
 - `elementType` (string): Optional. Element type to render, one of: 'nav', 'ol', 'ul'. Defaults to 'ul'.
@@ -48,7 +48,7 @@ Root navigation component that contains navigation items and links.
 - `id` (string): Optional. Unique ID for the navigation element. Defaults to `nav-{uid}`, where `uid` is a unique identifier.
 - `itemLayout` (string): Optional. Item layout, one of: 'none', 'fill', 'justified'. Defaults to 'none'.
 - `itemStyle` (string): Optional. Item style, one of: 'none', 'pills', 'tabs', 'underline'. Defaults to 'none'.
-- `role` (string | null): Optional. Defaults to 'tablist' inside Tab.Root, regardless of itemStyle. Otherwise no role attribute is added. Explicit roles are preserved; null opts out of the default. Use a nav wrapper or elementType='nav' for an ordinary navigation landmark.
+- `role` (string | null): Optional. Defaults to 'tablist' in a Tab.Root navigation strip, regardless of itemStyle; navigation inside Tab.Pane stays ordinary. Otherwise no role attribute is added. Explicit roles are preserved; null opts out of the default. Use a nav wrapper or elementType='nav' for an ordinary navigation landmark.
 - `verticalBreakpoint` (string): Optional. Breakpoint for vertical orientation, one of: 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'. Defaults to `null`, which means no vertical orientation is applied.
 -->
 <script lang="ts">
@@ -78,11 +78,14 @@ Root navigation component that contains navigation items and links.
     // Svelte context is read during initialization, not when reactive props update.
     const isTabNavigation = doesTabRootContextExists();
     let defaultRole = $derived(role !== undefined ? role : isTabNavigation ? 'tablist' : undefined);
-    let ariaOrientationDerived = $derived(ariaOrientation || (defaultRole === 'tablist' && isVertical ? 'vertical' : undefined));
+    let ariaOrientationDerived = $derived(ariaOrientation || (defaultRole === 'tablist' && verticalBreakpoint === 'xs' ? 'vertical' : undefined));
 
     const _rootState: NavRootState = initNavRootState({
         get id() {
             return id;
+        },
+        get role() {
+            return defaultRole;
         }
     });
 

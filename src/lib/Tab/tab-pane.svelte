@@ -25,7 +25,7 @@ Content pane for a tab. Used inside Tab.Root.
     import { uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
     import { fade } from 'svelte/transition';
-    import { initTabPaneState, TabPaneState } from '../common/nav-tab.svelte.js';
+    import { clearTabRootContext, initTabPaneState, TabPaneState } from '../common/nav-tab.svelte.js';
     import type { Tab } from './index.js';
 
     // Generate a unique ID for the pane element, in case one is not provided...
@@ -57,6 +57,9 @@ Content pane for a tab. Used inside Tab.Root.
             return isActive;
         }
     });
+
+    // Descendants are pane content, not members of this tab strip. A nested Tab.Root creates its own context.
+    clearTabRootContext();
 
     let isActiveState = $derived(paneState.root.isTabPaneActive(id));
     let classes: string = $derived(

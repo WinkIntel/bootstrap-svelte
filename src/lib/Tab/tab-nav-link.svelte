@@ -75,7 +75,7 @@ A tab navigation link component specifically used inside a Tab.Root component.
     aria-controls={linkState.ariaControls}
     aria-current={isActiveState ? 'page' : undefined}
     aria-disabled={isDisabled ? 'true' : undefined}
-    aria-selected={linkState.isTab ? isActiveState : undefined}
+    aria-selected={linkState.hasTabRole ? isActiveState : undefined}
     bind:this={elementRef}
     class={classes}
     data-tab-pane-id={targetPaneId}
@@ -83,7 +83,7 @@ A tab navigation link component specifically used inside a Tab.Root component.
     onclick={handleClick}
     tabindex={isDisabled ? -1 : undefined}
     type="button"
-    role="tab"
+    role={linkState.hasTabRole ? 'tab' : undefined}
     {...restOfProps}>
     {@render children?.()}
 </button>

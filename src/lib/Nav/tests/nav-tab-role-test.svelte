@@ -6,11 +6,11 @@
 
 <Tab.Root>
     <Nav.Root {...props} data-testid="role-tab-nav" aria-label="Example panes">
-        <Nav.Item>
+        <Nav.Item role="listitem">
             <Tab.NavLink id="role-one-tab" targetPaneId="#role-one-pane" isActive>One</Tab.NavLink>
         </Nav.Item>
-        <Nav.Item>
-            <Nav.Link id="role-two-tab" href="#role-two-pane">Two</Nav.Link>
+        <Nav.Item role="listitem">
+            <Nav.Link role="button" id="role-two-tab" href="#role-two-pane">Two</Nav.Link>
         </Nav.Item>
     </Nav.Root>
     <Tab.Content>

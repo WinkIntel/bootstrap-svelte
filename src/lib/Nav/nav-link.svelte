@@ -57,7 +57,7 @@ Navigation link component typically used inside a Nav.Item.
     });
 
     // If the link is a tab, we need to set the role to "tab", otherwise use the provided role.
-    let defaultRole = $derived(linkState.isTab ? 'tab' : role);
+    let defaultRole = $derived(linkState.hasTabRole ? 'tab' : role);
     // If isActive is not provided, use the state from the linkState.
     let isActiveState = $derived(isActive !== undefined ? isActive : linkState.isActive);
     let classes: string = $derived(uniqueClsx('nav-link', { active: isActiveState, disabled: isDisabled }, classValues));
@@ -95,7 +95,7 @@ Navigation link component typically used inside a Nav.Item.
     aria-controls={linkState.ariaControls ?? ariaControls}
     aria-current={isActiveState ? 'page' : ariaCurrent}
     aria-disabled={isDisabled ? 'true' : ariaDisabled}
-    aria-selected={linkState.isTab ? isActiveState : ariaSelected}
+    aria-selected={linkState.hasTabRole ? isActiveState : ariaSelected}
     bind:this={elementRef}
     class={classes}
     {href}
