@@ -2,7 +2,7 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## Unreleased
+## 2.2.1 — 2026-11-02
 
 ### Fixed
 
