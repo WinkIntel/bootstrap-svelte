@@ -15,6 +15,7 @@ import {
     verifyArtifactMetadata,
     changelogNotes,
     registryRead,
+    registryURL,
     validateReport
 } from './release-page.mjs';
 import { verifySourceHistory } from './release-policy.mjs';
@@ -56,9 +57,6 @@ export function selectArtifact(artifacts, run) {
         fail('Original publish artifact is expired or has conflicting identity; manual provenance review is required, never republish');
     return artifact;
 }
-export async function registryJSON(path) {
-    return registryRead(`https://registry.npmjs.org/${path}`);
-}
 // The registry's version, tarball, packument and attestation views can become visible separately.
 // This budget is shared by every registry read and npm command, within the 15-minute job.
 function registryReadiness(target) {
@@ -80,11 +78,10 @@ function registryReadiness(target) {
             try {
                 result = await operation();
             } catch (error) {
-                remaining(stage, Infinity);
                 throw new Error(`Registry verification failed for ${target}; stage=${stage}: ${error.message}`, { cause: error });
             }
-            const budget = remaining(stage, Infinity);
             if (result !== null) return result;
+            const budget = remaining(stage, Infinity);
             console.info(
                 `Registry readiness: ${target}; stage=${stage}; attempt=${attempt}; elapsed=${Date.now() - started}ms; remaining=${budget}ms`
             );
@@ -92,11 +89,6 @@ function registryReadiness(target) {
         }
     };
     return { read, wait, remaining };
-}
-function registryURL(value) {
-    const url = new URL(value);
-    if (url.origin !== 'https://registry.npmjs.org' || url.username || url.password) fail('Unexpected package registry host');
-    return url;
 }
 // Only npm's structured errors for this exact release are visibility failures.
 // Auth, dependency resolution, signatures, integrity and malformed output are never retried.
@@ -120,6 +112,63 @@ function npmVisibilityFailure(error, target, urls) {
     } catch {
         return false;
     }
+}
+function npmProvenanceAbsent(audit, name) {
+    const object = (value) => value && typeof value === 'object' && !Array.isArray(value);
+    const text = (value) => typeof value === 'string' && value.trim().length > 0;
+    // Only check generic statement structure here; unrelated dependencies need not use our source or predicate.
+    const proof = (entry, attestations) => {
+        if (
+            !text(entry?.predicateType) ||
+            !text(entry.bundle?.dsseEnvelope?.payload) ||
+            !Object.values(attestations).some((item) => object(item) && item.predicateType === entry.predicateType)
+        )
+            return false;
+        let statement;
+        try {
+            statement = JSON.parse(Buffer.from(entry.bundle.dsseEnvelope.payload, 'base64').toString('utf8'));
+        } catch {
+            return false;
+        }
+        return (
+            object(statement) &&
+            text(statement._type) &&
+            statement.predicateType === entry.predicateType &&
+            object(statement.predicate) &&
+            Array.isArray(statement.subject) &&
+            statement.subject.length > 0 &&
+            statement.subject.every(
+                (item) =>
+                    object(item) &&
+                    text(item.name) &&
+                    object(item.digest) &&
+                    Object.keys(item.digest).length > 0 &&
+                    Object.values(item.digest).every(text)
+            )
+        );
+    };
+    return (
+        object(audit) &&
+        Array.isArray(audit.invalid) &&
+        !audit.invalid.length &&
+        Array.isArray(audit.missing) &&
+        !audit.missing.length &&
+        Array.isArray(audit.verified) &&
+        audit.verified.every(
+            (item) =>
+                object(item) &&
+                typeof item.name === 'string' &&
+                item.name.length > 0 &&
+                item.name !== name &&
+                typeof item.version === 'string' &&
+                item.version.length > 0 &&
+                ['https://registry.npmjs.org/', 'https://registry.npmjs.org'].includes(item.registry) &&
+                object(item.attestations) &&
+                Array.isArray(item.attestationBundles) &&
+                item.attestationBundles.length > 0 &&
+                item.attestationBundles.every((entry) => proof(entry, item.attestations))
+        )
+    );
 }
 function sourceFile(path, sha) {
     const data = gh(`/contents/${path}?ref=${sha}`);
@@ -164,8 +213,10 @@ export async function verifyPublishedRun(runId, attempt, buildAttempt) {
             if (data === null) return null;
             verifyArtifactMetadata({ release, tarball, metadata: data });
             registryURL(data.dist.tarball);
-            if (data.dist.attestations === undefined) return null;
-            registryURL(data.dist.attestations.url);
+            const pointer = data.dist.attestations;
+            if (pointer === undefined) return null;
+            if (!pointer || typeof pointer !== 'object' || Array.isArray(pointer)) fail('Malformed registry attestations pointer');
+            registryURL(pointer.url);
             return data;
         };
         const metadata = await ready.wait('version-metadata', () => readMetadata('version-metadata'));
@@ -296,6 +347,9 @@ export async function verifyPublishedRun(runId, attempt, buildAttempt) {
                 if (npmVisibilityFailure(error, target, urls)) return null;
                 throw error;
             }
+            // npm omits the target from verified when its independently fetched manifest has no pointer.
+            // Wait only for that absence; any claimed target or invalid/malformed evidence fails closed.
+            if (npmProvenanceAbsent(audit, release.name)) return null;
             return verifyPublication({ release, tarball, metadata, audit, runId, attempt });
         });
         return validateReport({ schema: 1, ...release, ...hashes, runId, attempt, buildAttempt, publishedAt, notes });

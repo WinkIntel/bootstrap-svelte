@@ -128,9 +128,13 @@ export async function retryRegistry(read, sleep = (ms) => new Promise((resolve) 
     }
     fail('Registry propagation timeout; retry release-page recovery, never npm publish');
 }
+export function registryURL(value) {
+    const url = new URL(value);
+    if (url.origin !== 'https://registry.npmjs.org' || url.username || url.password) fail('Unexpected package registry host');
+    return url;
+}
 export async function registryRead(url, kind = 'json', fetcher = fetch, { timeout, fresh = false } = {}) {
-    const parsed = new URL(url);
-    if (parsed.origin !== 'https://registry.npmjs.org' || parsed.username || parsed.password) fail('Unexpected package registry host');
+    registryURL(url);
     let response;
     try {
         response = await fetcher(url, {

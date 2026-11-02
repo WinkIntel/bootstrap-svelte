@@ -25,6 +25,8 @@ const metadata = () => ({
 });
 function audit() {
     const statement = {
+        _type: 'https://in-toto.io/Statement/v1',
+        predicateType: 'https://slsa.dev/provenance/v1',
         subject: [{ name: `pkg:npm/%40winkintel/bootstrap-svelte@${version}`, digest: { sha512 } }],
         predicate: {
             buildDefinition: {
@@ -171,7 +173,7 @@ function fixture(t, scenario = {}) {
             if (args[0] === 'audit') {
                 audits++;
                 const result = audit();
-                const output = scenario.audit?.({ audits, elapsed, result });
+                const output = scenario.audit?.({ audits, elapsed, result, advance: (ms) => (elapsed += ms) });
                 return output ?? JSON.stringify(result);
             }
         }
@@ -382,7 +384,7 @@ for (const [label, scenario, expected] of [
         assert.ok(f.audits() <= 1);
     });
 
-test('an npm command stopped at the remaining deadline reports its stage without retrying', async (t) => {
+test('an npm command stopped at the remaining deadline preserves its cause and stage without retrying', async (t) => {
     const f = fixture(t, {
         read: (url, elapsed) => (url === tarballURL && elapsed < 570000 ? new Response('', { status: 404 }) : undefined),
         install: ({ options, advance }) => {
@@ -390,9 +392,45 @@ test('an npm command stopped at the remaining deadline reports its stage without
             throw Object.assign(new Error('npm timed out'), { code: 'ETIMEDOUT' });
         }
     });
-    await assert.rejects(f.verify(), /readiness timeout.*npm-resolution/);
+    await assert.rejects(f.verify(), (error) => /npm-resolution.*npm timed out/.test(error.message) && error.cause?.code === 'ETIMEDOUT');
     assert.equal(f.elapsed(), 600000);
     assert.equal(f.installs(), 1);
+});
+
+test('a non-transient npm failure after the deadline preserves the original error', async (t) => {
+    const original = npmFailure('E403', 'Forbidden');
+    const f = fixture(t, {
+        install: ({ advance }) => {
+            advance(600001);
+            throw original;
+        }
+    });
+    await assert.rejects(
+        f.verify(),
+        (error) => error.cause === original && /npm-resolution/.test(error.message) && error.message.includes(original.message)
+    );
+    assert.equal(f.installs(), 1);
+    assert.equal(f.audits(), 0);
+    assert.equal(f.messages.length, 0);
+});
+
+test('a fully verified npm audit result finishing at the deadline is accepted', async (t) => {
+    const f = fixture(t, {
+        audit: ({ advance }) => {
+            advance(600001);
+        }
+    });
+    assert.equal((await f.verify()).sha512, sha512);
+    assert.equal(f.audits(), 1);
+    assert.equal(f.messages.length, 0);
+});
+
+test('an install finishing at the deadline cannot start the following provenance stage', async (t) => {
+    const f = fixture(t, { install: ({ advance }) => advance(600001) });
+    await assert.rejects(f.verify(), /readiness timeout.*npm-provenance/);
+    assert.equal(f.installs(), 1);
+    assert.equal(f.audits(), 0);
+    assert.equal(f.messages.length, 0);
 });
 
 test('npm audit ETARGET and install target 404 retry only the exact expected resource', async (t) => {
@@ -483,3 +521,396 @@ test('an explicitly unsigned npm audit result still fails immediately after poin
     assert.equal(f.installs(), 1);
     assert.equal(f.audits(), 1);
 });
+
+for (const otherVerified of [false, true])
+    test(`npm's independently stale manifest retries absent target provenance${otherVerified ? ' alongside verified dependencies' : ''}`, async (t) => {
+        const f = fixture(t, {
+            audit: ({ audits, result }) => {
+                if (audits === 1) {
+                    if (otherVerified) result.verified[0].name = 'verified-dependency';
+                    else result.verified = [];
+                }
+            }
+        });
+        assert.equal((await f.verify()).sha512, sha512);
+        assert.equal(f.audits(), 2);
+        assert.equal(f.elapsed(), 15000);
+        assert.ok(f.messages.some((line) => line.includes('stage=npm-provenance')));
+    });
+
+test('persistent absence of npm target provenance exhausts the budget without accepting an unsigned package', async (t) => {
+    const f = fixture(t, {
+        audit: ({ result }) => {
+            result.verified = [];
+        }
+    });
+    await assert.rejects(f.verify(), /readiness timeout.*stage=npm-provenance/);
+    assert.equal(f.elapsed(), 600000);
+    assert.equal(f.audits(), 40);
+    assert.ok(f.commands.filter(({ args }) => args[0] === 'audit').every(({ elapsed }) => elapsed < 600000));
+});
+
+test('absent npm provenance at the deadline cannot sleep or start another audit', async (t) => {
+    const f = fixture(t, {
+        audit: ({ result, advance }) => {
+            result.verified = [];
+            advance(600001);
+        }
+    });
+    await assert.rejects(f.verify(), /readiness timeout.*stage=npm-provenance/);
+    assert.equal(f.audits(), 1);
+    assert.equal(f.messages.length, 0);
+});
+
+test('provenance appearing after an absent result still undergoes full source verification', async (t) => {
+    const f = fixture(t, {
+        audit: ({ audits, result }) => {
+            if (audits === 1) result.verified = [];
+            else
+                changeStatement(result, (statement) => {
+                    statement.predicate.buildDefinition.resolvedDependencies[0].digest.gitCommit = 'b'.repeat(40);
+                });
+        }
+    });
+    await assert.rejects(f.verify(), /source mismatch/);
+    assert.equal(f.elapsed(), 15000);
+    assert.equal(f.audits(), 2);
+});
+
+function changeStatement(result, change) {
+    const envelope = result.verified[0].attestationBundles[0].bundle.dsseEnvelope;
+    const statement = JSON.parse(Buffer.from(envelope.payload, 'base64'));
+    change(statement);
+    envelope.payload = Buffer.from(JSON.stringify(statement)).toString('base64');
+}
+
+for (const [label, change] of [
+    [
+        'empty predicate type',
+        (item) => {
+            item.attestationBundles[0].predicateType = '';
+        }
+    ],
+    [
+        'blank predicate type',
+        (item) => {
+            item.attestationBundles[0].predicateType = ' ';
+        }
+    ],
+    [
+        'empty payload',
+        (item) => {
+            item.attestationBundles[0].bundle.dsseEnvelope.payload = '';
+        }
+    ],
+    [
+        'blank payload',
+        (item) => {
+            item.attestationBundles[0].bundle.dsseEnvelope.payload = ' ';
+        }
+    ],
+    [
+        'non-JSON payload',
+        (item) => {
+            item.attestationBundles[0].bundle.dsseEnvelope.payload = 'not-json';
+        }
+    ],
+    [
+        'encoded non-JSON payload',
+        (item) => {
+            item.attestationBundles[0].bundle.dsseEnvelope.payload = Buffer.from('not-json').toString('base64');
+        }
+    ],
+    ...[null, [], {}, 'statement'].map((value) => [
+        `non-statement ${JSON.stringify(value)}`,
+        (item) => {
+            item.attestationBundles[0].bundle.dsseEnvelope.payload = Buffer.from(JSON.stringify(value)).toString('base64');
+        }
+    ]),
+    [
+        'empty attestations descriptor',
+        (item) => {
+            item.attestations = {};
+        }
+    ],
+    [
+        'mismatched predicate type',
+        (item) => {
+            item.attestationBundles[0].predicateType = 'https://example.com/other';
+        }
+    ],
+    [
+        'missing predicate',
+        (_item, result) =>
+            changeStatement(result, (statement) => {
+                delete statement.predicate;
+            })
+    ],
+    [
+        'missing subject',
+        (_item, result) =>
+            changeStatement(result, (statement) => {
+                delete statement.subject;
+            })
+    ],
+    [
+        'malformed subject',
+        (_item, result) =>
+            changeStatement(result, (statement) => {
+                statement.subject = [null];
+            })
+    ]
+])
+    test(`unrelated npm proof with ${label} fails before an absence retry`, async (t) => {
+        const f = fixture(t, {
+            audit: ({ audits, result }) => {
+                if (audits !== 1) return;
+                result.verified[0].name = 'verified-dependency';
+                change(result.verified[0], result);
+            }
+        });
+        await assert.rejects(f.verify());
+        assert.equal(f.audits(), 1);
+        assert.equal(f.elapsed(), 0);
+        assert.equal(f.messages.length, 0);
+    });
+
+test('well-formed unrelated npm proof can use a different predicate and source', async (t) => {
+    const f = fixture(t, {
+        audit: ({ audits, result }) => {
+            if (audits !== 1) return;
+            const item = result.verified[0];
+            item.name = 'verified-dependency';
+            const predicateType = 'https://example.com/publish/v1';
+            item.attestations = { publish: { predicateType } };
+            item.attestationBundles[0].predicateType = predicateType;
+            const statement = {
+                _type: 'https://in-toto.io/Statement/v0.1',
+                predicateType,
+                subject: [{ name: 'unrelated-package', digest: { sha256: 'b'.repeat(64) } }],
+                predicate: { unrelated: 'publish metadata' }
+            };
+            item.attestationBundles[0].bundle.dsseEnvelope.payload = Buffer.from(JSON.stringify(statement)).toString('base64');
+        }
+    });
+    assert.equal((await f.verify()).sha512, sha512);
+    assert.equal(f.audits(), 2);
+    assert.equal(f.elapsed(), 15000);
+});
+
+for (const [label, change] of [
+    [
+        'missing signature',
+        (result) => {
+            result.missing.push({ name });
+            result.verified = [];
+        }
+    ],
+    [
+        'invalid attestation',
+        (result) => {
+            result.invalid.push({ code: 'EATTESTATIONVERIFY', name });
+            result.verified = [];
+        }
+    ],
+    [
+        'missing invalid array',
+        (result) => {
+            delete result.invalid;
+            result.verified = [];
+        }
+    ],
+    [
+        'malformed missing array',
+        (result) => {
+            result.missing = {};
+            result.verified = [];
+        }
+    ],
+    [
+        'missing verified array',
+        (result) => {
+            delete result.verified;
+        }
+    ],
+    [
+        'malformed verified array',
+        (result) => {
+            result.verified = {};
+        }
+    ],
+    [
+        'malformed other verified entry',
+        (result) => {
+            result.verified = [null];
+        }
+    ],
+    [
+        'unproven other verified entry',
+        (result) => {
+            result.verified = [{ name: 'other', version, registry: base }];
+        }
+    ],
+    [
+        'wrong target version',
+        (result) => {
+            result.verified[0].version = '9.9.9';
+        }
+    ],
+    [
+        'wrong target registry',
+        (result) => {
+            result.verified[0].registry = 'https://evil.invalid';
+        }
+    ],
+    [
+        'duplicate target',
+        (result) => {
+            result.verified.push(structuredClone(result.verified[0]));
+        }
+    ],
+    [
+        'missing target bundle',
+        (result) => {
+            delete result.verified[0].attestationBundles;
+        }
+    ],
+    [
+        'empty target bundles',
+        (result) => {
+            result.verified[0].attestationBundles = [];
+        }
+    ],
+    [
+        'malformed target bundle',
+        (result) => {
+            result.verified[0].attestationBundles[0].bundle = {};
+        }
+    ],
+    [
+        'wrong workflow ref',
+        (result) =>
+            changeStatement(result, (statement) => {
+                statement.predicate.buildDefinition.externalParameters.workflow.ref = 'refs/heads/other';
+            })
+    ],
+    [
+        'wrong run',
+        (result) =>
+            changeStatement(result, (statement) => {
+                statement.predicate.runDetails.metadata.invocationId += '0';
+            })
+    ],
+    [
+        'wrong subject digest',
+        (result) =>
+            changeStatement(result, (statement) => {
+                statement.subject[0].digest.sha512 = '0'.repeat(128);
+            })
+    ]
+])
+    test(`${label} in npm audit remains an immediate hard failure`, async (t) => {
+        const f = fixture(t, {
+            audit: ({ result }) => {
+                change(result);
+            }
+        });
+        await assert.rejects(f.verify());
+        assert.equal(f.elapsed(), 0);
+        assert.equal(f.audits(), 1);
+        assert.equal(f.messages.length, 0);
+    });
+
+test('npm audit authentication failure remains immediate', async (t) => {
+    const f = fixture(t, {
+        audit: () => {
+            throw npmFailure('E401', 'Unauthorized');
+        }
+    });
+    await assert.rejects(f.verify(), /E401/);
+    assert.equal(f.elapsed(), 0);
+    assert.equal(f.audits(), 1);
+});
+
+for (const pointer of [null, false, 12, 'invalid', []])
+    test(`a malformed version attestations pointer ${JSON.stringify(pointer)} has an explicit diagnostic`, async (t) => {
+        const f = fixture(t, {
+            read: (url) => (url === versionURL ? Response.json({ ...metadata(), dist: { ...metadata().dist, attestations: pointer } }) : undefined)
+        });
+        await assert.rejects(f.verify(), /Malformed registry attestations pointer/);
+        assert.equal(f.elapsed(), 0);
+        assert.equal(f.installs(), 0);
+        assert.equal(f.audits(), 0);
+    });
+
+test('an absent version attestations pointer remains pending until it appears', async (t) => {
+    const f = fixture(t, {
+        read: (url, elapsed) => {
+            if (url !== versionURL || elapsed >= 15000) return;
+            const manifest = metadata();
+            delete manifest.dist.attestations;
+            return Response.json(manifest);
+        }
+    });
+    assert.equal((await f.verify()).sha512, sha512);
+    assert.equal(f.elapsed(), 15000);
+    assert.equal(f.audits(), 1);
+});
+
+test('the first audit refresh detects metadata changes after a long install', async (t) => {
+    let installed = false;
+    const f = fixture(t, {
+        install: ({ advance }) => {
+            advance(180000);
+            installed = true;
+        },
+        read: (url) =>
+            installed && url === versionURL
+                ? Response.json({ ...metadata(), dist: { ...metadata().dist, integrity: 'sha512-conflicting' } })
+                : undefined
+    });
+    await assert.rejects(f.verify(), /npm-provenance.*integrity mismatch/);
+    assert.equal(f.elapsed(), 180000);
+    assert.equal(f.installs(), 1);
+    assert.equal(f.audits(), 0);
+});
+
+test('the shared registry URL guard preserves the allowed origin and rejects credentials', async () => {
+    const { registryURL, registryRead } = await import('../release-page.mjs');
+    assert.equal(registryURL(`${base}/package?view=full`).href, `${base}/package?view=full`);
+    for (const url of [
+        'https://evil.invalid/package',
+        'http://registry.npmjs.org/package',
+        'https://registry.npmjs.org:444/package',
+        'https://user@registry.npmjs.org/package',
+        'https://:password@registry.npmjs.org/package'
+    ]) {
+        assert.throws(() => registryURL(url), /Unexpected package registry host/);
+        await assert.rejects(
+            registryRead(url, 'json', () => assert.fail('Rejected registry must not be fetched')),
+            /Unexpected package registry host/
+        );
+    }
+});
+
+for (const field of ['tarball', 'attestations'])
+    for (const url of [
+        'https://evil.invalid/package',
+        'https://user@registry.npmjs.org/package',
+        'https://:password@registry.npmjs.org/package',
+        'https://registry.npmjs.org:444/package'
+    ])
+        test(`version metadata rejects ${field} URL ${url} before fetching it`, async (t) => {
+            const f = fixture(t, {
+                read: (value) => {
+                    if (value !== versionURL) return;
+                    const manifest = metadata();
+                    manifest.dist[field] = field === 'attestations' ? { url } : url;
+                    return Response.json(manifest);
+                }
+            });
+            await assert.rejects(f.verify(), /Unexpected package registry host/);
+            assert.equal(f.requests.length, 1);
+            assert.equal(f.installs(), 0);
+            assert.equal(f.elapsed(), 0);
+        });
