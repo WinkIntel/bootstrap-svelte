@@ -50,15 +50,19 @@ export function changelogNotes(text, release, publishedAt, runId, attempt) {
     const body = changelogSection(text, release.version);
     return `${body}\n\nPublished to npm: ${publishedAt} (UTC). [${packageName}@${release.version}](https://www.npmjs.com/package/${packageName}/v/${release.version}).\n\nSource: [${release.sha}](https://github.com/${repository}/commit/${release.sha}). [Publish run ${runId}, attempt ${attempt}](https://github.com/${repository}/actions/runs/${runId}/attempts/${attempt}).\n`;
 }
-export function verifyPublication({ release, tarball, metadata, audit, runId, attempt }) {
-    if (!positiveId(runId) || !positiveId(attempt)) fail('Invalid publish run identity');
-    const sha512 = digest(tarball, 'sha512');
+export function verifyArtifactMetadata({ release, tarball, metadata }) {
     if (
-        metadata.name !== release.name ||
+        metadata?.name !== release.name ||
         metadata.version !== release.version ||
         metadata.dist?.integrity !== `sha512-${digest(tarball, 'sha512', 'base64')}`
     )
         fail('Published artifact identity/integrity mismatch');
+    return { sha256: digest(tarball, 'sha256'), sha512: digest(tarball, 'sha512') };
+}
+export function verifyPublication({ release, tarball, metadata, audit, runId, attempt }) {
+    if (!positiveId(runId) || !positiveId(attempt)) fail('Invalid publish run identity');
+    const hashes = verifyArtifactMetadata({ release, tarball, metadata });
+    const { sha512 } = hashes;
     if (!Array.isArray(audit.invalid) || !Array.isArray(audit.missing) || audit.invalid.length || audit.missing.length)
         fail('npm signature/provenance verification failed');
     const entries = audit.verified?.filter(
@@ -92,7 +96,7 @@ export function verifyPublication({ release, tarball, metadata, audit, runId, at
         statement.subject[0].digest?.sha512 !== sha512
     )
         fail('Published provenance subject mismatch');
-    return { sha256: digest(tarball, 'sha256'), sha512 };
+    return hashes;
 }
 export function validateReport(report) {
     if (!report || typeof report !== 'object') fail('Missing verified release report');
@@ -124,15 +128,22 @@ export async function retryRegistry(read, sleep = (ms) => new Promise((resolve) 
     }
     fail('Registry propagation timeout; retry release-page recovery, never npm publish');
 }
-export async function registryRead(url, kind = 'json', fetcher = fetch) {
+export async function registryRead(url, kind = 'json', fetcher = fetch, { timeout, fresh = false } = {}) {
     const parsed = new URL(url);
     if (parsed.origin !== 'https://registry.npmjs.org' || parsed.username || parsed.password) fail('Unexpected package registry host');
     let response;
     try {
-        response = await fetcher(url, { redirect: 'error', signal: AbortSignal.timeout(kind === 'bytes' ? 30000 : 15000) });
+        response = await fetcher(url, {
+            redirect: 'error',
+            signal: AbortSignal.timeout(Math.min(timeout ?? Infinity, kind === 'bytes' ? 30000 : 15000)),
+            ...(fresh ? { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } } : {})
+        });
         if (response.status === 404 || response.status === 429 || (response.status >= 500 && response.status <= 599)) return null;
         if (!response.ok) fail(`Registry HTTP ${response.status}`);
-        return kind === 'bytes' ? Buffer.from(await response.arrayBuffer()) : await response.json();
+        if (kind === 'bytes') return Buffer.from(await response.arrayBuffer());
+        const data = await response.json();
+        if (fresh && (!data || typeof data !== 'object' || Array.isArray(data))) fail('Malformed registry JSON');
+        return data;
     } catch (error) {
         if (error.name === 'TimeoutError' || ['ETIMEDOUT', 'ECONNRESET', 'EAI_AGAIN'].includes(error.cause?.code)) return null;
         throw error;

@@ -274,8 +274,19 @@ cryptographic provenance; the verifier then checks its source commit, workflow,
 ref, successful publish run/attempt and artifact digest. The artifact comes from
 the successful build attempt, which can precede a rerun of the publish job. Each
 attempt must identify the same source. Saved job outputs retain both attempts when
-only page jobs are rerun. Registry propagation retries are bounded, including
-429/5xx responses and timeouts; authorization and malformed-data errors fail closed. Verification installs only in a temporary directory with lifecycle scripts
+only page jobs are rerun. Version metadata, canonical tarball bytes, full package
+metadata and attestations can become visible independently after publication.
+The verifier waits on these conditions and npm resolution/provenance verification
+under one shared ten-minute deadline, within the existing fifteen-minute verify
+job. Registry requests and npm child processes are capped by the remaining budget.
+Retries log the exact package/version, stage, attempt, elapsed time and remaining
+budget. Registry 404/429/5xx responses and request timeouts can retry; npm retries
+only structured ETARGET for the exact released version or E404 for its exact registry
+resources. Fresh requests and isolated caches prevent reuse of a negative lookup.
+Authorization, malformed data, wrong source, integrity and signature failures fail
+closed. Exhaustion names the failed stage and requires release-page-only recovery;
+never repeat npm publication. The writer's dist-tag and GitHub read-back retry
+budgets are unchanged. Verification installs only in a temporary directory with lifecycle scripts
 disabled and peer packages omitted; it does not execute the published package.
 Signature failures in the remaining installed dependency tree still fail closed;
 minimizing that tree does not bypass npm verification failures.

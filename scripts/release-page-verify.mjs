@@ -12,8 +12,8 @@ import {
     positiveId,
     releaseIdentity,
     verifyPublication,
+    verifyArtifactMetadata,
     changelogNotes,
-    retryRegistry,
     registryRead,
     validateReport
 } from './release-page.mjs';
@@ -59,8 +59,67 @@ export function selectArtifact(artifacts, run) {
 export async function registryJSON(path) {
     return registryRead(`https://registry.npmjs.org/${path}`);
 }
-async function publishedTarball(url) {
-    return registryRead(url, 'bytes');
+// The registry's version, tarball, packument and attestation views can become visible separately.
+// This budget is shared by every registry read and npm command, within the 15-minute job.
+function registryReadiness(target) {
+    const started = Date.now(),
+        deadline = started + 600000;
+    const exhausted = (stage) =>
+        fail(`Registry readiness timeout after 600000ms for ${target}; stage=${stage}; use release-page recovery, never npm publish`);
+    const remaining = (stage, cap) => {
+        const budget = deadline - Date.now();
+        if (budget <= 0) exhausted(stage);
+        return Math.min(budget, cap);
+    };
+    const read = (stage, url, kind = 'json') =>
+        registryRead(url, kind, fetch, { timeout: remaining(stage, kind === 'bytes' ? 30000 : 15000), fresh: true });
+    const wait = async (stage, operation) => {
+        for (let attempt = 1; ; attempt++) {
+            remaining(stage, Infinity);
+            let result;
+            try {
+                result = await operation();
+            } catch (error) {
+                remaining(stage, Infinity);
+                throw new Error(`Registry verification failed for ${target}; stage=${stage}: ${error.message}`, { cause: error });
+            }
+            const budget = remaining(stage, Infinity);
+            if (result !== null) return result;
+            console.info(
+                `Registry readiness: ${target}; stage=${stage}; attempt=${attempt}; elapsed=${Date.now() - started}ms; remaining=${budget}ms`
+            );
+            await new Promise((resolve) => setTimeout(resolve, Math.min(15000, budget)));
+        }
+    };
+    return { read, wait, remaining };
+}
+function registryURL(value) {
+    const url = new URL(value);
+    if (url.origin !== 'https://registry.npmjs.org' || url.username || url.password) fail('Unexpected package registry host');
+    return url;
+}
+// Only npm's structured errors for this exact release are visibility failures.
+// Auth, dependency resolution, signatures, integrity and malformed output are never retried.
+function npmVisibilityFailure(error, target, urls) {
+    let data;
+    try {
+        data = JSON.parse(String(error.stdout)).error;
+    } catch {
+        return false;
+    }
+    if (data?.code === 'ETARGET') return data.summary?.trim() === `No matching version found for ${target}.`;
+    if (data?.code !== 'E404' || typeof data.summary !== 'string') return false;
+    const match = /^(?:404 )?Not Found - GET (https:\/\/\S+?)(?: - [^\n]*)?$/.exec(data.summary.trim());
+    if (!match) return false;
+    const normalized = (value) => {
+        const url = registryURL(value);
+        return `${url.origin}${decodeURIComponent(url.pathname)}${url.search}`;
+    };
+    try {
+        return urls.some((url) => normalized(url) === normalized(match[1]));
+    } catch {
+        return false;
+    }
 }
 function sourceFile(path, sha) {
     const data = gh(`/contents/${path}?ref=${sha}`);
@@ -94,13 +153,60 @@ export async function verifyPublishedRun(runId, attempt, buildAttempt) {
         if (entries.filter((entry) => entry === 'package/package.json').length !== 1) fail('Expected one package manifest in original artifact');
         const pkg = JSON.parse(execFileSync('tar', ['-xOzf', path, 'package/package.json'], { encoding: 'utf8' }));
         if (pkg.name !== release.name || pkg.version !== release.version) fail('Original artifact package mismatch');
+        const changelog = sourceFile('CHANGELOG.md', release.sha);
         const encoded = encodeURIComponent(packageName);
-        const metadata = await retryRegistry(async () => {
-            const data = await registryJSON(`${encoded}/${encodeURIComponent(release.version)}`);
-            return data?.dist?.attestations?.url ? data : null;
-        });
-        const published = await retryRegistry(() => publishedTarball(metadata.dist.tarball));
+        const target = `${packageName}@${release.version}`;
+        const ready = registryReadiness(target);
+        const versionURL = `https://registry.npmjs.org/${encoded}/${encodeURIComponent(release.version)}`;
+        const packumentURL = `https://registry.npmjs.org/${encoded}`;
+        const readMetadata = async (stage) => {
+            const data = await ready.read(stage, versionURL);
+            if (data === null) return null;
+            verifyArtifactMetadata({ release, tarball, metadata: data });
+            registryURL(data.dist.tarball);
+            if (data.dist.attestations === undefined) return null;
+            registryURL(data.dist.attestations.url);
+            return data;
+        };
+        const metadata = await ready.wait('version-metadata', () => readMetadata('version-metadata'));
+        const published = await ready.wait('tarball', () => ready.read('tarball', metadata.dist.tarball, 'bytes'));
         if (!tarball.equals(published)) fail('Published bytes differ from the original approved artifact');
+        const readPackument = async (stage) => {
+            const data = await ready.read(stage, packumentURL);
+            if (data === null) return null;
+            if (
+                data.name !== packageName ||
+                !data.versions ||
+                typeof data.versions !== 'object' ||
+                Array.isArray(data.versions) ||
+                !data.time ||
+                typeof data.time !== 'object' ||
+                Array.isArray(data.time)
+            )
+                fail('Malformed registry packument');
+            if (!Object.hasOwn(data.versions, release.version) || !Object.hasOwn(data.time, release.version)) return null;
+            verifyArtifactMetadata({ release, tarball, metadata: data.versions[release.version] });
+            const publishedAt = data.time[release.version];
+            const notes = changelogNotes(changelog, release, publishedAt, runId, attempt);
+            // npm/pacote reads this manifest independently and skips attestations when its pointer is absent.
+            const pointer = data.versions[release.version].dist.attestations;
+            if (pointer === undefined) return null;
+            if (!pointer || typeof pointer !== 'object' || Array.isArray(pointer)) fail('Malformed registry attestations pointer');
+            registryURL(pointer.url);
+            return { publishedAt, notes };
+        };
+        const { publishedAt, notes } = await ready.wait('packument', () => readPackument('packument'));
+        await ready.wait('attestations', async () => {
+            const data = await ready.read('attestations', metadata.dist.attestations.url);
+            if (data === null) return null;
+            if (
+                !Array.isArray(data.attestations) ||
+                !data.attestations.length ||
+                data.attestations.some((item) => !item?.predicateType || !item.bundle)
+            )
+                fail('Malformed registry attestations');
+            return data;
+        });
         // Install only to let npm verify signatures/provenance. No lifecycle scripts, source build, OIDC or App credentials.
         const cleanEnv = Object.fromEntries(
             Object.entries(process.env).filter(
@@ -113,37 +219,85 @@ export async function verifyPublishedRun(runId, attempt, buildAttempt) {
             ...cleanEnv,
             NPM_CONFIG_USERCONFIG: emptyConfig,
             NPM_CONFIG_GLOBALCONFIG: join(temporary, 'global.npmrc'),
-            NPM_CONFIG_CACHE: join(temporary, 'cache'),
+            NPM_CONFIG_CACHE: join(temporary, 'cache-version'),
             NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org',
             NPM_CONFIG_IGNORE_SCRIPTS: 'true'
         };
         writeFileSync(env.NPM_CONFIG_GLOBALCONFIG, '');
         writeFileSync(join(temporary, 'package.json'), JSON.stringify({ name: 'release-page-verification', version: '0.0.0', private: true }));
-        const npmVersion = execFileSync('npm', ['--version'], { env, encoding: 'utf8' }).trim().split('.').map(Number);
+        const npmVersion = execFileSync('npm', ['--version'], {
+            env,
+            encoding: 'utf8',
+            timeout: ready.remaining('npm-version', 15000),
+            killSignal: 'SIGKILL'
+        })
+            .trim()
+            .split('.')
+            .map(Number);
         if (!(npmVersion[0] > 11 || (npmVersion[0] === 11 && (npmVersion[1] > 5 || (npmVersion[1] === 5 && npmVersion[2] >= 1)))))
             fail('npm >= 11.5.1 required for provenance verification');
-        execFileSync(
-            'npm',
-            ['install', '--ignore-scripts', '--omit=peer', '--no-audit', '--no-fund', '--save-exact', `${packageName}@${release.version}`],
-            {
-                cwd: temporary,
-                env,
-                stdio: ['ignore', 'pipe', 'pipe'],
-                timeout: 180000
+        let installAttempt = 0;
+        const urls = [versionURL, packumentURL, metadata.dist.tarball, metadata.dist.attestations.url];
+        const refresh = async (stage) => (await readMetadata(stage)) !== null && (await readPackument(stage)) !== null;
+        await ready.wait('npm-resolution', async () => {
+            if (!(await refresh('npm-resolution'))) return null;
+            // A failed install may leave a lockfile or negative cache entry. Resolve afresh on each attempt.
+            rmSync(join(temporary, 'node_modules'), { recursive: true, force: true });
+            rmSync(join(temporary, 'package-lock.json'), { force: true });
+            env.NPM_CONFIG_CACHE = join(temporary, `cache-${++installAttempt}`);
+            try {
+                execFileSync(
+                    'npm',
+                    [
+                        'install',
+                        '--ignore-scripts',
+                        '--omit=peer',
+                        '--no-audit',
+                        '--no-fund',
+                        '--save-exact',
+                        target,
+                        '--json',
+                        '--prefer-online',
+                        '--fetch-retries=0'
+                    ],
+                    {
+                        cwd: temporary,
+                        env,
+                        encoding: 'utf8',
+                        maxBuffer: 16 * 1024 * 1024,
+                        stdio: ['ignore', 'pipe', 'pipe'],
+                        timeout: ready.remaining('npm-resolution', 180000),
+                        killSignal: 'SIGKILL'
+                    }
+                );
+                return true;
+            } catch (error) {
+                if (npmVisibilityFailure(error, target, urls)) return null;
+                throw error;
             }
-        );
-        const audit = JSON.parse(
-            execFileSync('npm', ['audit', 'signatures', '--json', '--include-attestations'], {
-                cwd: temporary,
-                env,
-                encoding: 'utf8',
-                maxBuffer: 16 * 1024 * 1024,
-                timeout: 180000
-            })
-        );
-        const hashes = verifyPublication({ release, tarball, metadata, audit, runId, attempt });
-        const publishedAt = await retryRegistry(async () => (await registryJSON(encoded))?.time?.[release.version] ?? null);
-        const notes = changelogNotes(sourceFile('CHANGELOG.md', release.sha), release, publishedAt, runId, attempt);
+        });
+        let auditAttempt = 0;
+        const hashes = await ready.wait('npm-provenance', async () => {
+            if (!(await refresh('npm-provenance'))) return null;
+            env.NPM_CONFIG_CACHE = join(temporary, `cache-audit-${++auditAttempt}`);
+            let audit;
+            try {
+                audit = JSON.parse(
+                    execFileSync('npm', ['audit', 'signatures', '--json', '--include-attestations', '--prefer-online', '--fetch-retries=0'], {
+                        cwd: temporary,
+                        env,
+                        encoding: 'utf8',
+                        maxBuffer: 16 * 1024 * 1024,
+                        timeout: ready.remaining('npm-provenance', 180000),
+                        killSignal: 'SIGKILL'
+                    })
+                );
+            } catch (error) {
+                if (npmVisibilityFailure(error, target, urls)) return null;
+                throw error;
+            }
+            return verifyPublication({ release, tarball, metadata, audit, runId, attempt });
+        });
         return validateReport({ schema: 1, ...release, ...hashes, runId, attempt, buildAttempt, publishedAt, notes });
     } finally {
         rmSync(temporary, { recursive: true, force: true });
