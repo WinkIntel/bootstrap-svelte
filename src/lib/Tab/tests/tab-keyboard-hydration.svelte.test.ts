@@ -13,6 +13,8 @@ it.each(['a', ''])(
             configFile: false,
             plugins: [svelte({ configFile: false })],
             resolve: { alias: { $lib: resolve('src/lib') } },
+            // This one-shot SSR server cannot reload an invalidated dependency pre-bundle.
+            ssr: { optimizeDeps: { noDiscovery: true, exclude: ['svelte'] } },
             server: { middlewareMode: true, hmr: false },
             appType: 'custom'
         });
