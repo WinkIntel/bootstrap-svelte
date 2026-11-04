@@ -1,5 +1,6 @@
 import { Context } from '$lib/common/index.js';
 import { onDestroy } from 'svelte';
+import { SvelteSet } from 'svelte/reactivity';
 import type { Nav } from '../Nav/index.js';
 import type { Navbar } from '../Navbar/index.js';
 import type { Tab } from '../Tab/index.js';
@@ -96,7 +97,7 @@ export class NavLinkState {
 export class TabRootState {
     #activeNavLink = $state<NavLinkState | null>(null);
     #activeTabPaneId: string = $state('');
-    #navLinkStates = $state<NavLinkState[]>([]);
+    #navLinkStates = new SvelteSet<NavLinkState>();
     #tabPaneStates: TabPaneState[] = [];
 
     constructor(readonly props: Tab.RootProps) {
@@ -115,11 +116,9 @@ export class TabRootState {
         return this.#activeTabPaneId === tabPaneId;
     }
     registerNavLinkState(linkState: NavLinkState): () => void {
-        this.#navLinkStates.push(linkState);
+        this.#navLinkStates.add(linkState);
         return () => {
-            const index = this.#navLinkStates.indexOf(linkState);
-            if (index === -1) return;
-            this.#navLinkStates.splice(index, 1);
+            if (!this.#navLinkStates.delete(linkState)) return;
             if (this.isNavLinkActive(linkState)) {
                 this.setNavLinkActive(this.#getTabStripLink(this.#activeTabPaneId) ?? null);
             }
@@ -137,8 +136,14 @@ export class TabRootState {
     /** Prefer a clicked strip link, then the current matching strip link, then registration order. */
     #getTabStripLink(tabPaneId: string, preferred?: NavLinkState): NavLinkState | undefined {
         const matches = (link: NavLinkState) => link.isTabStrip && link.targetPaneId === tabPaneId;
-        if (preferred && this.#navLinkStates.includes(preferred) && matches(preferred)) return preferred;
-        return this.#navLinkStates.find((link) => matches(link) && this.isNavLinkActive(link)) ?? this.#navLinkStates.find(matches);
+        if (preferred && this.#navLinkStates.has(preferred) && matches(preferred)) return preferred;
+        let first: NavLinkState | undefined;
+        for (const link of this.#navLinkStates) {
+            if (!matches(link)) continue;
+            if (this.isNavLinkActive(link)) return link;
+            first ??= link;
+        }
+        return first;
     }
     selectTabPane(tabPaneId: string, source: NavLinkState): void {
         this.setNavLinkActive(this.#getTabStripLink(tabPaneId, source) ?? null);

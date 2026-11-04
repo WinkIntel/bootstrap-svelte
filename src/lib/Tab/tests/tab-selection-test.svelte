@@ -32,7 +32,7 @@
     } = $props();
 </script>
 
-{#snippet paneControl(target: string, label: string, active?: boolean)}
+{#snippet paneControl(target: string, label: string, active: boolean | undefined)}
     {#if control === 'tab'}
         <Tab.NavLink targetPaneId={target} isActive={active}>{label}</Tab.NavLink>
     {:else}
@@ -64,9 +64,9 @@
 {#snippet panes()}
     <Tab.Pane id="a" isActive={true}>
         Pane A
-        {@render paneControl('#a', 'Stay on A')}
+        {@render paneControl('#a', 'Stay on A', undefined)}
         {@render paneControl('#b', 'Go to B', paneControlActive)}
-        {@render paneControl('#unlisted', 'Go unlisted')}
+        {@render paneControl('#unlisted', 'Go unlisted', undefined)}
         {#if nested}
             <Tab.Root>
                 <Nav.Root aria-label="Inner tabs">
@@ -83,12 +83,12 @@
     </Tab.Pane>
     <Tab.Pane id="b">
         Pane B
-        {@render paneControl(returnTarget, 'Return to A')}
-        {@render paneControl('#unlisted', 'Go unlisted')}
+        {@render paneControl(returnTarget, 'Return to A', undefined)}
+        {@render paneControl('#unlisted', 'Go unlisted', undefined)}
     </Tab.Pane>
     <Tab.Pane id="unlisted">
         Unlisted pane
-        {@render paneControl(returnTarget, 'Return to A')}
+        {@render paneControl(returnTarget, 'Return to A', undefined)}
     </Tab.Pane>
 {/snippet}
 
