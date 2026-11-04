@@ -3,6 +3,8 @@
 ## Nav.Link
 Navigation link component typically used inside a Nav.Item. A bare Nav.Link inside Tab.Pane selects a pane and synchronizes its strip selection. Under a Nav.Root in pane content, it follows its href as ordinary navigation. Explicit isActive props continue to control the rendered active state. An initially active pane control does not replace the initial strip selection or pane; clicks and later activation transitions still select its destination.
 
+In a Tab.Root tablist strip, tab-role links activate and focus with all four arrows and Home/End, wrapping and skipping disabled links in DOM order. Roving tabindex defaults to the selected enabled tab, or the first enabled tab after mount if none is selected. Explicit roles and enabled-link tabindex overrides are honored. Consumer onkeydown runs first and can preventDefault to cancel a managed key. Disabled clicks do not select or call onclick. Use pane lifecycle callbacks to observe pane changes.
+
 @example
 ```svelte
 <Nav.Link href="#!" isActive={true}>Active Link</Nav.Link>
@@ -39,6 +41,7 @@ Navigation link component typically used inside a Nav.Item. A bare Nav.Link insi
         isActive,
         isDisabled = false,
         onclick = noop,
+        onkeydown,
         role,
         tabindex: consumerTabIndex,
         ...restOfProps
@@ -48,6 +51,12 @@ Navigation link component typically used inside a Nav.Item. A bare Nav.Link insi
         get href() {
             return href;
         },
+        get role() {
+            return role;
+        },
+        get isDisabled() {
+            return isDisabled;
+        },
         get id() {
             return id;
         },
@@ -56,10 +65,10 @@ Navigation link component typically used inside a Nav.Item. A bare Nav.Link insi
         }
     });
 
-    // If the link is a tab, we need to set the role to "tab", otherwise use the provided role.
-    let defaultRole = $derived(linkState.hasTabRole ? 'tab' : role);
+    // Explicit roles override tab-role inference.
+    let defaultRole = $derived(linkState.role);
     // If isActive is not provided, use the state from the linkState.
-    let isActiveState = $derived(isActive !== undefined ? isActive : linkState.isActive);
+    let isActiveState = $derived(linkState.renderedActive);
     let classes: string = $derived(uniqueClsx('nav-link', { active: isActiveState, disabled: isDisabled }, classValues));
 
     const handleClick: EventListener = (event: Event) => {
@@ -70,6 +79,11 @@ Navigation link component typically used inside a Nav.Item. A bare Nav.Link insi
 
         linkState.onclick(event);
         onclick(event);
+    };
+
+    const handleKeydown = (event: KeyboardEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => {
+        onkeydown?.call(event.currentTarget, event);
+        linkState.onkeydown(event);
     };
 
     // Track the previously synchronized isActive value so we only react to
@@ -93,15 +107,24 @@ Navigation link component typically used inside a Nav.Item. A bare Nav.Link insi
 <a
     {...restOfProps}
     aria-controls={linkState.ariaControls ?? ariaControls}
-    aria-current={isActiveState ? 'page' : ariaCurrent}
+    aria-current={linkState.hasTabRole ? undefined : isActiveState ? 'page' : ariaCurrent}
     aria-disabled={isDisabled ? 'true' : ariaDisabled}
     aria-selected={linkState.hasTabRole ? isActiveState : ariaSelected}
-    bind:this={elementRef}
+    bind:this={
+        () => linkState.element,
+        (element) => {
+            const previous = linkState.element;
+            linkState.element = element;
+            // Clear only a public ref still owned by this link on unmount.
+            if (element !== null || elementRef === previous) elementRef = element;
+        }
+    }
     class={classes}
     {href}
     {id}
     onclick={handleClick}
-    tabindex={isDisabled ? -1 : consumerTabIndex}
+    onkeydown={handleKeydown}
+    tabindex={isDisabled ? -1 : consumerTabIndex !== undefined ? consumerTabIndex : linkState.tabIndex}
     role={defaultRole}>
     {@render children?.()}
 </a>

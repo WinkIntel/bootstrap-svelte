@@ -34,6 +34,8 @@ export class NavRootState {
     }
 }
 
+type NavLinkStateProps = Omit<Nav.LinkProps, 'role'> & { role?: Tab.NavLinkProps['role'] };
+
 /**
  * Manages the state for an individual Nav link.
  * Tracks active state and provides methods to handle clicks.
@@ -42,16 +44,22 @@ export class NavLinkState {
     isActive = $derived.by(() =>
         this.root instanceof TabRootState ? this.root.isNavLinkActive(this) : this.root.isNavLinkActive(this.props.id || '')
     );
-    hasTabRole = $derived.by(() => this.isTab && (this.tabRoles?.isTablist ?? true));
+    // The explicit role (including null) wins over inferred semantics.
+    role = $derived.by(() => (this.props.role !== undefined ? this.props.role : this.isTab && this.tabRoles?.isTablist ? 'tab' : undefined));
+    hasTabRole = $derived.by(() => this.isTab && !!this.tabRoles?.isTablist && this.role === 'tab');
+    element = $state<HTMLElement | null>(null);
+    renderedActive = $derived.by(() => (this.controlledActive && this.props.isActive !== undefined ? this.props.isActive : this.isActive));
+    tabIndex = $derived.by(() => (this.root instanceof TabRootState && this.isTabStrip && this.hasTabRole ? this.root.getTabIndex(this) : undefined));
     targetPaneId = $derived.by(() => this.props.href?.replace('#', ''));
     ariaControls = $derived.by(() => (this.hasTabRole ? this.targetPaneId : undefined));
     readonly isTab: boolean;
 
     constructor(
-        readonly props: Nav.LinkProps,
+        readonly props: NavLinkStateProps,
         readonly root: TabRootState | NavRootState,
-        readonly tabRoles?: { readonly isTablist: boolean },
-        readonly isTabStrip = false
+        readonly tabRoles?: { readonly isTablist: boolean; readonly group: object },
+        readonly isTabStrip = false,
+        readonly controlledActive = false
     ) {
         this.onclick = this.onclick.bind(this);
         this.isTab = root instanceof TabRootState;
@@ -79,6 +87,10 @@ export class NavLinkState {
             this.root.setNavLinkActive(this.props.id || '');
         }
     }
+    onkeydown(event: KeyboardEvent): void {
+        if (event.defaultPrevented || this.props.isDisabled || event.target !== this.element) return;
+        if (this.root instanceof TabRootState && this.isTabStrip && this.hasTabRole) this.root.onkeydown(event, this);
+    }
     deactivate(): void {
         if (this.root instanceof TabRootState) this.root.setNavLinkActive(null);
         else this.root.setNavLinkActive('');
@@ -93,6 +105,7 @@ export class TabRootState {
     #activeNavLink = $state<NavLinkState | null>(null);
     #activeTabPaneId: string = $state('');
     #navLinkStates = new SvelteSet<NavLinkState>();
+    #domOrder = $state(0);
 
     constructor(readonly props: Tab.RootProps) {
         this.isNavLinkActive = this.isNavLinkActive.bind(this);
@@ -100,8 +113,61 @@ export class TabRootState {
         this.registerNavLinkState = this.registerNavLinkState.bind(this);
         this.setNavLinkActive = this.setNavLinkActive.bind(this);
         this.setTabPaneActive = this.setTabPaneActive.bind(this);
+        // Keyed moves do not change registration order. Observe child-list changes
+        // only, so roving entry follows current DOM order without stealing focus.
+        $effect(() => {
+            void this.#domOrder;
+            const lists = new SvelteSet<Element>();
+            for (const link of this.#navLinkStates) {
+                const list = link.element?.closest('[role="tablist"]');
+                if (list) lists.add(list);
+            }
+            const observer = new MutationObserver(() => this.#domOrder++);
+            for (const list of lists) observer.observe(list, { childList: true, subtree: true });
+            return () => observer.disconnect();
+        });
     }
 
+    #keyboardLinks(source: NavLinkState): NavLinkState[] {
+        const group = (link: NavLinkState) => link.element?.closest('[role="tablist"]') ?? link.tabRoles?.group;
+        const sourceGroup = group(source);
+        // Read the scoped DOM revision so reactive tabindex also follows keyed moves.
+        void this.#domOrder;
+        return [...this.#navLinkStates]
+            .filter((link) => link.isTabStrip && link.hasTabRole && !link.props.isDisabled && group(link) === sourceGroup)
+            .sort((a, b) => {
+                if (!a.element || !b.element) return 0;
+                const position = a.element.compareDocumentPosition(b.element);
+                return position & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : position & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
+            });
+    }
+    getTabIndex(source: NavLinkState): number {
+        const links = this.#keyboardLinks(source);
+        const selected = links.find((link) => link.renderedActive);
+        // During SSR later siblings are not registered yet. Only selected links
+        // receive an entry point; the no-selection fallback is set after mount.
+        const entry = selected ?? (source.element ? links[0] : undefined);
+        return source === entry ? 0 : -1;
+    }
+    onkeydown(event: KeyboardEvent, source: NavLinkState): void {
+        if (!source.element?.closest('[role="tablist"]')) return;
+        const { key } = event;
+        if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(key)) return;
+        const links = this.#keyboardLinks(source);
+        const index = links.indexOf(source);
+        if (index === -1) return;
+        const next =
+            key === 'Home'
+                ? 0
+                : key === 'End'
+                  ? links.length - 1
+                  : (index + (key === 'ArrowRight' || key === 'ArrowDown' ? 1 : -1) + links.length) % links.length;
+        event.preventDefault();
+        event.stopPropagation();
+        const destination = links[next]!;
+        destination.onclick(event);
+        destination.element?.focus({ preventScroll: true });
+    }
     isNavLinkActive(navLink: NavLinkState): boolean {
         return this.#activeNavLink === navLink;
     }
@@ -179,10 +245,11 @@ function getTabStripRoot(): TabRootState | null {
 export const isInTabStrip = () => getTabStripRoot() !== null;
 
 /** Capture contexts during initialization; read the resolved root role reactively. */
-export function getTabRoleState(): { readonly isTablist: boolean } {
+export function getTabRoleState(): { readonly isTablist: boolean; readonly group: object } {
     const tabRoot = getTabStripRoot();
     const navRoot = NavRootContext.getOr(null);
     return {
+        group: navRoot?.tabRoot === tabRoot ? navRoot : (tabRoot ?? {}),
         get isTablist() {
             return tabRoot !== null && (navRoot?.tabRoot === tabRoot ? navRoot.isTablist : true);
         }
@@ -218,11 +285,11 @@ export function initTabRootState(props: Tab.RootProps): TabRootState {
  * @param isTabNavLink - Whether the link is a Tab.NavLink, which always targets the nearest Tab root if there is one.
  * @returns The created NavLinkState instance.
  */
-export function initNavLinkState(props: Nav.LinkProps, isTabNavLink = false): NavLinkState {
+export function initNavLinkState(props: NavLinkStateProps, isTabNavLink = false): NavLinkState {
     const rootState = TabRootContext.getOr(null);
     // A Nav.Link under a Nav.Root in this Tab root's pane content is ordinary navigation.
     if (rootState && (isTabNavLink || NavRootContext.getOr(null)?.tabPaneRoot !== rootState)) {
-        const linkState = new NavLinkState(props, rootState, getTabRoleState(), getTabStripRoot() === rootState);
+        const linkState = new NavLinkState(props, rootState, getTabRoleState(), getTabStripRoot() === rootState, !isTabNavLink);
         onDestroy(rootState.registerNavLinkState(linkState));
         return linkState;
     } else if (!NavRootContext.exists()) {
@@ -231,7 +298,7 @@ export function initNavLinkState(props: Nav.LinkProps, isTabNavLink = false): Na
         );
     } else {
         const rootState = NavRootContext.get();
-        const linkState = new NavLinkState(props, rootState);
+        const linkState = new NavLinkState(props, rootState, undefined, false, true);
         return linkState;
     }
 }

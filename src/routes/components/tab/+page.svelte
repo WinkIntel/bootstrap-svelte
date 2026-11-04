@@ -571,7 +571,7 @@
                         <td><code>role</code></td>
                         <td><code>'button' | 'tab'</code></td>
                         <td>Auto-determined</td>
-                        <td>ARIA role for the link. Defaults to 'tab' if within tablist context.</td>
+                        <td>ARIA role for the link. Defaults to 'tab' in a tab strip; explicit roles and null are honored.</td>
                     </tr>
                     <tr>
                         <td><code>targetPaneId</code></td>
@@ -664,6 +664,26 @@
         </ul>
 
         <h3 class="h5 mt-4">Accessibility</h3>
+        <p>
+            In a <code>Tab.Root</code> strip with a <code>tablist</code> container, <code>Tab.NavLink</code> and <code>Nav.Link</code> support automatic
+            activation: Right/Down Arrow selects and focuses the next enabled tab, and Left/Up Arrow selects and focuses the previous one, wrapping at either
+            end. Home and End select and focus the first and last enabled tabs. All four arrows work in either orientation, matching Bootstrap. Keyboard
+            order follows the current DOM order within that tablist; nested roots and other tablists stay separate.
+        </p>
+        <p>
+            By default, the selected enabled tab has <code>tabindex="0"</code> and the others have <code>tabindex="-1"</code>. If no enabled tab is
+            selected, the first enabled tab becomes the entry point after mount; an all-disabled list has no entry point. Removing or disabling tabs
+            updates entry without moving focus. Disabled links reject clicks, including synthetic clicks, before selection or consumer click
+            callbacks. Tabs use <code>aria-selected</code> and omit <code>aria-current</code>.
+        </p>
+        <p>
+            Explicit link roles are honored; a non-tab role opts the link out of automatic tab ARIA and keyboard handling. Root role overrides other
+            than <code>tablist</code> also opt out. Pane controls retain ordinary button/link behavior. Explicit <code>tabindex</code> values override
+            roving defaults on enabled links, so callers supplying them own tab-sequence consistency. Explicit <code>Nav.Link isActive</code>
+            props still control rendered selection; synchronize those props in the application when controlling tabs. Consumer
+            <code>onkeydown</code> runs first and may call <code>preventDefault()</code> to cancel a managed key. Use pane lifecycle callbacks such as
+            <code>onShow</code> and <code>onShown</code> to observe pane changes from either clicks or keyboard selection.
+        </p>
         <p>The Tab component automatically applies proper ARIA attributes:</p>
         <ul>
             <li>

@@ -89,7 +89,7 @@ describe('Nav root semantics', () => {
         expect(within(nav).queryAllByRole('tab')).toHaveLength(0);
         expect(nav.querySelectorAll('[aria-selected], [aria-controls]')).toHaveLength(0);
         expect(within(nav).getAllByRole('listitem')).toHaveLength(2);
-        expect(within(nav).getByRole('button', { name: 'Two' })).toHaveAttribute('role', 'button');
+        expect(within(nav).getByRole('link', { name: 'Two' })).not.toHaveAttribute('role');
 
         await rerender({ role: 'navigation' });
         expect(nav).toHaveAttribute('role', 'navigation');

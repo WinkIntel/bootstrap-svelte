@@ -10,7 +10,7 @@
             <Tab.NavLink id="role-one-tab" targetPaneId="#role-one-pane" isActive>One</Tab.NavLink>
         </Nav.Item>
         <Nav.Item role="listitem">
-            <Nav.Link role="button" id="role-two-tab" href="#role-two-pane">Two</Nav.Link>
+            <Nav.Link id="role-two-tab" href="#role-two-pane">Two</Nav.Link>
         </Nav.Item>
     </Nav.Root>
     <Tab.Content>
