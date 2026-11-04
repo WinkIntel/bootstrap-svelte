@@ -13,7 +13,9 @@
         showFirst = true,
         firstId = 'strip-a',
         firstTarget = '#a',
-        returnTarget = '#a'
+        returnTarget = '#a',
+        firstActive = true,
+        paneControlActive
     }: {
         control?: 'tab' | 'nav';
         panesFirst?: boolean;
@@ -27,14 +29,16 @@
         firstId?: string;
         firstTarget?: string;
         returnTarget?: string;
+        firstActive?: boolean;
+        paneControlActive?: boolean;
     } = $props();
 </script>
 
-{#snippet paneControl(target: string, label: string)}
+{#snippet paneControl(target: string, label: string, active: boolean | undefined)}
     {#if control === 'tab'}
-        <Tab.NavLink targetPaneId={target}>{label}</Tab.NavLink>
+        <Tab.NavLink targetPaneId={target} isActive={active}>{label}</Tab.NavLink>
     {:else}
-        <Nav.Link href={target}>{label}</Nav.Link>
+        <Nav.Link href={target} isActive={active}>{label}</Nav.Link>
     {/if}
 {/snippet}
 
@@ -44,7 +48,7 @@
             <Nav.Link href={returnTarget} role="button">Return to A</Nav.Link>
         </Nav.Root>
     {:else}
-        {@render paneControl(returnTarget, 'Return to A')}
+        {@render paneControl(returnTarget, 'Return to A', undefined)}
     {/if}
 {/snippet}
 
@@ -52,9 +56,9 @@
     <Nav.Root aria-label="Outer tabs" role={stripRole}>
         {#if showFirst}
             {#if controlled}
-                <Nav.Link id={firstId} href={firstTarget} isActive={true}>A</Nav.Link>
+                <Nav.Link id={firstId} href={firstTarget} isActive={firstActive}>A</Nav.Link>
             {:else}
-                <Tab.NavLink id={firstId} targetPaneId={firstTarget} isActive={true} {...linkRole === undefined ? {} : { role: linkRole }}
+                <Tab.NavLink id={firstId} targetPaneId={firstTarget} isActive={firstActive} {...linkRole === undefined ? {} : { role: linkRole }}
                     >A</Tab.NavLink>
             {/if}
         {/if}
@@ -72,9 +76,9 @@
 {#snippet panes()}
     <Tab.Pane id="a" isActive={true}>
         Pane A
-        {@render paneControl('#a', 'Stay on A')}
-        {@render paneControl('#b', 'Go to B')}
-        {@render paneControl('#unlisted', 'Go unlisted')}
+        {@render paneControl('#a', 'Stay on A', undefined)}
+        {@render paneControl('#b', 'Go to B', paneControlActive)}
+        {@render paneControl('#unlisted', 'Go unlisted', undefined)}
         {#if nested}
             <Tab.Root>
                 <Nav.Root aria-label="Inner tabs" role="tablist">
@@ -92,7 +96,7 @@
     <Tab.Pane id="b">
         Pane B
         {@render returnControl()}
-        {@render paneControl('#unlisted', 'Go unlisted')}
+        {@render paneControl('#unlisted', 'Go unlisted', undefined)}
     </Tab.Pane>
     <Tab.Pane id="unlisted">
         Unlisted pane

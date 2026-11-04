@@ -203,7 +203,10 @@
         <p>
             A <code>Tab.NavLink</code> or <code>Nav.Link</code> inside a pane selects its destination and updates the matching strip tab. If several
             strip links share a target, pane controls keep the selected match or choose the first registered strip link. A pane without a matching
-            strip link leaves the strip unselected. Explicit <code>Nav.Link isActive</code> props continue to control their rendered active state.
+            strip link leaves the strip unselected. Remounted links register last, even if they appear first in the markup. Removing the selected
+            strip link selects a remaining match for the visible pane or clears strip selection. An initially active pane control does not change the
+            initial pane or strip selection; clicks and later activation transitions still select its destination. Explicit
+            <code>Nav.Link isActive</code> props continue to control their rendered active state.
         </p>
         <div class="card">
             <div class="card-body">
