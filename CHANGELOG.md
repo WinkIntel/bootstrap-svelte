@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## Unreleased
+
+### Fixed
+
+- Keep library-managed tab strip selection synchronized when an in-pane `Tab.NavLink` or `Nav.Link` selects a pane ([#139](https://github.com/WinkIntel/bootstrap-svelte/issues/139)). Prefer an explicitly clicked strip link; pane controls preserve a selected matching strip link or select the first registered strip match. A valid pane without a strip match leaves the strip unselected. Pane labels use a matching strip representative, and removed links no longer remain selection candidates. Explicit `Nav.Link isActive` props retain control of their rendered state. Existing 1.x role and routing behavior is unchanged.
+
 ## 1.1.4 — 2026-10-28
 
 ### Compatibility / custom-theme migration
