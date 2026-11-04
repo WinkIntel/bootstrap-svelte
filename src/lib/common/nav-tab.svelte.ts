@@ -43,9 +43,12 @@ export class NavRootState {
  * Tracks active state and provides methods to handle clicks.
  */
 export class NavLinkState {
-    isActive = $derived.by(() => this.root.isNavLinkActive(this.props.id || ''));
+    isActive = $derived.by(() =>
+        this.root instanceof TabRootState ? this.root.isNavLinkActive(this) : this.root.isNavLinkActive(this.props.id || '')
+    );
     hasTabRole = $derived.by(() => this.isTab && (this.tabRoles?.isTablist ?? true));
-    ariaControls = $derived.by(() => (this.hasTabRole ? this.props.href?.replace('#', '') : undefined));
+    targetPaneId = $derived.by(() => this.props.href?.replace('#', ''));
+    ariaControls = $derived.by(() => (this.hasTabRole ? this.targetPaneId : undefined));
     readonly isTab: boolean;
 
     constructor(
@@ -57,15 +60,19 @@ export class NavLinkState {
         this.onclick = this.onclick.bind(this);
         this.isTab = root instanceof TabRootState;
         if (this.props.isActive) {
-            this.root.setNavLinkActive(this.props.id || '');
+            if (this.root instanceof TabRootState) {
+                if (this.isTabStrip) this.root.setNavLinkActive(this);
+            } else {
+                this.root.setNavLinkActive(this.props.id || '');
+            }
         }
     }
 
     onclick(event: Event) {
-        if (this.isTab && this.root instanceof TabRootState) {
+        if (this.root instanceof TabRootState) {
             event.preventDefault();
             event.stopImmediatePropagation();
-            const tabPaneId = this.props.href?.replace('#', '');
+            const tabPaneId = this.targetPaneId;
             if (tabPaneId) {
                 this.root.selectTabPane(tabPaneId, this);
             }
@@ -76,6 +83,10 @@ export class NavLinkState {
             this.root.setNavLinkActive(this.props.id || '');
         }
     }
+    deactivate(): void {
+        if (this.root instanceof TabRootState) this.root.setNavLinkActive(null);
+        else this.root.setNavLinkActive('');
+    }
 }
 
 /**
@@ -83,9 +94,9 @@ export class NavLinkState {
  * Handles the tracking of active tab panes and provides methods to set them.
  */
 export class TabRootState {
-    #activeNavLinkId: string = $state('');
+    #activeNavLink = $state<NavLinkState | null>(null);
     #activeTabPaneId: string = $state('');
-    #navLinkStates = $state.raw<NavLinkState[]>([]);
+    #navLinkStates = $state<NavLinkState[]>([]);
     #tabPaneStates: TabPaneState[] = [];
 
     constructor(readonly props: Tab.RootProps) {
@@ -97,35 +108,40 @@ export class TabRootState {
         this.setTabPaneActive = this.setTabPaneActive.bind(this);
     }
 
-    isNavLinkActive(navLinkId: string): boolean {
-        return this.#activeNavLinkId === navLinkId;
+    isNavLinkActive(navLink: NavLinkState): boolean {
+        return this.#activeNavLink === navLink;
     }
     isTabPaneActive(tabPaneId: string): boolean {
         return this.#activeTabPaneId === tabPaneId;
     }
     registerNavLinkState(linkState: NavLinkState): () => void {
-        this.#navLinkStates = [...this.#navLinkStates, linkState];
+        this.#navLinkStates.push(linkState);
         return () => {
-            this.#navLinkStates = this.#navLinkStates.filter((link) => link !== linkState);
+            const index = this.#navLinkStates.indexOf(linkState);
+            if (index === -1) return;
+            this.#navLinkStates.splice(index, 1);
+            if (this.isNavLinkActive(linkState)) {
+                this.setNavLinkActive(this.#getTabStripLink(this.#activeTabPaneId) ?? null);
+            }
         };
     }
     registerTabPaneState(paneState: TabPaneState): void {
         this.#tabPaneStates.push(paneState);
     }
-    setNavLinkActive(navLinkId: string): void {
-        this.#activeNavLinkId = navLinkId;
+    setNavLinkActive(navLink: NavLinkState | null): void {
+        this.#activeNavLink = navLink;
     }
     setTabPaneActive(tabPaneId: string): void {
         this.#activeTabPaneId = tabPaneId;
     }
     /** Prefer a clicked strip link, then the current matching strip link, then registration order. */
     #getTabStripLink(tabPaneId: string, preferred?: NavLinkState): NavLinkState | undefined {
-        const matches = (link: NavLinkState) => link.isTabStrip && link.props.href?.replace('#', '') === tabPaneId;
+        const matches = (link: NavLinkState) => link.isTabStrip && link.targetPaneId === tabPaneId;
         if (preferred && this.#navLinkStates.includes(preferred) && matches(preferred)) return preferred;
-        return this.#navLinkStates.find((link) => matches(link) && this.isNavLinkActive(link.props.id || '')) ?? this.#navLinkStates.find(matches);
+        return this.#navLinkStates.find((link) => matches(link) && this.isNavLinkActive(link)) ?? this.#navLinkStates.find(matches);
     }
     selectTabPane(tabPaneId: string, source: NavLinkState): void {
-        this.setNavLinkActive(this.#getTabStripLink(tabPaneId, source)?.props.id || '');
+        this.setNavLinkActive(this.#getTabStripLink(tabPaneId, source) ?? null);
         this.setTabPaneActive(tabPaneId);
     }
     getAriaLabelledBy(tabPaneId: string): string | undefined {

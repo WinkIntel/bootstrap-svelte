@@ -1,7 +1,7 @@
 <!--
 @component
 ## Nav.Link
-Navigation link component typically used inside a Nav.Item. A bare Nav.Link inside Tab.Pane selects a pane and synchronizes its strip selection. Under a Nav.Root in pane content, it follows its href as ordinary navigation. Explicit isActive props continue to control the rendered active state.
+Navigation link component typically used inside a Nav.Item. A bare Nav.Link inside Tab.Pane selects a pane and synchronizes its strip selection. Under a Nav.Root in pane content, it follows its href as ordinary navigation. Explicit isActive props continue to control the rendered active state. An initially active pane control does not replace the initial strip selection or pane; clicks and later activation transitions still select its destination.
 
 @example
 ```svelte
@@ -80,7 +80,7 @@ Navigation link component typically used inside a Nav.Item. A bare Nav.Link insi
     $effect(() => {
         if (previousIsActive !== unset && previousIsActive !== isActive) {
             if (linkState.isActive && !isActive) {
-                linkState.root.setNavLinkActive('');
+                linkState.deactivate();
             } else if (!linkState.isActive && isActive) {
                 linkState.onclick(new MouseEvent('click'));
             }

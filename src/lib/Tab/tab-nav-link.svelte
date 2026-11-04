@@ -2,7 +2,8 @@
 @component
 ## Tab.NavLink
 A tab navigation link component specifically used inside a Tab.Root component. Inside Tab.Pane content, it selects a pane of its Tab.Root and synchronizes the matching strip selection, without tab semantics.
-When strip links share a target, a pane control preserves the selected match or chooses the first registered strip link. A pane without a strip match leaves the strip unselected.
+When strip links share a target, a pane control preserves the selected match or chooses the first registered strip link. A remounted link registers last, even if it appears first in the markup. Removing the selected strip link selects a remaining match for the visible pane or clears strip selection. A pane without a strip match leaves the strip unselected.
+An initially true isActive on a pane control does not change the initial pane or strip selection. Clicks and later false-to-true isActive transitions select its destination.
 
 @example
 ```svelte

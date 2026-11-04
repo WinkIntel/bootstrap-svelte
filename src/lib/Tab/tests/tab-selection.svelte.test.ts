@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 import TabSelectionTest from './tab-selection-test.svelte';
+import TabSelectionProgrammaticTest from './tab-selection-programmatic-test.svelte';
 
 function expectSelected(link: HTMLElement, selected: boolean) {
     expect(link).toHaveAttribute('aria-selected', String(selected));
@@ -150,5 +151,119 @@ describe('Tab pane controls synchronize strip selection', () => {
         await fireEvent.click(screen.getByRole('tab', { name: 'A' }));
         expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane A');
         expectSelected(screen.getByRole('tab', { name: 'A' }), true);
+    });
+});
+
+describe('Tab selection review regressions', () => {
+    it.each(['tab', 'nav'] as const)('does not let initially active pane %s controls steal selection or change the initial pane', async (control) => {
+        const { rerender } = render(TabSelectionTest, { control, paneControlActive: true });
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane A');
+        expectSelected(screen.getByRole('tab', { name: 'A' }), true);
+        const paneControl = screen.getByText('Go to B');
+        if (control === 'nav') expect(paneControl).toHaveClass('active');
+        else expect(paneControl).not.toHaveClass('active');
+        await fireEvent.click(paneControl);
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane B');
+        expectSelected(screen.getByRole('tab', { name: 'B' }), true);
+        await fireEvent.click(screen.getByText('Return to A'));
+        expectSelected(screen.getByRole('tab', { name: 'A' }), true);
+        await rerender({ paneControlActive: false });
+        await rerender({ paneControlActive: true });
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane B');
+        expectSelected(screen.getByRole('tab', { name: 'B' }), true);
+    });
+
+    it('reselects a remaining duplicate when the selected strip link is removed', async () => {
+        const { rerender } = render(TabSelectionTest, { duplicates: true });
+        expectSelected(screen.getByRole('tab', { name: 'A' }), true);
+        await rerender({ showFirst: false });
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane A');
+        expectSelected(screen.getByRole('tab', { name: 'A second' }), true);
+        expectSelected(screen.getByRole('tab', { name: 'B' }), false);
+        expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'strip-a-second');
+    });
+
+    it('clears selection on removal of the only matching strip link without changing the pane', async () => {
+        const { rerender } = render(TabSelectionTest);
+        await rerender({ showFirst: false });
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane A');
+        expectSelected(screen.getByRole('tab', { name: 'B' }), false);
+        expect(screen.getByRole('tabpanel')).not.toHaveAttribute('aria-labelledby');
+        await rerender({ showFirst: true, firstActive: false });
+        expectSelected(screen.getByRole('tab', { name: 'A' }), false);
+    });
+
+    it('keeps an explicit empty ID distinct from no strip selection', async () => {
+        render(TabSelectionTest, { firstId: '' });
+        expectSelected(screen.getByRole('tab', { name: 'A' }), true);
+        await fireEvent.click(screen.getByText('Go unlisted'));
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('Unlisted pane');
+        for (const tab of screen.getAllByRole('tab')) expectSelected(tab, false);
+        await fireEvent.click(screen.getByText('Return to A'));
+        expectSelected(screen.getByRole('tab', { name: 'A' }), true);
+    });
+
+    it('clears programmatic Nav.Link selection without activating an empty-ID sibling, and can reactivate', async () => {
+        const { rerender } = render(TabSelectionProgrammaticTest, { active: true });
+        expectSelected(screen.getByRole('tab', { name: 'Controlled' }), true);
+        await rerender({ active: false });
+        expectSelected(screen.getByRole('tab', { name: 'Controlled' }), false);
+        expectSelected(screen.getByRole('tab', { name: 'Other' }), false);
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane A');
+        await fireEvent.click(screen.getByRole('tab', { name: 'Other' }));
+        expectSelected(screen.getByRole('tab', { name: 'Other' }), true);
+        await rerender({ active: true });
+        expectSelected(screen.getByRole('tab', { name: 'Controlled' }), true);
+        expectSelected(screen.getByRole('tab', { name: 'Other' }), false);
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane A');
+        await rerender({ active: false });
+        expectSelected(screen.getByRole('tab', { name: 'Other' }), false);
+    });
+
+    it('retains ordinary Nav.Root programmatic activation and clearing', async () => {
+        const { rerender } = render(TabSelectionProgrammaticTest, { active: true, ordinary: true });
+        const controlled = screen.getByRole('link', { name: 'Controlled' });
+        const other = screen.getByRole('link', { name: 'Other' });
+        expect(controlled).toHaveClass('active');
+        await rerender({ active: false });
+        expect(controlled).not.toHaveClass('active');
+        expect(other).not.toHaveClass('active');
+        await fireEvent.click(other);
+        expect(other).toHaveClass('active');
+        await rerender({ active: true });
+        expect(controlled).toHaveClass('active');
+        expect(other).not.toHaveClass('active');
+    });
+
+    it('registers remounted strip links last even when they appear first in DOM order', async () => {
+        const { rerender } = render(TabSelectionTest, { duplicates: true, firstActive: false });
+        await fireEvent.click(screen.getByRole('tab', { name: 'B' }));
+        await rerender({ showFirst: false });
+        await rerender({ showFirst: true });
+        expect(screen.getAllByRole('tab').map((tab) => tab.textContent?.trim())).toEqual(['A', 'A second', 'B']);
+        expectSelected(screen.getByRole('tab', { name: 'B' }), true);
+        await fireEvent.click(screen.getByText('Return to A'));
+        expectSelected(screen.getByRole('tab', { name: 'A second' }), true);
+        expectSelected(screen.getByRole('tab', { name: 'A' }), false);
+        expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'strip-a-second');
+    });
+
+    it('keeps the currently selected strip link selected when its ID changes reactively', async () => {
+        const { rerender } = render(TabSelectionTest);
+        expectSelected(screen.getByRole('tab', { name: 'A' }), true);
+        await rerender({ firstId: 'renamed-selected-strip' });
+        expectSelected(screen.getByRole('tab', { name: 'A' }), true);
+        expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'renamed-selected-strip');
+    });
+
+    it.each(['tab', 'nav'] as const)('retains first-hash replacement parsing for %s pane controls and strip associations', async (control) => {
+        render(TabSelectionTest, { control, firstTarget: 'a#', returnTarget: 'a#' });
+        const a = screen.getByRole('tab', { name: 'A' });
+        expect(a).toHaveAttribute('aria-controls', 'a');
+        await fireEvent.click(screen.getByRole('tab', { name: 'B' }));
+        await fireEvent.click(screen.getByText('Return to A'));
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane A');
+        expectSelected(a, true);
+        expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'strip-a');
     });
 });
