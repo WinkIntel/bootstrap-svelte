@@ -1,7 +1,8 @@
 <!--
 @component
 ## Tab.NavLink
-A tab navigation link component specifically used inside a Tab.Root component. Inside Tab.Pane content, it still selects a pane of its Tab.Root, without tab semantics.
+A tab navigation link component specifically used inside a Tab.Root component. Inside Tab.Pane content, it selects a pane of its Tab.Root and synchronizes the matching strip selection, without tab semantics.
+When strip links share a target, a pane control preserves the selected match or chooses the first registered strip link. A pane without a strip match leaves the strip unselected.
 
 @example
 ```svelte

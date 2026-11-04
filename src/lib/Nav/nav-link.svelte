@@ -1,7 +1,7 @@
 <!--
 @component
 ## Nav.Link
-Navigation link component typically used inside a Nav.Item.
+Navigation link component typically used inside a Nav.Item. A bare Nav.Link inside Tab.Pane selects a pane and synchronizes its strip selection. Under a Nav.Root in pane content, it follows its href as ordinary navigation. Explicit isActive props continue to control the rendered active state.
 
 @example
 ```svelte
