@@ -27,6 +27,7 @@
         <Tab.Pane id="profile">
             <h5 class="mt-3">Profile Content</h5>
             <p>This is the profile content panel.</p>
+            <Tab.NavLink targetPaneId="#home">Return to Home</Tab.NavLink>
         </Tab.Pane>
         <Tab.Pane id="messages">
             <h5 class="mt-3">Messages Content</h5>
@@ -199,6 +200,15 @@
             The Tab component combines <code>Nav</code> components with tab content panes for creating a tabbed interface. The active tab is
             controlled by the <code>isActive</code> prop on both the <code>Tab.NavLink</code> and <code>Tab.Pane</code> components.
         </p>
+        <p>
+            A <code>Tab.NavLink</code> inside a pane selects its destination and updates the matching strip tab. A bare <code>Nav.Link</code>
+            does the same; under a <code>Nav.Root</code> in pane content, use <code>Tab.NavLink</code> to select a pane. If several strip links share
+            a target, pane controls keep the selected match or choose the first registered strip link. A pane without a matching strip link leaves the
+            strip unselected. Remounted links register last, even if they appear first in the markup. Removing the selected strip link selects a
+            remaining match for the visible pane or clears strip selection. An initially active pane control does not change the initial pane or strip
+            selection; clicks and later activation transitions still select its destination. Explicit <code>Nav.Link isActive</code> props continue to control
+            their rendered active state.
+        </p>
         <div class="card">
             <div class="card-body">
                 <div class="mb-4">
@@ -225,6 +235,7 @@
                             <Tab.Pane id="profile-basic">
                                 <h5 class="mt-3">Profile Content</h5>
                                 <p>This is the profile content panel.</p>
+                                <Tab.NavLink targetPaneId="#home-basic">Return to Home</Tab.NavLink>
                             </Tab.Pane>
                             <Tab.Pane id="messages-basic">
                                 <h5 class="mt-3">Messages Content</h5>
