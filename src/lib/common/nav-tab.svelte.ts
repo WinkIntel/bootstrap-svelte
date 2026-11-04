@@ -12,7 +12,6 @@ import type { Tab } from '../Tab/index.js';
  */
 export class NavRootState {
     #activeNavLinkId: string = $state('');
-    #navLinkStates: NavLinkState[] = [];
 
     get isTablist(): boolean {
         return this.props.role === 'tablist';
@@ -24,15 +23,11 @@ export class NavRootState {
         readonly tabPaneRoot: TabRootState | null = null
     ) {
         this.isNavLinkActive = this.isNavLinkActive.bind(this);
-        this.registerNavLinkState = this.registerNavLinkState.bind(this);
         this.setNavLinkActive = this.setNavLinkActive.bind(this);
     }
 
     isNavLinkActive(navLinkId: string): boolean {
         return this.#activeNavLinkId === navLinkId;
-    }
-    registerNavLinkState(linkState: NavLinkState): void {
-        this.#navLinkStates.push(linkState);
     }
     setNavLinkActive(navLinkId: string): void {
         this.#activeNavLinkId = navLinkId;
@@ -98,13 +93,11 @@ export class TabRootState {
     #activeNavLink = $state<NavLinkState | null>(null);
     #activeTabPaneId: string = $state('');
     #navLinkStates = new SvelteSet<NavLinkState>();
-    #tabPaneStates: TabPaneState[] = [];
 
     constructor(readonly props: Tab.RootProps) {
         this.isNavLinkActive = this.isNavLinkActive.bind(this);
         this.isTabPaneActive = this.isTabPaneActive.bind(this);
         this.registerNavLinkState = this.registerNavLinkState.bind(this);
-        this.registerTabPaneState = this.registerTabPaneState.bind(this);
         this.setNavLinkActive = this.setNavLinkActive.bind(this);
         this.setTabPaneActive = this.setTabPaneActive.bind(this);
     }
@@ -123,9 +116,6 @@ export class TabRootState {
                 this.setNavLinkActive(this.#getTabStripLink(this.#activeTabPaneId) ?? null);
             }
         };
-    }
-    registerTabPaneState(paneState: TabPaneState): void {
-        this.#tabPaneStates.push(paneState);
     }
     setNavLinkActive(navLink: NavLinkState | null): void {
         this.#activeNavLink = navLink;
@@ -242,7 +232,6 @@ export function initNavLinkState(props: Nav.LinkProps, isTabNavLink = false): Na
     } else {
         const rootState = NavRootContext.get();
         const linkState = new NavLinkState(props, rootState);
-        rootState.registerNavLinkState(linkState);
         return linkState;
     }
 }
@@ -259,7 +248,6 @@ export function initTabPaneState(props: Tab.PaneProps): TabPaneState {
     }
     const rootState = TabRootContext.get();
     const paneState = new TabPaneState(props, rootState);
-    rootState.registerTabPaneState(paneState);
     TabPaneRootContext.set(rootState);
     return paneState;
 }
