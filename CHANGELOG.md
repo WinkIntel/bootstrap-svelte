@@ -4,9 +4,11 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## Unreleased
 
+## 2.2.2 — Unreleased
+
 ### Fixed
 
-- Fix tab keyboard and disabled behavior ([#57](https://github.com/WinkIntel/bootstrap-svelte/issues/57)): strip tabs automatically activate and focus with all four arrows and Home/End, wrapping and skipping disabled links in current DOM order within their tablist. Add default roving tab stops with a first-enabled fallback after mount, omit tab `aria-current`, and block disabled `Tab.NavLink` synthetic clicks before selection or consumer callbacks. Preserve ordinary navigation, pane controls, native tab stops outside tablists, explicit tabindex and controlled active props. Keyboard activation follows the destination click path so consumer click callbacks can synchronize controlled tabs; modified keys and composition retain native behavior. Honor explicit link roles rather than overwriting `Nav.Link` roles in tab strips; non-tab roles opt out of inferred tab ARIA and keyboard behavior. No public props or dependency requirements changed.
+- Fix tab keyboard and disabled behavior ([#57](https://github.com/WinkIntel/bootstrap-svelte/issues/57)): strip tabs automatically activate and focus with all four arrows and Home/End, wrapping and skipping disabled links in current DOM order within their tablist. Add default roving tab stops with a first-enabled fallback after mount, omit tab `aria-current`, and block disabled `Tab.NavLink` synthetic clicks before selection or consumer callbacks. Preserve ordinary navigation, pane controls, native tab stops outside tablists, explicit tabindex and controlled active props. Keyboard activation follows the destination click path so consumer click callbacks can synchronize controlled tabs. Consumer `onkeydown` runs first and can cancel managed keys with `preventDefault`; use pane lifecycle callbacks to observe pane changes. Modified keys and composition retain native behavior. Honor explicit link roles rather than overwriting `Nav.Link` roles in tab strips; non-tab roles opt out of inferred tab ARIA and keyboard behavior. No public props or dependency requirements changed.
 
 - Remove unused ordinary navigation-link and tab-pane registries so long-lived roots no longer retain destroyed states through those registries.
 
