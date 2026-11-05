@@ -524,6 +524,16 @@
             <code>ariaOrientation</code> to supply a value that tracks your layout.
         </p>
         <p>
+            Within a <code>Tab.Root</code> tablist, links with tab semantics automatically select and focus the next/previous enabled tab with
+            Right/Down and Left/Up Arrow, wrapping at the ends; Home/End select the first/last enabled tab. Only the selected enabled tab is a tab
+            stop by default, falling back to the first enabled tab after mount when none is selected. Disabled links cannot activate. Tab links use
+            <code>aria-selected</code>
+            without <code>aria-current</code>; ordinary active navigation keeps <code>aria-current="page"</code>. Explicit link roles are honored, and
+            non-tab roles opt out of managed tab behavior. Enabled links preserve explicit
+            <code>tabindex</code>; explicit <code>isActive</code> still controls rendered selection and must be synchronized by the application when
+            controlling tabs. See <a href="/components/tab#accessibility">Tab accessibility guidance</a> for keyboard callbacks and pane lifecycle events.
+        </p>
+        <p>
             Custom tab widgets outside <code>Tab.Root</code> must explicitly set <code>role="tablist"</code> on <code>Nav.Root</code>,
             <code>role="presentation"</code>
             on <code>Nav.Item</code> and <code>role="tab"</code> on <code>Nav.Link</code>, with associated panels, selection state and interaction
@@ -697,7 +707,7 @@
                         <td><code>role</code></td>
                         <td><code>'button' | 'tab'</code></td>
                         <td>Auto-determined</td>
-                        <td>ARIA role for the link. Defaults to 'tab' if within tablist context.</td>
+                        <td>ARIA role for the link. Defaults to 'tab' in a tab strip; explicit roles are honored.</td>
                     </tr>
                 </tbody>
             </table>
