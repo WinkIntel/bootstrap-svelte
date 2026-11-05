@@ -4,6 +4,8 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## Unreleased
 
+## 1.1.5 — Unreleased
+
 ### Fixed
 
 - Remove unused ordinary navigation-link and tab-pane registries so long-lived roots no longer retain destroyed states through those registries.
