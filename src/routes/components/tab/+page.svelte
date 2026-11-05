@@ -3,6 +3,22 @@
     import SyntaxHighlighter from '../../(common)/SyntaxHighlighter.svelte';
     import TabPlayground from './TabPlayground.svelte';
 
+    const controlledTabCode =
+        `<script>
+    import { Nav, Tab } from '@winkintel/bootstrap-svelte';
+    let active = $state('home');
+<` +
+        `/script>
+
+<Tab.Root>
+    <Nav.Root aria-label="Account">
+        <Nav.Link href="#home" isActive={active === 'home'} onclick={() => active = 'home'}>Home</Nav.Link>
+        <Nav.Link href="#profile" isActive={active === 'profile'} onclick={() => active = 'profile'}>Profile</Nav.Link>
+    </Nav.Root>
+    <Tab.Pane id="home" isActive={active === 'home'}>Home content</Tab.Pane>
+    <Tab.Pane id="profile" isActive={active === 'profile'}>Profile content</Tab.Pane>
+</Tab.Root>`;
+
     // Sample code examples for demonstration
     const basicExampleCode = `<Tab.Root>
     <Nav.Root itemStyle="tabs">
@@ -663,27 +679,37 @@
             <li><code>show</code> - Applied to Tab.Pane during transition when doFade=true</li>
         </ul>
 
-        <h3 class="h5 mt-4">Accessibility</h3>
+        <h3 id="accessibility" class="h5 mt-4">Accessibility</h3>
         <p>
             In a <code>Tab.Root</code> strip with a <code>tablist</code> container, <code>Tab.NavLink</code> and <code>Nav.Link</code> support automatic
             activation: Right/Down Arrow selects and focuses the next enabled tab, and Left/Up Arrow selects and focuses the previous one, wrapping at either
             end. Home and End select and focus the first and last enabled tabs. All four arrows work in either orientation, matching Bootstrap. Keyboard
-            order follows the current DOM order within that tablist; nested roots and other tablists stay separate.
+            order follows the current DOM order within that tablist; nested roots and other tablists stay separate. Modified keys (Alt, Ctrl, Meta or Shift)
+            and composition events retain their native behavior.
         </p>
         <p>
             By default, the selected enabled tab has <code>tabindex="0"</code> and the others have <code>tabindex="-1"</code>. If no enabled tab is
             selected, the first enabled tab becomes the entry point after mount; an all-disabled list has no entry point. Removing or disabling tabs
             updates entry without moving focus. Disabled links reject clicks, including synthetic clicks, before selection or consumer click
-            callbacks. Tabs use <code>aria-selected</code> and omit <code>aria-current</code>.
+            callbacks. Strip links outside a tablist retain their native tab stops and do not manage arrow keys. Tabs use <code>aria-selected</code>
+            and omit <code>aria-current</code>.
         </p>
         <p>
             Explicit link roles are honored; a non-tab role opts the link out of automatic tab ARIA and keyboard handling. Root role overrides other
             than <code>tablist</code> also opt out. Pane controls retain ordinary button/link behavior. Explicit <code>tabindex</code> values override
             roving defaults on enabled links, so callers supplying them own tab-sequence consistency. Explicit <code>Nav.Link isActive</code>
-            props still control rendered selection; synchronize those props in the application when controlling tabs. Consumer
+            props still control rendered selection; synchronize those props in the application when controlling tabs. Keyboard activation invokes the destination
+            link’s existing <code>onclick</code> callback, just like a click. Consumer
             <code>onkeydown</code> runs first and may call <code>preventDefault()</code> to cancel a managed key. Use pane lifecycle callbacks such as
             <code>onShow</code> and <code>onShown</code> to observe pane changes from either clicks or keyboard selection.
         </p>
+        <p>
+            <code>Tab.NavLink</code> preserves explicit <code>aria-controls</code> and <code>aria-selected</code> overrides; callers supplying them
+            must keep panel associations and selection coherent. <code>Nav.Link</code> retains its existing managed tab ARIA priority. Omit these overrides
+            to use automatic selection and panel associations.
+        </p>
+        <p>For controlled <code>Nav.Link</code> tabs, update the active value through the existing click callback:</p>
+        <SyntaxHighlighter code={controlledTabCode} />
         <p>The Tab component automatically applies proper ARIA attributes:</p>
         <ul>
             <li>

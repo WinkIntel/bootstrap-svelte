@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, within } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
+import { tick } from 'svelte';
+import { describe, expect, it, vi } from 'vitest';
 import KeyboardTest from './tab-keyboard-test.svelte';
 
 const tab = (name: string) => within(screen.getByRole('tablist', { name: 'Main' })).getByRole('tab', { name });
@@ -19,7 +20,7 @@ describe.each(['tab', 'nav'] as const)('%s tab keyboard', (kind) => {
         expect(tab(destination)).toHaveFocus();
         expect(tab(destination)).toHaveAttribute('aria-selected', 'true');
         expect(screen.getByRole('tabpanel')).toHaveTextContent(`Pane ${destination}`);
-        expect(screen.getByTestId('callbacks')).toHaveTextContent('0:1');
+        expect(screen.getByTestId('callbacks')).toHaveTextContent('1:1');
     });
 
     it('uses one tab stop and selected ARIA instead of aria-current', async () => {
@@ -218,7 +219,7 @@ it('skips native disabled Tab.NavLink buttons and blocks synthetic activation', 
     tab('B').dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
     expect(tab('C')).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByTestId('callbacks')).toHaveTextContent('0:1');
+    expect(screen.getByTestId('callbacks')).toHaveTextContent('1:1');
 });
 
 it.each(['tab', 'nav'] as const)('preserves a shared public ref owned by a remaining %s link', async (kind) => {
@@ -237,4 +238,162 @@ it.each(['tab', 'nav'] as const)('preserves a consumer-reassigned public ref whe
     expect(external).not.toBe(tab('C'));
     await unmount();
     expect(component.readRef()).toBe(external);
+});
+
+describe.each(['tab', 'nav'] as const)('%s review regressions', (kind) => {
+    it('leaves bare links natively tabbable without consuming arrow keys', async () => {
+        const { container, rerender } = render(KeyboardTest, { kind, bare: true });
+        for (const name of ['a', 'c']) {
+            const link = container.querySelector<HTMLElement>(`#key-${name}`)!;
+            expect(link).not.toHaveAttribute('tabindex');
+            link.focus();
+            const event = new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true });
+            await fireEvent(link, event);
+            expect(event.defaultPrevented).toBe(false);
+            expect(link).toHaveFocus();
+        }
+        await rerender({ bare: false });
+        expect(tab('A')).toHaveAttribute('tabindex', '0');
+        await fireEvent.keyDown(tab('A'), { key: 'End' });
+        expect(tab('C')).toHaveFocus();
+    });
+
+    it('uses the destination click callback once with its DOM currentTarget', async () => {
+        render(KeyboardTest, { kind, initial: '' });
+        const event = new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true });
+        await fireEvent(tab('A'), event);
+        expect(event.defaultPrevented).toBe(true);
+        expect(tab('C')).toHaveFocus();
+        expect(tab('C')).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByTestId('callbacks')).toHaveTextContent('1:1');
+        expect(screen.getByTestId('last-click')).toHaveTextContent('click:key-c');
+    });
+
+    it('does not suppress a peer listener at the Svelte delegation target', async () => {
+        const { container } = render(KeyboardTest, { kind });
+        const peer = vi.fn();
+        container.addEventListener('keydown', peer);
+        await fireEvent.keyDown(tab('A'), { key: 'End' });
+        expect(peer).toHaveBeenCalledOnce();
+        container.removeEventListener('keydown', peer);
+    });
+
+    it.each(['altKey', 'ctrlKey', 'metaKey', 'shiftKey', 'isComposing'] as const)('preserves %s keyboard combinations', async (modifier) => {
+        render(KeyboardTest, { kind });
+        const a = tab('A');
+        a.focus();
+        for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End']) {
+            const event = new KeyboardEvent('keydown', { key, [modifier]: true, bubbles: true, cancelable: true });
+            await fireEvent(a, event);
+            expect(event.defaultPrevented).toBe(false);
+            expect(a).toHaveFocus();
+            expect(a).toHaveAttribute('aria-selected', 'true');
+        }
+        expect(screen.getByTestId('callbacks')).toHaveTextContent('0:6');
+    });
+
+    it('does not rebuild observation or invalidate tab order for label-only mutations', async () => {
+        const { rerender, unmount } = render(KeyboardTest, { kind, initial: '' });
+        const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+        const disconnect = vi.spyOn(MutationObserver.prototype, 'disconnect');
+        const compare = vi.spyOn(tab('A'), 'compareDocumentPosition');
+        try {
+            await rerender({ badge: true });
+            tab('A').querySelector('span')!.setAttribute('role', 'img');
+            await tick();
+            expect(observe).not.toHaveBeenCalled();
+            expect(disconnect).not.toHaveBeenCalled();
+            expect(compare).not.toHaveBeenCalled();
+            await rerender({ badge: false, order: ['c', 'b', 'a'], initial: '' });
+            expect(tab('C')).toHaveAttribute('tabindex', '0');
+            await fireEvent.keyDown(tab('C'), { key: 'ArrowRight' });
+            expect(tab('A')).toHaveFocus();
+            disconnect.mockClear();
+            await unmount();
+            expect(disconnect).toHaveBeenCalledOnce();
+        } finally {
+            observe.mockRestore();
+            disconnect.mockRestore();
+            compare.mockRestore();
+        }
+    });
+});
+
+it('synchronizes controlled Nav.Link selection through its existing click callback', async () => {
+    render(KeyboardTest, { kind: 'nav', controlled: true, syncControlled: true });
+    await fireEvent.keyDown(tab('A'), { key: 'End' });
+    expect(tab('C')).toHaveFocus();
+    expect(tab('C')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('C')).toHaveAttribute('tabindex', '0');
+    expect(tab('A')).toHaveAttribute('aria-selected', 'false');
+    expect(tab('A')).toHaveAttribute('tabindex', '-1');
+    expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane C');
+    expect(screen.getByTestId('callbacks')).toHaveTextContent('1:1');
+    await fireEvent.click(tab('A'));
+    expect(tab('A')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tabpanel')).toHaveTextContent('Pane A');
+    expect(screen.getByTestId('callbacks')).toHaveTextContent('2:1');
+});
+
+it.each(['tab', 'nav'] as const)('tracks wrapped moves and nearest authored list changes for %s links', async (kind) => {
+    render(KeyboardTest, { kind, initial: '', disabled: [] });
+    const list = screen.getByRole('tablist', { name: 'Main' });
+    const a = tab('A');
+    const b = tab('B');
+    const c = tab('C');
+    const wrapper = document.createElement('div');
+    list.appendChild(wrapper);
+    wrapper.append(c, a, b);
+    await waitFor(() => expect(c).toHaveAttribute('tabindex', '0'));
+    await fireEvent.keyDown(c, { key: 'ArrowRight' });
+    expect(a).toHaveFocus();
+    const nested = document.createElement('div');
+    nested.setAttribute('role', 'tablist');
+    wrapper.appendChild(nested);
+    nested.appendChild(c);
+    await waitFor(() => expect(c).toHaveAttribute('tabindex', '0'));
+    await fireEvent.keyDown(a, { key: 'End' });
+    expect(b).toHaveFocus();
+    wrapper.prepend(c);
+    await fireEvent.keyDown(b, { key: 'ArrowRight' });
+    expect(c).toHaveFocus();
+});
+
+it.each(['tab', 'nav'] as const)('restores roving entry after every %s link leaves and returns to an empty tablist', async (kind) => {
+    const { container } = render(KeyboardTest, { kind, initial: '', disabled: [] });
+    const list = screen.getByRole('tablist', { name: 'Main' });
+    const links = ['a', 'b', 'c'].map((name) => container.querySelector<HTMLElement>(`#key-${name}`)!);
+    const bare = document.createElement('div');
+    list.parentElement!.appendChild(bare);
+    bare.append(...links);
+    await waitFor(() => {
+        for (const link of links) expect(link).not.toHaveAttribute('tabindex');
+    });
+    list.append(...links.toReversed());
+    await waitFor(() => expect(links[2]).toHaveAttribute('tabindex', '0'));
+    expect(links[0]).toHaveAttribute('tabindex', '-1');
+    await fireEvent.keyDown(links[2]!, { key: 'ArrowRight' });
+    expect(links[1]).toHaveFocus();
+});
+
+it.each(['tab', 'nav'] as const)('updates native and roving stops when an authored %s tablist role is removed and restored', async (kind) => {
+    render(KeyboardTest, { kind, rawLists: true, initial: '', disabled: [] });
+    const list = screen.getByRole('tablist', { name: 'Main' });
+    const links = ['A', 'B', 'C'].map(tab);
+    const inner = within(screen.getByRole('tablist', { name: 'Raw nested' })).getByRole('tab', { name: 'Raw D' });
+    list.removeAttribute('role');
+    await waitFor(() => {
+        for (const link of links) expect(link).not.toHaveAttribute('tabindex');
+    });
+    expect(inner).toHaveAttribute('tabindex', '0');
+    links[0]!.focus();
+    const event = new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true });
+    await fireEvent(links[0]!, event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(links[0]).toHaveFocus();
+    list.setAttribute('role', 'tablist');
+    await waitFor(() => expect(links[0]).toHaveAttribute('tabindex', '0'));
+    expect(links[2]).toHaveAttribute('tabindex', '-1');
+    await fireEvent.keyDown(links[0]!, { key: 'End' });
+    expect(links[2]).toHaveFocus();
 });

@@ -57,7 +57,7 @@ export class NavLinkState {
     constructor(
         readonly props: NavLinkStateProps,
         readonly root: TabRootState | NavRootState,
-        readonly tabRoles?: { readonly isTablist: boolean; readonly group: object },
+        readonly tabRoles?: { readonly isTablist: boolean; readonly hasTablistContext: boolean; readonly group: object },
         readonly isTabStrip = false,
         readonly controlledActive = false
     ) {
@@ -89,6 +89,7 @@ export class NavLinkState {
     }
     onkeydown(event: KeyboardEvent): void {
         if (event.defaultPrevented || this.props.isDisabled || event.target !== this.element) return;
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing) return;
         if (this.root instanceof TabRootState && this.isTabStrip && this.hasTabRole) this.root.onkeydown(event, this);
     }
     deactivate(): void {
@@ -113,19 +114,23 @@ export class TabRootState {
         this.registerNavLinkState = this.registerNavLinkState.bind(this);
         this.setNavLinkActive = this.setNavLinkActive.bind(this);
         this.setTabPaneActive = this.setTabPaneActive.bind(this);
-        // Keyed moves do not change registration order. Observe child-list changes
-        // only, so roving entry follows current DOM order without stealing focus.
-        $effect(() => {
-            void this.#domOrder;
-            const lists = new SvelteSet<Element>();
-            for (const link of this.#navLinkStates) {
-                const list = link.element?.closest('[role="tablist"]');
-                if (list) lists.add(list);
-            }
-            const observer = new MutationObserver(() => this.#domOrder++);
-            for (const list of lists) observer.observe(list, { childList: true, subtree: true });
-            return () => observer.disconnect();
+        this.observeTabOrder = this.observeTabOrder.bind(this);
+    }
+
+    /** Observe only this root, including temporarily empty or bare tab groups. */
+    observeTabOrder(element: HTMLElement): () => void {
+        const observer = new MutationObserver((records) => {
+            const elements = [...this.#navLinkStates].flatMap((link) => (link.isTabStrip && link.element ? [link.element] : []));
+            const membershipChanged = records.some((record) =>
+                record.type === 'attributes'
+                    ? elements.some((element) => record.target.contains(element))
+                    : [...record.addedNodes, ...record.removedNodes].some((node) => elements.some((element) => node.contains(element)))
+            );
+            // Label-only changes cannot affect link order or ancestor tablist roles.
+            if (membershipChanged) this.#domOrder++;
         });
+        observer.observe(element, { childList: true, subtree: true, attributes: true, attributeFilter: ['role'] });
+        return () => observer.disconnect();
     }
 
     #keyboardLinks(source: NavLinkState): NavLinkState[] {
@@ -141,7 +146,11 @@ export class TabRootState {
                 return position & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : position & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
             });
     }
-    getTabIndex(source: NavLinkState): number {
+    getTabIndex(source: NavLinkState): number | undefined {
+        // Bare strip links retain native tab stops. Before mount, only a real
+        // Nav.Root context can establish a tablist; authored lists opt in on mount.
+        void this.#domOrder;
+        if (source.element ? !source.element.closest('[role="tablist"]') : !source.tabRoles?.hasTablistContext) return undefined;
         const links = this.#keyboardLinks(source);
         const selected = links.find((link) => link.renderedActive);
         // During SSR later siblings are not registered yet. Only selected links
@@ -165,7 +174,7 @@ export class TabRootState {
         event.preventDefault();
         event.stopPropagation();
         const destination = links[next]!;
-        destination.onclick(event);
+        destination.element?.click();
         destination.element?.focus({ preventScroll: true });
     }
     isNavLinkActive(navLink: NavLinkState): boolean {
@@ -245,11 +254,14 @@ function getTabStripRoot(): TabRootState | null {
 export const isInTabStrip = () => getTabStripRoot() !== null;
 
 /** Capture contexts during initialization; read the resolved root role reactively. */
-export function getTabRoleState(): { readonly isTablist: boolean; readonly group: object } {
+export function getTabRoleState(): { readonly isTablist: boolean; readonly hasTablistContext: boolean; readonly group: object } {
     const tabRoot = getTabStripRoot();
     const navRoot = NavRootContext.getOr(null);
     return {
         group: navRoot?.tabRoot === tabRoot ? navRoot : (tabRoot ?? {}),
+        get hasTablistContext() {
+            return tabRoot !== null && navRoot?.tabRoot === tabRoot && navRoot.isTablist;
+        },
         get isTablist() {
             return tabRoot !== null && (navRoot?.tabRoot === tabRoot ? navRoot.isTablist : true);
         }

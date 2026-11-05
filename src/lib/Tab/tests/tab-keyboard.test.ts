@@ -13,6 +13,14 @@ describe.each(['tab', 'nav'] as const)('%s server tab entry', (kind) => {
         expect(links.join('')).not.toContain('aria-current');
     });
 
+    it('keeps enabled bare links in the native tab sequence during SSR', () => {
+        const html = render(KeyboardTest, { props: { kind, bare: true } }).body;
+        const links = html.match(/<(?:button|a)\b[^>]*id="key-[abc]"[^>]*>/g)!;
+        expect(links[0]).not.toContain('tabindex=');
+        expect(links[1]).toContain('tabindex="-1"');
+        expect(links[2]).not.toContain('tabindex=');
+    });
+
     it('defers the no-selection fallback until mount and leaves all-disabled lists without an entry', () => {
         for (const props of [{ initial: '' }, { initial: 'c', disabled: ['a', 'b', 'c'] }]) {
             const html = render(KeyboardTest, { props: { kind, ...props } }).body;

@@ -55,7 +55,7 @@ Root component for tab content. Used with tabs navigation.
 
     let { children, class: classValues, elementRef = $bindable(null), id = `tab-${uid}`, ...restOfProps }: Tab.RootProps = $props();
 
-    const _rootState: TabRootState = initTabRootState({
+    const rootState: TabRootState = initTabRootState({
         get id() {
             return id;
         }
@@ -64,6 +64,6 @@ Root component for tab content. Used with tabs navigation.
     let classes: string = $derived(uniqueClsx(classValues));
 </script>
 
-<div bind:this={elementRef} class={classes} {id} {...restOfProps}>
+<div {@attach rootState.observeTabOrder} bind:this={elementRef} class={classes} {id} {...restOfProps}>
     {@render children?.()}
 </div>

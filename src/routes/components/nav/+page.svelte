@@ -531,7 +531,7 @@
             without <code>aria-current</code>; ordinary active navigation keeps <code>aria-current="page"</code>. Explicit link roles are honored, and
             non-tab roles opt out of managed tab behavior. Enabled links preserve explicit
             <code>tabindex</code>; explicit <code>isActive</code> still controls rendered selection and must be synchronized by the application when
-            controlling tabs. See <a href="/components/tab">Tab accessibility guidance</a> for keyboard callbacks and pane lifecycle events.
+            controlling tabs. See <a href="/components/tab#accessibility">Tab accessibility guidance</a> for keyboard callbacks and pane lifecycle events.
         </p>
         <p>
             Custom tab widgets outside <code>Tab.Root</code> must explicitly set <code>role="tablist"</code> on <code>Nav.Root</code>,

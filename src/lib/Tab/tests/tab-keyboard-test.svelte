@@ -18,7 +18,10 @@
         rawLists = false,
         tabindexNull = false,
         consumerAria = false,
-        nativeDisabled = []
+        nativeDisabled = [],
+        bare = false,
+        syncControlled = false,
+        badge = false
     }: {
         kind?: 'tab' | 'nav';
         order?: string[];
@@ -38,12 +41,16 @@
         tabindexNull?: boolean;
         consumerAria?: boolean;
         nativeDisabled?: string[];
+        bare?: boolean;
+        syncControlled?: boolean;
+        badge?: boolean;
     } = $props();
     export function readRef() {
         return ref;
     }
     let clicks = $state(0);
     let keys = $state(0);
+    let lastClick = $state('');
     let ref = $state<HTMLElement | null>(null);
     $effect(() => {
         if (corruptRef) ref = document.createElement('button');
@@ -64,12 +71,16 @@
                 role={linkRole}
                 tabindex={tabindexNull ? null : consumerTabIndex}
                 bind:elementRef={ref}
-                onclick={() => clicks++}
+                onclick={(event) => {
+                    clicks++;
+                    lastClick = `${event.type}:${event.currentTarget instanceof HTMLElement ? event.currentTarget.id : ''}`;
+                    if (syncControlled) initial = name;
+                }}
                 onkeydown={(event) => {
                     keys++;
                     if (cancelKeys) event.preventDefault();
                 }}>
-                {name.toUpperCase()}
+                {name.toUpperCase()}{#if badge}<span aria-hidden="true">!</span>{/if}
             </Tab.NavLink>
         {:else}
             <Nav.Link
@@ -80,12 +91,16 @@
                 role={linkRole as Nav.LinkProps['role']}
                 tabindex={tabindexNull ? null : consumerTabIndex}
                 bind:elementRef={ref}
-                onclick={() => clicks++}
+                onclick={(event) => {
+                    clicks++;
+                    lastClick = `${event.type}:${event.currentTarget instanceof HTMLElement ? event.currentTarget.id : ''}`;
+                    if (syncControlled) initial = name;
+                }}
                 onkeydown={(event) => {
                     keys++;
                     if (cancelKeys) event.preventDefault();
                 }}>
-                {name.toUpperCase()}
+                {name.toUpperCase()}{#if badge}<span aria-hidden="true">!</span>{/if}
             </Nav.Link>
         {/if}
     {/each}
@@ -95,7 +110,9 @@
     <Nav.Root aria-label="Main" role={rootRole} verticalBreakpoint={vertical ? 'xs' : undefined}>{@render links()}</Nav.Root>
 {:else}
     <Tab.Root>
-        {#if rawLists}
+        {#if bare}
+            {@render links()}
+        {:else if rawLists}
             <div role="tablist" aria-label="Main">
                 {@render links()}
                 <div role="tablist" aria-label="Raw nested">
@@ -127,3 +144,5 @@
     </Tab.Root>
 {/if}
 <output data-testid="callbacks">{clicks}:{keys}</output>
+
+<output data-testid="last-click">{lastClick}</output>
