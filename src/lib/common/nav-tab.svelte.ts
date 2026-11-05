@@ -107,6 +107,24 @@ export class TabRootState {
     #activeTabPaneId: string = $state('');
     #navLinkStates = new SvelteSet<NavLinkState>();
     #domOrder = $state(0);
+    #flushTabOrder: (() => void) | undefined;
+    #orderedStripLinks = $derived.by(() => {
+        // Share ordering across all tab stops; selection and current DOM groups
+        // are resolved separately and do not need another sort.
+        void this.#domOrder;
+        const links = this.#eligibleStripLinks();
+        // Track every binding even if sort skips its comparator for a singleton
+        // or short-circuits on another link's null element during mount/SSR.
+        for (const link of links) void link.element;
+        return links.sort((a, b) => {
+            const elementA = a.element;
+            const elementB = b.element;
+            if (!elementA) return elementB ? 1 : 0;
+            if (!elementB) return -1;
+            const position = elementA.compareDocumentPosition(elementB);
+            return position & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : position & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
+        });
+    });
 
     constructor(readonly props: Tab.RootProps) {
         this.isNavLinkActive = this.isNavLinkActive.bind(this);
@@ -119,7 +137,8 @@ export class TabRootState {
 
     /** Observe only this root, including temporarily empty or bare tab groups. */
     observeTabOrder(element: HTMLElement): () => void {
-        const observer = new MutationObserver((records) => {
+        const updateOrder = (records: MutationRecord[]) => {
+            if (records.length === 0) return;
             const elements = [...this.#navLinkStates].flatMap((link) => (link.isTabStrip && link.element ? [link.element] : []));
             const membershipChanged = records.some((record) =>
                 record.type === 'attributes'
@@ -128,9 +147,19 @@ export class TabRootState {
             );
             // Label-only changes cannot affect link order or ancestor tablist roles.
             if (membershipChanged) this.#domOrder++;
-        });
+        };
+        const observer = new MutationObserver(updateOrder);
+        const flush = () => updateOrder(observer.takeRecords());
+        this.#flushTabOrder = flush;
         observer.observe(element, { childList: true, subtree: true, attributes: true, attributeFilter: ['role'] });
-        return () => observer.disconnect();
+        return () => {
+            observer.disconnect();
+            if (this.#flushTabOrder === flush) this.#flushTabOrder = undefined;
+        };
+    }
+
+    #eligibleStripLinks(): NavLinkState[] {
+        return [...this.#navLinkStates].filter((link) => link.isTabStrip && link.hasTabRole && !link.props.isDisabled);
     }
 
     #keyboardLinks(source: NavLinkState): NavLinkState[] {
@@ -138,13 +167,10 @@ export class TabRootState {
         const sourceGroup = group(source);
         // Read the scoped DOM revision so reactive tabindex also follows keyed moves.
         void this.#domOrder;
-        return [...this.#navLinkStates]
-            .filter((link) => link.isTabStrip && link.hasTabRole && !link.props.isDisabled && group(link) === sourceGroup)
-            .sort((a, b) => {
-                if (!a.element || !b.element) return 0;
-                const position = a.element.compareDocumentPosition(b.element);
-                return position & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : position & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
-            });
+        // SSR registers siblings sequentially without reactive set invalidation.
+        // Unbound sources need fresh insertion order, not cached DOM ordering.
+        const links = source.element ? this.#orderedStripLinks : this.#eligibleStripLinks();
+        return links.filter((link) => group(link) === sourceGroup);
     }
     getTabIndex(source: NavLinkState): number | undefined {
         // Bare strip links retain native tab stops. Before mount, only a real
@@ -162,6 +188,8 @@ export class TabRootState {
         if (!source.element?.closest('[role="tablist"]')) return;
         const { key } = event;
         if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(key)) return;
+        // An earlier keydown listener may move links before observer delivery.
+        this.#flushTabOrder?.();
         const links = this.#keyboardLinks(source);
         const index = links.indexOf(source);
         if (index === -1) return;

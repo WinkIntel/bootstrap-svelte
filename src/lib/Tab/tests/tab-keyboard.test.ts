@@ -21,6 +21,19 @@ describe.each(['tab', 'nav'] as const)('%s server tab entry', (kind) => {
         expect(links[2]).not.toContain('tabindex=');
     });
 
+    it('renders a sole eligible selected tab without needing DOM comparison during SSR', () => {
+        for (const props of [
+            { order: ['c'], disabled: [] },
+            { order: ['a', 'b', 'c'], disabled: ['a', 'b'] }
+        ]) {
+            const html = render(KeyboardTest, { props: { kind, initial: 'c', ...props } }).body;
+            const selected = html.match(/<(?:button|a)\b[^>]*id="key-c"[^>]*>/)![0];
+            expect(selected).toContain('tabindex="0"');
+            expect(selected).toContain('aria-selected="true"');
+            expect(html.match(/tabindex="0"/g)).toHaveLength(1);
+        }
+    });
+
     it('defers the no-selection fallback until mount and leaves all-disabled lists without an entry', () => {
         for (const props of [{ initial: '' }, { initial: 'c', disabled: ['a', 'b', 'c'] }]) {
             const html = render(KeyboardTest, { props: { kind, ...props } }).body;
