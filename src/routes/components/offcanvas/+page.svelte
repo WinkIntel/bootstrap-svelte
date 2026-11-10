@@ -354,7 +354,8 @@
             Give each panel an <code>Offcanvas.Title</code> or an explicit <code>aria-label</code> or <code>aria-labelledby</code> on
             <code>Offcanvas.Root</code>. The first mounted title with a nonempty ID labels its nearest panel automatically. Generated title IDs remain
             stable during hydration; changing or removing a title updates the association. Explicit naming attributes, including null or empty
-            opt-outs, take precedence. A panel without a title or an explicit name remains unnamed.
+            opt-outs, take precedence. A panel without a title or an explicit name remains unnamed. Supply an explicit
+            <code>aria-label</code> or <code>aria-labelledby</code> if an initially shown panel must be named in server-rendered markup before hydration.
         </p>
         <p>
             When shown as an overlay, focus moves to the first available control (or the panel itself), and Tab and Shift+Tab wrap within the top

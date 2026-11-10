@@ -1,6 +1,7 @@
 import { mockMatchMedia } from '$lib/common/tests/mock-match-media.js';
 import { BreakpointMinimumMediaQuery } from '$lib/common/types.js';
 import { fireEvent, render, screen } from '@testing-library/svelte';
+import { userEvent } from '@testing-library/user-event';
 import { flushSync, tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Offcanvas } from '../index.js';
@@ -114,6 +115,89 @@ describe('Offcanvas overlay accessibility', () => {
         expect(second).toHaveFocus();
         await fireEvent.keyDown(window, { key: 'Tab' });
         expect(first).toHaveFocus();
+    });
+    it('traverses an unchecked radio group in both directions without skipping adjacent controls', async () => {
+        render(Fixture, { empty: true });
+        await settled();
+        screen.getByTestId('panel').insertAdjacentHTML(
+            'beforeend',
+            `
+            <button id="sequence-a">A</button><input type="radio" name="direction" id="direction-r1">
+            <input type="radio" name="direction" id="direction-r2"><button id="sequence-b">B</button>
+        `
+        );
+        const user = userEvent.setup();
+        document.getElementById('sequence-b')!.focus();
+        await user.tab({ shift: true });
+        expect(document.getElementById('direction-r2')).toHaveFocus();
+        await user.tab({ shift: true });
+        expect(document.getElementById('sequence-a')).toHaveFocus();
+        await user.tab({ shift: true });
+        expect(document.getElementById('sequence-b')).toHaveFocus();
+        document.getElementById('sequence-a')!.focus();
+        await user.tab();
+        expect(document.getElementById('direction-r1')).toHaveFocus();
+        await user.tab();
+        expect(document.getElementById('sequence-b')).toHaveFocus();
+    });
+    it.each([
+        ['available', '', '', true],
+        ['hidden', 'hidden', '', false],
+        ['disabled', 'disabled', '', false],
+        ['negative tabindex', 'tabindex="-1"', '', false],
+        ['different form owner', '', 'form="external-form"', false]
+    ])('uses whole-tree radio membership for a checked %s external group member', async (_kind, attributes, ownership, shouldWrap) => {
+        render(Fixture, { empty: true });
+        await settled();
+        screen
+            .getByTestId('outside')
+            .insertAdjacentHTML(
+                'beforeend',
+                `<form id="external-form"></form><input type="radio" name="spanning" checked ${attributes} ${ownership}>`
+            );
+        screen
+            .getByTestId('panel')
+            .insertAdjacentHTML(
+                'beforeend',
+                '<button id="spanning-action">Action</button><input type="radio" name="spanning" id="spanning-internal">'
+            );
+        const action = document.getElementById('spanning-action')!;
+        action.focus();
+        const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+        action.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(shouldWrap);
+        expect(action).toHaveFocus();
+    });
+    it.each([
+        ['display contents', '<div tabindex="0" style="display:contents">Contents</div>'],
+        ['content visibility hidden descendant', '<div style="content-visibility:hidden"><button>Hidden content</button></div>']
+    ])('wraps before a nonfocusable %s candidate after the last control', async (_kind, html) => {
+        render(Fixture, { empty: true });
+        await settled();
+        screen.getByTestId('panel').insertAdjacentHTML('beforeend', `<button id="visible-last">Visible</button>${html}`);
+        const target = document.getElementById('visible-last')!;
+        target.focus();
+        const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+        target.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(true);
+        expect(target).toHaveFocus();
+    });
+    it.each([
+        ['overridden visibility', '<div style="visibility:hidden"><button id="available-only" style="visibility:visible">Visible</button></div>'],
+        ['case-insensitive editable', '<div id="available-only" contenteditable="TRUE">Editable</div>'],
+        ['mixed-case plaintext editor', '<div id="available-only" contenteditable="PlainText-Only">Editable</div>'],
+        ['editor below case-insensitive false', '<div contenteditable="FALSE"><div id="available-only" contenteditable="TRUE">Editable</div></div>']
+    ])('retains native focus on the sole %s control', async (_kind, html) => {
+        render(Fixture, { empty: true });
+        await settled();
+        screen.getByTestId('panel').insertAdjacentHTML('beforeend', html);
+        const target = document.getElementById('available-only')!;
+        target.focus();
+        expect(target).toHaveFocus();
+        await fireEvent.keyDown(target, { key: 'Tab' });
+        expect(target).toHaveFocus();
+        await fireEvent.keyDown(target, { key: 'Tab', shiftKey: true });
+        expect(target).toHaveFocus();
     });
     it('restores focus when an open panel unmounts and ignores an unavailable opener', async () => {
         focusOpener();

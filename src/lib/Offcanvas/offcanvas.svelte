@@ -46,7 +46,8 @@ at its responsive breakpoint. Overlay panels move focus inside, contain Tab/Shif
 on dismissal or removal, respecting other open overlays. Inline panels do not manage focus.
 The first mounted `Offcanvas.Title` supplies the accessible name unless an explicit `aria-label` or
 `aria-labelledby` is provided (including null or empty opt-outs). Provide a Title or an explicit name;
-a panel without either remains unnamed. Other consumer attributes remain configurable.
+a panel without either remains unnamed. Supply an explicit `aria-label` or `aria-labelledby` if an
+initially shown panel must be named in server-rendered markup before hydration. Other consumer attributes remain configurable.
 
 ### Props
 - `children` (slot): Content to display inside the offcanvas.
@@ -224,15 +225,18 @@ a panel without either remains unnamed. Other consumer attributes remain configu
     // Reject unavailable candidates without relying on geometry (which differs in SSR/test DOMs).
     function isAvailable(element: HTMLElement): boolean {
         if (!element.isConnected || element.matches(':disabled, [disabled], input[type="hidden"]')) return false;
+        const elementStyle = getComputedStyle(element);
+        if (elementStyle.display === 'contents' || elementStyle.visibility === 'hidden' || elementStyle.visibility === 'collapse') return false;
         for (let ancestor: HTMLElement | null = element; ancestor; ancestor = ancestor.parentElement) {
             if (ancestor.matches('[hidden], [inert], [aria-hidden="true"]')) return false;
             // Closed details expose only their first summary (and its descendants).
             if (ancestor instanceof HTMLDetailsElement && !ancestor.open && ancestor !== element) {
-                const summary = Array.from(ancestor.children).find((child) => child.tagName === 'SUMMARY');
+                const summary: Element | undefined = Array.from(ancestor.children).find((child) => child.tagName === 'SUMMARY');
                 if (!summary?.contains(element)) return false;
             }
             const style = getComputedStyle(ancestor);
-            if (style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse') return false;
+            // Visibility is inherited but can be overridden by a child; display/content suppression cannot.
+            if (style.display === 'none' || (ancestor !== element && style.contentVisibility === 'hidden')) return false;
         }
         return true;
     }
@@ -245,38 +249,47 @@ a panel without either remains unnamed. Other consumer attributes remain configu
         if (element.tabIndex >= 0) return true;
         if (element.hasAttribute('tabindex')) return false;
         // Browsers report -1 for default contenteditable tabIndex, despite it being a native Tab stop.
-        const editable = element.getAttribute('contenteditable');
+        const editable = element.getAttribute('contenteditable')?.toLowerCase();
         if (editable !== '' && editable !== 'true' && editable !== 'plaintext-only') return false;
-        const parentEditable = element.parentElement?.closest('[contenteditable]');
-        return !parentEditable || parentEditable.getAttribute('contenteditable') === 'false';
+        for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+            const value = parent.getAttribute('contenteditable')?.toLowerCase();
+            if (value === 'false') return true;
+            if (value === '' || value === 'true' || value === 'plaintext-only') return false;
+        }
+        return true;
     }
 
-    function getFocusableElements(): HTMLElement[] {
+    function getFocusableElements(reverse = false, activeElement: Element | null = null): HTMLElement[] {
         const candidates = Array.from(
             panelElement?.querySelectorAll<HTMLElement>(
                 'a[href], area[href], button, input, select, textarea, iframe, object, embed, audio[controls], video[controls], summary, [contenteditable], [tabindex]'
             ) ?? []
-        ).filter((element) => isSequentiallyFocusable(element) && isAvailable(element));
-        return candidates
-            .filter((element) => {
-                if (!(element instanceof HTMLInputElement) || element.type !== 'radio' || !element.name) return true;
-                // One sequential stop per available radio group; form-associated radios can be outside their form.
-                const group = candidates.filter(
-                    (candidate): candidate is HTMLInputElement =>
-                        candidate instanceof HTMLInputElement &&
-                        candidate.type === 'radio' &&
-                        candidate.name === element.name &&
-                        candidate.form === element.form &&
-                        candidate.getRootNode() === element.getRootNode()
-                );
-                return element === (group.find((radio) => radio.checked) ?? group[0]);
-            })
+        )
+            .filter((element) => isSequentiallyFocusable(element) && isAvailable(element))
             .sort((a, b) => {
                 // Positive tabindex precedes the ordinary DOM sequence; stable sorting retains live DOM order for ties.
                 const aOrder = a.tabIndex > 0 ? a.tabIndex : Number.POSITIVE_INFINITY;
                 const bOrder = b.tabIndex > 0 ? b.tabIndex : Number.POSITIVE_INFINITY;
                 return aOrder === bOrder ? 0 : aOrder - bOrder;
             });
+        return candidates.filter((element) => {
+            if (!(element instanceof HTMLInputElement) || element.type !== 'radio' || !element.name) return true;
+            const sameGroup = (candidate: HTMLElement): candidate is HTMLInputElement =>
+                candidate instanceof HTMLInputElement &&
+                candidate.type === 'radio' &&
+                candidate.name === element.name &&
+                candidate.form === element.form;
+            // A checked member anywhere in the same tree owns the group's sequential stop, including outside this panel.
+            const tree = element.getRootNode() as Document | ShadowRoot;
+            const checked = Array.from(tree.querySelectorAll<HTMLInputElement>('input[type="radio"]')).find(
+                (radio) => sameGroup(radio) && radio.checked && isSequentiallyFocusable(radio) && isAvailable(radio)
+            );
+            if (checked) return element === checked;
+            const group = candidates.filter(sameGroup);
+            // Native traversal enters an unchecked group at the directional edge, then skips its other radios on exit.
+            const current = group.find((radio) => radio === activeElement);
+            return element === (current ?? (reverse ? group.at(-1) : group[0]));
+        });
     }
 
     async function focusPanel(): Promise<void> {
@@ -299,10 +312,10 @@ a panel without either remains unnamed. Other consumer attributes remain configu
     }
 
     function trapFocus(event: KeyboardEvent): void {
-        const candidates = getFocusableElements();
+        const active = document.activeElement;
+        const candidates = getFocusableElements(event.shiftKey, active);
         const first = candidates[0] ?? panelElement;
         const last = candidates.at(-1) ?? panelElement;
-        const active = document.activeElement;
         // Also recover from focus on the panel itself or an element that became unavailable.
         if (!candidates.includes(active as HTMLElement) || (event.shiftKey ? active === first : active === last)) {
             event.preventDefault();
