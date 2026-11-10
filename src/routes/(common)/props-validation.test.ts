@@ -280,7 +280,7 @@ ${'#'.repeat(level)} Events
             return result.errors.map((error) => `${relative(root, file)}: ${error}`);
         });
         expect(errors).toEqual([]);
-        expect(total).toEqual({ blocks: 114, props: 643 });
+        expect(total).toEqual({ blocks: 114, props: 644 });
         expect(validateHover(readFileSync(join(root, 'src/lib/Form/form-feedback.svelte'), 'utf8'))).toEqual({
             blocks: 1,
             props: 5,

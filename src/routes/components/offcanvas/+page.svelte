@@ -349,6 +349,21 @@
     </section>
 
     <section class="mb-5">
+        <h2 class="wk-quick-link">Accessibility and Focus</h2>
+        <p>
+            Give each panel an <code>Offcanvas.Title</code> or an explicit <code>aria-label</code> or <code>aria-labelledby</code> on
+            <code>Offcanvas.Root</code>. The first mounted title with a nonempty ID labels its nearest panel automatically. Generated title IDs remain
+            stable during hydration; changing or removing a title updates the association. Explicit naming attributes, including null or empty
+            opt-outs, take precedence. A panel without a title or an explicit name remains unnamed.
+        </p>
+        <p>
+            When shown as an overlay, focus moves to the first available control (or the panel itself), and Tab and Shift+Tab wrap within the top
+            overlay. Dismissal or removal restores focus to an available opener, or into a surviving overlay. Responsive inline panels do not move or
+            trap focus. Use <code>onShow</code>, <code>onShown</code>, <code>onHide</code>, and <code>onHidden</code> for lifecycle callbacks.
+        </p>
+    </section>
+
+    <section class="mb-5">
         <h2 class="wk-quick-link">Responsive Behaviors</h2>
         <p>
             The Offcanvas component can be configured to behave responsively using the <code>showOnBreakpoint</code> prop. When set, the component

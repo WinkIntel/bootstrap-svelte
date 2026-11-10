@@ -42,7 +42,11 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
 These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
 The component owns `role="dialog"` and `aria-modal` in overlay mode and omits them when shown inline
-at its responsive breakpoint. Consumer accessible names and other attributes remain configurable.
+at its responsive breakpoint. Overlay panels move focus inside, contain Tab/Shift+Tab, and restore focus
+on dismissal or removal, respecting other open overlays. Inline panels do not manage focus.
+The first mounted `Offcanvas.Title` supplies the accessible name unless an explicit `aria-label` or
+`aria-labelledby` is provided (including null or empty opt-outs). Provide a Title or an explicit name;
+a panel without either remains unnamed. Other consumer attributes remain configurable.
 
 ### Props
 - `children` (slot): Content to display inside the offcanvas.
@@ -67,9 +71,16 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
     import { initialShow } from '$lib/common/initial-show.js';
     import { noop, uniqueClsx } from '$lib/common/index.js';
     import { initOffcanvasRootState, OffcanvasRootState } from '$lib/common/navbar-offcanvas.svelte.js';
-    import { isTopOverlay, registerOverlay, unregisterOverlay, type OverlayStackEntry } from '$lib/common/overlay-stack.js';
+    import {
+        focusTopOverlay,
+        isFocusInTopOverlay,
+        isTopOverlay,
+        registerOverlay,
+        unregisterOverlay,
+        type OverlayStackEntry
+    } from '$lib/common/overlay-stack.js';
     import { acquireBodyScrollLock, releaseBodyScrollLock } from '$lib/common/scrollbar.js';
-    import { onDestroy, onMount } from 'svelte';
+    import { onDestroy, onMount, tick } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import type { Offcanvas } from './index.js';
 
@@ -110,6 +121,9 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
         if (elementRef !== element) elementRef = element;
     }
     let holdsScrollLock = false;
+    let mounted = false;
+    let focusGeneration = 0;
+    let previouslyFocusedElement: HTMLElement | null = null;
     let overlayZIndex: number | undefined = $state(undefined);
     let backdropZIndex: number | undefined = $state(undefined);
     const unset = Symbol('unset');
@@ -133,6 +147,8 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
     const overlayEntry: OverlayStackEntry = {
         baseBackdropZIndex: 1040,
         baseOverlayZIndex: 1045,
+        containsActiveElement: () => !!panelElement?.contains(document.activeElement),
+        focus: focusPanel,
         onKeydown: handleKeydown,
         setLayers: (nextOverlayZIndex, nextBackdropZIndex) => {
             overlayZIndex = nextOverlayZIndex;
@@ -194,16 +210,109 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
     $effect(() => {
         const isOverlayShown = rootState.isShown && !rootState.isMediaQueryMatched;
         if (isOverlayShown && !previousRootIsOverlayShown) {
+            focusGeneration++;
+            previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
             registerOverlay(overlayEntry);
+            void focusPanel();
         } else if (!isOverlayShown && previousRootIsOverlayShown) {
-            unregisterOverlay(overlayEntry);
+            leaveOverlay();
         }
 
         previousRootIsOverlayShown = isOverlayShown;
     });
 
+    // Reject unavailable candidates without relying on geometry (which differs in SSR/test DOMs).
+    function isAvailable(element: HTMLElement): boolean {
+        if (!element.isConnected || element.matches(':disabled, [disabled], input[type="hidden"]')) return false;
+        for (let ancestor: HTMLElement | null = element; ancestor; ancestor = ancestor.parentElement) {
+            if (ancestor.matches('[hidden], [inert], [aria-hidden="true"]')) return false;
+            // Closed details expose only their first summary (and its descendants).
+            if (ancestor instanceof HTMLDetailsElement && !ancestor.open && ancestor !== element) {
+                const summary = Array.from(ancestor.children).find((child) => child.tagName === 'SUMMARY');
+                if (!summary?.contains(element)) return false;
+            }
+            const style = getComputedStyle(ancestor);
+            if (style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse') return false;
+        }
+        return true;
+    }
+
+    function isSequentiallyFocusable(element: HTMLElement): boolean {
+        if (element.tagName === 'SUMMARY' && element.parentElement instanceof HTMLDetailsElement) {
+            const firstSummary = Array.from(element.parentElement.children).find((child) => child.tagName === 'SUMMARY');
+            if (element !== firstSummary && !element.hasAttribute('tabindex')) return false;
+        }
+        if (element.tabIndex >= 0) return true;
+        if (element.hasAttribute('tabindex')) return false;
+        // Browsers report -1 for default contenteditable tabIndex, despite it being a native Tab stop.
+        const editable = element.getAttribute('contenteditable');
+        if (editable !== '' && editable !== 'true' && editable !== 'plaintext-only') return false;
+        const parentEditable = element.parentElement?.closest('[contenteditable]');
+        return !parentEditable || parentEditable.getAttribute('contenteditable') === 'false';
+    }
+
+    function getFocusableElements(): HTMLElement[] {
+        const candidates = Array.from(
+            panelElement?.querySelectorAll<HTMLElement>(
+                'a[href], area[href], button, input, select, textarea, iframe, object, embed, audio[controls], video[controls], summary, [contenteditable], [tabindex]'
+            ) ?? []
+        ).filter((element) => isSequentiallyFocusable(element) && isAvailable(element));
+        return candidates
+            .filter((element) => {
+                if (!(element instanceof HTMLInputElement) || element.type !== 'radio' || !element.name) return true;
+                // One sequential stop per available radio group; form-associated radios can be outside their form.
+                const group = candidates.filter(
+                    (candidate): candidate is HTMLInputElement =>
+                        candidate instanceof HTMLInputElement &&
+                        candidate.type === 'radio' &&
+                        candidate.name === element.name &&
+                        candidate.form === element.form &&
+                        candidate.getRootNode() === element.getRootNode()
+                );
+                return element === (group.find((radio) => radio.checked) ?? group[0]);
+            })
+            .sort((a, b) => {
+                // Positive tabindex precedes the ordinary DOM sequence; stable sorting retains live DOM order for ties.
+                const aOrder = a.tabIndex > 0 ? a.tabIndex : Number.POSITIVE_INFINITY;
+                const bOrder = b.tabIndex > 0 ? b.tabIndex : Number.POSITIVE_INFINITY;
+                return aOrder === bOrder ? 0 : aOrder - bOrder;
+            });
+    }
+
+    async function focusPanel(): Promise<void> {
+        const generation = focusGeneration;
+        await tick();
+        // A settled task belongs to one overlay session, never to a subsequent open or another top overlay.
+        if (!mounted || generation !== focusGeneration || !rootState.isShown || rootState.isMediaQueryMatched || !isTopOverlay(overlayEntry)) return;
+        (getFocusableElements()[0] ?? panelElement)?.focus({ preventScroll: true });
+    }
+
+    function leaveOverlay(): void {
+        focusGeneration++;
+        const wasTopOverlay = isTopOverlay(overlayEntry);
+        unregisterOverlay(overlayEntry);
+        const opener = previouslyFocusedElement;
+        previouslyFocusedElement = null;
+        if (!wasTopOverlay || isFocusInTopOverlay()) return;
+        if (opener && isAvailable(opener)) opener.focus({ preventScroll: true });
+        if (!isFocusInTopOverlay()) focusTopOverlay();
+    }
+
+    function trapFocus(event: KeyboardEvent): void {
+        const candidates = getFocusableElements();
+        const first = candidates[0] ?? panelElement;
+        const last = candidates.at(-1) ?? panelElement;
+        const active = document.activeElement;
+        // Also recover from focus on the panel itself or an element that became unavailable.
+        if (!candidates.includes(active as HTMLElement) || (event.shiftKey ? active === first : active === last)) {
+            event.preventDefault();
+            (event.shiftKey ? last : first)?.focus({ preventScroll: true });
+        }
+    }
+
     // Get the body element when the component is mounted...
     onMount(() => {
+        mounted = true;
         if (typeof window !== 'undefined') {
             bodyElement = document.querySelector('body');
         }
@@ -238,7 +347,8 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
     // so a removed-while-open offcanvas doesn't permanently disable body
     // scrolling...
     onDestroy(() => {
-        unregisterOverlay(overlayEntry);
+        mounted = false;
+        leaveOverlay();
         if (holdsScrollLock && bodyElement) {
             releaseBodyScrollLock(bodyElement);
             holdsScrollLock = false;
@@ -278,6 +388,11 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
 
     // Dismiss the offcanvas on Escape key press
     function handleKeydown(event: KeyboardEvent): void {
+        if (!rootState.isShown || rootState.isMediaQueryMatched) return;
+        if (event.key === 'Tab') {
+            trapFocus(event);
+            return;
+        }
         if (rootState.isShown && !isKeyboardDismissible && useBackdrop === 'static' && event.key === 'Escape') {
             onHidePrevented(event);
             return;
@@ -305,6 +420,11 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
         tabindex="-1"
         transition:showTransition={{ duration: rootState.transitionDuration, x: flyX, y: flyY, opacity: 1 }}
         {...restOfProps}
+        aria-labelledby={restOfProps['aria-labelledby'] !== undefined
+            ? restOfProps['aria-labelledby']
+            : restOfProps['aria-label'] !== undefined
+              ? undefined
+              : rootState.titleId}
         aria-modal={rootState.isShown && !rootState.isMediaQueryMatched ? true : undefined}
         onintrostart={(event) => {
             onShow.call(event.currentTarget, event);
