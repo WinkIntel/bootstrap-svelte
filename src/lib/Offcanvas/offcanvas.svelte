@@ -48,6 +48,8 @@ The first mounted `Offcanvas.Title` supplies the accessible name unless an expli
 `aria-labelledby` is provided (including null or empty opt-outs). Provide a Title or an explicit name;
 a panel without either remains unnamed. Supply an explicit `aria-label` or `aria-labelledby` if an
 initially shown panel must be named in server-rendered markup before hydration. Other consumer attributes remain configurable.
+Open shadow focus scopes remain traversable; embedded sequential escapes are recovered when focus returns to the
+containing document. Closed-shadow internals, complex slots, cross-origin internals and other-browser keyboard settings remain unverified.
 
 ### Props
 - `children` (slot): Content to display inside the offcanvas.
@@ -124,6 +126,9 @@ initially shown panel must be named in server-rendered markup before hydration. 
     let holdsScrollLock = false;
     let mounted = false;
     let focusGeneration = 0;
+    let pendingTab: { reverse: boolean; generation: number } | null = null;
+    let tabFrame: number | undefined;
+    let embeddedFocus: { element: HTMLElement; generation: number } | null = null;
     let previouslyFocusedElement: HTMLElement | null = null;
     let overlayZIndex: number | undefined = $state(undefined);
     let backdropZIndex: number | undefined = $state(undefined);
@@ -223,12 +228,12 @@ initially shown panel must be named in server-rendered markup before hydration. 
     });
 
     // Reject unavailable candidates without relying on geometry (which differs in SSR/test DOMs).
-    function isAvailable(element: HTMLElement): boolean {
+    function isAvailable(element: HTMLElement, nativeOwnership = false): boolean {
         if (!element.isConnected || element.matches(':disabled, [disabled], input[type="hidden"]')) return false;
         const elementStyle = getComputedStyle(element);
         if (elementStyle.display === 'contents' || elementStyle.visibility === 'hidden' || elementStyle.visibility === 'collapse') return false;
-        for (let ancestor: HTMLElement | null = element; ancestor; ancestor = ancestor.parentElement) {
-            if (ancestor.matches('[hidden], [inert], [aria-hidden="true"]')) return false;
+        for (let ancestor: HTMLElement | null = element; ancestor; ancestor = getComposedParent(ancestor)) {
+            if (ancestor.matches('[hidden], [inert]') || (!nativeOwnership && ancestor.matches('[aria-hidden="true"]'))) return false;
             // Closed details expose only their first summary (and its descendants).
             if (ancestor instanceof HTMLDetailsElement && !ancestor.open && ancestor !== element) {
                 const summary: Element | undefined = Array.from(ancestor.children).find((child) => child.tagName === 'SUMMARY');
@@ -241,7 +246,14 @@ initially shown panel must be named in server-rendered markup before hydration. 
         return true;
     }
 
+    function getComposedParent(element: HTMLElement): HTMLElement | null {
+        const root = element.getRootNode();
+        return element.assignedSlot ?? element.parentElement ?? (root instanceof ShadowRoot ? (root.host as HTMLElement) : null);
+    }
+
     function isSequentiallyFocusable(element: HTMLElement): boolean {
+        // A resource-less object can accept programmatic focus while native Tab skips it.
+        if (element instanceof HTMLObjectElement && !element.data) return false;
         if (element.tagName === 'SUMMARY' && element.parentElement instanceof HTMLDetailsElement) {
             const firstSummary = Array.from(element.parentElement.children).find((child) => child.tagName === 'SUMMARY');
             if (element !== firstSummary && !element.hasAttribute('tabindex')) return false;
@@ -251,7 +263,7 @@ initially shown panel must be named in server-rendered markup before hydration. 
         // Browsers report -1 for default contenteditable tabIndex, despite it being a native Tab stop.
         const editable = element.getAttribute('contenteditable')?.toLowerCase();
         if (editable !== '' && editable !== 'true' && editable !== 'plaintext-only') return false;
-        for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+        for (let parent = element.parentElement; parent; parent = getComposedParent(parent)) {
             const value = parent.getAttribute('contenteditable')?.toLowerCase();
             if (value === 'false') return true;
             if (value === '' || value === 'true' || value === 'plaintext-only') return false;
@@ -259,19 +271,51 @@ initially shown panel must be named in server-rendered markup before hydration. 
         return true;
     }
 
-    function getFocusableElements(reverse = false, activeElement: Element | null = null): HTMLElement[] {
-        const candidates = Array.from(
-            panelElement?.querySelectorAll<HTMLElement>(
-                'a[href], area[href], button, input, select, textarea, iframe, object, embed, audio[controls], video[controls], summary, [contenteditable], [tabindex]'
-            ) ?? []
-        )
-            .filter((element) => isSequentiallyFocusable(element) && isAvailable(element))
-            .sort((a, b) => {
-                // Positive tabindex precedes the ordinary DOM sequence; stable sorting retains live DOM order for ties.
-                const aOrder = a.tabIndex > 0 ? a.tabIndex : Number.POSITIVE_INFINITY;
-                const bOrder = b.tabIndex > 0 ? b.tabIndex : Number.POSITIVE_INFINITY;
-                return aOrder === bOrder ? 0 : aOrder - bOrder;
-            });
+    // Preserve native focus scopes: each shadow host/slot keeps its own ordered descendants together.
+    function collectFocusScope(scope: ParentNode): HTMLElement[] {
+        const items: { element: HTMLElement; targets: HTMLElement[] }[] = [];
+        function visit(node: Element): void {
+            const element = node as HTMLElement;
+            if (element.shadowRoot) {
+                if (element.hasAttribute('tabindex') && element.tabIndex < 0) return;
+                const children = collectFocusScope(element.shadowRoot);
+                const own = isSequentiallyFocusable(element) && isAvailable(element) ? [element] : [];
+                if (own.length || children.length) items.push({ element, targets: [...own, ...children] });
+                return;
+            }
+            if (element instanceof HTMLSlotElement) {
+                const assigned = element.assignedElements({ flatten: true });
+                const children = assigned.length ? assigned : Array.from(element.children);
+                // Assigned nodes form a nested focus scope rather than joining the outer positive-tabindex sort.
+                const targets = collectElements(children);
+                if (targets.length) items.push({ element, targets });
+                return;
+            }
+            if (isSequentiallyFocusable(element) && isAvailable(element)) items.push({ element, targets: [element] });
+            Array.from(element.children).forEach(visit);
+        }
+        function collectElements(elements: Element[]): HTMLElement[] {
+            const previous = items.splice(0);
+            elements.forEach(visit);
+            const result = orderedTargets();
+            items.splice(0, items.length, ...previous);
+            return result;
+        }
+        function orderedTargets(): HTMLElement[] {
+            return items
+                .sort((a, b) => {
+                    const aOrder = a.element.tabIndex > 0 ? a.element.tabIndex : Number.POSITIVE_INFINITY;
+                    const bOrder = b.element.tabIndex > 0 ? b.element.tabIndex : Number.POSITIVE_INFINITY;
+                    return aOrder === bOrder ? 0 : aOrder - bOrder;
+                })
+                .flatMap((item) => item.targets);
+        }
+        Array.from(scope.children).forEach(visit);
+        return orderedTargets();
+    }
+
+    function getFocusableElements(reverse = false, activeElement: Element | null = null, scope: ParentNode | null = panelElement): HTMLElement[] {
+        const candidates = scope ? collectFocusScope(scope) : [];
         return candidates.filter((element) => {
             if (!(element instanceof HTMLInputElement) || element.type !== 'radio' || !element.name) return true;
             const sameGroup = (candidate: HTMLElement): candidate is HTMLInputElement =>
@@ -279,17 +323,92 @@ initially shown panel must be named in server-rendered markup before hydration. 
                 candidate.type === 'radio' &&
                 candidate.name === element.name &&
                 candidate.form === element.form;
-            // A checked member anywhere in the same tree owns the group's sequential stop, including outside this panel.
             const tree = element.getRootNode() as Document | ShadowRoot;
             const checked = Array.from(tree.querySelectorAll<HTMLInputElement>('input[type="radio"]')).find(
-                (radio) => sameGroup(radio) && radio.checked && isSequentiallyFocusable(radio) && isAvailable(radio)
+                // ARIA exclusion does not erase native group ownership, even when the owner is outside the panel.
+                (radio) => sameGroup(radio) && radio.checked && isSequentiallyFocusable(radio) && isAvailable(radio, true)
             );
             if (checked) return element === checked;
             const group = candidates.filter(sameGroup);
-            // Native traversal enters an unchecked group at the directional edge, then skips its other radios on exit.
             const current = group.find((radio) => radio === activeElement);
             return element === (current ?? (reverse ? group.at(-1) : group[0]));
         });
+    }
+
+    function getDeepActiveElement(): Element | null {
+        let active = document.activeElement;
+        while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+        return active;
+    }
+
+    function focusBoundary(reverse: boolean): void {
+        const candidates = getFocusableElements(reverse);
+        if (reverse) candidates.reverse();
+        for (const candidate of candidates) {
+            let target = candidate;
+            // Same-origin contexts can use their actual edge; opaque contexts remain native browsing-context stops.
+            try {
+                const childDocument =
+                    candidate instanceof HTMLIFrameElement || candidate instanceof HTMLObjectElement ? candidate.contentDocument : null;
+                if (childDocument) {
+                    const children = getFocusableElements(reverse, null, childDocument);
+                    target = (reverse ? children.at(-1) : children[0]) ?? candidate;
+                }
+            } catch {
+                /* Cross-origin documents do not need inspection for outer containment. */
+            }
+            if (target !== candidate) candidate.focus({ preventScroll: true });
+            target.focus({ preventScroll: true });
+            if (
+                panelElement?.contains(document.activeElement) &&
+                (getDeepActiveElement() === target || target.ownerDocument.activeElement === target)
+            )
+                return;
+        }
+        panelElement?.focus({ preventScroll: true });
+    }
+
+    function isOverlayActive(): boolean {
+        return mounted && rootState.isShown && !rootState.isMediaQueryMatched && isTopOverlay(overlayEntry);
+    }
+
+    function clearNativeFocusTracking(): void {
+        pendingTab = null;
+        embeddedFocus = null;
+        if (tabFrame !== undefined) cancelAnimationFrame(tabFrame);
+        tabFrame = undefined;
+    }
+
+    function trackNativeTab(event: KeyboardEvent): void {
+        const token = { reverse: event.shiftKey, generation: focusGeneration };
+        pendingTab = token;
+        if (tabFrame !== undefined) cancelAnimationFrame(tabFrame);
+        tabFrame = requestAnimationFrame(() => {
+            if (pendingTab === token) pendingTab = null;
+            tabFrame = undefined;
+        });
+    }
+
+    function trackEmbeddedFocus(): void {
+        const active = document.activeElement;
+        if (isOverlayActive() && panelElement?.contains(active) && (active instanceof HTMLIFrameElement || active instanceof HTMLObjectElement)) {
+            embeddedFocus = { element: active, generation: focusGeneration };
+        }
+    }
+
+    function handleFocusIn(event: FocusEvent): void {
+        if (!isOverlayActive() || !(event.target instanceof Element) || !panelElement) return;
+        if (panelElement.contains(event.target)) {
+            embeddedFocus = null;
+            trackEmbeddedFocus();
+            return;
+        }
+        const tab = pendingTab?.generation === focusGeneration ? pendingTab : null;
+        const fromContext = embeddedFocus?.generation === focusGeneration && panelElement.contains(embeddedFocus.element);
+        if (!tab && !fromContext) return;
+        const reverse = tab?.reverse ?? !!(panelElement.compareDocumentPosition(event.target) & Node.DOCUMENT_POSITION_PRECEDING);
+        clearNativeFocusTracking();
+        focusBoundary(reverse);
     }
 
     async function focusPanel(): Promise<void> {
@@ -297,10 +416,11 @@ initially shown panel must be named in server-rendered markup before hydration. 
         await tick();
         // A settled task belongs to one overlay session, never to a subsequent open or another top overlay.
         if (!mounted || generation !== focusGeneration || !rootState.isShown || rootState.isMediaQueryMatched || !isTopOverlay(overlayEntry)) return;
-        (getFocusableElements()[0] ?? panelElement)?.focus({ preventScroll: true });
+        focusBoundary(false);
     }
 
     function leaveOverlay(): void {
+        clearNativeFocusTracking();
         focusGeneration++;
         const wasTopOverlay = isTopOverlay(overlayEntry);
         unregisterOverlay(overlayEntry);
@@ -312,14 +432,14 @@ initially shown panel must be named in server-rendered markup before hydration. 
     }
 
     function trapFocus(event: KeyboardEvent): void {
-        const active = document.activeElement;
+        const active = getDeepActiveElement();
         const candidates = getFocusableElements(event.shiftKey, active);
         const first = candidates[0] ?? panelElement;
         const last = candidates.at(-1) ?? panelElement;
         // Also recover from focus on the panel itself or an element that became unavailable.
         if (!candidates.includes(active as HTMLElement) || (event.shiftKey ? active === first : active === last)) {
             event.preventDefault();
-            (event.shiftKey ? last : first)?.focus({ preventScroll: true });
+            focusBoundary(event.shiftKey);
         }
     }
 
@@ -329,6 +449,16 @@ initially shown panel must be named in server-rendered markup before hydration. 
         if (typeof window !== 'undefined') {
             bodyElement = document.querySelector('body');
         }
+        document.addEventListener('focusin', handleFocusIn, true);
+        window.addEventListener('blur', trackEmbeddedFocus);
+        document.addEventListener('pointerdown', clearNativeFocusTracking, true);
+        document.addEventListener('mousedown', clearNativeFocusTracking, true);
+        return () => {
+            document.removeEventListener('focusin', handleFocusIn, true);
+            window.removeEventListener('blur', trackEmbeddedFocus);
+            document.removeEventListener('pointerdown', clearNativeFocusTracking, true);
+            document.removeEventListener('mousedown', clearNativeFocusTracking, true);
+        };
     });
 
     // Breakpoint and scrolling-option changes can enter or leave overlay mode without an intro/outro.
@@ -403,6 +533,8 @@ initially shown panel must be named in server-rendered markup before hydration. 
     function handleKeydown(event: KeyboardEvent): void {
         if (!rootState.isShown || rootState.isMediaQueryMatched) return;
         if (event.key === 'Tab') {
+            if (event.defaultPrevented) return;
+            trackNativeTab(event);
             trapFocus(event);
             return;
         }

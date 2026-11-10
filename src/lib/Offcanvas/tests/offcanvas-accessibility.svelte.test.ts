@@ -199,6 +199,115 @@ describe('Offcanvas overlay accessibility', () => {
         await fireEvent.keyDown(target, { key: 'Tab', shiftKey: true });
         expect(target).toHaveFocus();
     });
+    it.each([false, true])('retains native group ownership for an ARIA-hidden external checked radio (ancestor=%s)', async (ancestor) => {
+        render(Fixture, { empty: true });
+        await settled();
+        const outside = screen.getByTestId('outside');
+        outside.insertAdjacentHTML('beforeend', '<input type="radio" name="aria-owner" checked>');
+        (ancestor ? outside : outside.querySelector('input')!).setAttribute('aria-hidden', 'true');
+        screen
+            .getByTestId('panel')
+            .insertAdjacentHTML('beforeend', '<button id="aria-owner-action">Action</button><input type="radio" name="aria-owner">');
+        const action = document.getElementById('aria-owner-action')!;
+        action.focus();
+        const user = userEvent.setup();
+        await user.tab();
+        expect(action).toHaveFocus();
+        await user.tab({ shift: true });
+        expect(action).toHaveFocus();
+    });
+    it('recovers a native forward focus escape from a panel-owned browsing context', async () => {
+        render(Fixture, { empty: true });
+        await settled();
+        screen
+            .getByTestId('panel')
+            .insertAdjacentHTML('beforeend', '<button id="frame-boundary-first">First</button><iframe id="boundary-frame"></iframe>');
+        const frame = document.getElementById('boundary-frame') as HTMLIFrameElement;
+        frame.contentDocument!.body.innerHTML = '<button id="frame-control">Frame action</button>';
+        frame.contentDocument!.getElementById('frame-control')!.focus();
+        await fireEvent.blur(window);
+        const after = focusOpener();
+        expect(document.getElementById('frame-boundary-first')).toHaveFocus();
+        expect(after).not.toHaveFocus();
+    });
+    it('recovers reverse browsing-context escape into the last embedded control while allowing pointer ownership', async () => {
+        render(Fixture, { empty: true });
+        await settled();
+        screen.getByTestId('panel').insertAdjacentHTML('beforeend', '<button>First</button><iframe id="reverse-frame"></iframe>');
+        const frame = document.getElementById('reverse-frame') as HTMLIFrameElement;
+        frame.contentDocument!.body.innerHTML = '<button id="reverse-control">Frame action</button>';
+        const inner = frame.contentDocument!.getElementById('reverse-control')!;
+        inner.focus();
+        await fireEvent.blur(window);
+        const outside = screen.getByRole('button', { name: 'Outside' });
+        outside.focus();
+        expect(document.activeElement).toBe(frame);
+        expect(inner).toHaveFocus();
+        await fireEvent.mouseDown(outside);
+        outside.focus();
+        expect(outside).toHaveFocus();
+    });
+    it('preserves an open shadow focus scope and wraps at its deepest boundary', async () => {
+        render(Fixture, { empty: true });
+        await settled();
+        const panel = screen.getByTestId('panel');
+        panel.insertAdjacentHTML('beforeend', '<button id="shadow-first">First</button><div id="shadow-host" tabindex="0"></div>');
+        const host = document.getElementById('shadow-host')!;
+        const shadow = host.attachShadow({ mode: 'open' });
+        shadow.innerHTML = '<button id="shadow-a">A</button><button id="shadow-b">B</button>';
+        host.focus();
+        const entering = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, composed: true, cancelable: true });
+        host.dispatchEvent(entering);
+        expect(entering.defaultPrevented).toBe(false);
+        const last = shadow.getElementById('shadow-b') as HTMLElement;
+        last.focus();
+        await fireEvent.keyDown(last, { key: 'Tab', composed: true });
+        expect(document.getElementById('shadow-first')).toHaveFocus();
+        await fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
+        expect(shadow.activeElement).toBe(last);
+    });
+    it('ignores an empty object as a sequential stop and retains resource-backed objects', async () => {
+        render(Fixture, { empty: true });
+        await settled();
+        screen.getByTestId('panel').insertAdjacentHTML('beforeend', '<button id="object-action">First</button><object></object>');
+        const action = document.getElementById('object-action')!;
+        action.focus();
+        const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+        action.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(true);
+        expect(action).toHaveFocus();
+        screen.getByTestId('panel').querySelector('object')!.setAttribute('data', 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"/%3E');
+        const loaded = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+        action.dispatchEvent(loaded);
+        expect(loaded.defaultPrevented).toBe(false);
+    });
+    it('respects a control that consumes Tab before it reaches the overlay handler', async () => {
+        render(Fixture);
+        await settled();
+        const last = screen.getByTestId('last-action');
+        last.focus();
+        last.addEventListener('keydown', (event) => event.preventDefault());
+        await fireEvent.keyDown(last, { key: 'Tab' });
+        expect(last).toHaveFocus();
+        screen.getByRole('button', { name: 'Outside' }).focus();
+        expect(screen.getByRole('button', { name: 'Outside' })).toHaveFocus();
+    });
+    it.each(['hide', 'inline', 'unmount'])('cancels pending sequential recovery on %s', async (mode) => {
+        const { emit } = mockMatchMedia();
+        const view = render(Fixture, { showOnBreakpoint: 'lg' });
+        await settled();
+        const outside = focusOpener();
+        const first = screen.getByTestId('first-action');
+        first.focus();
+        await fireEvent.keyDown(first, { key: 'Tab' });
+        if (mode === 'hide') await view.rerender({ isShown: false });
+        else if (mode === 'inline') {
+            emit(BreakpointMinimumMediaQuery.lg!, true);
+            await settled();
+        } else view.unmount();
+        outside.focus();
+        expect(outside).toHaveFocus();
+    });
     it('restores focus when an open panel unmounts and ignores an unavailable opener', async () => {
         focusOpener();
         const { rerender } = render(Fixture);

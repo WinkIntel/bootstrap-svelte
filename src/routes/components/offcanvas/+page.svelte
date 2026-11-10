@@ -362,6 +362,11 @@
             overlay. Dismissal or removal restores focus to an available opener, or into a surviving overlay. Responsive inline panels do not move or
             trap focus. Use <code>onShow</code>, <code>onShown</code>, <code>onHide</code>, and <code>onHidden</code> for lifecycle callbacks.
         </p>
+        <p>
+            Open shadow focus scopes remain traversable. Embedded content keeps native traversal, with sequential recovery when focus returns to the
+            containing document; pointer interactions remain consumer-controlled. Closed-shadow internals, complex slot combinations, cross-origin
+            frame internals, and Safari/Firefox keyboard settings have not been validated.
+        </p>
     </section>
 
     <section class="mb-5">
