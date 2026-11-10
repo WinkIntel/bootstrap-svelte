@@ -266,6 +266,27 @@ describe('Offcanvas overlay accessibility', () => {
         await fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
         expect(shadow.activeElement).toBe(last);
     });
+    it('keeps same-name radios in separate shadow roots as independent sequential stops', async () => {
+        render(Fixture, { empty: true });
+        await settled();
+        const panel = screen.getByTestId('panel');
+        panel.insertAdjacentHTML('beforeend', '<div id="radio-host-one"></div><div id="radio-host-two"></div>');
+        const firstRoot = document.getElementById('radio-host-one')!.attachShadow({ mode: 'open' });
+        const secondRoot = document.getElementById('radio-host-two')!.attachShadow({ mode: 'open' });
+        firstRoot.innerHTML = '<input type="radio" name="choice" id="radio-one">';
+        secondRoot.innerHTML = '<input type="radio" name="choice" id="radio-two">';
+        const first = firstRoot.getElementById('radio-one') as HTMLInputElement;
+        const second = secondRoot.getElementById('radio-two') as HTMLInputElement;
+        first.focus();
+        const forward = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, composed: true, cancelable: true });
+        first.dispatchEvent(forward);
+        expect(forward.defaultPrevented).toBe(false);
+        second.focus();
+        await fireEvent.keyDown(second, { key: 'Tab', composed: true });
+        expect(firstRoot.activeElement).toBe(first);
+        await fireEvent.keyDown(first, { key: 'Tab', shiftKey: true, composed: true });
+        expect(secondRoot.activeElement).toBe(second);
+    });
     it('ignores an empty object as a sequential stop and retains resource-backed objects', async () => {
         render(Fixture, { empty: true });
         await settled();

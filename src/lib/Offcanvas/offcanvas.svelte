@@ -322,7 +322,8 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
                 candidate instanceof HTMLInputElement &&
                 candidate.type === 'radio' &&
                 candidate.name === element.name &&
-                candidate.form === element.form;
+                candidate.form === element.form &&
+                candidate.getRootNode() === element.getRootNode();
             const tree = element.getRootNode() as Document | ShadowRoot;
             const checked = Array.from(tree.querySelectorAll<HTMLInputElement>('input[type="radio"]')).find(
                 // ARIA exclusion does not erase native group ownership, even when the owner is outside the panel.
