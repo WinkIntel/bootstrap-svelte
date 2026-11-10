@@ -4,6 +4,9 @@
         isShown = true,
         renderPanel = true,
         showOnBreakpoint,
+        isBodyScrollable = false,
+        useBackdrop = false,
+        onShow,
         empty = false,
         firstTitle = true,
         titleId,
@@ -15,6 +18,9 @@
         isShown?: boolean;
         renderPanel?: boolean;
         showOnBreakpoint?: Offcanvas.RootProps['showOnBreakpoint'];
+        isBodyScrollable?: boolean;
+        useBackdrop?: Offcanvas.RootProps['useBackdrop'];
+        onShow?: Offcanvas.RootProps['onShow'];
         empty?: boolean;
         firstTitle?: boolean;
         titleId?: string | null;
@@ -32,7 +38,7 @@
 
 <div bind:this={outside} data-testid="outside"><button>Outside</button></div>
 {#if renderPanel}
-    <Offcanvas.Root bind:elementRef {isShown} {showOnBreakpoint} {...names} useBackdrop={false} data-testid="panel">
+    <Offcanvas.Root bind:elementRef {isShown} {showOnBreakpoint} {...names} {isBodyScrollable} {useBackdrop} {onShow} data-testid="panel">
         {#if firstTitle}<Offcanvas.Title id={titleId} data-testid="first-title">First title</Offcanvas.Title>{/if}
         <Offcanvas.Title id="second-title">Second title</Offcanvas.Title>
         {#if !empty}

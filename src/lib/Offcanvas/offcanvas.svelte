@@ -41,15 +41,18 @@ Build hidden sidebars into your project for navigation, shopping carts, and more
 ### Lifecycle callbacks and accessibility
 Use `onShow`, `onShown`, `onHide`, and `onHidden` for component lifecycle notifications.
 These are the recommended callbacks for responding when the component starts or finishes showing or hiding.
-The component owns `role="dialog"` and `aria-modal` in overlay mode and omits them when shown inline
-at its responsive breakpoint. Overlay panels move focus inside, contain Tab/Shift+Tab, and restore focus
-on dismissal or removal, respecting other open overlays. Inline panels do not manage focus.
-The first mounted `Offcanvas.Title` supplies the accessible name unless an explicit `aria-label` or
-`aria-labelledby` is provided (including null or empty opt-outs). Provide a Title or an explicit name;
-a panel without either remains unnamed. Supply an explicit `aria-label` or `aria-labelledby` if an
-initially shown panel must be named in server-rendered markup before hydration. Other consumer attributes remain configurable.
+The component owns `role="dialog"` in overlay mode and omits it when shown inline at its responsive breakpoint.
+Modal overlays own `aria-modal`, enter focus, contain Tab/Shift+Tab, and restore focus on dismissal or removal.
+A scrollable panel with `useBackdrop={false}` is nonmodal and leaves page focus usable without entry, trapping or restoration.
+Inline crossings stop focus management without moving focus out of the still-visible panel, unless a surviving modal overlay needs focus. Entry preserves available
+consumer-placed focus and otherwise prefers an available explicit autofocus target (including programmatic tabindex=-1)
+before the first sequential control or the panel itself.
+The first mounted `Offcanvas.Title` supplies an overlay panel's accessible name unless an explicit `aria-label` or
+`aria-labelledby` is provided (including null or empty opt-outs). Generated inline names are omitted; explicit attributes remain configurable.
+Provide a Title or an explicit name; a panel without either remains unnamed. Supply an explicit `aria-label` or `aria-labelledby`
+if an initially shown panel must be named in server-rendered markup before hydration.
 Open shadow focus scopes remain traversable; embedded sequential escapes are recovered when focus returns to the
-containing document. Closed-shadow internals, complex slots, cross-origin internals and other-browser keyboard settings remain unverified.
+containing document. Closed-shadow internals, complex slots, cross-origin internals, browser-chrome exits and other-browser keyboard settings remain unverified.
 
 ### Props
 - `children` (slot): Content to display inside the offcanvas.
@@ -118,6 +121,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
     // Initialize the root state of the offcanvas component...
     let bodyElement: HTMLElement | null = $state(null);
     let panelElement: HTMLDivElement | null = $state(null);
+    let backdropElement: HTMLDivElement | null = $state(null);
     // Keep containment private while preserving the public ref, including bind:this cleanup.
     function setPanelElement(element: HTMLDivElement | null) {
         panelElement = element;
@@ -135,6 +139,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
     const unset = Symbol('unset');
     let previousIsShown: Offcanvas.RootProps['isShown'] | typeof unset = unset;
     let previousRootIsOverlayShown = false;
+    let previousRootFocusManaged = false;
     let previousUseBackdrop: Offcanvas.RootProps['useBackdrop'] | typeof unset = unset;
     const rootState: OffcanvasRootState = initOffcanvasRootState({
         get id() {
@@ -150,6 +155,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
             return useBackdrop;
         }
     });
+    const isFocusModal = $derived(!isBodyScrollable || rootState.useBackdrop !== false);
     const overlayEntry: OverlayStackEntry = {
         baseBackdropZIndex: 1040,
         baseOverlayZIndex: 1045,
@@ -215,31 +221,42 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
 
     $effect(() => {
         const isOverlayShown = rootState.isShown && !rootState.isMediaQueryMatched;
+        const shouldManageFocus = isOverlayShown && isFocusModal;
         if (isOverlayShown && !previousRootIsOverlayShown) {
-            focusGeneration++;
-            previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
             registerOverlay(overlayEntry);
-            void focusPanel();
         } else if (!isOverlayShown && previousRootIsOverlayShown) {
-            leaveOverlay();
+            leaveOverlay(!rootState.isMediaQueryMatched);
         }
-
+        if (shouldManageFocus && !previousRootFocusManaged) {
+            focusGeneration++;
+            const active = document.activeElement;
+            previouslyFocusedElement = active && 'focus' in active ? (active as HTMLElement) : null;
+            void focusPanel();
+        } else if (!shouldManageFocus && previousRootFocusManaged && isOverlayShown) {
+            // A scrollable, backdrop-free panel remains in the stack but leaves the page keyboard-accessible.
+            cancelFocusSession();
+        }
         previousRootIsOverlayShown = isOverlayShown;
+        previousRootFocusManaged = shouldManageFocus;
     });
+
+    function isHtmlTag<K extends keyof HTMLElementTagNameMap>(element: Element | null, tag: K): element is HTMLElementTagNameMap[K] {
+        return element?.namespaceURI === 'http://www.w3.org/1999/xhtml' && element.localName === tag;
+    }
 
     // Reject unavailable candidates without relying on geometry (which differs in SSR/test DOMs).
     function isAvailable(element: HTMLElement, nativeOwnership = false): boolean {
         if (!element.isConnected || element.matches(':disabled, [disabled], input[type="hidden"]')) return false;
-        const elementStyle = getComputedStyle(element);
+        const elementStyle = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
         if (elementStyle.display === 'contents' || elementStyle.visibility === 'hidden' || elementStyle.visibility === 'collapse') return false;
         for (let ancestor: HTMLElement | null = element; ancestor; ancestor = getComposedParent(ancestor)) {
             if (ancestor.matches('[hidden], [inert]') || (!nativeOwnership && ancestor.matches('[aria-hidden="true"]'))) return false;
             // Closed details expose only their first summary (and its descendants).
-            if (ancestor instanceof HTMLDetailsElement && !ancestor.open && ancestor !== element) {
+            if (isHtmlTag(ancestor, 'details') && !ancestor.open && ancestor !== element) {
                 const summary: Element | undefined = Array.from(ancestor.children).find((child) => child.tagName === 'SUMMARY');
                 if (!summary?.contains(element)) return false;
             }
-            const style = getComputedStyle(ancestor);
+            const style = (ancestor.ownerDocument.defaultView ?? window).getComputedStyle(ancestor);
             // Visibility is inherited but can be overridden by a child; display/content suppression cannot.
             if (style.display === 'none' || (ancestor !== element && style.contentVisibility === 'hidden')) return false;
         }
@@ -248,13 +265,18 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
 
     function getComposedParent(element: HTMLElement): HTMLElement | null {
         const root = element.getRootNode();
-        return element.assignedSlot ?? element.parentElement ?? (root instanceof ShadowRoot ? (root.host as HTMLElement) : null);
+        return (
+            element.assignedSlot ??
+            element.parentElement ??
+            (root.nodeType === 11 && 'host' in root ? ((root as ShadowRoot).host as HTMLElement) : null)
+        );
     }
 
     function isSequentiallyFocusable(element: HTMLElement): boolean {
         // A resource-less object can accept programmatic focus while native Tab skips it.
-        if (element instanceof HTMLObjectElement && !element.data) return false;
-        if (element.tagName === 'SUMMARY' && element.parentElement instanceof HTMLDetailsElement) {
+        if (isHtmlTag(element, 'object') && !element.data) return false;
+        if (isHtmlTag(element, 'a') && !element.hasAttribute('href') && !element.hasAttribute('tabindex')) return false;
+        if (element.tagName === 'SUMMARY' && isHtmlTag(element.parentElement, 'details')) {
             const firstSummary = Array.from(element.parentElement.children).find((child) => child.tagName === 'SUMMARY');
             if (element !== firstSummary && !element.hasAttribute('tabindex')) return false;
         }
@@ -283,7 +305,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
                 if (own.length || children.length) items.push({ element, targets: [...own, ...children] });
                 return;
             }
-            if (element instanceof HTMLSlotElement) {
+            if (isHtmlTag(element, 'slot')) {
                 const assigned = element.assignedElements({ flatten: true });
                 const children = assigned.length ? assigned : Array.from(element.children);
                 // Assigned nodes form a nested focus scope rather than joining the outer positive-tabindex sort.
@@ -317,9 +339,9 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
     function getFocusableElements(reverse = false, activeElement: Element | null = null, scope: ParentNode | null = panelElement): HTMLElement[] {
         const candidates = scope ? collectFocusScope(scope) : [];
         return candidates.filter((element) => {
-            if (!(element instanceof HTMLInputElement) || element.type !== 'radio' || !element.name) return true;
+            if (!isHtmlTag(element, 'input') || element.type !== 'radio' || !element.name) return true;
             const sameGroup = (candidate: HTMLElement): candidate is HTMLInputElement =>
-                candidate instanceof HTMLInputElement &&
+                isHtmlTag(candidate, 'input') &&
                 candidate.type === 'radio' &&
                 candidate.name === element.name &&
                 candidate.form === element.form &&
@@ -336,8 +358,8 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
         });
     }
 
-    function getDeepActiveElement(): Element | null {
-        let active = document.activeElement;
+    function getDeepActiveElement(ownerDocument: Document = document): Element | null {
+        let active = ownerDocument.activeElement;
         while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
         return active;
     }
@@ -349,8 +371,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
             let target = candidate;
             // Same-origin contexts can use their actual edge; opaque contexts remain native browsing-context stops.
             try {
-                const childDocument =
-                    candidate instanceof HTMLIFrameElement || candidate instanceof HTMLObjectElement ? candidate.contentDocument : null;
+                const childDocument = isHtmlTag(candidate, 'iframe') || isHtmlTag(candidate, 'object') ? candidate.contentDocument : null;
                 if (childDocument) {
                     const children = getFocusableElements(reverse, null, childDocument);
                     target = (reverse ? children.at(-1) : children[0]) ?? candidate;
@@ -360,17 +381,13 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
             }
             if (target !== candidate) candidate.focus({ preventScroll: true });
             target.focus({ preventScroll: true });
-            if (
-                panelElement?.contains(document.activeElement) &&
-                (getDeepActiveElement() === target || target.ownerDocument.activeElement === target)
-            )
-                return;
+            if (panelElement?.contains(document.activeElement) && getDeepActiveElement(target.ownerDocument) === target) return;
         }
         panelElement?.focus({ preventScroll: true });
     }
 
     function isOverlayActive(): boolean {
-        return mounted && rootState.isShown && !rootState.isMediaQueryMatched && isTopOverlay(overlayEntry);
+        return mounted && isFocusModal && rootState.isShown && !rootState.isMediaQueryMatched && isTopOverlay(overlayEntry);
     }
 
     function clearNativeFocusTracking(): void {
@@ -392,14 +409,15 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
 
     function trackEmbeddedFocus(): void {
         const active = document.activeElement;
-        if (isOverlayActive() && panelElement?.contains(active) && (active instanceof HTMLIFrameElement || active instanceof HTMLObjectElement)) {
+        if (isOverlayActive() && panelElement?.contains(active) && (isHtmlTag(active, 'iframe') || isHtmlTag(active, 'object'))) {
             embeddedFocus = { element: active, generation: focusGeneration };
         }
     }
 
     function handleFocusIn(event: FocusEvent): void {
-        if (!isOverlayActive() || !(event.target instanceof Element) || !panelElement) return;
-        if (panelElement.contains(event.target)) {
+        if (!isOverlayActive() || (event.target as Node | null)?.nodeType !== 1 || !panelElement) return;
+        const target = event.target as Element;
+        if (panelElement.contains(target)) {
             embeddedFocus = null;
             trackEmbeddedFocus();
             return;
@@ -407,7 +425,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
         const tab = pendingTab?.generation === focusGeneration ? pendingTab : null;
         const fromContext = embeddedFocus?.generation === focusGeneration && panelElement.contains(embeddedFocus.element);
         if (!tab && !fromContext) return;
-        const reverse = tab?.reverse ?? !!(panelElement.compareDocumentPosition(event.target) & Node.DOCUMENT_POSITION_PRECEDING);
+        const reverse = tab?.reverse ?? !!(panelElement.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_PRECEDING);
         clearNativeFocusTracking();
         focusBoundary(reverse);
     }
@@ -416,19 +434,32 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
         const generation = focusGeneration;
         await tick();
         // A settled task belongs to one overlay session, never to a subsequent open or another top overlay.
-        if (!mounted || generation !== focusGeneration || !rootState.isShown || rootState.isMediaQueryMatched || !isTopOverlay(overlayEntry)) return;
+        if (generation !== focusGeneration || !isOverlayActive()) return;
+        const active = getDeepActiveElement();
+        if (panelElement?.contains(document.activeElement) && active && isAvailable(active as HTMLElement)) return;
+        // Explicit entry focus can be programmatic (for example a heading with tabindex=-1).
+        for (const autofocus of panelElement?.querySelectorAll<HTMLElement>('[autofocus]') ?? []) {
+            if (!isAvailable(autofocus)) continue;
+            autofocus.focus({ preventScroll: true });
+            if (getDeepActiveElement(autofocus.ownerDocument) === autofocus) return;
+        }
         focusBoundary(false);
     }
 
-    function leaveOverlay(): void {
+    function cancelFocusSession(): HTMLElement | null {
         clearNativeFocusTracking();
         focusGeneration++;
-        const wasTopOverlay = isTopOverlay(overlayEntry);
-        unregisterOverlay(overlayEntry);
         const opener = previouslyFocusedElement;
         previouslyFocusedElement = null;
+        return opener;
+    }
+
+    function leaveOverlay(restoreFocus = !rootState.isMediaQueryMatched && isFocusModal): void {
+        const opener = cancelFocusSession();
+        const wasTopOverlay = isTopOverlay(overlayEntry);
+        unregisterOverlay(overlayEntry);
         if (!wasTopOverlay || isFocusInTopOverlay()) return;
-        if (opener && isAvailable(opener)) opener.focus({ preventScroll: true });
+        if (restoreFocus && previousRootFocusManaged && opener && isAvailable(opener)) opener.focus({ preventScroll: true });
         if (!isFocusInTopOverlay()) focusTopOverlay();
     }
 
@@ -437,8 +468,10 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
         const candidates = getFocusableElements(event.shiftKey, active);
         const first = candidates[0] ?? panelElement;
         const last = candidates.at(-1) ?? panelElement;
-        // Also recover from focus on the panel itself or an element that became unavailable.
-        if (!candidates.includes(active as HTMLElement) || (event.shiftKey ? active === first : active === last)) {
+        // Internal programmatic/native noncandidates retain their native next position; escape recovery handles their outer boundary.
+        const isInside = panelElement?.contains(document.activeElement);
+        const isEmptyPanel = active === panelElement && candidates.length === 0;
+        if (!isInside || isEmptyPanel || (candidates.includes(active as HTMLElement) && (event.shiftKey ? active === first : active === last))) {
             event.preventDefault();
             focusBoundary(event.shiftKey);
         }
@@ -525,6 +558,8 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
             return;
         }
         if (rootState.isShown && useBackdrop !== 'static') {
+            // Cancel only the actual backdrop surface's default blur, preserving pointer defaults on consumer controls.
+            if (backdropElement && path.includes(backdropElement)) event.preventDefault();
             event.stopPropagation();
             rootState.toggleIsShown();
         }
@@ -534,7 +569,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
     function handleKeydown(event: KeyboardEvent): void {
         if (!rootState.isShown || rootState.isMediaQueryMatched) return;
         if (event.key === 'Tab') {
-            if (event.defaultPrevented) return;
+            if (event.defaultPrevented || !isOverlayActive()) return;
             trackNativeTab(event);
             trapFocus(event);
             return;
@@ -570,8 +605,10 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
             ? restOfProps['aria-labelledby']
             : restOfProps['aria-label'] !== undefined
               ? undefined
-              : rootState.titleId}
-        aria-modal={rootState.isShown && !rootState.isMediaQueryMatched ? true : undefined}
+              : rootState.isShown && !rootState.isMediaQueryMatched
+                ? rootState.titleId
+                : undefined}
+        aria-modal={rootState.isShown && !rootState.isMediaQueryMatched && isFocusModal ? true : undefined}
         onintrostart={(event) => {
             onShow.call(event.currentTarget, event);
             onIntroStart?.call(event.currentTarget, event);
@@ -595,6 +632,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
 
 {#if rootState.isBackdropShown}
     <div
+        bind:this={backdropElement}
         class={backDropClasses}
         onmousedown={handleBackdropMouseDown}
         role="presentation"

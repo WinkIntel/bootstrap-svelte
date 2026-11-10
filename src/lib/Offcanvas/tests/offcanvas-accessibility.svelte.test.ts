@@ -373,14 +373,16 @@ describe('Offcanvas overlay accessibility', () => {
         expect(focus).not.toHaveBeenCalled();
         expect(screen.getByRole('button', { name: 'Nested action' })).toHaveFocus();
     });
-    it('recovers Tab from the panel and from descendants that become unavailable', async () => {
+    it('retains native traversal from the panel and recovers an unavailable descendant escape', async () => {
         render(Fixture);
         await settled();
+        focusOpener();
+        const user = userEvent.setup();
         screen.getByTestId('panel').focus();
-        await fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
+        await user.tab({ shift: true });
         expect(screen.getByTestId('last-action')).toHaveFocus();
         screen.getByTestId('last-action').setAttribute('hidden', '');
-        await fireEvent.keyDown(window, { key: 'Tab' });
+        await user.tab();
         expect(screen.getByTestId('first-action')).toHaveFocus();
     });
     it('leaves inline content unfocused and starts/stops focus management at responsive crossings', async () => {
@@ -397,7 +399,7 @@ describe('Offcanvas overlay accessibility', () => {
         expect(screen.getByTestId('first-action')).toHaveFocus();
         emit(BreakpointMinimumMediaQuery.lg!, true);
         await settled();
-        expect(opener).toHaveFocus();
+        expect(screen.getByTestId('first-action')).toHaveFocus();
         expect(screen.getByTestId('panel')).not.toHaveAttribute('aria-modal');
     });
     it('keeps focus in the surviving Offcanvas after a Modal above it closes', async () => {

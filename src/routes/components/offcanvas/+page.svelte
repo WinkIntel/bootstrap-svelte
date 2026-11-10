@@ -352,20 +352,25 @@
         <h2 class="wk-quick-link">Accessibility and Focus</h2>
         <p>
             Give each panel an <code>Offcanvas.Title</code> or an explicit <code>aria-label</code> or <code>aria-labelledby</code> on
-            <code>Offcanvas.Root</code>. The first mounted title with a nonempty ID labels its nearest panel automatically. Generated title IDs remain
-            stable during hydration; changing or removing a title updates the association. Explicit naming attributes, including null or empty
-            opt-outs, take precedence. A panel without a title or an explicit name remains unnamed. Supply an explicit
+            <code>Offcanvas.Root</code>. The first mounted title with a nonempty ID labels its nearest overlay panel automatically. Generated title
+            IDs remain stable during hydration; changing or removing a title updates the association. Explicit naming attributes, including null or
+            empty opt-outs, take precedence. A panel without a title or an explicit name remains unnamed. Supply an explicit
             <code>aria-label</code> or <code>aria-labelledby</code> if an initially shown panel must be named in server-rendered markup before hydration.
         </p>
         <p>
-            When shown as an overlay, focus moves to the first available control (or the panel itself), and Tab and Shift+Tab wrap within the top
-            overlay. Dismissal or removal restores focus to an available opener, or into a surviving overlay. Responsive inline panels do not move or
-            trap focus. Use <code>onShow</code>, <code>onShown</code>, <code>onHide</code>, and <code>onHidden</code> for lifecycle callbacks.
+            Modal overlays retain valid focus already placed inside, otherwise prefer an available explicit <code>autofocus</code> target (including
+            <code>tabindex="-1"</code>), then the first sequential control or the panel itself. Tab and Shift+Tab wrap within the top modal overlay.
+            Dismissal or removal restores focus to an available opener or a surviving overlay. A panel with
+            <code>isBodyScrollable</code> enabled and <code>useBackdrop</code> disabled is nonmodal and leaves page keyboard focus usable without
+            entry, trapping or restoration. Responsive inline crossings stop focus management while preserving focus in still-visible content unless a
+            surviving modal overlay needs focus; generated title associations are omitted inline. Use <code>onShow</code>, <code>onShown</code>,
+            <code>onHide</code>, and
+            <code>onHidden</code> for lifecycle callbacks.
         </p>
         <p>
             Open shadow focus scopes remain traversable. Embedded content keeps native traversal, with sequential recovery when focus returns to the
             containing document; pointer interactions remain consumer-controlled. Closed-shadow internals, complex slot combinations, cross-origin
-            frame internals, and Safari/Firefox keyboard settings have not been validated.
+            frame internals, browser-chrome exits, and Safari/Firefox keyboard settings have not been validated.
         </p>
     </section>
 
