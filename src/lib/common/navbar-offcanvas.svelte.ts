@@ -165,6 +165,9 @@ export class OffcanvasRootState {
     #isShown: boolean = $state(false);
     #useBackdrop: OffcanvasBackdrop = $state(true);
     #navbarRootState: NavbarRootState | undefined;
+    // Ordered, plain registry: title effects write titleId without subscribing to it.
+    #titles: { key: symbol; id: string | null | undefined }[] = [];
+    titleId: string | undefined = $state(undefined);
     readonly showOnBreakpoint: OffcanvasBreakpoint | undefined = $derived.by(() => {
         const breakpoint = resolveBreakpoint(this.props.showOnBreakpoint);
         // Bootstrap has no offcanvas-xs mode. Legacy/untyped xs follows omitted-prop behavior.
@@ -212,6 +215,18 @@ export class OffcanvasRootState {
 
     isControllingTogglerEvent(event: MouseEvent): boolean {
         return this.#navbarRootState?.isTogglerEvent(event) ?? false;
+    }
+
+    registerTitleId(key: symbol, id: string | null | undefined) {
+        const entry = this.#titles.find((title) => title.key === key);
+        if (entry) entry.id = id;
+        else this.#titles.push({ key, id });
+        this.titleId = this.#titles.find((title) => title.id)?.id ?? undefined;
+    }
+
+    unregisterTitleId(key: symbol) {
+        this.#titles = this.#titles.filter((title) => title.key !== key);
+        this.titleId = this.#titles.find((title) => title.id)?.id ?? undefined;
     }
 
     registerControlledPanel() {
@@ -303,4 +318,8 @@ export function initOffcanvasRootState(props: Offcanvas.RootProps): OffcanvasRoo
 export function initOffcanvasHeaderState(props: Offcanvas.HeaderProps): OffcanvasHeaderState {
     const rootState = OffcanvasRootContext.get();
     return new OffcanvasHeaderState(props, rootState);
+}
+
+export function getOptionalOffcanvasRootState(): OffcanvasRootState | undefined {
+    return OffcanvasRootContext.getOr(undefined);
 }
