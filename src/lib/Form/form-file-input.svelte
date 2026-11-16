@@ -106,11 +106,10 @@ Native form reset clears the selection, sets `files` to null, and synchronizes t
     class={classes}
     onchange={handleChange}
     value={undefined}
-    use:syncFormReset={() => {
-        const input = elementRef as HTMLInputElement;
+    use:syncFormReset={(state) => {
         // Browsers may clear the selected FileList in place. A distinct null
         // publishes the empty selection to reactive consumers of bind:files.
         files = null;
-        value = input.value;
+        value = state.value;
     }}
     type="file" />

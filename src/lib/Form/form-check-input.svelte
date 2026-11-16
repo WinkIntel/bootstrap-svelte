@@ -49,6 +49,7 @@ Bootstrap-styled checkbox input component for boolean selections.
     import { noop, uniqueClsx } from '$lib/common/index.js';
     import type { ChangeEventHandler } from 'svelte/elements';
     import type { Form } from './index.js';
+    import { syncFormReset } from './form-reset.js';
 
     let {
         'aria-invalid': ariaInvalid,
@@ -80,15 +81,15 @@ Bootstrap-styled checkbox input component for boolean selections.
         if (group !== null) {
             if (!Array.isArray(group)) {
                 console.warn('Form.CheckInput: `group` prop should be an array when used for grouped inputs.');
-                return;
-            }
-            const isIncluded = group.includes(value);
-            if (event.currentTarget.checked && !isIncluded) {
-                // Add the value to the group array
-                group = [...(group as unknown[]), value];
-            } else if (!event.currentTarget.checked && isIncluded) {
-                // Remove the value from the group array
-                group = (group as unknown[]).filter((val) => val !== value);
+            } else {
+                const isIncluded = group.includes(value);
+                if (event.currentTarget.checked && !isIncluded) {
+                    // Add the value to the group array
+                    group = [...(group as unknown[]), value];
+                } else if (!event.currentTarget.checked && isIncluded) {
+                    // Remove the value from the group array
+                    group = (group as unknown[]).filter((val) => val !== value);
+                }
             }
         }
         if (onchange !== null) {
@@ -116,5 +117,11 @@ Bootstrap-styled checkbox input component for boolean selections.
     bind:checked
     class={classes}
     onchange={handleChange}
+    use:syncFormReset={(state) => {
+        if (!Array.isArray(group)) return;
+        const included = group.includes(value);
+        if (state.checked && !included) group = [...group, value];
+        else if (!state.checked && included) group = group.filter((member) => member !== value);
+    }}
     {value}
     type="checkbox" />

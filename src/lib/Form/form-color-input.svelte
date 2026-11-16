@@ -86,7 +86,7 @@ Bootstrap-styled color picker input component.
     oninput={handleInput}
     value={initialColor}
     defaultValue={defaultValue === undefined ? initialColor : defaultValue}
-    use:syncFormReset={() => {
-        value = (elementRef as HTMLInputElement).value;
+    use:syncFormReset={(state) => {
+        value = state.value;
     }}
     type="color" />

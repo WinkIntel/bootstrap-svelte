@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest';
 import Fixture from './form-reset-correctness-test.svelte';
 
 const settleReset = async () => {
-    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve, 0));
     await tick();
 };
 
