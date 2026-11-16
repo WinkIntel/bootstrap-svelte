@@ -23,7 +23,7 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
 - `colorVariant` (string): Optional. Button style variant for the label.
 - `disabled` (boolean): Optional. Disables the input and label interaction.
 - `elementRef` (HTMLInputElement): Optional. Reference to the input element.
-- `group` (string | unknown[]): Optional. Bindable group value for grouped radio or checkbox inputs. A radio group may initially be undefined; supply distinct values for its options.
+- `group` (string | unknown[]): Optional. Bindable group value for grouped radio or checkbox inputs. A radio group may initially be undefined; supply distinct values for its options. An already defined group retains selection authority over checked.
 - `id` (string): Optional. Input id used by the label `for` attribute.
 - `labelClass` (string): Optional. Additional CSS classes for the label.
 - `labelElementRef` (HTMLLabelElement): Optional. Reference to the label element.
@@ -32,6 +32,7 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
 -->
 <script lang="ts">
     import { noop, uniqueClsx } from '$lib/common/index.js';
+    import { untrack } from 'svelte';
     import type { ChangeEventHandler } from 'svelte/elements';
     import type { ButtonCheckRootProps } from './types.js';
 
@@ -59,7 +60,10 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
     let labelClasses: string = $derived(uniqueClsx('btn', colorVariant && `btn-${colorVariant}`, labelClass));
     let isCheckboxGroup: boolean = $derived(type === 'checkbox' && group !== undefined);
     let radioValue = $derived(value === undefined ? 'on' : value);
-    let controlsChecked = $derived(type === 'radio' && checked !== undefined);
+    // A group supplied at mount keeps its established selection authority.
+    // Undefined groups still accept a standalone checked seed and bind:group.
+    const hasInitialGroup = untrack(() => group !== undefined);
+    let controlsChecked = $derived(type === 'radio' && checked !== undefined && !hasInitialGroup);
     const unset = Symbol('unset');
     const controlledSnapshot: {
         checked: boolean | null | undefined | typeof unset;

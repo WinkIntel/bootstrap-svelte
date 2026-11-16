@@ -24,6 +24,60 @@ async function changeInputs(container: HTMLElement) {
 }
 
 describe('native color/file form reset', () => {
+    test('makes native clearing observable when the selected FileList identity is retained', async () => {
+        const { container } = render(Fixture);
+        const input = container.querySelector('input[type=file]') as HTMLInputElement;
+        await userEvent.setup().upload(input, new File(['data'], 'selected.txt'));
+        const selected = input.files!;
+        expect(screen.getByTestId('file-name')).toHaveTextContent('selected.txt');
+        // userEvent exposes a native-like immutable FileList snapshot rather than
+        // Chromium's mutable selection. The reset listener below models only that
+        // platform identity behavior; the real form still performs its default reset.
+        let cleared = false;
+        const nativeLikeFiles = new Proxy(Object.create(Object.getPrototypeOf(selected)) as FileList, {
+            get(_target, key) {
+                if (cleared && key === 'length') return 0;
+                if (cleared && key === '0') return undefined;
+                if (key === 'item') return (index: number) => (cleared ? null : selected.item(index));
+                if (key === Symbol.iterator)
+                    return function* () {
+                        if (!cleared) yield* selected;
+                    };
+                return Reflect.get(selected, key, selected);
+            }
+        });
+        Object.defineProperty(input, 'files', { configurable: true, get: () => nativeLikeFiles });
+        delete (input as unknown as Record<string, unknown>).value;
+        await fireEvent.change(input);
+        const form = container.querySelector('form') as HTMLFormElement;
+        form.addEventListener('reset', () => {
+            cleared = true;
+        });
+        form.reset();
+        await settleReset();
+        expect(input.files).toBe(nativeLikeFiles);
+        expect(input.files).toHaveLength(0);
+        expect(screen.getByTestId('file-name')).toHaveTextContent('none');
+    });
+    test('preserves an explicit native defaultValue and its reactive updates', async () => {
+        const { container, rerender } = render(Fixture, { defaultColor: '#ffffff' });
+        const input = container.querySelector('input[type=color]') as HTMLInputElement;
+        const form = container.querySelector('form') as HTMLFormElement;
+        expect(input.value).toBe('#563d7c');
+        expect(input.defaultValue).toBe('#ffffff');
+        await fireEvent.input(input, { target: { value: '#123456' } });
+        form.reset();
+        await settleReset();
+        expect(input.value).toBe('#ffffff');
+        expect(screen.getByTestId('color')).toHaveTextContent('#ffffff');
+        await rerender({ defaultColor: '#abcdef' });
+        expect(input.defaultValue).toBe('#abcdef');
+        await fireEvent.input(input, { target: { value: '#123456' } });
+        form.reset();
+        await settleReset();
+        expect(input.value).toBe('#abcdef');
+        expect(screen.getByTestId('color')).toHaveTextContent('#abcdef');
+    });
     test.each([false, true])('synchronizes bound state after reset (external=%s)', async (external) => {
         const { container } = render(Fixture, { external });
         const { color, file, form } = await changeInputs(container);
@@ -32,7 +86,7 @@ describe('native color/file form reset', () => {
         expect(color.value).toBe('#563d7c');
         expect(screen.getByTestId('color')).toHaveTextContent('#563d7c');
         expect(file.files).toHaveLength(0);
-        expect(screen.getByTestId('files')).toHaveTextContent('0');
+        expect(screen.getByTestId('files')).toHaveTextContent('null');
         expect(screen.getByTestId('file-value')).toHaveTextContent('empty');
         expect(new FormData(form).get('color')).toBe('#563d7c');
         expect((new FormData(form).get('file') as File).name).toBe('');
@@ -49,7 +103,7 @@ describe('native color/file form reset', () => {
         (container.querySelector('#other-reset-form') as HTMLFormElement).reset();
         await settleReset();
         expect(screen.getByTestId('color')).toHaveTextContent('#563d7c');
-        expect(screen.getByTestId('files')).toHaveTextContent('0');
+        expect(screen.getByTestId('files')).toHaveTextContent('null');
     });
     test('honors a canceled reset', async () => {
         const { container } = render(Fixture, { cancel: true });

@@ -17,7 +17,7 @@ Bootstrap-styled file input component for file uploads.
 // Large sizing
 <Form.FileInput accept=".png, .jpg, image/png, image/jpeg" name="newFile" sizing="lg" />
 ```
-Native form reset clears the selection and synchronizes `files` and the compatibility `value` binding without a change callback.
+Native form reset clears the selection, sets `files` to null, and synchronizes the compatibility `value` binding without a change callback.
 
 ### Props
 - `class` (string): Optional. Additional CSS classes to apply to the input.
@@ -108,7 +108,9 @@ Native form reset clears the selection and synchronizes `files` and the compatib
     value={undefined}
     use:syncFormReset={() => {
         const input = elementRef as HTMLInputElement;
-        files = input.files;
+        // Browsers may clear the selected FileList in place. A distinct null
+        // publishes the empty selection to reactive consumers of bind:files.
+        files = null;
         value = input.value;
     }}
     type="file" />

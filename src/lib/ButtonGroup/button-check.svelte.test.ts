@@ -169,6 +169,16 @@ describe('ButtonCheck radio correctness', () => {
         const { container } = render(ButtonCheck, { type: 'radio' });
         expect((container.querySelector('input') as HTMLInputElement).checked).toBe(false);
     });
+    test.each([
+        { initial: 'b', initialChecked: true, aChecked: false, bChecked: true },
+        { initial: 'a', initialChecked: false, aChecked: true, bChecked: false }
+    ])('preserves defined group $initial over conflicting checked=$initialChecked', ({ initial, initialChecked, aChecked, bChecked }) => {
+        const { container } = render(RadioBinding, { initial, initialChecked });
+        const [a, b] = Array.from(container.querySelectorAll('input'));
+        expect(a?.checked).toBe(aChecked);
+        expect(b?.checked).toBe(bChecked);
+        expect(container.querySelector('output')).toHaveTextContent(`${initial}:0:${initialChecked}`);
+    });
     test('synchronizes explicit checked and later group selection without overriding siblings', async () => {
         const { container } = render(RadioBinding, { initialChecked: true });
         const [a, b] = Array.from(container.querySelectorAll('input'));

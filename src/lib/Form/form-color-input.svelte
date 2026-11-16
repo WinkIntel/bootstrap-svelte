@@ -23,7 +23,7 @@ Bootstrap-styled color picker input component.
 - `isInvalid` (boolean): Optional. Indicates whether the input is invalid. If undefined, no validation styles are applied.
 - `isValid` (boolean): Optional. Indicates whether the input is valid. If undefined, no validation styles are applied.
 - `sizing` ('sm' | 'lg'): Optional. Controls the size of the color picker.
-- `value` (string): Optional. Bindable hex color (e.g., "#563d7c"). Defaults to black. The initial color is rendered for SSR and is the native form reset default; reset updates the binding without an input callback.
+- `value` (string): Optional. Bindable hex color (e.g., "#563d7c"). Defaults to black. The initial color is rendered for SSR and is the native form reset default unless `defaultValue` is supplied; reset updates the binding without an input callback.
 -->
 <script lang="ts">
     import { untrack } from 'svelte';
@@ -35,6 +35,7 @@ Bootstrap-styled color picker input component.
     let {
         'aria-invalid': ariaInvalid,
         class: classValues,
+        defaultValue,
         elementRef = $bindable(null),
         isInvalid,
         isValid,
@@ -84,7 +85,7 @@ Bootstrap-styled color picker input component.
     class={classes}
     oninput={handleInput}
     value={initialColor}
-    defaultValue={initialColor}
+    defaultValue={defaultValue === undefined ? initialColor : defaultValue}
     use:syncFormReset={() => {
         value = (elementRef as HTMLInputElement).value;
     }}
