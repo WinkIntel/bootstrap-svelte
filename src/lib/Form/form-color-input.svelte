@@ -23,9 +23,11 @@ Bootstrap-styled color picker input component.
 - `isInvalid` (boolean): Optional. Indicates whether the input is invalid. If undefined, no validation styles are applied.
 - `isValid` (boolean): Optional. Indicates whether the input is valid. If undefined, no validation styles are applied.
 - `sizing` ('sm' | 'lg'): Optional. Controls the size of the color picker.
-- `value` (string): Optional. The color value in hex format (e.g., "#563d7c"). If undefined, the input is empty.
+- `value` (string): Optional. Bindable hex color (e.g., "#563d7c"). Defaults to black. The initial color is rendered for SSR and is the native form reset default unless `defaultValue` is supplied; reset updates the binding without an input callback.
 -->
 <script lang="ts">
+    import { untrack } from 'svelte';
+    import { syncFormReset } from './form-reset.js';
     import { uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
     import type { Form } from './index.js';
@@ -33,6 +35,7 @@ Bootstrap-styled color picker input component.
     let {
         'aria-invalid': ariaInvalid,
         class: classValues,
+        defaultValue,
         elementRef = $bindable(null),
         isInvalid,
         isValid,
@@ -55,8 +58,10 @@ Bootstrap-styled color picker input component.
         )
     );
 
-    // Keep the input value in sync with the prop without using `bind:value` or the
-    // `value` attribute directly. Chrome logs a warning whenever an `<input type="color">`
+    const initialColor = untrack(() => value || '#000000');
+
+    // Keep the input value in sync with the prop without using `bind:value` or
+    // a reactive `value` attribute. Chrome logs a warning whenever an `<input type="color">`
     // value transiently becomes `""` during hydration (see sveltejs/svelte#8446);
     // setting the property imperatively via an effect avoids that transient state.
     $effect(() => {
@@ -79,4 +84,9 @@ Bootstrap-styled color picker input component.
     bind:this={elementRef}
     class={classes}
     oninput={handleInput}
+    value={initialColor}
+    defaultValue={defaultValue === undefined ? initialColor : defaultValue}
+    use:syncFormReset={(state) => {
+        value = state.value;
+    }}
     type="color" />

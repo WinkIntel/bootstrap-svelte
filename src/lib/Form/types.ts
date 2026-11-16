@@ -1,4 +1,3 @@
-import type { enhance } from '$app/forms';
 import type {
     DivElement,
     FormControlSize,
@@ -118,8 +117,9 @@ export type FormRadioInputProps = Omit<InputElement, 'type'> &
 export type FormRangeInputProps = Omit<InputElement, 'type'> & FixedInputType<'range'>;
 export type FormRadioLabelProps = LabelElement;
 export type FormRootProps = FormElement & {
+    /** A form action, including SvelteKit enhance or a custom progressive enhancement action. */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    enhance?: typeof enhance | ((el: HTMLFormElement, events?: any) => ReturnType<typeof enhance>); // Accepts a custom enhance function (e.g., SuperForm's enhance)
+    enhance?: (form: HTMLFormElement, ...args: any[]) => { update?(...args: any[]): void; destroy?(): void } | void;
     needsValidation?: boolean;
     wasValidated?: boolean;
 };
@@ -139,6 +139,7 @@ export type FormSelectProps = SelectElement & {
 };
 export type FormSwitchInputProps = Omit<InputElement, 'type'> &
     FixedInputType<'checkbox'> & {
+        isIndeterminate?: boolean;
         isInvalid?: boolean;
         isValid?: boolean;
     };
