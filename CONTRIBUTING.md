@@ -62,6 +62,16 @@ Do not automatically lower floors, exclude affected production files, or accept 
 new baseline merely because CI fails. Retain behavioral regression tests regardless
 of any approved attribution adjustment.
 
+### Component type import names
+
+Keep the original type import names unless a compiler diagnostic requires a local
+alias. The existing `AccordionTypes`, `FormTypes` and other root-component
+namespace aliases are targeted exceptions: without them, the packed consumer
+reports TypeScript `TS2440` because the generated declaration imports a namespace
+with the same name as its local component value and instance type. The strict consumer
+check reproduces these conflicts with `skipLibCheck: false`; matching names alone
+are not a reason to introduce aliases elsewhere.
+
 ### Union component declarations
 
 The packed declarations for Button, Dropdown.Toggle, Form.CheckLabel,
