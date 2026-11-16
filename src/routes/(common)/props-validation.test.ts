@@ -225,6 +225,15 @@ describe('component hover documentation', () => {
         ]);
     });
 
+    test('resolves locally aliased namespace and flat props imports without accepting unknown props', () => {
+        const fixture = (prop: string, annotation = 'PaginationTypes.RootProps') =>
+            `<!--\n@component\n### Props\n- \`${prop}\`: Optional.\n-->\n<script lang="ts">import type { Pagination as PaginationTypes } from '$lib/index.js'; import type { PaginationRootProps as Props } from '$lib/Pagination/types.js'; let { ...props }: ${annotation} = $props();</script>`;
+        expect(validateHover(fixture('class')).errors).toEqual([]);
+        expect(validateHover(fixture('madeUp')).errors).toEqual(['madeUp is absent from PaginationRootProps']);
+        expect(validateHover(fixture('class', 'Props')).errors).toEqual([]);
+        expect(validateHover(fixture('class', 'UnknownTypes.RootProps')).errors).toEqual(['Documented props have no resolved $props() type']);
+    });
+
     test('ignores nested option keys and non-prop lists', () => {
         const source =
             '<!--\n@component\n### Sub-components\n- `Table.Data`: cell\n### Props\n- `responsiveProps`: options\n  - `breakpoint`: width\n-->\n<script>let { ...props }: Table.RootProps = $props();</script>';
@@ -280,7 +289,7 @@ ${'#'.repeat(level)} Events
             return result.errors.map((error) => `${relative(root, file)}: ${error}`);
         });
         expect(errors).toEqual([]);
-        expect(total).toEqual({ blocks: 114, props: 644 });
+        expect(total).toEqual({ blocks: 114, props: 649 });
         expect(validateHover(readFileSync(join(root, 'src/lib/Form/form-feedback.svelte'), 'utf8'))).toEqual({
             blocks: 1,
             props: 5,

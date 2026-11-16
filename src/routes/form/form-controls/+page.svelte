@@ -52,9 +52,18 @@
         </ul>
     </section>
 
+    <p>
+        Checkboxes and switches support array <code>bind:group</code> and the native <code>indeterminate</code> alias. An explicit
+        <code>isIndeterminate</code> takes precedence, including false. Native form reset restores the initial color and clears file selections, updating
+        their bindings without input or change callbacks.
+    </p>
+
     <section class="mb-4" id="control-examples">
         <h2 class="wk-quick-link mb-3">ButtonCheck Inputs</h2>
-        <p>Use <code>ButtonCheck</code> to bind checkbox and radio toggle inputs.</p>
+        <p>
+            Use <code>ButtonCheck</code> to bind checkbox and radio toggle inputs. Standalone radios accept <code>checked</code>; bound radio groups
+            may start undefined.
+        </p>
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">

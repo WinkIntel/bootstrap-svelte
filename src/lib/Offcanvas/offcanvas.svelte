@@ -88,7 +88,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
     import { acquireBodyScrollLock, releaseBodyScrollLock } from '$lib/common/scrollbar.js';
     import { onDestroy, onMount, tick } from 'svelte';
     import { fade, fly } from 'svelte/transition';
-    import type { Offcanvas } from './index.js';
+    import type { Offcanvas as OffcanvasTypes } from './index.js';
 
     // Generate a unique ID for the offcanvas element, in case one is not provided...
     const uid: string = $props.id();
@@ -116,7 +116,7 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
         onShow = noop,
         onShown = noop,
         ...restOfProps
-    }: Offcanvas.RootProps = $props();
+    }: OffcanvasTypes.RootProps = $props();
 
     // Initialize the root state of the offcanvas component...
     let bodyElement: HTMLElement | null = $state(null);
@@ -137,10 +137,10 @@ containing document. Closed-shadow internals, complex slots, cross-origin intern
     let overlayZIndex: number | undefined = $state(undefined);
     let backdropZIndex: number | undefined = $state(undefined);
     const unset = Symbol('unset');
-    let previousIsShown: Offcanvas.RootProps['isShown'] | typeof unset = unset;
+    let previousIsShown: OffcanvasTypes.RootProps['isShown'] | typeof unset = unset;
     let previousRootIsOverlayShown = false;
     let previousRootFocusManaged = false;
-    let previousUseBackdrop: Offcanvas.RootProps['useBackdrop'] | typeof unset = unset;
+    let previousUseBackdrop: OffcanvasTypes.RootProps['useBackdrop'] | typeof unset = unset;
     const rootState: OffcanvasRootState = initOffcanvasRootState({
         get id() {
             return id;

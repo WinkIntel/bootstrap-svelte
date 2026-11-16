@@ -48,12 +48,12 @@ Root component for tab content. Used with tabs navigation.
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
     import { initTabRootState, TabRootState } from '../common/nav-tab.svelte.js';
-    import type { Tab } from './index.js';
+    import type { Tab as TabTypes } from './index.js';
 
     // Generate a unique ID for the card element, in case one is not provided...
     const uid: string = $props.id();
 
-    let { children, class: classValues, elementRef = $bindable(null), id = `tab-${uid}`, ...restOfProps }: Tab.RootProps = $props();
+    let { children, class: classValues, elementRef = $bindable(null), id = `tab-${uid}`, ...restOfProps }: TabTypes.RootProps = $props();
 
     const rootState: TabRootState = initTabRootState({
         get id() {

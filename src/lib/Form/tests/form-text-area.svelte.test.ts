@@ -235,3 +235,10 @@ describe('Form.TextArea', () => {
         expect(field).toHaveAttribute('aria-invalid', 'true');
     });
 });
+
+test.each([undefined, null])('nonresizable style omits absent style text (%s)', (style) => {
+    const { container } = render(TextArea, { isResizable: false, style } as never);
+    const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
+    expect(textarea.style.resize).toBe('none');
+    expect(textarea.getAttribute('style')).not.toMatch(/undefined|null/);
+});

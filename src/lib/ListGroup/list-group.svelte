@@ -65,7 +65,7 @@ A component that serves as a container for list group items. It can be used to c
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
-    import type { ListGroup } from './index.js';
+    import type { ListGroup as ListGroupTypes } from './index.js';
 
     // Generate a unique ID for the card element, in case one is not provided...
     const uid: string = $props.id();
@@ -79,7 +79,7 @@ A component that serves as a container for list group items. It can be used to c
         isFlush,
         isNumbered,
         ...restOfProps
-    }: ListGroup.RootProps = $props();
+    }: ListGroupTypes.RootProps = $props();
 
     let elementType: string = $derived(isNumbered ? 'ol' : 'ul');
 

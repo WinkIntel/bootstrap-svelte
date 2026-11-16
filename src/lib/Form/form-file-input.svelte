@@ -17,6 +17,8 @@ Bootstrap-styled file input component for file uploads.
 // Large sizing
 <Form.FileInput accept=".png, .jpg, image/png, image/jpeg" name="newFile" sizing="lg" />
 ```
+Native form reset clears the selection, sets `files` to null, and synchronizes the compatibility `value` binding without a change callback.
+
 ### Props
 - `class` (string): Optional. Additional CSS classes to apply to the input.
 - `elementRef` (HTMLInputElement): Optional. Reference to the input DOM element.
@@ -27,6 +29,7 @@ Bootstrap-styled file input component for file uploads.
 - `value` (string): Deprecated compatibility binding. Prefer `files`; non-empty parent values are ignored by the platform input.
 -->
 <script lang="ts">
+    import { syncFormReset } from './form-reset.js';
     import { uniqueClsx } from '$lib/common/css.js';
     import type { ChangeEventHandler } from 'svelte/elements';
     import type { Form } from './index.js';
@@ -103,4 +106,10 @@ Bootstrap-styled file input component for file uploads.
     class={classes}
     onchange={handleChange}
     value={undefined}
+    use:syncFormReset={(state) => {
+        // Browsers may clear the selected FileList in place. A distinct null
+        // publishes the empty selection to reactive consumers of bind:files.
+        files = null;
+        value = state.value;
+    }}
     type="file" />

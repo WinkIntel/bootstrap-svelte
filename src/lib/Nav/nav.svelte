@@ -54,7 +54,7 @@ Root navigation component that contains navigation items and links.
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
     import { initNavRootState, isInTabStrip, NavRootState } from '$lib/common/nav-tab.svelte.js';
-    import type { Nav } from './index.js';
+    import type { Nav as NavTypes } from './index.js';
 
     // Generate a unique ID for the component, in case one is not provided...
     const uid: string = $props.id();
@@ -72,7 +72,7 @@ Root navigation component that contains navigation items and links.
         role,
         verticalBreakpoint,
         ...restOfProps
-    }: Nav.RootProps = $props();
+    }: NavTypes.RootProps = $props();
 
     let isVertical = $derived(!!verticalBreakpoint); // !! to convert to boolean
     // Svelte context is read during initialization, not when reactive props update.

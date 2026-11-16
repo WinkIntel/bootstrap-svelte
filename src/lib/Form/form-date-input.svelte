@@ -49,7 +49,7 @@ Bootstrap-styled date input component for selecting dates.
         'aria-invalid': ariaInvalid,
         autocomplete = 'off',
         class: classValues,
-        'data-form-type': dataFormType = 'email',
+        'data-form-type': dataFormType = undefined,
         'data-lpignore': dataLpignore = undefined,
         elementRef = $bindable(null),
         isInvalid,
