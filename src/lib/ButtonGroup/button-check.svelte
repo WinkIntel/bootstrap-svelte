@@ -18,7 +18,7 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
 
 ### Props
 - `autocomplete` (string): Optional. Defaults to `'off'`.
-- `checked` (boolean): Optional. Bindable checked state for checkbox inputs and standalone radio selection.
+- `checked` (boolean): Optional. Bindable checked state for checkbox inputs and standalone radio selection. Use shared `bind:group` for same-name radios to track sibling deselection; browsers do not emit change on the deselected radio.
 - `class` (string): Optional. Additional CSS classes for the input.
 - `colorVariant` (string): Optional. Button style variant for the label.
 - `disabled` (boolean): Optional. Disables the input and label interaction.
@@ -33,6 +33,7 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
 <script lang="ts">
     import { noop, uniqueClsx } from '$lib/common/index.js';
     import { untrack } from 'svelte';
+    import { syncFormReset } from '../Form/form-reset.js';
     import type { ChangeEventHandler } from 'svelte/elements';
     import type { ButtonCheckRootProps } from './types.js';
 
@@ -64,41 +65,56 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
     // Undefined groups still accept a standalone checked seed and bind:group.
     const hasInitialGroup = untrack(() => group !== undefined);
     let controlsChecked = $derived(type === 'radio' && checked !== undefined && !hasInitialGroup);
+    const initialRadioChecked = untrack(() => checked === true && !hasInitialGroup);
     const unset = Symbol('unset');
     const controlledSnapshot: {
         checked: boolean | null | undefined | typeof unset;
         group: unknown | typeof unset;
-    } = { checked: unset, group: unset };
+        value: unknown | typeof unset;
+    } = { checked: unset, group: unset, value: unset };
 
     $effect(() => {
         const currentChecked = checked;
         const currentGroup = group;
+        const currentValue = radioValue;
 
         if (!controlsChecked) {
             controlledSnapshot.checked = unset;
             controlledSnapshot.group = unset;
+            controlledSnapshot.value = unset;
             return;
         }
 
         const isInitialSync = controlledSnapshot.checked === unset;
         const checkedChanged = !isInitialSync && controlledSnapshot.checked !== currentChecked;
         const groupChanged = !isInitialSync && controlledSnapshot.group !== currentGroup;
+        const previousValue = controlledSnapshot.value;
+        const valueChanged = !isInitialSync && previousValue !== currentValue;
 
         controlledSnapshot.checked = currentChecked;
         controlledSnapshot.group = currentGroup;
+        controlledSnapshot.value = currentValue;
 
         // `checked` establishes the initial selection and drives later explicit
         // checked updates. Group updates are authoritative otherwise so sibling
         // radios and parent assignments can clear this radio without ping-ponging.
         if (isInitialSync || (checkedChanged && !groupChanged)) {
-            const nextGroup = currentChecked ? radioValue : currentGroup === radioValue ? undefined : currentGroup;
+            const nextGroup = currentChecked ? currentValue : currentGroup === currentValue ? undefined : currentGroup;
             if (currentGroup !== nextGroup) {
                 group = nextGroup;
             }
         } else if (groupChanged) {
-            const nextChecked = currentGroup === radioValue;
+            const nextChecked = currentGroup === currentValue;
             if (currentChecked !== nextChecked) {
                 checked = nextChecked;
+            }
+        } else if (valueChanged) {
+            // Migrate only a checked selection that still owns its old value.
+            // Established groups and simultaneous parent assignments keep authority.
+            if (currentChecked && currentGroup === previousValue) {
+                group = currentValue;
+            } else {
+                checked = currentGroup === currentValue;
             }
         }
     });
@@ -117,6 +133,33 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
         bind:this={elementRef}
         bind:group
         checked={controlsChecked ? checked : undefined}
+        defaultChecked={restOfProps.defaultChecked === undefined ? initialRadioChecked : restOfProps.defaultChecked}
+        use:syncFormReset={() => {
+            if (!controlsChecked) return;
+            const input = elementRef as HTMLInputElement;
+            // Svelte's group-reset hook can overwrite checked before this task.
+            // Recover the native radio default: the last default-checked member
+            // of this named/form-owned group wins, rather than every true default.
+            let selected = input.defaultChecked;
+            if (selected && input.name && input.form) {
+                let lastDefault: Element | undefined;
+                for (const element of Array.from(input.form.elements)) {
+                    if (element.tagName !== 'INPUT') continue;
+                    const member = element as HTMLInputElement;
+                    if (
+                        member.type === 'radio' &&
+                        member.name === input.name &&
+                        member.defaultChecked &&
+                        member.getRootNode() === input.getRootNode()
+                    )
+                        lastDefault = member;
+                }
+                selected = lastDefault === input;
+            }
+            checked = selected;
+            if (selected) group = radioValue;
+            else if (group === radioValue) group = null;
+        }}
         {autocomplete}
         class={inputClasses}
         {disabled}
