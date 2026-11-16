@@ -62,7 +62,7 @@ for the supplied content. Consumer accessible names and other attributes remain 
     import { createPopper, type Instance } from '@popperjs/core';
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
-    import type { Tooltip } from './index.js';
+    import type { Tooltip as TooltipTypes } from './index.js';
 
     // Generate a unique ID for the component, in case one is not provided...
     const uid: string = $props.id();
@@ -89,7 +89,7 @@ for the supplied content. Consumer accessible names and other attributes remain 
         type = 'tooltip',
         useFade = true,
         ...restOfProps
-    }: Tooltip.RootProps = $props();
+    }: TooltipTypes.RootProps = $props();
 
     // Keep lifecycle identity private while mirroring the consumer-bindable ref.
     let panelElement: HTMLDivElement | null = $state(null);
@@ -100,7 +100,7 @@ for the supplied content. Consumer accessible names and other attributes remain 
 
     // Set defaults based on type
     let effectiveId: string = $derived(id || `${type}-${uid}`);
-    let effectivePlacement: Tooltip.RootProps['placement'] = $derived(placement || (type === 'tooltip' ? 'top' : 'right'));
+    let effectivePlacement: TooltipTypes.RootProps['placement'] = $derived(placement || (type === 'tooltip' ? 'top' : 'right'));
     let effectiveTrigger: string = $derived(trigger || (type === 'tooltip' ? 'hover focus' : 'click'));
     const unset = Symbol('unset');
     let previousTrigger: string | typeof unset = unset;

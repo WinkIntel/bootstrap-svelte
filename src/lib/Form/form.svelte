@@ -20,7 +20,7 @@ Form container with optional progressive enhancement and Bootstrap validation cl
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
-    import type { Form } from './index.js';
+    import type { Form as FormTypes } from './index.js';
 
     let {
         children,
@@ -30,7 +30,7 @@ Form container with optional progressive enhancement and Bootstrap validation cl
         needsValidation = false,
         wasValidated = false,
         ...restOfProps
-    }: Form.RootProps = $props();
+    }: FormTypes.RootProps = $props();
 
     let classes: string = $derived(
         uniqueClsx(
