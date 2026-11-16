@@ -132,7 +132,7 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
         {...restOfProps}
         bind:this={elementRef}
         bind:group
-        checked={controlsChecked ? checked : undefined}
+        {...controlsChecked ? { checked } : {}}
         defaultChecked={restOfProps.defaultChecked === undefined ? initialRadioChecked : restOfProps.defaultChecked}
         use:syncFormReset={() => {
             if (!controlsChecked) return;

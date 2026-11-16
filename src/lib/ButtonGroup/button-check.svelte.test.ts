@@ -3,6 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, test } from 'vitest';
+import Ownership from './tests/button-check-ownership-test.svelte';
 import RadioBinding from './tests/button-check-radio-binding-test.svelte';
 import ButtonCheck from './button-check.svelte';
 import type { ButtonCheckRootProps } from './types.js';
@@ -210,5 +211,38 @@ describe('ButtonCheck radio correctness', () => {
         await fireEvent.click(screen.getByText('Select A'));
         expect(a?.checked).toBe(true);
         expect(b?.checked).toBe(false);
+    });
+});
+
+describe('ButtonCheck native group ownership transitions', () => {
+    test('preserves the existing checked-release behavior and later parent group control', async () => {
+        const { container } = render(Ownership);
+        const [a, b] = Array.from(container.querySelectorAll('input'));
+        expect(a?.checked).toBe(true);
+        await fireEvent.click(screen.getByText('Release checked'));
+        // Existing client behavior at bb981f8 also clears the DOM property here;
+        // this SSR-only correction preserves that transition and the parent group.
+        expect(a?.checked).toBe(false);
+        expect(b?.checked).toBe(false);
+        expect(container.querySelector('output')).toHaveTextContent('"a":undefined');
+        await fireEvent.click(screen.getByText('Select B'));
+        expect(a?.checked).toBe(false);
+        expect(b?.checked).toBe(true);
+    });
+    test('retains a parent selection when false checked control is released', async () => {
+        const { container } = render(Ownership);
+        await fireEvent.click(screen.getByText('Select B'));
+        await fireEvent.click(screen.getByText('Release checked'));
+        const [a, b] = Array.from(container.querySelectorAll('input'));
+        expect(a?.checked).toBe(false);
+        expect(b?.checked).toBe(true);
+        expect(container.querySelector('output')).toHaveTextContent('"b":undefined');
+    });
+    test('preserves native proxy-to-raw group equality through an unrelated class rerender', async () => {
+        const { container } = render(Ownership, { objectGroup: true, initialChecked: false });
+        expect(container.querySelector('input')?.checked).toBe(true);
+        await fireEvent.click(screen.getByText('Change class'));
+        expect(container.querySelector('input')?.checked).toBe(true);
+        expect(container.querySelector('input')).toHaveClass('changed');
     });
 });
