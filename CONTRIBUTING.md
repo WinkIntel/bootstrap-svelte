@@ -77,3 +77,25 @@ See [Update dependencies to latest minor versions](docs/npm/update-all-dependenc
 ## License
 
 By intentionally submitting a contribution, you agree that your contribution is provided under the Apache License 2.0, consistent with this repository's license.
+
+### Union component declarations
+
+The packed declarations for Button, Dropdown.Toggle, Form.CheckLabel,
+Form.InputGroupText and ListGroup.Root use a private structural component type.
+Their original prop unions and bindable keys are preserved. Instantiating Svelte's
+`Component<Props, {}, Bindings>` directly for these large DOM prop unions makes
+TypeScript eagerly expand the union's keys past its complexity limit, even though
+the props themselves remain valid.
+
+`prepack` prepares exactly those five generated signatures after `svelte-package`.
+The helper derives call internals, return methods and static metadata from the
+public Svelte `Component` type; it retains the props-dependent `$set` signature.
+Unexpected emitted names, props, exports, bindings or instance aliases fail the
+package step before any declaration is rewritten. The helper is not a root export.
+
+When updating Svelte or declaration tooling, inspect whether this preparation is
+still needed. Run `pnpm check-types` (including the helper equivalence contracts),
+`node --test scripts/tests/svelte-support.test.mjs`, and the strict packed consumer.
+The consumer checks all five components, accepted props/bindings, rejected props
+and rejected bindings with `skipLibCheck: false`. Do not expand the preparation
+map or weaken prop types merely to accept a changed emitter signature.
