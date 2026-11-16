@@ -62,22 +62,6 @@ Do not automatically lower floors, exclude affected production files, or accept 
 new baseline merely because CI fails. Retain behavioral regression tests regardless
 of any approved attribution adjustment.
 
-## Dependency updates
-
-See [Update dependencies to latest minor versions](docs/npm/update-all-dependencies-to-latest-minor-versions.md) for the update policy, validation, and separate PR workflows for `main` (2.x) and `codex/maintenance-1.x` (1.x).
-
-## Component guidelines
-
-- Keep components generic and reusable for Svelte 5 applications.
-- Avoid app-specific assumptions, private URLs, customer data, or internal WinkIntel workflows.
-- Keep Bootstrap behavior and accessibility expectations in mind.
-- Add or update tests for behavior changes.
-- Update the package-local showcase in `src/routes` for new or changed public components.
-
-## License
-
-By intentionally submitting a contribution, you agree that your contribution is provided under the Apache License 2.0, consistent with this repository's license.
-
 ### Union component declarations
 
 The packed declarations for Button, Dropdown.Toggle, Form.CheckLabel,
@@ -99,3 +83,19 @@ still needed. Run `pnpm check-types` (including the helper equivalence contracts
 The consumer checks all five components, accepted props/bindings, rejected props
 and rejected bindings with `skipLibCheck: false`. Do not expand the preparation
 map or weaken prop types merely to accept a changed emitter signature.
+
+## Dependency updates
+
+See [Update dependencies to latest minor versions](docs/npm/update-all-dependencies-to-latest-minor-versions.md) for the update policy, validation, and separate PR workflows for `main` (2.x) and `codex/maintenance-1.x` (1.x).
+
+## Component guidelines
+
+- Keep components generic and reusable for Svelte 5 applications.
+- Avoid app-specific assumptions, private URLs, customer data, or internal WinkIntel workflows.
+- Keep Bootstrap behavior and accessibility expectations in mind.
+- Add or update tests for behavior changes.
+- Update the package-local showcase in `src/routes` for new or changed public components.
+
+## License
+
+By intentionally submitting a contribution, you agree that your contribution is provided under the Apache License 2.0, consistent with this repository's license.
