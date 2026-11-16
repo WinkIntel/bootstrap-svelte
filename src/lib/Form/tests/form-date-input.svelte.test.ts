@@ -203,7 +203,7 @@ describe('Form.DateInput', () => {
         expect(input).toHaveAttribute('data-lpignore', 'false');
     });
 
-    test('uses default data-form-type when autocomplete is not off and no custom value is provided', () => {
+    test('does not default to email metadata when autocomplete is enabled', () => {
         const { container } = render(DateInput, {
             props: {
                 autocomplete: 'bday'
@@ -211,7 +211,7 @@ describe('Form.DateInput', () => {
         });
         const input = container.querySelector('input[type="date"]') as HTMLInputElement;
 
-        expect(input).toHaveAttribute('data-form-type', 'email');
+        expect(input).not.toHaveAttribute('data-form-type');
         expect(input).not.toHaveAttribute('data-lpignore');
     });
 

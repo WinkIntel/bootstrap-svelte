@@ -39,7 +39,9 @@ Bootstrap-styled checkbox input component for boolean selections.
 - `checked` (boolean): Optional. Binds the checkbox state. If undefined, the checkbox is unchecked.
 - `class` (string): Optional. Additional CSS classes to apply to the checkbox.
 - `elementRef` (HTMLInputElement): Optional. Reference to the checkbox DOM element.
-- `isIndeterminate` (boolean): Optional. Sets the checkbox to indeterminate state when true.
+- `group` (unknown[]): Optional. Bindable checkbox group. Membership follows the checked state of each change event.
+- `indeterminate` (boolean): Optional. Native alias for `isIndeterminate`.
+- `isIndeterminate` (boolean): Optional. Sets the indeterminate state; when supplied, takes precedence over `indeterminate`, including false.
 - `isInvalid` (boolean): Optional. Indicates whether the input is invalid. If undefined, no validation styles are applied.
 - `isValid` (boolean): Optional. Indicates whether the input is valid. If undefined, no validation styles are applied.
 -->
@@ -54,6 +56,7 @@ Bootstrap-styled checkbox input component for boolean selections.
         class: classValues,
         elementRef = $bindable(null),
         group = $bindable(null),
+        indeterminate,
         isIndeterminate,
         isInvalid,
         isValid,
@@ -80,10 +83,10 @@ Bootstrap-styled checkbox input component for boolean selections.
                 return;
             }
             const isIncluded = group.includes(value);
-            if (!isIncluded) {
+            if (event.currentTarget.checked && !isIncluded) {
                 // Add the value to the group array
                 group = [...(group as unknown[]), value];
-            } else if (isIncluded) {
+            } else if (!event.currentTarget.checked && isIncluded) {
                 // Remove the value from the group array
                 group = (group as unknown[]).filter((val) => val !== value);
             }
@@ -95,7 +98,7 @@ Bootstrap-styled checkbox input component for boolean selections.
 
     $effect(() => {
         if (elementRef) {
-            (elementRef as HTMLInputElement).indeterminate = isIndeterminate === true;
+            (elementRef as HTMLInputElement).indeterminate = (isIndeterminate ?? indeterminate) === true;
         }
     });
 

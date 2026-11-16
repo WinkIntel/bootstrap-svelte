@@ -65,7 +65,7 @@ Bootstrap-styled textarea component for multi-line text input.
         if (isResizable && style === undefined) {
             return undefined;
         }
-        return isResizable === false ? `resize: none; ${style}` : style || undefined;
+        return isResizable === false ? ['resize: none', style].filter(Boolean).join('; ') : style || undefined;
     });
 </script>
 

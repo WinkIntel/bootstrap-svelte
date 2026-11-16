@@ -33,11 +33,15 @@ Bootstrap-styled switch input component for toggling between two states.
 - `checked` (boolean): Optional. Binds the switch state. If undefined, the switch is unchecked.
 - `class` (string): Optional. Additional CSS classes to apply to the switch.
 - `elementRef` (HTMLInputElement): Optional. Reference to the switch DOM element.
+- `group` (unknown[]): Optional. Bindable switch group. Use an array, or null for standalone checked state.
+- `indeterminate` (boolean): Optional. Native alias for `isIndeterminate`.
+- `isIndeterminate` (boolean): Optional. Sets the indeterminate state; an explicit false takes precedence over the native alias.
 - `isInvalid` (boolean): Optional. Indicates whether the input is invalid. If undefined, no validation styles are applied.
 - `isValid` (boolean): Optional. Indicates whether the input is valid. If undefined, no validation styles are applied.
 -->
 <script lang="ts">
-    import { uniqueClsx } from '$lib/common/css.js';
+    import { noop, uniqueClsx } from '$lib/common/index.js';
+    import type { ChangeEventHandler } from 'svelte/elements';
     import type { Form } from './index.js';
 
     let {
@@ -45,8 +49,13 @@ Bootstrap-styled switch input component for toggling between two states.
         checked = $bindable(undefined),
         class: classValues,
         elementRef = $bindable(null),
+        group = $bindable(null),
+        indeterminate,
+        isIndeterminate,
         isInvalid,
         isValid,
+        onchange = noop,
+        value = undefined,
         ...restOfProps
     }: Form.SwitchInputProps = $props();
 
@@ -60,6 +69,37 @@ Bootstrap-styled switch input component for toggling between two states.
             classValues
         )
     );
+    const handleChange: ChangeEventHandler<HTMLInputElement> = (event: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
+        if (group !== null) {
+            if (!Array.isArray(group)) {
+                console.warn('Form.SwitchInput: `group` prop should be an array when used for grouped inputs.');
+                return;
+            }
+            const isIncluded = group.includes(value);
+            if (event.currentTarget.checked && !isIncluded) {
+                // Add the value to the group array
+                group = [...(group as unknown[]), value];
+            } else if (!event.currentTarget.checked && isIncluded) {
+                // Remove the value from the group array
+                group = (group as unknown[]).filter((val) => val !== value);
+            }
+        }
+        if (onchange !== null) {
+            onchange(event);
+        }
+    };
+
+    $effect(() => {
+        if (elementRef) {
+            (elementRef as HTMLInputElement).indeterminate = (isIndeterminate ?? indeterminate) === true;
+        }
+    });
+
+    $effect(() => {
+        if (group !== null && Array.isArray(group)) {
+            checked = (group as unknown[]).includes(value);
+        }
+    });
 </script>
 
 <input
@@ -68,5 +108,7 @@ Bootstrap-styled switch input component for toggling between two states.
     bind:this={elementRef}
     bind:checked
     class={classes}
+    onchange={handleChange}
+    {value}
     role="switch"
     type="checkbox" />

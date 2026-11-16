@@ -141,7 +141,7 @@ describe('Form.ColorInput', () => {
         expect(input.value).toBe('#000000');
     });
 
-    test('does not render a value attribute while syncing the input value property', () => {
+    test('renders the initial color as the native reset default', () => {
         const { container } = render(ColorInput, {
             props: {
                 value: '#563d7c'
@@ -149,7 +149,7 @@ describe('Form.ColorInput', () => {
         });
         const input = container.querySelector('input[type="color"]') as HTMLInputElement;
 
-        expect(input).not.toHaveAttribute('value');
+        expect(input.defaultValue).toBe('#563d7c');
         expect(input.value).toBe('#563d7c');
     });
 

@@ -1,8 +1,9 @@
 /// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom/vitest';
-import { render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, test } from 'vitest';
+import RadioBinding from './tests/button-check-radio-binding-test.svelte';
 import ButtonCheck from './button-check.svelte';
 import type { ButtonCheckRootProps } from './types.js';
 
@@ -156,5 +157,48 @@ describe('ButtonCheck.svelte', () => {
 
         const input = screen.getByRole('radio');
         expect(input).not.toBeChecked();
+    });
+});
+
+describe('ButtonCheck radio correctness', () => {
+    test.each([undefined, 'a'])('honors standalone checked with value %s', (value) => {
+        const { container } = render(ButtonCheck, { type: 'radio', checked: true, value });
+        expect((container.querySelector('input') as HTMLInputElement).checked).toBe(true);
+    });
+    test('leaves a standalone radio without value unselected by default', () => {
+        const { container } = render(ButtonCheck, { type: 'radio' });
+        expect((container.querySelector('input') as HTMLInputElement).checked).toBe(false);
+    });
+    test('synchronizes explicit checked and later group selection without overriding siblings', async () => {
+        const { container } = render(RadioBinding, { initialChecked: true });
+        const [a, b] = Array.from(container.querySelectorAll('input'));
+        expect(a?.checked).toBe(true);
+        await fireEvent.click(b!);
+        expect(a?.checked).toBe(false);
+        expect(container.querySelector('output')).toHaveTextContent('b:1:false');
+        await fireEvent.click(screen.getByText('Check A'));
+        expect(a?.checked).toBe(true);
+        expect(b?.checked).toBe(false);
+        expect(container.querySelector('output')).toHaveTextContent('a:1:true');
+        await fireEvent.click(screen.getByText('Check A'));
+        expect(a?.checked).toBe(true);
+        expect(container.querySelector('output')).toHaveTextContent('a:1:true');
+    });
+    test('accepts a null radio change callback', async () => {
+        const { container } = render(ButtonCheck, { type: 'radio', checked: false, onchange: null });
+        const input = container.querySelector('input') as HTMLInputElement;
+        await fireEvent.click(input);
+        expect(input.checked).toBe(true);
+    });
+    test.each([undefined, 'b'])('keeps bind:group functional from %s', async (initial) => {
+        const { container } = render(RadioBinding, { initial });
+        const [a, b] = Array.from(container.querySelectorAll('input'));
+        expect(a?.checked).toBe(false);
+        expect(b?.checked).toBe(initial === 'b');
+        await fireEvent.click(initial === 'b' ? a! : b!);
+        expect(container.querySelector('output')).toHaveTextContent(initial === 'b' ? 'a:1' : 'b:1');
+        await fireEvent.click(screen.getByText('Select A'));
+        expect(a?.checked).toBe(true);
+        expect(b?.checked).toBe(false);
     });
 });

@@ -12,7 +12,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const minimum = svelteMinimum(pkg.peerDependencies.svelte);
 assert.notEqual(process.platform, 'win32', 'This repository check requires POSIX npm and tar; use WSL on Windows');
 const toolchain = Object.fromEntries(
-    ['@sveltejs/vite-plugin-svelte', 'vite', 'svelte-check', 'typescript'].map((name) => {
+    ['@sveltejs/vite-plugin-svelte', 'vite', 'svelte-check', 'typescript', '@types/node'].map((name) => {
         const installed = JSON.parse(readFileSync(join(root, 'node_modules', name, 'package.json'), 'utf8'));
         assert.match(installed.version, /^\d+\.\d+\.\d+$/, `Expected an installed stable version for ${name}`);
         return [name, installed.version];
@@ -55,7 +55,7 @@ try {
                 module: 'ESNext',
                 moduleResolution: 'Bundler',
                 strict: true,
-                skipLibCheck: true,
+                skipLibCheck: false,
                 allowJs: true,
                 noEmit: true
             },
@@ -69,12 +69,28 @@ try {
     writeFileSync(
         join(directory, 'src/App.svelte'),
         `<script lang="ts">
-import { Alert, Badge, Button, Dropdown, Modal } from '${pkg.name}';
+import { Alert, Badge, Button, ButtonCheck, Dropdown, Form, Modal } from '${pkg.name}';
 import type { ButtonRootProps, Modal as ModalTypes } from '${pkg.name}';
 let shown = $state(false);
+let group = $state<string | undefined>(undefined);
+let values = $state<unknown[]>([]);
+let color = $state('#563d7c');
+let files = $state<FileList | null>(null);
+const form: Form.RootProps = { enhance: (node: HTMLFormElement) => ({ destroy() { void node; } }) };
 const button: ButtonRootProps = { colorVariant: 'primary' };
 const modal: ModalTypes.RootProps = { isShown: false };
 </script>
+<Form.Root {...form}>
+    <Form.CheckInput bind:group={values} value="check" indeterminate />
+    <Form.SwitchInput bind:group={values} value="switch" isIndeterminate={false} />
+    <Form.ColorInput name="color" bind:value={color} />
+    <Form.FileInput name="file" bind:files />
+    <Form.DateInput autocomplete="on" />
+    <Form.TextArea isResizable={false} />
+    <ButtonCheck type="radio" name="options" value="a" bind:group>A</ButtonCheck>
+    <ButtonCheck type="radio" name="options" value="b" bind:group>B</ButtonCheck>
+    <ButtonCheck type="radio" checked>Standalone</ButtonCheck>
+</Form.Root>
 <Alert class="d-flex">Default alert</Alert>
 <Badge colorVariant="none" class="badge-brand">Custom badge</Badge>
 <Button {...button} onclick={() => (shown = true)}>Open</Button>
