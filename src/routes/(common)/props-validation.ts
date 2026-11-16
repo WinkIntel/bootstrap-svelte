@@ -79,7 +79,18 @@ export function validateHoverProps(
     if (!props.length) return result;
     const script = source.replace(/<!--[\s\S]*?-->/g, '').match(/<script\b[^>]*>([\s\S]*?)<\/script>/)?.[1] ?? '';
     const annotation = script.match(/:\s*([\w.]+)\s*=\s*\$props\(\)/)?.[1];
-    const type = annotation && (aliases.get(annotation) ?? annotation);
+    // The component's local type import may alias its public namespace to avoid
+    // a collision with the generated component declaration (e.g. FormTypes).
+    const imports = new Map<string, string>();
+    const parsed = ts.createSourceFile('component.ts', script, ts.ScriptTarget.Latest, true);
+    for (const statement of parsed.statements) {
+        if (!ts.isImportDeclaration(statement)) continue;
+        const bindings = statement.importClause?.namedBindings;
+        if (!bindings || !ts.isNamedImports(bindings)) continue;
+        for (const item of bindings.elements) imports.set(item.name.text, (item.propertyName ?? item.name).text);
+    }
+    const canonical = annotation?.replace(/^\w+/, (name) => imports.get(name) ?? name);
+    const type = canonical && (aliases.get(canonical) ?? canonical);
     const resolved = type && names[type];
     if (!resolved) result.errors.push('Documented props have no resolved $props() type');
     else result.errors.push(...props.filter((prop) => !resolved.has(prop)).map((prop) => `${prop} is absent from ${type}`));
