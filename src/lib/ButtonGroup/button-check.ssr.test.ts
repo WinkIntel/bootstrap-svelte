@@ -1,6 +1,7 @@
 import { render } from 'svelte/server';
 import { JSDOM } from 'jsdom';
 import Group from './tests/button-check-ssr-group-test.svelte';
+import NativeGroup from './tests/button-check-native-ssr-group-test.svelte';
 import { describe, expect, test } from 'vitest';
 import ButtonCheck from './button-check.svelte';
 
@@ -37,12 +38,17 @@ describe('ButtonCheck grouped radio SSR authority', () => {
             dom.window.close();
         }
     });
-    test('preserves explicit native default attributes while the grouped B selection is submitted', () => {
-        const dom = new JSDOM(render(Group, { props: { group: 'b', defaultChecked: true } }).body);
+    test('matches native SSR defaults while submitting the grouped B selection', () => {
+        const props = { group: 'b', defaultChecked: true };
+        const dom = new JSDOM(render(Group, { props }).body);
+        const native = new JSDOM(render(NativeGroup, { props }).body);
         try {
             const form = dom.window.document.querySelector('form')!;
             const [a, b] = Array.from(form.querySelectorAll('input'));
-            expect(a?.defaultChecked).toBe(true);
+            // Svelte 5.29 omits a spread defaultChecked from checked markup;
+            // current Svelte serializes it. Match the native compiler contract
+            // while independently requiring the selected option and FormData.
+            expect(a?.defaultChecked).toBe(native.window.document.querySelector('input')?.defaultChecked);
             expect(b?.defaultChecked).toBe(true);
             expect(a?.checked).toBe(false);
             expect(b?.checked).toBe(true);
@@ -50,6 +56,7 @@ describe('ButtonCheck grouped radio SSR authority', () => {
             expect(new NativeFormData(form).get('choices')).toBe('b');
         } finally {
             dom.window.close();
+            native.window.close();
         }
     });
     test('uses native SSR identity equality for object group values', () => {

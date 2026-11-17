@@ -61,6 +61,7 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
     let labelClasses: string = $derived(uniqueClsx('btn', colorVariant && `btn-${colorVariant}`, labelClass));
     let isCheckboxGroup: boolean = $derived(type === 'checkbox' && group !== undefined);
     let radioValue = $derived(value === undefined ? 'on' : value);
+    let radioInput = $state<HTMLInputElement | null>(null);
     // A group supplied at mount keeps its established selection authority.
     // Undefined groups still accept a standalone checked seed and bind:group.
     const hasInitialGroup = untrack(() => group !== undefined);
@@ -87,10 +88,11 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
 
         const isInitialSync = controlledSnapshot.checked === unset;
         const checkedChanged = !isInitialSync && controlledSnapshot.checked !== currentChecked;
-        const groupChanged = !isInitialSync && controlledSnapshot.group !== currentGroup;
+        const groupChanged = !isInitialSync && !Object.is(controlledSnapshot.group, currentGroup);
         const previousValue = controlledSnapshot.value;
-        const valueChanged = !isInitialSync && previousValue !== currentValue;
+        const valueChanged = !isInitialSync && !Object.is(previousValue, currentValue);
 
+        const wasChecked = controlledSnapshot.checked === true;
         controlledSnapshot.checked = currentChecked;
         controlledSnapshot.group = currentGroup;
         controlledSnapshot.value = currentValue;
@@ -99,44 +101,38 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
         // checked updates. Group updates are authoritative otherwise so sibling
         // radios and parent assignments can clear this radio without ping-ponging.
         if (isInitialSync || (checkedChanged && !groupChanged)) {
-            const nextGroup = currentChecked ? currentValue : currentGroup === currentValue ? undefined : currentGroup;
-            if (currentGroup !== nextGroup) {
+            const nextGroup = currentChecked ? currentValue : wasChecked ? undefined : currentGroup;
+            if (!Object.is(currentGroup, nextGroup)) {
                 group = nextGroup;
             }
         } else if (groupChanged) {
-            const nextChecked = currentGroup === currentValue;
+            // Native bind:group already resolves raw/proxy identity, including
+            // distinct objects. Read its result rather than comparing objects here.
+            const nextChecked = radioInput?.checked ?? false;
             if (currentChecked !== nextChecked) {
+                controlledSnapshot.checked = nextChecked;
                 checked = nextChecked;
             }
         } else if (valueChanged) {
             // Migrate only a checked selection that still owns its old value.
             // Established groups and simultaneous parent assignments keep authority.
-            if (currentChecked && currentGroup === previousValue) {
+            if (currentChecked) {
                 group = currentValue;
             } else {
-                checked = currentGroup === currentValue;
+                const nextChecked = radioInput?.checked ?? false;
+                controlledSnapshot.checked = nextChecked;
+                checked = nextChecked;
             }
         }
     });
 
-    const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-        if (controlsChecked) {
-            checked = event.currentTarget.checked;
-        }
-        (onchange as EventListener | null)?.(event);
-    };
-</script>
-
-{#if type === 'radio'}
-    <input
-        {...restOfProps}
-        bind:this={elementRef}
-        bind:group
-        {...controlsChecked ? { checked } : {}}
-        defaultChecked={restOfProps.defaultChecked === undefined ? initialRadioChecked : restOfProps.defaultChecked}
-        use:syncFormReset={() => {
+    $effect(() => {
+        const input = radioInput;
+        if (!input || type !== 'radio') return;
+        // An action on the input defers native bind:group setup on Svelte 5.29,
+        // which can leave selection stale when an option value changes.
+        const reset = syncFormReset(input, () => {
             if (!controlsChecked) return;
-            const input = elementRef as HTMLInputElement;
             // Svelte's group-reset hook can overwrite checked before this task.
             // Recover the native radio default: the last default-checked member
             // of this named/form-owned group wins, rather than every true default.
@@ -158,8 +154,31 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
             }
             checked = selected;
             if (selected) group = radioValue;
-            else if (group === radioValue) group = null;
-        }}
+        });
+        return () => reset.destroy();
+    });
+
+    const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+        if (controlsChecked) {
+            checked = event.currentTarget.checked;
+        }
+        (onchange as EventListener | null)?.(event);
+    };
+</script>
+
+{#if type === 'radio'}
+    <input
+        {...restOfProps}
+        bind:this={
+            () => elementRef,
+            (input) => {
+                radioInput = input;
+                elementRef = input;
+            }
+        }
+        bind:group
+        {...controlsChecked ? { checked } : {}}
+        defaultChecked={restOfProps.defaultChecked === undefined ? initialRadioChecked : restOfProps.defaultChecked}
         {autocomplete}
         class={inputClasses}
         {disabled}

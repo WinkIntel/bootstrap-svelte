@@ -53,9 +53,9 @@
     </section>
 
     <p>
-        Checkboxes and switches support array <code>bind:group</code> and the native <code>indeterminate</code> alias. An explicit
-        <code>isIndeterminate</code> takes precedence, including false. Native form reset restores the initial color and clears file selections, updating
-        their bindings without input or change callbacks.
+        Checkboxes and switches support array <code>bind:group</code> and the native <code>indeterminate</code> property. For
+        <code>CheckInput</code>, an explicit <code>isIndeterminate</code> takes precedence, including false. Native form reset restores the initial color
+        and clears file selections, updating their bindings without input or change callbacks.
     </p>
 
     <section class="mb-4" id="control-examples">

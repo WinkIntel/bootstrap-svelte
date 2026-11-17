@@ -139,7 +139,6 @@ export type FormSelectProps = SelectElement & {
 };
 export type FormSwitchInputProps = Omit<InputElement, 'type'> &
     FixedInputType<'checkbox'> & {
-        isIndeterminate?: boolean;
         isInvalid?: boolean;
         isValid?: boolean;
     };

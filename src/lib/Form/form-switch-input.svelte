@@ -34,8 +34,7 @@ Bootstrap-styled switch input component for toggling between two states.
 - `class` (string): Optional. Additional CSS classes to apply to the switch.
 - `elementRef` (HTMLInputElement): Optional. Reference to the switch DOM element.
 - `group` (unknown[]): Optional. Bindable switch group. Use an array, or null for standalone checked state.
-- `indeterminate` (boolean): Optional. Native alias for `isIndeterminate`.
-- `isIndeterminate` (boolean): Optional. Sets the indeterminate state; an explicit false takes precedence over the native alias.
+- `indeterminate` (boolean): Optional. Sets the native indeterminate state.
 - `isInvalid` (boolean): Optional. Indicates whether the input is invalid. If undefined, no validation styles are applied.
 - `isValid` (boolean): Optional. Indicates whether the input is valid. If undefined, no validation styles are applied.
 -->
@@ -51,8 +50,6 @@ Bootstrap-styled switch input component for toggling between two states.
         class: classValues,
         elementRef = $bindable(null),
         group = $bindable(null),
-        indeterminate,
-        isIndeterminate,
         isInvalid,
         isValid,
         onchange = noop,
@@ -89,12 +86,6 @@ Bootstrap-styled switch input component for toggling between two states.
             onchange(event);
         }
     };
-
-    $effect(() => {
-        if (elementRef) {
-            (elementRef as HTMLInputElement).indeterminate = (isIndeterminate ?? indeterminate) === true;
-        }
-    });
 
     $effect(() => {
         if (group !== null && Array.isArray(group)) {

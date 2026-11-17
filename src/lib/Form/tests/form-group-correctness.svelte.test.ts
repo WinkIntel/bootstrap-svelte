@@ -35,9 +35,9 @@ describe.each([false, true])('group correctness (switch=%s)', (switchInput) => {
     });
 });
 
-describe.each([CheckInput, SwitchInput])('native indeterminate alias', (Component) => {
+describe('CheckInput native indeterminate alias', () => {
     test('honors native alias with reactive explicit false precedence', async () => {
-        const { container, rerender } = render(Component, { indeterminate: true, 'data-consumer': 'kept' });
+        const { container, rerender } = render(CheckInput, { indeterminate: true, 'data-consumer': 'kept' });
         const input = container.querySelector('input') as HTMLInputElement;
         expect(input.indeterminate).toBe(true);
         expect(input).toHaveAttribute('data-consumer', 'kept');
@@ -50,4 +50,15 @@ describe.each([CheckInput, SwitchInput])('native indeterminate alias', (Componen
         await rerender({ indeterminate: false, isIndeterminate: true } as never);
         expect(input.indeterminate).toBe(true);
     });
+});
+
+test('preserves SwitchInput native indeterminate reactivity and consumer attributes', async () => {
+    const { container, rerender } = render(SwitchInput, { indeterminate: true, 'data-consumer': 'kept' });
+    const input = container.querySelector('input') as HTMLInputElement;
+    expect(input.indeterminate).toBe(true);
+    expect(input).toHaveAttribute('data-consumer', 'kept');
+    await rerender({ indeterminate: false });
+    expect(input.indeterminate).toBe(false);
+    await rerender({ indeterminate: true });
+    expect(input.indeterminate).toBe(true);
 });
