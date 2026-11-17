@@ -70,7 +70,7 @@ try {
     writeFileSync(
         join(directory, 'src/App.svelte'),
         `<script lang="ts">
-import { Alert, Badge, Button, ButtonCheck, Dropdown, Form, ListGroup, Modal } from '${pkg.name}';
+import { Alert, Badge, Button, ButtonCheck, Dropdown, Form, ListGroup, Modal, Pagination } from '${pkg.name}';
 import type { ButtonRootProps, Modal as ModalTypes } from '${pkg.name}';
 let shown = $state(false);
 let group = $state<string | undefined>(undefined);
@@ -96,6 +96,11 @@ const modal: ModalTypes.RootProps = { isShown: false };
     <ButtonCheck type="radio" name="options" value="b" bind:group>B</ButtonCheck>
     <ButtonCheck type="radio" checked>Standalone</ButtonCheck>
 </Form.Root>
+<Pagination.Root>
+    <Pagination.Item isControl><Pagination.Link href="#previous">Previous</Pagination.Link></Pagination.Item>
+    <Pagination.Item isActive><Pagination.Link href="#page">Page</Pagination.Link></Pagination.Item>
+    <Pagination.Item isControl><Pagination.Link href="#next">Next</Pagination.Link></Pagination.Item>
+</Pagination.Root>
 <Alert class="d-flex">Default alert</Alert>
 <Badge colorVariant="none" class="badge-brand">Custom badge</Badge>
 <Button {...button} onclick={() => (shown = true)}>Open</Button>

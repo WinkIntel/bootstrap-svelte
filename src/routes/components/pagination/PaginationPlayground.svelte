@@ -30,30 +30,34 @@
 
     // Generate code snippet based on current props
     function getCodeSnippet(): string {
-        let code = `<Pagination.Root`;
+        let code = `<script>
+    import { Pagination } from '@winkintel/bootstrap-svelte';
+    let activePage = $state(${activePage});
+\u003c/script>
+
+<Pagination.Root isStateful={false}`;
 
         if (size) code += `\n  size="${size}"`;
         if (alignment) code += `\n  alignment="${alignment}"`;
-        if (isDisabled) code += `\n  isDisabled={true}`;
         code += `>`;
 
         // Add Previous button
-        code += `\n  <Pagination.Item${activePage === 1 ? ' isDisabled={true}' : ''}>`;
-        code += `\n    <Pagination.Link href="#!" aria-label="Previous">`;
+        code += `\n  <Pagination.Item isControl isDisabled={${isDisabled ? 'true' : 'activePage === 1'}}>`;
+        code += `\n    <Pagination.Link href="#!" aria-label="Previous" onclick={() => activePage = Math.max(1, activePage - 1)}>`;
         code += `\n      <span aria-hidden="true">&laquo;</span>`;
         code += `\n    </Pagination.Link>`;
         code += `\n  </Pagination.Item>`;
 
         // Add page items
         pageNumbers.forEach((num) => {
-            code += `\n  <Pagination.Item${num === activePage ? ' isActive={true}' : ''}${hasDisabledItem && disabledItemIndex + 1 === num ? ' isDisabled={true}' : ''}>`;
-            code += `\n    <Pagination.Link href="#!">${num}</Pagination.Link>`;
+            code += `\n  <Pagination.Item isActive={activePage === ${num}}${isDisabled || (hasDisabledItem && disabledItemIndex + 1 === num) ? ' isDisabled={true}' : ''}>`;
+            code += `\n    <Pagination.Link href="#!" onclick={() => activePage = ${num}}>${num}</Pagination.Link>`;
             code += `\n  </Pagination.Item>`;
         });
 
         // Add Next button
-        code += `\n  <Pagination.Item${activePage === pageCount ? ' isDisabled={true}' : ''}>`;
-        code += `\n    <Pagination.Link href="#!" aria-label="Next">`;
+        code += `\n  <Pagination.Item isControl isDisabled={${isDisabled ? 'true' : `activePage === ${pageCount}`}}>`;
+        code += `\n    <Pagination.Link href="#!" aria-label="Next" onclick={() => activePage = Math.min(${pageCount}, activePage + 1)}>`;
         code += `\n      <span aria-hidden="true">&raquo;</span>`;
         code += `\n    </Pagination.Link>`;
         code += `\n  </Pagination.Item>`;
@@ -146,22 +150,24 @@
                     <h4 class="h6">Preview</h4>
 
                     <div class="p-4 border rounded bg-light">
-                        <Pagination.Root {alignment} {size}>
-                            <Pagination.Item isDisabled={activePage === 1}>
+                        <Pagination.Root {alignment} {size} isStateful={false}>
+                            <Pagination.Item isControl isDisabled={isDisabled || activePage === 1}>
                                 <Pagination.Link href="#!" aria-label="Previous" onclick={handlePrevious}>
                                     <span aria-hidden="true">&laquo;</span>
                                 </Pagination.Link>
                             </Pagination.Item>
 
                             {#each pageNumbers as pageNum, pageNumIndex (`pageNum-${pageNumIndex}`)}
-                                <Pagination.Item isActive={activePage === pageNum} isDisabled={hasDisabledItem && disabledItemIndex + 1 === pageNum}>
+                                <Pagination.Item
+                                    isActive={activePage === pageNum}
+                                    isDisabled={isDisabled || (hasDisabledItem && disabledItemIndex + 1 === pageNum)}>
                                     <Pagination.Link href="#!" onclick={() => handlePageClick(pageNum)}>
                                         {pageNum}
                                     </Pagination.Link>
                                 </Pagination.Item>
                             {/each}
 
-                            <Pagination.Item isDisabled={activePage === pageCount}>
+                            <Pagination.Item isControl isDisabled={isDisabled || activePage === pageCount}>
                                 <Pagination.Link href="#!" aria-label="Next" onclick={handleNext}>
                                     <span aria-hidden="true">&raquo;</span>
                                 </Pagination.Link>

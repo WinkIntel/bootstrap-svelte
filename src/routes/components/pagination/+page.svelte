@@ -5,7 +5,7 @@
 
     // Sample code examples for demonstration
     const basicExampleCode = `<Pagination.Root>
-    <Pagination.Item isDisabled={true}>
+    <Pagination.Item isControl isDisabled={true}>
         <Pagination.Link href="#!" aria-label="Previous">
             <span aria-hidden="true">&laquo;</span>
         </Pagination.Link>
@@ -19,7 +19,7 @@
     <Pagination.Item>
         <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
-    <Pagination.Item>
+    <Pagination.Item isControl>
         <Pagination.Link href="#!" aria-label="Next">
             <span aria-hidden="true">&raquo;</span>
         </Pagination.Link>
@@ -131,6 +131,24 @@
         <PaginationPlayground />
     </section>
 
+    <section class="mb-5" id="selection">
+        <h2 class="wk-quick-link">Page selection</h2>
+        <p>
+            Pagination is stateful by default. Declarative <code>isActive</code> flags set its initial appearance; after a page is clicked, that selection
+            becomes the only active item. Later declarative flag changes do not replace it. Removing or renaming the selected item clears that selection
+            without restoring earlier flags.
+        </p>
+        <p>
+            Mark Previous, Next, ellipsis and other navigation controls with <code>isControl</code> on <code>Pagination.Item</code>. Their links
+            retain navigation and click callbacks without becoming the selected page. This optional prop defaults to false; existing unmarked items
+            keep their click behavior. It does not calculate the next page: provide a destination or handle the click.
+        </p>
+        <p>
+            When your application manages the page index, use <code>isStateful={false}</code> on <code>Pagination.Root</code> and update each item's
+            <code>isActive</code> flag yourself. The playground uses this controlled pattern.
+        </p>
+    </section>
+
     <!-- Basic Example section -->
     <section class="mb-5" id="basic-example">
         <h2 class="wk-quick-link">Basic Example</h2>
@@ -139,7 +157,7 @@
             <div class="card-body">
                 <div class="mb-3">
                     <Pagination.Root>
-                        <Pagination.Item isDisabled={true}>
+                        <Pagination.Item isControl isDisabled={true}>
                             <Pagination.Link href="#!" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </Pagination.Link>
@@ -153,7 +171,7 @@
                         <Pagination.Item>
                             <Pagination.Link href="#!">3</Pagination.Link>
                         </Pagination.Item>
-                        <Pagination.Item>
+                        <Pagination.Item isControl>
                             <Pagination.Link href="#!" aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </Pagination.Link>
@@ -366,6 +384,12 @@
                         <td>Unique ID for the pagination element.</td>
                     </tr>
                     <tr>
+                        <td><code>isStateful</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>true</code></td>
+                        <td>Select an item on click. Set false for application-managed active flags.</td>
+                    </tr>
+                    <tr>
                         <td><code>size</code></td>
                         <td><code>'sm' | 'lg'</code></td>
                         <td><code>undefined</code></td>
@@ -410,6 +434,12 @@
                         <td><code>boolean</code></td>
                         <td><code>false</code></td>
                         <td>Whether the pagination item is active.</td>
+                    </tr>
+                    <tr>
+                        <td><code>isControl</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>false</code></td>
+                        <td>Keep link clicks from selecting this navigation-control item as a page.</td>
                     </tr>
                     <tr>
                         <td><code>isDisabled</code></td>
