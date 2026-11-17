@@ -52,6 +52,7 @@
 <button data-action="select-a" onclick={() => (group = a)}>Select A</button>
 <button data-action="select-b" onclick={() => (group = b)}>Select B</button>
 <button data-action="adopt-false" onclick={() => (checkedA = false)}>Adopt false</button>
+<button data-action="adopt-false-b" onclick={() => (checkedB = false)}>Adopt false B</button>
 <button
     data-action="adopt-b"
     onclick={() => {

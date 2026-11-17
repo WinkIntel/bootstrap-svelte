@@ -146,6 +146,16 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
         // An action on the input defers native bind:group setup on Svelte 5.29,
         // which can leave selection stale when an option value changes.
         let active = true;
+        const targets = new Set([input.ownerDocument, input.getRootNode()]);
+        const rememberNativeSelection = (event: Event) => {
+            const member = event.target as HTMLInputElement | null;
+            if (controlsChecked || !input.name || member?.tagName !== 'INPUT' || member.type !== 'radio') return;
+            if (member.name !== input.name || member.form !== input.form || member.getRootNode() !== input.getRootNode()) return;
+            // Equal-valued radios can exchange physical selection without a
+            // group update. Refresh before a later checked=false adoption.
+            controlledSnapshot.nativeChecked = input.checked;
+        };
+        for (const target of targets) target.addEventListener('change', rememberNativeSelection, true);
         const reset = syncFormReset(input, () => {
             if (!controlsChecked) return;
             // Svelte's group-reset hook can overwrite checked before this task.
@@ -192,6 +202,7 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
         });
         return () => {
             active = false;
+            for (const target of targets) target.removeEventListener('change', rememberNativeSelection, true);
             reset.destroy();
         };
     });

@@ -165,3 +165,31 @@ describe.each(['connected', 'detached', 'shadow'] as const)('ButtonCheck reset g
         }
     });
 });
+
+describe.each(['a', 'b'] as const)('ButtonCheck duplicate physical ownership (last selected %s)', (selected) => {
+    test('does not let a stale sibling snapshot clear the selected member on false adoption', async () => {
+        const { container } = render(Fixture, { duplicate: true });
+        const { a, b, form } = radios(container);
+        await select(b);
+        await select(a);
+        if (selected === 'b') await select(b);
+        const calls = selected === 'a' ? 2 : 3;
+        expect(a.checked).toBe(selected === 'a');
+        expect(b.checked).toBe(selected === 'b');
+        expect(state(container)).toHaveTextContent(`"a":undefined:undefined:${calls}`);
+        await action(container, selected === 'a' ? 'adopt-false-b' : 'adopt-false');
+        expect(a.checked).toBe(selected === 'a');
+        expect(b.checked).toBe(selected === 'b');
+        expect(state(container)).toHaveTextContent(selected === 'a' ? `"a":undefined:false:${calls}` : `"a":false:undefined:${calls}`);
+        expect(new FormData(form).get('choices')).toBe('a');
+        await action(container, selected === 'a' ? 'adopt-false' : 'adopt-false-b');
+        expect(a.checked).toBe(false);
+        expect(b.checked).toBe(false);
+        expect(state(container)).toHaveTextContent(`undefined:false:false:${calls}`);
+        expect(new FormData(form).get('choices')).toBe(null);
+        await action(container, 'select-a');
+        expect(container.querySelectorAll('input:checked')).toHaveLength(1);
+        expect(state(container)).toHaveTextContent(`"a":false:true:${calls}`);
+        expect(new FormData(form).get('choices')).toBe('a');
+    });
+});
