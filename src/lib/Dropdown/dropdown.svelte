@@ -33,7 +33,7 @@ Bootstrap's dropdown component provides a togglable overlay of links and actions
     import { uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
     import { DropdownRootState, initDropdownRootState } from './dropdown.svelte.js';
-    import type { Dropdown } from './index.js';
+    import type { Dropdown as DropdownTypes } from './index.js';
 
     // Generate a unique ID for the dropdown element, in case one is not provided
     const uid: string = $props.id();
@@ -52,7 +52,7 @@ Bootstrap's dropdown component provides a togglable overlay of links and actions
         onShow = noop,
         onShown = noop,
         ...restOfProps
-    }: Dropdown.RootProps = $props();
+    }: DropdownTypes.RootProps = $props();
 
     const rootState: DropdownRootState = initDropdownRootState({
         get autoClose() {

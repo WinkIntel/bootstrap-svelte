@@ -71,7 +71,7 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
     import { acquireBodyScrollLock, releaseBodyScrollLock } from '$lib/common/scrollbar.js';
     import { onDestroy, onMount } from 'svelte';
     import { fade, fly } from 'svelte/transition';
-    import type { Offcanvas } from './index.js';
+    import type { Offcanvas as OffcanvasTypes } from './index.js';
 
     // Generate a unique ID for the offcanvas element, in case one is not provided...
     const uid: string = $props.id();
@@ -99,7 +99,7 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
         onShow = noop,
         onShown = noop,
         ...restOfProps
-    }: Offcanvas.RootProps = $props();
+    }: OffcanvasTypes.RootProps = $props();
 
     // Initialize the root state of the offcanvas component...
     let bodyElement: HTMLElement | null = $state(null);
@@ -113,10 +113,10 @@ at its responsive breakpoint. Consumer accessible names and other attributes rem
     let overlayZIndex: number | undefined = $state(undefined);
     let backdropZIndex: number | undefined = $state(undefined);
     const unset = Symbol('unset');
-    let previousIsShown: Offcanvas.RootProps['isShown'] | typeof unset = unset;
+    let previousIsShown: OffcanvasTypes.RootProps['isShown'] | typeof unset = unset;
     let previousRootIsOverlayShown = false;
-    let previousShowOnBreakpoint: Offcanvas.RootProps['showOnBreakpoint'] | typeof unset = unset;
-    let previousUseBackdrop: Offcanvas.RootProps['useBackdrop'] | typeof unset = unset;
+    let previousShowOnBreakpoint: OffcanvasTypes.RootProps['showOnBreakpoint'] | typeof unset = unset;
+    let previousUseBackdrop: OffcanvasTypes.RootProps['useBackdrop'] | typeof unset = unset;
     const rootState: OffcanvasRootState = initOffcanvasRootState({
         get id() {
             return id;

@@ -60,7 +60,7 @@ Use `role="status"` with `aria-live="polite"` for routine confirmations, or the 
     import { uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
     import { fade } from 'svelte/transition';
-    import type { Toast } from './index.js';
+    import type { Toast as ToastTypes } from './index.js';
     import { initToastRootState, ToastRootState } from './toast.svelte.js';
 
     // Generate a unique ID for the component, in case one is not provided...
@@ -85,7 +85,7 @@ Use `role="status"` with `aria-live="polite"` for routine confirmations, or the 
         onShown = noop,
         useFade = ToastRootState.USE_FADE_DEFAULT,
         ...restOfProps
-    }: Toast.RootProps = $props();
+    }: ToastTypes.RootProps = $props();
 
     // Keep lifecycle identity private while mirroring the consumer-bindable ref.
     let panelElement: HTMLDivElement | null = $state(null);

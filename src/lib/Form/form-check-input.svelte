@@ -39,7 +39,9 @@ Bootstrap-styled checkbox input component for boolean selections.
 - `checked` (boolean): Optional. Binds the checkbox state. If undefined, the checkbox is unchecked.
 - `class` (string): Optional. Additional CSS classes to apply to the checkbox.
 - `elementRef` (HTMLInputElement): Optional. Reference to the checkbox DOM element.
-- `isIndeterminate` (boolean): Optional. Sets the checkbox to indeterminate state when true.
+- `group` (unknown[]): Optional. Bindable checkbox group. Membership follows the checked state of each change event.
+- `indeterminate` (boolean): Optional. Native alias for `isIndeterminate`.
+- `isIndeterminate` (boolean): Optional. Sets the indeterminate state; when supplied, takes precedence over `indeterminate`, including false.
 - `isInvalid` (boolean): Optional. Indicates whether the input is invalid. If undefined, no validation styles are applied.
 - `isValid` (boolean): Optional. Indicates whether the input is valid. If undefined, no validation styles are applied.
 -->
@@ -47,6 +49,7 @@ Bootstrap-styled checkbox input component for boolean selections.
     import { noop, uniqueClsx } from '$lib/common/index.js';
     import type { ChangeEventHandler } from 'svelte/elements';
     import type { Form } from './index.js';
+    import { syncFormReset } from './form-reset.js';
 
     let {
         'aria-invalid': ariaInvalid,
@@ -54,6 +57,7 @@ Bootstrap-styled checkbox input component for boolean selections.
         class: classValues,
         elementRef = $bindable(null),
         group = $bindable(null),
+        indeterminate,
         isIndeterminate,
         isInvalid,
         isValid,
@@ -77,15 +81,15 @@ Bootstrap-styled checkbox input component for boolean selections.
         if (group !== null) {
             if (!Array.isArray(group)) {
                 console.warn('Form.CheckInput: `group` prop should be an array when used for grouped inputs.');
-                return;
-            }
-            const isIncluded = group.includes(value);
-            if (!isIncluded) {
-                // Add the value to the group array
-                group = [...(group as unknown[]), value];
-            } else if (isIncluded) {
-                // Remove the value from the group array
-                group = (group as unknown[]).filter((val) => val !== value);
+            } else {
+                const isIncluded = group.includes(value);
+                if (event.currentTarget.checked && !isIncluded) {
+                    // Add the value to the group array
+                    group = [...(group as unknown[]), value];
+                } else if (!event.currentTarget.checked && isIncluded) {
+                    // Remove the value from the group array
+                    group = (group as unknown[]).filter((val) => val !== value);
+                }
             }
         }
         if (onchange !== null) {
@@ -95,7 +99,7 @@ Bootstrap-styled checkbox input component for boolean selections.
 
     $effect(() => {
         if (elementRef) {
-            (elementRef as HTMLInputElement).indeterminate = isIndeterminate === true;
+            (elementRef as HTMLInputElement).indeterminate = (isIndeterminate ?? indeterminate) === true;
         }
     });
 
@@ -113,5 +117,11 @@ Bootstrap-styled checkbox input component for boolean selections.
     bind:checked
     class={classes}
     onchange={handleChange}
+    use:syncFormReset={(state) => {
+        if (!Array.isArray(group)) return;
+        const included = group.includes(value);
+        if (state.checked && !included) group = [...group, value];
+        else if (!state.checked && included) group = group.filter((member) => member !== value);
+    }}
     {value}
     type="checkbox" />

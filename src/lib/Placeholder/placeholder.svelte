@@ -29,9 +29,9 @@ A container for placeholder items with optional animation effects.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
-    import type { Placeholder } from './index.js';
+    import type { Placeholder as PlaceholderTypes } from './index.js';
 
-    let { children, class: classValues, elementRef = $bindable(null), type = 'glow', ...restOfProps }: Placeholder.RootProps = $props();
+    let { children, class: classValues, elementRef = $bindable(null), type = 'glow', ...restOfProps }: PlaceholderTypes.RootProps = $props();
 
     let classes: string = $derived(uniqueClsx(`placeholder-${type}`, classValues));
 </script>

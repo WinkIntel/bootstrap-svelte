@@ -50,7 +50,7 @@ Add small overlay content to any element for housing secondary information or in
 -->
 <script lang="ts">
     import { Tooltip } from '$lib/index.js';
-    import type { Popover } from './index.js';
+    import type { Popover as PopoverTypes } from './index.js';
 
     // Generate a unique ID for the component, in case one is not provided...
     const uid: string = $props.id();
@@ -71,7 +71,7 @@ Add small overlay content to any element for housing secondary information or in
         trigger = 'click',
         useFade = true,
         ...restOfProps
-    }: Popover.RootProps = $props();
+    }: PopoverTypes.RootProps = $props();
 </script>
 
 <Tooltip.Root
