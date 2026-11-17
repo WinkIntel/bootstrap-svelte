@@ -68,7 +68,7 @@ Consumer accessible names and other attributes remain configurable.
     import { Portal } from '$lib/index.js';
     import { onDestroy, onMount, tick } from 'svelte';
     import { fade, fly } from 'svelte/transition';
-    import type { Modal } from './index.js';
+    import type { Modal as ModalTypes } from './index.js';
     import { acquireModalOpenClass, initModalRootState, ModalRootState, releaseModalOpenClass } from './modal.svelte.js';
 
     // Generate a unique ID for the modal element, in case one is not provided...
@@ -96,7 +96,7 @@ Consumer accessible names and other attributes remain configurable.
         useBackdrop = true,
         useFade = true,
         ...restOfProps
-    }: Modal.RootProps = $props();
+    }: ModalTypes.RootProps = $props();
 
     // Keep lifecycle identity private while mirroring the consumer-bindable ref.
     let panelElement: HTMLDivElement | null = $state(null);
@@ -114,9 +114,9 @@ Consumer accessible names and other attributes remain configurable.
     let backdropZIndex: number | undefined = $state(undefined);
     let previouslyFocusedElement: HTMLElement | null = null;
     const unset = Symbol('unset');
-    let previousIsShown: Modal.RootProps['isShown'] | typeof unset = unset;
+    let previousIsShown: ModalTypes.RootProps['isShown'] | typeof unset = unset;
     let previousRootIsShown = false;
-    let previousUseBackdrop: Modal.RootProps['useBackdrop'] | typeof unset = unset;
+    let previousUseBackdrop: ModalTypes.RootProps['useBackdrop'] | typeof unset = unset;
     const rootState: ModalRootState = initModalRootState({
         get isShown() {
             return isShown;

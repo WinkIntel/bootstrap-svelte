@@ -34,7 +34,7 @@ Root pagination component that contains pagination items and links.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
-    import type { Pagination } from './index.js';
+    import type { Pagination as PaginationTypes } from './index.js';
     import { initPaginationRootState, PaginationRootState } from './pagination.svelte.js';
 
     // Generate a unique ID for the component, in case one is not provided...
@@ -50,7 +50,7 @@ Root pagination component that contains pagination items and links.
         isStateful = true,
         size,
         ...restOfProps
-    }: Pagination.RootProps = $props();
+    }: PaginationTypes.RootProps = $props();
 
     const _rootState: PaginationRootState = initPaginationRootState({
         get id() {

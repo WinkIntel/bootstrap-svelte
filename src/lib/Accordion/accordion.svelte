@@ -49,7 +49,7 @@ Supports multiple items and allows one or all items to be expanded.
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
     import { AccordionRootState, initAccordionRootState } from './accordion.svelte.js';
-    import type { Accordion } from './index.js';
+    import type { Accordion as AccordionTypes } from './index.js';
 
     let {
         children,
@@ -58,7 +58,7 @@ Supports multiple items and allows one or all items to be expanded.
         isMultiple = false,
         isFlush = false,
         ...restOfProps
-    }: Accordion.RootProps = $props();
+    }: AccordionTypes.RootProps = $props();
 
     const rootState: AccordionRootState = initAccordionRootState({
         get isMultiple() {

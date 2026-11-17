@@ -33,6 +33,8 @@ jobs:
               run: pnpm install --frozen-lockfile
             - name: Test release controls
               run: node --test scripts/tests/release-*.test.mjs
+            - name: Test form package controls
+              run: node --test scripts/tests/form-package.test.mjs
             - name: Lint
               run: pnpm lint
             - name: Type check
@@ -43,3 +45,5 @@ jobs:
               run: pnpm build
             - name: Inspect npm package contents
               run: npm pack --dry-run
+            - name: Test packed form consumers
+              run: pnpm test:svelte-consumer

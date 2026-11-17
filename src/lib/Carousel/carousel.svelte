@@ -45,7 +45,7 @@ The main container for a carousel component.
     import { uniqueClsx } from '$lib/common/css.js';
     import { onMount, tick } from 'svelte';
     import { CarouselRootState, initCarouselRootState } from './carousel.svelte.js';
-    import type { Carousel } from './index.js';
+    import type { Carousel as CarouselTypes } from './index.js';
 
     // Generate a unique ID for the carousel element, in case one is not provided
     const uid: string = $props.id();
@@ -65,7 +65,7 @@ The main container for a carousel component.
         style,
         transitionDuration = CarouselRootState.TRANSITION_DURATION_DEFAULT,
         ...restOfProps
-    }: Carousel.RootProps = $props();
+    }: CarouselTypes.RootProps = $props();
 
     // Initialize the carousel state
     const rootState: CarouselRootState = initCarouselRootState({
@@ -129,11 +129,11 @@ The main container for a carousel component.
 
     // Track the previously synchronized prop values so rootState side effects
     // only run for genuine external prop transitions.
-    let previousAnimation: Carousel.RootProps['animation'] | typeof unset = unset;
-    let previousInterval: Carousel.RootProps['interval'] | typeof unset = unset;
-    let previousPause: Carousel.RootProps['pause'] | typeof unset = unset;
-    let previousRide: Carousel.RootProps['ride'] | typeof unset = unset;
-    let previousTransitionDuration: Carousel.RootProps['transitionDuration'] | typeof unset = unset;
+    let previousAnimation: CarouselTypes.RootProps['animation'] | typeof unset = unset;
+    let previousInterval: CarouselTypes.RootProps['interval'] | typeof unset = unset;
+    let previousPause: CarouselTypes.RootProps['pause'] | typeof unset = unset;
+    let previousRide: CarouselTypes.RootProps['ride'] | typeof unset = unset;
+    let previousTransitionDuration: CarouselTypes.RootProps['transitionDuration'] | typeof unset = unset;
 
     $effect(() => {
         if (previousAnimation !== unset && previousAnimation !== animation) {

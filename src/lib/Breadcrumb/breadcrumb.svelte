@@ -32,7 +32,7 @@ Root breadcrumb component that contains breadcrumb items.
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';
     import { BreadcrumbRootState, initBreadcrumbRootState } from './breadcrumb.svelte.js';
-    import type { Breadcrumb } from './index.js';
+    import type { Breadcrumb as BreadcrumbTypes } from './index.js';
 
     // Generate a unique ID for the component, in case one is not provided
     const uid = $props.id();
@@ -46,7 +46,7 @@ Root breadcrumb component that contains breadcrumb items.
         id = `breadcrumb-${uid}`,
         style,
         ...restOfProps
-    }: Breadcrumb.RootProps = $props();
+    }: BreadcrumbTypes.RootProps = $props();
 
     const _rootState: BreadcrumbRootState = initBreadcrumbRootState({
         get id() {

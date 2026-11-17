@@ -95,7 +95,7 @@ A component to render a Bootstrap table.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/index.js';
-    import type { Table } from './index.js';
+    import type { Table as TableTypes } from './index.js';
     import { initTableRootState, TableRootState } from './table.svelte.js';
 
     let {
@@ -117,16 +117,16 @@ A component to render a Bootstrap table.
         tableContainerFooter,
         verticalAlign,
         ...restOfProps
-    }: Table.RootProps = $props();
+    }: TableTypes.RootProps = $props();
 
-    let containerClassValues: Table.ContainerProps['class'] = $derived(containerProps.class);
-    let restOfContainerProps: Omit<Table.ContainerProps, 'class'> = $derived.by(() => {
+    let containerClassValues: TableTypes.ContainerProps['class'] = $derived(containerProps.class);
+    let restOfContainerProps: Omit<TableTypes.ContainerProps, 'class'> = $derived.by(() => {
         const { class: _classValues, ...rest } = containerProps;
         return rest;
     });
-    let breakpoint: Table.ResponsiveProps['breakpoint'] = $derived(responsiveProps.breakpoint);
-    let responsiveClassValues: Table.ResponsiveProps['class'] = $derived(responsiveProps.class);
-    let restOfResponsiveProps: Omit<Table.ResponsiveProps, 'class' | 'breakpoint'> = $derived.by(() => {
+    let breakpoint: TableTypes.ResponsiveProps['breakpoint'] = $derived(responsiveProps.breakpoint);
+    let responsiveClassValues: TableTypes.ResponsiveProps['class'] = $derived(responsiveProps.class);
+    let restOfResponsiveProps: Omit<TableTypes.ResponsiveProps, 'class' | 'breakpoint'> = $derived.by(() => {
         const { breakpoint: _breakpoint, class: _classValues, ...rest } = responsiveProps;
         return rest;
     });

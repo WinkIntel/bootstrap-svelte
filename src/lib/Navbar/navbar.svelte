@@ -86,7 +86,7 @@ Root navigation bar component that provides responsive navigation header functio
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/index.js';
     import { initNavbarRootState, NavbarRootState } from '$lib/common/navbar-offcanvas.svelte.js';
-    import type { Navbar } from './index.js';
+    import type { Navbar as NavbarTypes } from './index.js';
 
     // Generate a unique ID for the component, in case one is not provided...
     const uid = $props.id();
@@ -100,7 +100,7 @@ Root navigation bar component that provides responsive navigation header functio
         id = `navbar-${uid}`,
         placement,
         ...restOfProps
-    }: Navbar.RootProps = $props();
+    }: NavbarTypes.RootProps = $props();
 
     const _rootState: NavbarRootState = initNavbarRootState({
         get expandOnBreakpoint() {
