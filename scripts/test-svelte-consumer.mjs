@@ -98,7 +98,7 @@ for (const { version, withBuild } of [
     </script>
     <Form.Root {...form}>
         <Form.CheckInput bind:group={values} value="check" indeterminate />
-        <Form.SwitchInput bind:group={values} value="switch" isIndeterminate={false} />
+        <Form.SwitchInput bind:group={values} value="switch" indeterminate={false} />
         <Form.ColorInput name="color" bind:value={color} />
         <Form.FileInput name="file" bind:files />
         <Form.CheckLabel for="check" elementType="label" bind:elementRef={element}>Check</Form.CheckLabel>
