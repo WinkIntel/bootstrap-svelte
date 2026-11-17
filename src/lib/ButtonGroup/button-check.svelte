@@ -30,6 +30,11 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
 - `name` (string): Optional. Input group name, commonly used with radio toggles.
 - `type` (`'checkbox' | 'radio'`): Optional. Defaults to `'checkbox'`.
 -->
+<script module lang="ts">
+    // Only a checked-controlled default can publish its restored group value.
+    const checkedControlledRadios = new WeakSet<HTMLInputElement>();
+</script>
+
 <script lang="ts">
     import { noop, uniqueClsx } from '$lib/common/index.js';
     import { tick, untrack } from 'svelte';
@@ -76,16 +81,37 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
         nativeChecked: boolean;
     } = { checked: unset, group: unset, value: unset, nativeChecked: false };
 
+    function hasSelectedSibling(input: HTMLInputElement | null): boolean {
+        if (!input?.name) return false;
+        return Array.from(input.form?.elements ?? (input.getRootNode() as ParentNode).querySelectorAll('input')).some((element) => {
+            const member = element as HTMLInputElement;
+            return (
+                member !== input &&
+                member.tagName === 'INPUT' &&
+                member.type === 'radio' &&
+                member.name === input.name &&
+                member.form === input.form &&
+                member.getRootNode() === input.getRootNode() &&
+                member.checked
+            );
+        });
+    }
+
     $effect(() => {
         const currentChecked = checked;
         const currentGroup = group;
         const currentValue = radioValue;
 
         if (!controlsChecked) {
+            const input = radioInput;
+            const sameSelection = Object.is(controlledSnapshot.group, currentGroup) && Object.is(controlledSnapshot.value, currentValue);
+            const retainedSelection = sameSelection && (controlledSnapshot.checked === true || controlledSnapshot.nativeChecked);
+            // Removing checked control can itself uncheck the DOM input. Retain
+            // its unchanged logical selection unless a native sibling owns it.
+            controlledSnapshot.nativeChecked = !!input && type === 'radio' && (input.checked || (retainedSelection && !hasSelectedSibling(input)));
             controlledSnapshot.checked = unset;
             controlledSnapshot.group = currentGroup;
             controlledSnapshot.value = currentValue;
-            controlledSnapshot.nativeChecked = radioInput?.checked ?? false;
             return;
         }
 
@@ -100,8 +126,9 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
         // retain the native result from before that checked-only update.
         const sameSelection = Object.is(controlledSnapshot.group, currentGroup) && Object.is(controlledSnapshot.value, currentValue);
         const wasChecked =
-            controlledSnapshot.checked === true ||
-            (isInitialSync && (sameSelection ? controlledSnapshot.nativeChecked : radioInput?.checked === true));
+            (controlledSnapshot.checked === true ||
+                (isInitialSync && (sameSelection ? controlledSnapshot.nativeChecked : radioInput?.checked === true))) &&
+            !hasSelectedSibling(radioInput);
         const resetSelection = pendingReset;
         const nativeChecked =
             resetSelection && Object.is(resetSelection.group, currentGroup) && Object.is(resetSelection.value, currentValue)
@@ -142,6 +169,13 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
 
     $effect(() => {
         const input = radioInput;
+        if (!input || !controlsChecked) return;
+        checkedControlledRadios.add(input);
+        return () => checkedControlledRadios.delete(input);
+    });
+
+    $effect(() => {
+        const input = radioInput;
         if (!input || type !== 'radio') return;
         // An action on the input defers native bind:group setup on Svelte 5.29,
         // which can leave selection stale when an option value changes.
@@ -162,7 +196,7 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
             // Recover the native radio default: the last default-checked member
             // of this named/form-owned group wins, rather than every true default.
             let selected = input.defaultChecked;
-            let lastDefault: Element | undefined = selected ? input : undefined;
+            let lastDefault: HTMLInputElement | undefined = selected ? input : undefined;
             if (input.name && input.form) {
                 lastDefault = undefined;
                 for (const element of Array.from(input.form.elements)) {
@@ -185,7 +219,7 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
             controlledSnapshot.checked = selected;
             checked = selected;
             if (selected) group = radioValue;
-            else if (ownedSelection && !lastDefault) group = null;
+            else if (ownedSelection && (!lastDefault || !checkedControlledRadios.has(lastDefault))) group = null;
             const restoration = { group, value: radioValue, checked: selected };
             const form = input.form;
             pendingReset = restoration;

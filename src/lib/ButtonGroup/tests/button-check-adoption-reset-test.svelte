@@ -2,6 +2,7 @@
     import ButtonCheck from '../button-check.svelte';
     let {
         initialChecked,
+        controlB = true,
         defaultA = false,
         defaultB = false,
         duplicate = false,
@@ -10,6 +11,7 @@
         overrideReset
     }: {
         initialChecked?: boolean;
+        controlB?: boolean;
         defaultA?: boolean;
         defaultB?: boolean;
         duplicate?: boolean;
@@ -26,7 +28,7 @@
     // svelte-ignore state_referenced_locally
     let checkedA = $state(initialChecked);
     // svelte-ignore state_referenced_locally
-    let checkedB = $state(initialChecked);
+    let checkedB = $state(controlB ? initialChecked : undefined);
     let group = $state<unknown>(undefined);
     let calls = $state(0);
     let resetting = $state(false);
@@ -51,7 +53,10 @@
 </form>
 <button data-action="select-a" onclick={() => (group = a)}>Select A</button>
 <button data-action="select-b" onclick={() => (group = b)}>Select B</button>
+<button data-action="release-a" onclick={() => (checkedA = undefined)}>Release A</button>
+<button data-action="adopt-true" onclick={() => (checkedA = true)}>Adopt true</button>
 <button data-action="adopt-false" onclick={() => (checkedA = false)}>Adopt false</button>
+<button data-action="release-b" onclick={() => (checkedB = undefined)}>Release B</button>
 <button data-action="adopt-false-b" onclick={() => (checkedB = false)}>Adopt false B</button>
 <button
     data-action="adopt-b"

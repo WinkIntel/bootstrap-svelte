@@ -193,3 +193,129 @@ describe.each(['a', 'b'] as const)('ButtonCheck duplicate physical ownership (la
         expect(new FormData(form).get('choices')).toBe('a');
     });
 });
+
+describe.each(['connected', 'detached', 'shadow'] as const)('ButtonCheck released ownership (%s)', (location) => {
+    test.each([false, true])('clears its released selection on false adoption and permits parent reselection (object=%s)', async (objectValue) => {
+        const fixture = mountIn(location, { initialChecked: true, controlB: false, objectValue });
+        try {
+            const { container } = fixture;
+            const { a, b, form } = radios(container);
+            expect(a.checked).toBe(true);
+            await action(container, 'release-a');
+            expect(a.checked).toBe(false);
+            expect(state(container)).toHaveTextContent(`${objectValue ? '{"id":"a"}' : '"a"'}:undefined:undefined:0`);
+            await action(container, 'adopt-false');
+            expect(a.checked).toBe(false);
+            expect(b.checked).toBe(false);
+            expect(state(container)).toHaveTextContent('undefined:false:undefined:0');
+            expect(new FormData(form).get('choices')).toBe(null);
+            await action(container, 'select-a');
+            expect(a.checked).toBe(true);
+            expect(state(container)).toHaveTextContent(`${objectValue ? '{"id":"a"}' : '"a"'}:true:undefined:0`);
+            expect(new FormData(form).get('choices')).toBe(objectValue ? '[object Object]' : 'a');
+        } finally {
+            await fixture.cleanup();
+        }
+    });
+    test('preserves an equal-valued sibling selected after release', async () => {
+        const fixture = mountIn(location, { initialChecked: true, controlB: false, duplicate: true });
+        try {
+            const { container } = fixture;
+            const { a, b, form } = radios(container);
+            await select(a);
+            expect(a.checked).toBe(true);
+            await action(container, 'release-a');
+            await select(b);
+            await action(container, 'adopt-false');
+            expect(a.checked).toBe(false);
+            expect(b.checked).toBe(true);
+            expect(state(container)).toHaveTextContent('"a":false:undefined:2');
+            expect(new FormData(form).get('choices')).toBe('a');
+        } finally {
+            await fixture.cleanup();
+        }
+    });
+});
+
+describe.each(['connected', 'detached', 'shadow'] as const)('ButtonCheck mixed ownership reset (%s)', (location) => {
+    test.each([
+        { duplicate: false, objectValue: false },
+        { duplicate: true, objectValue: false },
+        { duplicate: false, objectValue: true }
+    ])('clears the group when an uncontrolled sibling is the native default ($duplicate/$objectValue)', async ({ duplicate, objectValue }) => {
+        const fixture = mountIn(location, { initialChecked: false, controlB: false, defaultB: true, duplicate, objectValue });
+        try {
+            const { container } = fixture;
+            const { a, b, form } = radios(container);
+            await select(a);
+            // Group binding can initially select the last duplicate. Use the
+            // explicit checked API to establish A before testing its reset.
+            if (duplicate) await action(container, 'adopt-true');
+            expect(a.checked).toBe(true);
+            expect(state(container)).toHaveTextContent(`${objectValue ? '{"id":"a"}' : '"a"'}:true:undefined:1`);
+            form.reset();
+            await settle();
+            expect(state(container)).toHaveTextContent('null:false:undefined:1');
+            expect(a.checked).toBe(false);
+            expect(b.checked).toBe(false);
+            expect(new FormData(form).get('choices')).toBe(null);
+            await action(container, 'select-b');
+            expect(b.checked).toBe(true);
+            expect(state(container)).toHaveTextContent(
+                `${objectValue ? JSON.stringify(duplicate ? { id: 'a' } : { id: 'b' }) : duplicate ? '"a"' : '"b"'}:false:undefined:1`
+            );
+            expect(new FormData(form).get('choices')).toBe(objectValue ? '[object Object]' : duplicate ? 'a' : 'b');
+        } finally {
+            await fixture.cleanup();
+        }
+    });
+});
+
+describe.each(['connected', 'detached', 'shadow'] as const)('ButtonCheck reset ownership changes (%s)', (location) => {
+    test('tracks default winner ownership through release and readoption', async () => {
+        const fixture = mountIn(location, { initialChecked: false, defaultB: true });
+        try {
+            const { container } = fixture;
+            const { a, b, form } = radios(container);
+            await select(a);
+            form.reset();
+            await settle();
+            expect(state(container)).toHaveTextContent('"b":false:true:1');
+            expect(b.checked).toBe(true);
+            await action(container, 'release-b');
+            await select(a);
+            form.reset();
+            await settle();
+            expect(state(container)).toHaveTextContent('null:false:undefined:2');
+            expect(a.checked).toBe(false);
+            expect(b.checked).toBe(false);
+            expect(new FormData(form).get('choices')).toBe(null);
+            await action(container, 'adopt-false-b');
+            await select(a);
+            form.reset();
+            await settle();
+            expect(state(container)).toHaveTextContent('"b":false:true:3');
+            expect(a.checked).toBe(false);
+            expect(b.checked).toBe(true);
+            expect(new FormData(form).get('choices')).toBe('b');
+        } finally {
+            await fixture.cleanup();
+        }
+    });
+    test('leaves a mixed group unchanged when reset is canceled', async () => {
+        const fixture = mountIn(location, { initialChecked: false, controlB: false, defaultB: true, cancelReset: true });
+        try {
+            const { container } = fixture;
+            const { a, b, form } = radios(container);
+            await select(a);
+            form.reset();
+            await settle();
+            expect(state(container)).toHaveTextContent('"a":true:undefined:1');
+            expect(a.checked).toBe(true);
+            expect(b.checked).toBe(false);
+            expect(new FormData(form).get('choices')).toBe('a');
+        } finally {
+            await fixture.cleanup();
+        }
+    });
+});
