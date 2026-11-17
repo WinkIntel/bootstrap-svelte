@@ -5,6 +5,15 @@ import PaginationIdentityTest from './pagination-identity-test.svelte';
 import PaginationInteractionTest from './pagination-interaction-test.svelte';
 
 describe('Pagination Component', () => {
+    it('retains the 1.x Next-item selection behavior without adding a control API', async () => {
+        render(PaginationBasicTest);
+        await fireEvent.click(screen.getByTestId('pagination-link-next'));
+        expect(screen.getByTestId('pagination-item-next')).toHaveClass('active');
+        expect(screen.getByTestId('pagination-item-next')).toHaveAttribute('aria-current', 'page');
+        expect(screen.getByTestId('pagination-item-2')).not.toHaveClass('active');
+        expect(screen.getByTestId('basic-pagination').querySelectorAll('.active')).toHaveLength(1);
+    });
+
     it('should render basic pagination with all sub-components', async () => {
         render(PaginationBasicTest);
 
@@ -136,11 +145,15 @@ describe('Pagination Component', () => {
         expect(screen.getByTestId('new-disabled-reuse-link')).not.toHaveAttribute('aria-disabled');
     });
 
-    it('honors each declarative active prop even when multiple items are transiently active', () => {
+    it('honors multiple declarative active props until a stateful page is selected', async () => {
         render(PaginationIdentityTest);
 
         expect(screen.getByTestId('declarative-active-one')).toHaveClass('active');
         expect(screen.getByTestId('declarative-active-two')).toHaveClass('active');
+        await fireEvent.click(screen.getByText('Declarative one'));
+        expect(screen.getByTestId('declarative-active-one')).toHaveClass('active');
+        expect(screen.getByTestId('declarative-active-two')).not.toHaveClass('active');
+        expect(screen.getByTestId('declarative-active-two')).not.toHaveAttribute('aria-current');
     });
 
     it('cleans click-activated state when a stateful item changes identity or unmounts', async () => {

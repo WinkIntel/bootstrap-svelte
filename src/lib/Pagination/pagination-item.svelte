@@ -27,7 +27,7 @@ Pagination item component to wrap Pagination.Link components.
 ### Props
 - `class` (string): Optional. Additional CSS classes.
 - `elementRef` (HTMLElement): Optional. Reference to the item DOM element.
-- `isActive` (boolean): Optional. Whether the pagination item is active. Defaults to false.
+- `isActive` (boolean): Optional. Initial active state in stateful mode, or the current active state with `isStateful={false}`. Defaults to false.
 - `isDisabled` (boolean): Optional. Whether the pagination item is disabled. Defaults to false.
 -->
 <script lang="ts">
@@ -74,21 +74,14 @@ Pagination item component to wrap Pagination.Link components.
 
     $effect(() => {
         const itemId = id;
-        const itemIsActive = isActive;
 
         if (!itemId) {
             return;
         }
 
-        if (itemIsActive) {
-            itemState.root.setPaginationItemActive(itemId);
-        } else {
-            itemState.root.removePaginationItemActive(itemId);
-        }
-
         return () => {
-            // The root may have activated this identity through a stateful link
-            // click even when the declarative isActive prop is false.
+            // Identity cleanup must not depend on declarative flag changes:
+            // after interaction the root owns selection for this identity.
             itemState.root.removePaginationItemActive(itemId);
         };
     });

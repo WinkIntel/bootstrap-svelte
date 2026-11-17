@@ -131,6 +131,19 @@
         <PaginationPlayground />
     </section>
 
+    <section class="mb-5" id="selection">
+        <h2 class="wk-quick-link">Page selection in 1.x</h2>
+        <p>
+            Pagination is stateful by default. Declarative <code>isActive</code> flags set its initial appearance; after an enabled link is clicked, only
+            that item stays active. Later declarative changes do not replace the selection. Removing or renaming that item clears its selection without
+            restoring earlier flags. Declarative-only rendering is unchanged.
+        </p>
+        <p>
+            The 1.x maintenance fix is limited to single selection. It adds no control-item prop and retains the existing Prev/Next click behavior.
+            For application-managed navigation, use <code>isStateful={false}</code> and update <code>isActive</code> yourself.
+        </p>
+    </section>
+
     <!-- Basic Example section -->
     <section class="mb-5" id="basic-example">
         <h2 class="wk-quick-link">Basic Example</h2>
@@ -364,6 +377,12 @@
                         <td><code>string</code></td>
                         <td><code>pagination-{'{'}uid}</code></td>
                         <td>Unique ID for the pagination element.</td>
+                    </tr>
+                    <tr>
+                        <td><code>isStateful</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>true</code></td>
+                        <td>Select an item on click. Set false for application-managed active flags.</td>
                     </tr>
                     <tr>
                         <td><code>size</code></td>

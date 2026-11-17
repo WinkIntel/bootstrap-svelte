@@ -33,7 +33,7 @@ the current development Vite plugin requires newer Svelte than the 1.x peer floo
 Neither the library peer range nor its dependencies are raised by this check.
 After the development build and packed consumers, CI installs exactly Svelte
 5.29.0 in its disposable checkout, verifies both repository and Vite-plugin
-resolution, and executes the focused ButtonGroup and checkbox/switch group
+resolution, and executes the focused ButtonGroup, checkbox/switch group and Pagination
 regressions. This runtime check excludes unrelated known legacy-floor suite
 failures and catches binding-order differences that compilation alone cannot.
 The repository type check also verifies the real SvelteKit `enhance` action without
