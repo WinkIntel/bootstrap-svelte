@@ -47,3 +47,11 @@ jobs:
               run: npm pack --dry-run
             - name: Test packed form consumers
               run: pnpm test:svelte-consumer
+            - name: Test focused runtime regressions at exact Svelte minimum
+              env:
+                  SVELTE_MINIMUM: 5.29.0
+              run: |
+                  node -e "require('node:assert/strict').equal(require('./package.json').peerDependencies.svelte, '^' + process.env.SVELTE_MINIMUM)"
+                  pnpm add --save-dev --save-exact "svelte@$SVELTE_MINIMUM" --ignore-scripts
+                  node -e "const assert = require('node:assert/strict'); const plugin = require('node:module').createRequire(require('node:fs').realpathSync('node_modules/@sveltejs/vite-plugin-svelte/package.json')); for (const load of [require, plugin]) assert.equal(load('svelte/package.json').version, process.env.SVELTE_MINIMUM); console.log('Verified repository and Vite plugin Svelte ' + process.env.SVELTE_MINIMUM)"
+                  pnpm exec vitest run src/lib/ButtonGroup src/lib/Form/tests/form-group-correctness.svelte.test.ts --silent
