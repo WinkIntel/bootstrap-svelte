@@ -28,3 +28,14 @@ test('generated controlled example compiles and includes working page callbacks'
     expect(code).toContain('onclick={() => activePage = 3}');
     expect(() => compile(code, { generate: 'client' })).not.toThrow();
 });
+
+test('reachable disabled-item controls preserve selection and produce a compilable example', async () => {
+    const { container } = render(Playground);
+    await fireEvent.click(screen.getByRole('checkbox', { name: 'Include Disabled Item' }));
+    const disabled = screen.getByRole('link', { name: '2' });
+    expect(disabled).toHaveAttribute('aria-disabled', 'true');
+    await fireEvent.click(disabled);
+    expect(container.querySelector('.page-item.active')!.textContent?.trim()).toBe('1');
+    const code = container.querySelector('pre code')!.textContent!;
+    expect(() => compile(code, { generate: 'client' })).not.toThrow();
+});

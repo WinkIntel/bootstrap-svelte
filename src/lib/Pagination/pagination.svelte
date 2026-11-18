@@ -29,7 +29,7 @@ Root pagination component that contains pagination items and links.
 - `class` (string): Optional. Additional CSS classes.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
 - `id` (string): Optional. Unique ID for the pagination element.
-- `isStateful` (boolean): Optional. Defaults to true. After the first page click, interactive selection replaces declarative `isActive` flags. Use false when your application controls those flags.
+- `isStateful` (boolean): Optional. Defaults to true. A page click overrides earlier unchanged `isActive` flags; later flag changes restore declarative selection. Use false for purely application-controlled flags.
 - `size` (string): Optional. Size of pagination component, one of: 'sm', 'lg'.
 -->
 <script lang="ts">

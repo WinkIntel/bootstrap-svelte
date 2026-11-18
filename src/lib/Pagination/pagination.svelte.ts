@@ -9,36 +9,43 @@ import { Pagination } from './index.js';
  * Provides methods to check and set the active and disabled states.
  */
 export class PaginationRootState {
-    #activePaginationItemId: string = $state('');
-    // Declarative flags seed rendering; a page click takes selection ownership.
-    // Keep ownership after identity cleanup so old flags do not revive.
-    #hasStatefulSelection: boolean = $state(false);
+    #activePaginationItemId: string | null = $state(null);
     #disabledPaginationItemIds = new SvelteSet<string>();
 
     constructor(readonly props: Pagination.RootProps) {
         this.isPaginationItemActive = this.isPaginationItemActive.bind(this);
         this.setPaginationItemActive = this.setPaginationItemActive.bind(this);
         this.removePaginationItemActive = this.removePaginationItemActive.bind(this);
+
+        $effect(() => {
+            if (!this.props.isStateful) {
+                this.clearPaginationItemActive();
+            }
+        });
         this.isPaginationItemDisabled = this.isPaginationItemDisabled.bind(this);
         this.setPaginationItemDisabled = this.setPaginationItemDisabled.bind(this);
         this.removePaginationItemDisabled = this.removePaginationItemDisabled.bind(this);
     }
 
     get hasStatefulSelection(): boolean {
-        return this.#hasStatefulSelection;
+        return this.#activePaginationItemId !== null;
     }
 
     isPaginationItemActive(itemId: string): boolean {
-        return this.#activePaginationItemId === itemId;
+        return !!itemId && this.#activePaginationItemId === itemId;
     }
     setPaginationItemActive(itemId: string): void {
-        this.#hasStatefulSelection = true;
-        this.#activePaginationItemId = itemId;
+        if (itemId) {
+            this.#activePaginationItemId = itemId;
+        }
+    }
+    clearPaginationItemActive(): void {
+        this.#activePaginationItemId = null;
     }
     removePaginationItemActive(itemId: string): void {
         untrack(() => {
             if (this.#activePaginationItemId === itemId) {
-                this.#activePaginationItemId = '';
+                this.#activePaginationItemId = null;
             }
         });
     }

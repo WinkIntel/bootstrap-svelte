@@ -134,9 +134,9 @@
     <section class="mb-5" id="selection">
         <h2 class="wk-quick-link">Page selection</h2>
         <p>
-            Pagination is stateful by default. Declarative <code>isActive</code> flags set its initial appearance; after a page is clicked, that selection
-            becomes the only active item. Later declarative flag changes do not replace it. Removing or renaming the selected item clears that selection
-            without restoring earlier flags.
+            Pagination is stateful by default. A page click replaces earlier unchanged <code>isActive</code> flags with a single selection. Later changes
+            to those flags return selection to the application. Removing or renaming the selected item, or leaving stateful mode, also releases the click
+            selection so current declarative flags can render again.
         </p>
         <p>
             Mark Previous, Next, ellipsis and other navigation controls with <code>isControl</code> on <code>Pagination.Item</code>. Their links
@@ -433,7 +433,7 @@
                         <td><code>isActive</code></td>
                         <td><code>boolean</code></td>
                         <td><code>false</code></td>
-                        <td>Whether the pagination item is active.</td>
+                        <td>Declarative active state. A stateful click overrides earlier flags until a later flag change or selection cleanup.</td>
                     </tr>
                     <tr>
                         <td><code>isControl</code></td>
@@ -507,7 +507,7 @@
             <li><code>pagination-lg</code> - Applied when size="lg"</li>
             <li><code>justify-content-center</code> - Applied when alignment="center"</li>
             <li><code>justify-content-end</code> - Applied when alignment="end"</li>
-            <li><code>active</code> - Applied to Pagination.Item when isActive=true</li>
+            <li><code>active</code> - Applied to the current active pagination item</li>
             <li><code>disabled</code> - Applied to Pagination.Item when isDisabled=true or parent Pagination.Root has isDisabled=true</li>
         </ul>
     </section>
