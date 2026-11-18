@@ -77,10 +77,17 @@ export function validateHoverProps(
     }
     result.props = props.length;
     if (!props.length) return result;
-    const scripts = [...source.replace(/<!--[\s\S]*?-->/g, '').matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
-    // Props belong to the instance script, not a preceding shared module script.
+    const scripts = [...source.replace(/<!--[\s\S]*?-->/g, '').matchAll(/<script\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/script>/g)];
+    // Parse whole attributes so quoted generic text (including "module" and >)
+    // cannot be mistaken for a module flag. Props belong to the instance script.
     const script =
-        scripts.find(([, attributes]) => !/(?:^|\s)(?:module(?=\s|=|$)|context\s*=\s*["']module["'](?=\s|$))/.test(attributes!))?.[2] ?? '';
+        scripts.find(([, attributes]) => {
+            const entries = [...attributes!.matchAll(/([^\s=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s]+)))?/g)];
+            return !entries.some(
+                ([, name, doubleQuoted, singleQuoted, unquoted]) =>
+                    name === 'module' || (name === 'context' && (doubleQuoted ?? singleQuoted ?? unquoted) === 'module')
+            );
+        })?.[2] ?? '';
     const annotation = script.match(/:\s*([\w.]+)\s*=\s*\$props\(\)/)?.[1];
     // The component's local type import may alias its public namespace to avoid
     // a collision with the generated component declaration (e.g. FormTypes).

@@ -202,7 +202,8 @@ describe.each(['connected', 'detached', 'shadow'] as const)('ButtonCheck release
             const { a, b, form } = radios(container);
             expect(a.checked).toBe(true);
             await action(container, 'release-a');
-            expect(a.checked).toBe(false);
+            expect(a.checked).toBe(true);
+            expect(new FormData(form).get('choices')).toBe(objectValue ? '[object Object]' : 'a');
             expect(state(container)).toHaveTextContent(`${objectValue ? '{"id":"a"}' : '"a"'}:undefined:undefined:0`);
             await action(container, 'adopt-false');
             expect(a.checked).toBe(false);

@@ -47,6 +47,9 @@ describe('ButtonCheck grouped radio SSR authority', () => {
             const [nativeA, nativeB] = Array.from(native.window.document.querySelectorAll('input'));
             expect(a?.defaultChecked).toBe(nativeA?.defaultChecked);
             expect(b?.defaultChecked).toBe(nativeB?.defaultChecked);
+            // This fixed assertion keeps the native comparison non-vacuous.
+            // Selected B must be serialized regardless of A's default policy.
+            expect(b?.defaultChecked).toBe(true);
             expect(a?.checked).toBe(false);
             expect(b?.checked).toBe(true);
             const NativeFormData = form.ownerDocument.defaultView!.FormData;
