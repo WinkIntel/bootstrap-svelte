@@ -30,6 +30,7 @@ Root pagination component that contains pagination items and links.
 - `disabled` (boolean): Optional. Whether the pagination is disabled. Defaults to false.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
 - `id` (string): Optional. Unique ID for the pagination element.
+- `isStateful` (boolean): Optional. Defaults to true. A page click overrides earlier unchanged `isActive` flags; later flag changes restore declarative selection. Use false for purely application-controlled flags.
 - `size` (string): Optional. Size of pagination component, one of: 'sm', 'lg'.
 -->
 <script lang="ts">
