@@ -20,22 +20,35 @@ describe('Pagination interaction-owned selection', () => {
         }
         expect(screen.getByTestId('clicks')).toHaveTextContent('3');
     });
-    test('later declarative updates do not steal or clear the selected identity', async () => {
+    test('later observable declarative changes supersede the click selection', async () => {
         render(Fixture);
         await fireEvent.click(screen.getByTestId('one-link'));
         await fireEvent.click(screen.getByTestId('declare-one'));
         selected('one');
         await fireEvent.click(screen.getByTestId('declare-two'));
-        selected('one');
+        selected('two');
+    });
+    test('a later false flag releases selection even when no flag becomes true', async () => {
+        render(Fixture);
+        await fireEvent.click(screen.getByTestId('one-link'));
+        await fireEvent.click(screen.getByTestId('declare-none'));
+        expect(active()).toHaveLength(0);
+        expect(current()).toHaveLength(0);
+        await fireEvent.click(screen.getByTestId('three-link'));
+        selected('three');
+    });
+    test('newly mounted flags do not supersede an existing selected identity', async () => {
+        render(Fixture);
+        await fireEvent.click(screen.getByTestId('one-link'));
         await fireEvent.click(screen.getByTestId('mount-active'));
         selected('one');
     });
-    test.each(['change-id', 'remove-one'])('clears the selected identity on %s without reviving earlier flags or id reuse', async (action) => {
+    test.each(['change-id', 'remove-one'])('restores declarative flags on %s without selecting a reused id', async (action) => {
         render(Fixture, { multiple: true });
         await fireEvent.click(screen.getByTestId('one-link'));
         await fireEvent.click(screen.getByTestId(action));
-        expect(active()).toHaveLength(0);
-        expect(current()).toHaveLength(0);
+        expect(active()).toEqual([screen.getByTestId('two-item'), screen.getByTestId('three-item')]);
+        expect(current()).toEqual(active());
         await fireEvent.click(screen.getByTestId('reuse-link'));
         selected('reuse');
     });
@@ -75,7 +88,13 @@ describe('Pagination interaction-owned selection', () => {
         await fireEvent.click(screen.getByTestId('three-link'));
         selected('two');
         await rerender({ isStateful: true });
+        selected('two');
+        await fireEvent.click(screen.getByTestId('one-link'));
         selected('one');
+        await rerender({ isStateful: false });
+        selected('two');
+        await rerender({ isStateful: true });
+        selected('two');
     });
     test('keeps roots independent even with matching item ids', async () => {
         render(Fixture);

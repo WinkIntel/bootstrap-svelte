@@ -27,7 +27,7 @@ Pagination item component to wrap Pagination.Link components.
 ### Props
 - `class` (string): Optional. Additional CSS classes.
 - `elementRef` (HTMLElement): Optional. Reference to the item DOM element.
-- `isActive` (boolean): Optional. Initial active state in stateful mode, or the current active state with `isStateful={false}`. Defaults to false.
+- `isActive` (boolean): Optional. Declarative active state. Stateful clicks override unchanged flags; later flag changes, selected-item removal or leaving stateful mode restore declarative control. Defaults to false.
 - `isDisabled` (boolean): Optional. Whether the pagination item is disabled. Defaults to false.
 -->
 <script lang="ts">
@@ -72,6 +72,17 @@ Pagination item component to wrap Pagination.Link components.
         )
     );
 
+    // Observe only the declarative flag: selecting an item must not rerun this
+    // effect and immediately surrender the click selection.
+    let previousIsActive: boolean | undefined;
+    $effect(() => {
+        const currentIsActive = isActive;
+        if (previousIsActive !== undefined && currentIsActive !== previousIsActive) {
+            itemState.root.clearPaginationItemActive();
+        }
+        previousIsActive = currentIsActive;
+    });
+
     $effect(() => {
         const itemId = id;
 
@@ -80,8 +91,7 @@ Pagination item component to wrap Pagination.Link components.
         }
 
         return () => {
-            // Identity cleanup must not depend on declarative flag changes:
-            // after interaction the root owns selection for this identity.
+            // Release the click selection when its identity changes or unmounts.
             itemState.root.removePaginationItemActive(itemId);
         };
     });

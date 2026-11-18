@@ -27,6 +27,13 @@
         activeTwo = true;
         activeThree = false;
     }}>Declare two</button>
+<button
+    data-testid="declare-none"
+    onclick={() => {
+        activeOne = false;
+        activeTwo = false;
+        activeThree = false;
+    }}>Declare none</button>
 <button data-testid="mount-active" onclick={() => (showNew = true)}>Mount active</button>
 <button
     data-testid="change-id"
