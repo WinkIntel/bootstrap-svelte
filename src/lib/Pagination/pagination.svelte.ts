@@ -9,28 +9,43 @@ import { Pagination } from './index.js';
  * Provides methods to check and set the active and disabled states.
  */
 export class PaginationRootState {
-    #activePaginationItemId: string = $state('');
+    #activePaginationItemId: string | null = $state(null);
     #disabledPaginationItemIds = new SvelteSet<string>();
 
     constructor(readonly props: Pagination.RootProps) {
         this.isPaginationItemActive = this.isPaginationItemActive.bind(this);
         this.setPaginationItemActive = this.setPaginationItemActive.bind(this);
         this.removePaginationItemActive = this.removePaginationItemActive.bind(this);
+
+        $effect(() => {
+            if (!this.props.isStateful) {
+                this.clearPaginationItemActive();
+            }
+        });
         this.isPaginationItemDisabled = this.isPaginationItemDisabled.bind(this);
         this.setPaginationItemDisabled = this.setPaginationItemDisabled.bind(this);
         this.removePaginationItemDisabled = this.removePaginationItemDisabled.bind(this);
     }
 
+    get hasStatefulSelection(): boolean {
+        return this.#activePaginationItemId !== null;
+    }
+
     isPaginationItemActive(itemId: string): boolean {
-        return this.#activePaginationItemId === itemId;
+        return !!itemId && this.#activePaginationItemId === itemId;
     }
     setPaginationItemActive(itemId: string): void {
-        this.#activePaginationItemId = itemId;
+        if (itemId) {
+            this.#activePaginationItemId = itemId;
+        }
+    }
+    clearPaginationItemActive(): void {
+        this.#activePaginationItemId = null;
     }
     removePaginationItemActive(itemId: string): void {
         untrack(() => {
             if (this.#activePaginationItemId === itemId) {
-                this.#activePaginationItemId = '';
+                this.#activePaginationItemId = null;
             }
         });
     }
@@ -60,17 +75,15 @@ export class PaginationRootState {
  * Initializes its active and disabled states based on the `isActive` and `isDisabled` props.
  */
 export class PaginationItemState {
-    isActive = $derived.by(() => this.props.isActive || this.root.isPaginationItemActive(this.props.id || ''));
+    isActive = $derived.by(() =>
+        this.root.props.isStateful && this.root.hasStatefulSelection ? this.root.isPaginationItemActive(this.props.id || '') : this.props.isActive
+    );
     isDisabled = $derived.by(() => this.props.isDisabled || this.root.isPaginationItemDisabled(this.props.id || ''));
 
     constructor(
         readonly props: Pagination.ItemProps,
         readonly root: PaginationRootState
-    ) {
-        if (this.props.isActive) {
-            this.root.setPaginationItemActive(this.props.id || '');
-        }
-    }
+    ) {}
 }
 
 /**
@@ -90,7 +103,7 @@ export class PaginationLinkState {
     }
 
     onclick() {
-        if (this.root.props.isStateful) {
+        if (this.root.props.isStateful && !this.item.props.isControl) {
             this.root.setPaginationItemActive(this.item.props.id || '');
         }
     }

@@ -1746,7 +1746,7 @@
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <div class="text-muted">Showing 1 to 3 of 3 entries</div>
                                 <Pagination.Root size="sm">
-                                    <Pagination.Item isDisabled={true}>
+                                    <Pagination.Item isControl isDisabled={true}>
                                         <Pagination.Link href="#!" aria-label="Previous">
                                             <span aria-hidden="true">&laquo;</span>
                                         </Pagination.Link>
@@ -1760,7 +1760,7 @@
                                     <Pagination.Item>
                                         <Pagination.Link href="#!">3</Pagination.Link>
                                     </Pagination.Item>
-                                    <Pagination.Item>
+                                    <Pagination.Item isControl>
                                         <Pagination.Link href="#!" aria-label="Next">
                                             <span aria-hidden="true">&raquo;</span>
                                         </Pagination.Link>
@@ -1806,7 +1806,7 @@
                 Showing 1 to 3 of 3 entries
             </div>
             <Pagination.Root size="sm">
-                <Pagination.Item isDisabled={true}>
+                <Pagination.Item isControl isDisabled={true}>
                     <Pagination.Link href="#!" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </Pagination.Link>
@@ -1820,7 +1820,7 @@
                 <Pagination.Item>
                     <Pagination.Link href="#!">3</Pagination.Link>
                 </Pagination.Item>
-                <Pagination.Item>
+                <Pagination.Item isControl>
                     <Pagination.Link href="#!" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </Pagination.Link>

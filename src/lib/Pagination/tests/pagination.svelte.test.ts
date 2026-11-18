@@ -136,11 +136,15 @@ describe('Pagination Component', () => {
         expect(screen.getByTestId('new-disabled-reuse-link')).not.toHaveAttribute('aria-disabled');
     });
 
-    it('honors each declarative active prop even when multiple items are transiently active', () => {
+    it('honors multiple declarative active props until a stateful page is selected', async () => {
         render(PaginationIdentityTest);
 
         expect(screen.getByTestId('declarative-active-one')).toHaveClass('active');
         expect(screen.getByTestId('declarative-active-two')).toHaveClass('active');
+        await fireEvent.click(screen.getByText('Declarative one'));
+        expect(screen.getByTestId('declarative-active-one')).toHaveClass('active');
+        expect(screen.getByTestId('declarative-active-two')).not.toHaveClass('active');
+        expect(screen.getByTestId('declarative-active-two')).not.toHaveAttribute('aria-current');
     });
 
     it('cleans click-activated state when a stateful item changes identity or unmounts', async () => {

@@ -12,6 +12,7 @@ export type PaginationRootProps = UListElement & {
 
 export type PaginationItemProps = ListItemElement & {
     isActive?: boolean;
+    isControl?: boolean;
     isDisabled?: boolean;
 };
 

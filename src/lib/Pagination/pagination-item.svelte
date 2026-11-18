@@ -19,7 +19,7 @@ Pagination item component to wrap Pagination.Link components.
 
 @example
 ```svelte
-<Pagination.Item isDisabled={true}>
+<Pagination.Item isControl isDisabled={true}>
     <Pagination.Link href="#!">Next</Pagination.Link>
 </Pagination.Item>
 ```
@@ -27,7 +27,8 @@ Pagination item component to wrap Pagination.Link components.
 ### Props
 - `class` (string): Optional. Additional CSS classes.
 - `elementRef` (HTMLElement): Optional. Reference to the item DOM element.
-- `isActive` (boolean): Optional. Whether the pagination item is active. Defaults to false.
+- `isActive` (boolean): Optional. Declarative active state. Stateful clicks override unchanged flags; later flag changes, selected-item removal or leaving stateful mode restore declarative control. Defaults to false.
+- `isControl` (boolean): Optional. Prevents link clicks from selecting this item as the active page. Use for Previous, Next and ellipsis items. Defaults to false.
 - `isDisabled` (boolean): Optional. Whether the pagination item is disabled. Defaults to false.
 -->
 <script lang="ts">
@@ -44,6 +45,7 @@ Pagination item component to wrap Pagination.Link components.
         elementRef = $bindable(null),
         id = `page-item-${uid}`,
         isActive = false,
+        isControl = false,
         isDisabled = false,
         'aria-current': ariaCurrent,
         ...restOfProps
@@ -55,6 +57,9 @@ Pagination item component to wrap Pagination.Link components.
         },
         get isActive() {
             return isActive;
+        },
+        get isControl() {
+            return isControl;
         },
         get isDisabled() {
             return isDisabled;
@@ -72,23 +77,26 @@ Pagination item component to wrap Pagination.Link components.
         )
     );
 
+    // Observe only the declarative flag: selecting an item must not rerun this
+    // effect and immediately surrender the click selection.
+    let previousIsActive: boolean | undefined;
+    $effect(() => {
+        const currentIsActive = isActive;
+        if (previousIsActive !== undefined && currentIsActive !== previousIsActive) {
+            itemState.root.clearPaginationItemActive();
+        }
+        previousIsActive = currentIsActive;
+    });
+
     $effect(() => {
         const itemId = id;
-        const itemIsActive = isActive;
 
         if (!itemId) {
             return;
         }
 
-        if (itemIsActive) {
-            itemState.root.setPaginationItemActive(itemId);
-        } else {
-            itemState.root.removePaginationItemActive(itemId);
-        }
-
         return () => {
-            // The root may have activated this identity through a stateful link
-            // click even when the declarative isActive prop is false.
+            // Release the click selection when its identity changes or unmounts.
             itemState.root.removePaginationItemActive(itemId);
         };
     });

@@ -6,7 +6,7 @@ Root pagination component that contains pagination items and links.
 @example
 ```svelte
 <Pagination.Root>
-    <Pagination.Item>
+    <Pagination.Item isControl>
         <Pagination.Link href="#!">Previous</Pagination.Link>
     </Pagination.Item>
     <Pagination.Item>
@@ -18,7 +18,7 @@ Root pagination component that contains pagination items and links.
     <Pagination.Item>
         <Pagination.Link href="#!">3</Pagination.Link>
     </Pagination.Item>
-    <Pagination.Item>
+    <Pagination.Item isControl>
         <Pagination.Link href="#!">Next</Pagination.Link>
     </Pagination.Item>
 </Pagination.Root>
@@ -29,6 +29,7 @@ Root pagination component that contains pagination items and links.
 - `class` (string): Optional. Additional CSS classes.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
 - `id` (string): Optional. Unique ID for the pagination element.
+- `isStateful` (boolean): Optional. Defaults to true. A page click overrides earlier unchanged `isActive` flags; later flag changes restore declarative selection. Use false for purely application-controlled flags.
 - `size` (string): Optional. Size of pagination component, one of: 'sm', 'lg'.
 -->
 <script lang="ts">
