@@ -213,6 +213,23 @@ function components(directory: string): string[] {
 }
 
 describe('component hover documentation', () => {
+    test.each(['module lang="ts"', 'lang="ts" module', 'context="module" lang="ts"', "lang='ts' context='module'"])(
+        'resolves instance props after a %s script without accepting unknown props',
+        (attributes) => {
+            const fixture = (prop: string) => `<!--
+@component
+### Props
+- \`${prop}\`: property
+-->
+<script ${attributes}>const registry = new WeakSet();</script>
+<script lang="ts">let { ...props }: ButtonCheckRootProps = $props();</script>`;
+            expect(validateHover(fixture('group')).errors).toEqual([]);
+            expect(validateHover(fixture('madeUp')).errors).toEqual(['madeUp is absent from ButtonCheckRootProps']);
+            const moduleOnly = fixture('group').replace(/<script lang="ts">[\s\S]*?<\/script>/, '');
+            expect(validateHover(moduleOnly).errors).toEqual(['Documented props have no resolved $props() type']);
+        }
+    );
+
     test('rejects obsolete props while accepting inherited HTML props', () => {
         const fixture = (name: string) =>
             `<!--\n@component\n### Props\n- \`${name}\`: Optional.\n-->\n<script lang="ts">let { ...props }: Pagination.RootProps = $props();</script>`;

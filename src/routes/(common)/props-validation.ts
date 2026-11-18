@@ -77,7 +77,10 @@ export function validateHoverProps(
     }
     result.props = props.length;
     if (!props.length) return result;
-    const script = source.replace(/<!--[\s\S]*?-->/g, '').match(/<script\b[^>]*>([\s\S]*?)<\/script>/)?.[1] ?? '';
+    const scripts = [...source.replace(/<!--[\s\S]*?-->/g, '').matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
+    // Props belong to the instance script, not a preceding shared module script.
+    const script =
+        scripts.find(([, attributes]) => !/(?:^|\s)(?:module(?=\s|=|$)|context\s*=\s*["']module["'](?=\s|$))/.test(attributes!))?.[2] ?? '';
     const annotation = script.match(/:\s*([\w.]+)\s*=\s*\$props\(\)/)?.[1];
     // The component's local type import may alias its public namespace to avoid
     // a collision with the generated component declaration (e.g. FormTypes).
