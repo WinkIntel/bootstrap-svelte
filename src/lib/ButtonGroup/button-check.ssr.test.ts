@@ -1,6 +1,7 @@
 import { render } from 'svelte/server';
 import { JSDOM } from 'jsdom';
 import Group from './tests/button-check-ssr-group-test.svelte';
+import NativeDefaults from './tests/button-check-native-defaults-test.svelte';
 import { describe, expect, test } from 'vitest';
 import ButtonCheck from './button-check.svelte';
 
@@ -37,12 +38,17 @@ describe('ButtonCheck grouped radio SSR authority', () => {
             dom.window.close();
         }
     });
-    test('preserves explicit native default attributes while the grouped B selection is submitted', () => {
+    test('matches native default attributes while the grouped B selection is submitted', () => {
         const dom = new JSDOM(render(Group, { props: { group: 'b', defaultChecked: true } }).body);
+        const native = new JSDOM(render(NativeDefaults).body);
         try {
             const form = dom.window.document.querySelector('form')!;
             const [a, b] = Array.from(form.querySelectorAll('input'));
-            expect(a?.defaultChecked).toBe(true);
+            const [nativeA, nativeB] = Array.from(native.window.document.querySelectorAll('input'));
+            expect(a?.defaultChecked).toBe(nativeA?.defaultChecked);
+            expect(b?.defaultChecked).toBe(nativeB?.defaultChecked);
+            // This fixed assertion keeps the native comparison non-vacuous.
+            // Selected B must be serialized regardless of A's default policy.
             expect(b?.defaultChecked).toBe(true);
             expect(a?.checked).toBe(false);
             expect(b?.checked).toBe(true);
@@ -50,6 +56,7 @@ describe('ButtonCheck grouped radio SSR authority', () => {
             expect(new NativeFormData(form).get('choices')).toBe('b');
         } finally {
             dom.window.close();
+            native.window.close();
         }
     });
     test('uses native SSR identity equality for object group values', () => {

@@ -30,9 +30,39 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
 - `name` (string): Optional. Input group name, commonly used with radio toggles.
 - `type` (`'checkbox' | 'radio'`): Optional. Defaults to `'checkbox'`.
 -->
+<script module lang="ts">
+    // Only a checked-controlled default can publish its restored group value.
+    const checkedControlledRadios = new WeakSet<HTMLInputElement>();
+    const radioChangeObservers = new WeakMap<EventTarget, { listeners: Set<(event: Event) => void>; handleChange: (event: Event) => void }>();
+
+    function observeRadioChanges(target: EventTarget, observer: (event: Event) => void) {
+        let registration = radioChangeObservers.get(target);
+        if (!registration) {
+            const listeners = new Set<(event: Event) => void>();
+            const handleChange = (event: Event) => {
+                const member = event.target as HTMLInputElement | null;
+                if (member?.tagName !== 'INPUT' || member.type !== 'radio') return;
+                for (const listener of listeners) listener(event);
+            };
+            registration = { listeners, handleChange };
+            radioChangeObservers.set(target, registration);
+            target.addEventListener('change', handleChange, true);
+        }
+        const { listeners, handleChange } = registration;
+        listeners.add(observer);
+        return () => {
+            listeners.delete(observer);
+            if (!listeners.size) {
+                target.removeEventListener('change', handleChange, true);
+                radioChangeObservers.delete(target);
+            }
+        };
+    }
+</script>
+
 <script lang="ts">
     import { noop, uniqueClsx } from '$lib/common/index.js';
-    import { untrack } from 'svelte';
+    import { tick, untrack } from 'svelte';
     import { syncFormReset } from '../Form/form-reset.js';
     import type { ChangeEventHandler } from 'svelte/elements';
     import type { ButtonCheckRootProps } from './types.js';
@@ -61,6 +91,8 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
     let labelClasses: string = $derived(uniqueClsx('btn', colorVariant && `btn-${colorVariant}`, labelClass));
     let isCheckboxGroup: boolean = $derived(type === 'checkbox' && group !== undefined);
     let radioValue = $derived(value === undefined ? 'on' : value);
+    let radioInput = $state<HTMLInputElement | null>(null);
+    let pendingReset: { group: unknown; value: unknown; checked: boolean } | undefined;
     // A group supplied at mount keeps its established selection authority.
     // Undefined groups still accept a standalone checked seed and bind:group.
     const hasInitialGroup = untrack(() => group !== undefined);
@@ -71,26 +103,89 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
         checked: boolean | null | undefined | typeof unset;
         group: unknown | typeof unset;
         value: unknown | typeof unset;
-    } = { checked: unset, group: unset, value: unset };
+        nativeChecked: boolean;
+    } = { checked: unset, group: unset, value: unset, nativeChecked: false };
+
+    function hasSelectedSibling(input: HTMLInputElement | null): boolean {
+        if (!input?.name) return false;
+        const namedMembers = input.form?.elements.namedItem(input.name);
+        const members = input.form
+            ? !namedMembers
+                ? []
+                : 'tagName' in namedMembers
+                  ? [namedMembers]
+                  : Array.from(namedMembers)
+            : (input.getRootNode() as ParentNode).querySelectorAll('input[type="radio"]:checked');
+        return Array.from(members).some((element) => {
+            const member = element as HTMLInputElement;
+            return (
+                member !== input &&
+                member.tagName === 'INPUT' &&
+                member.type === 'radio' &&
+                member.name === input.name &&
+                member.form === input.form &&
+                member.getRootNode() === input.getRootNode() &&
+                member.checked
+            );
+        });
+    }
 
     $effect(() => {
         const currentChecked = checked;
         const currentGroup = group;
         const currentValue = radioValue;
+        let active = true;
+        // A sibling may publish group from its own effect in this flush. Read
+        // bind:group's proxy-aware result only after its render effects settle.
+        const afterBinding = (update: () => void) => {
+            void tick().then(() => {
+                if (!active || !Object.is(group, currentGroup) || !Object.is(radioValue, currentValue) || checked !== currentChecked) return;
+                update();
+            });
+        };
 
         if (!controlsChecked) {
+            const input = radioInput;
+            const sameSelection = Object.is(controlledSnapshot.group, currentGroup) && Object.is(controlledSnapshot.value, currentValue);
+            const retainedSelection = sameSelection && (controlledSnapshot.checked === true || controlledSnapshot.nativeChecked);
+            // Removing checked control can itself uncheck the DOM input. Retain
+            // its unchanged logical selection unless a native sibling owns it.
+            controlledSnapshot.nativeChecked = !!input && type === 'radio' && (input.checked || (retainedSelection && !hasSelectedSibling(input)));
+            if (input && controlledSnapshot.nativeChecked) input.checked = true;
             controlledSnapshot.checked = unset;
-            controlledSnapshot.group = unset;
-            controlledSnapshot.value = unset;
-            return;
+            controlledSnapshot.group = currentGroup;
+            controlledSnapshot.value = currentValue;
+            return () => {
+                active = false;
+            };
         }
 
         const isInitialSync = controlledSnapshot.checked === unset;
         const checkedChanged = !isInitialSync && controlledSnapshot.checked !== currentChecked;
-        const groupChanged = !isInitialSync && controlledSnapshot.group !== currentGroup;
+        const groupChanged = !isInitialSync && !Object.is(controlledSnapshot.group, currentGroup);
         const previousValue = controlledSnapshot.value;
-        const valueChanged = !isInitialSync && previousValue !== currentValue;
+        const valueChanged = !isInitialSync && !Object.is(previousValue, currentValue);
 
+        // A first checked=false adoption must release a selection established
+        // while checked was undefined. The DOM has already received false, so
+        // retain the native result from before that checked-only update.
+        const sameSelection = Object.is(controlledSnapshot.group, currentGroup) && Object.is(controlledSnapshot.value, currentValue);
+        const wasChecked =
+            (controlledSnapshot.checked === true ||
+                (isInitialSync && (sameSelection ? controlledSnapshot.nativeChecked : radioInput?.checked === true))) &&
+            !hasSelectedSibling(radioInput);
+        const resetSelection = pendingReset;
+        const reconcileChecked = () => {
+            const nextChecked =
+                resetSelection && Object.is(resetSelection.group, currentGroup) && Object.is(resetSelection.value, currentValue)
+                    ? resetSelection.checked
+                    : (radioInput?.checked ?? false);
+            controlledSnapshot.nativeChecked = nextChecked;
+            if (checked !== nextChecked) {
+                controlledSnapshot.checked = nextChecked;
+                checked = nextChecked;
+            }
+        };
         controlledSnapshot.checked = currentChecked;
         controlledSnapshot.group = currentGroup;
         controlledSnapshot.value = currentValue;
@@ -99,50 +194,65 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
         // checked updates. Group updates are authoritative otherwise so sibling
         // radios and parent assignments can clear this radio without ping-ponging.
         if (isInitialSync || (checkedChanged && !groupChanged)) {
-            const nextGroup = currentChecked ? currentValue : currentGroup === currentValue ? undefined : currentGroup;
-            if (currentGroup !== nextGroup) {
-                group = nextGroup;
+            if (currentChecked) {
+                if (!Object.is(currentGroup, currentValue)) {
+                    group = currentValue;
+                    controlledSnapshot.group = group;
+                }
+                controlledSnapshot.nativeChecked = true;
+            } else if (wasChecked) {
+                controlledSnapshot.nativeChecked = false;
+                // Give a sibling's same-tick checked=true update a chance to
+                // publish its selection before releasing this radio's old group.
+                afterBinding(() => {
+                    if (!hasSelectedSibling(radioInput)) group = undefined;
+                });
+            } else {
+                controlledSnapshot.nativeChecked = false;
             }
         } else if (groupChanged) {
-            const nextChecked = currentGroup === currentValue;
-            if (currentChecked !== nextChecked) {
-                checked = nextChecked;
-            }
+            afterBinding(reconcileChecked);
         } else if (valueChanged) {
             // Migrate only a checked selection that still owns its old value.
             // Established groups and simultaneous parent assignments keep authority.
-            if (currentChecked && currentGroup === previousValue) {
+            if (currentChecked) {
                 group = currentValue;
-            } else {
-                checked = currentGroup === currentValue;
-            }
+                controlledSnapshot.group = group;
+            } else afterBinding(reconcileChecked);
         }
+        return () => {
+            active = false;
+        };
     });
 
-    const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-        if (controlsChecked) {
-            checked = event.currentTarget.checked;
-        }
-        (onchange as EventListener | null)?.(event);
-    };
-</script>
+    $effect(() => {
+        const input = radioInput;
+        if (!input || !controlsChecked) return;
+        checkedControlledRadios.add(input);
+        return () => checkedControlledRadios.delete(input);
+    });
 
-{#if type === 'radio'}
-    <input
-        {...restOfProps}
-        bind:this={elementRef}
-        bind:group
-        {...controlsChecked ? { checked } : {}}
-        defaultChecked={restOfProps.defaultChecked === undefined ? initialRadioChecked : restOfProps.defaultChecked}
-        use:syncFormReset={() => {
+    function syncRadioReset(input: HTMLInputElement) {
+        let active = true;
+        const targets = new Set([input.ownerDocument, input.getRootNode()]);
+        const rememberNativeSelection = (event: Event) => {
+            const member = event.target as HTMLInputElement | null;
+            if (controlsChecked || !input.name || member?.tagName !== 'INPUT' || member.type !== 'radio') return;
+            if (member.name !== input.name || member.form !== input.form || member.getRootNode() !== input.getRootNode()) return;
+            // Equal-valued radios can exchange physical selection without a
+            // group update. Refresh before a later checked=false adoption.
+            controlledSnapshot.nativeChecked = input.checked;
+        };
+        const stopObserving = Array.from(targets, (target) => observeRadioChanges(target, rememberNativeSelection));
+        const reset = syncFormReset(input, () => {
             if (!controlsChecked) return;
-            const input = elementRef as HTMLInputElement;
             // Svelte's group-reset hook can overwrite checked before this task.
             // Recover the native radio default: the last default-checked member
             // of this named/form-owned group wins, rather than every true default.
             let selected = input.defaultChecked;
-            if (selected && input.name && input.form) {
-                let lastDefault: Element | undefined;
+            let lastDefault: HTMLInputElement | undefined = selected ? input : undefined;
+            if (input.name && input.form) {
+                lastDefault = undefined;
                 for (const element of Array.from(input.form.elements)) {
                     if (element.tagName !== 'INPUT') continue;
                     const member = element as HTMLInputElement;
@@ -156,10 +266,59 @@ Bootstrap toggle-button input that renders a `.btn-check` input and its matching
                 }
                 selected = lastDefault === input;
             }
+            const ownedSelection = checked === true;
+            // Publish the checked snapshot with reset's group result. Otherwise
+            // the effect can treat this internal false as a parent uncheck and
+            // clear a restored duplicate-value sibling (or emit undefined).
+            controlledSnapshot.checked = selected;
             checked = selected;
             if (selected) group = radioValue;
-            else if (group === radioValue) group = null;
-        }}
+            else if (ownedSelection && (!lastDefault || !checkedControlledRadios.has(lastDefault))) group = null;
+            const restoration = { group, value: radioValue, checked: selected };
+            const form = input.form;
+            pendingReset = restoration;
+            // Native group binding cannot distinguish duplicate values. Let its
+            // render finish, then retain the native reset winner unless a parent
+            // changed selection/value/checked or the input was removed meanwhile.
+            void tick().then(() => {
+                if (pendingReset !== restoration) return;
+                pendingReset = undefined;
+                if (!active || radioInput !== input || input.form !== form || !controlsChecked) return;
+                if (!Object.is(group, restoration.group) || !Object.is(radioValue, restoration.value) || checked !== selected) return;
+                input.checked = selected;
+            });
+        });
+        return {
+            destroy() {
+                active = false;
+                for (const stop of stopObserving) stop();
+                reset.destroy();
+            }
+        };
+    }
+
+    const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+        if (controlsChecked) {
+            checked = event.currentTarget.checked;
+        }
+        (onchange as EventListener | null)?.(event);
+    };
+</script>
+
+{#if type === 'radio'}
+    <input
+        {...restOfProps}
+        bind:this={
+            () => elementRef,
+            (input) => {
+                radioInput = input;
+                elementRef = input;
+            }
+        }
+        bind:group
+        {...controlsChecked ? { checked } : {}}
+        defaultChecked={restOfProps.defaultChecked === undefined ? initialRadioChecked : restOfProps.defaultChecked}
+        use:syncRadioReset
         {autocomplete}
         class={inputClasses}
         {disabled}
