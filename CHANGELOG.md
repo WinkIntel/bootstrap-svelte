@@ -2,7 +2,18 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## Unreleased
+## 2.2.3 — Unreleased
+
+### Fixed
+
+- Manage Offcanvas overlay focus and accessible title associations, while keeping scrollable backdrop-free panels keyboard accessible and preserving explicit naming and lifecycle callbacks ([#150](https://github.com/WinkIntel/bootstrap-svelte/pull/150), [#51](https://github.com/WinkIntel/bootstrap-svelte/issues/51)).
+- Reconcile checkbox, switch and radio selection with native checked/reset state; synchronize FileInput and ColorInput reset bindings, correct DateInput autofill metadata and nonresizable TextArea styles, and preserve grouped-radio SSR markup. Keep form enhancement types usable in plain Svelte and with SvelteKit, and prepare the five proven large-union declarations without changing their prop or binding contracts ([#153](https://github.com/WinkIntel/bootstrap-svelte/pull/153), [#52](https://github.com/WinkIntel/bootstrap-svelte/issues/52)).
+- Keep grouped ButtonCheck radio object identity and checked-owned values aligned with the mounted input, including consumer-mutated element references, same-tick updates, release/re-adoption and native resets. Preserve native duplicate-value behavior and the existing cross-root remount requirement ([#158](https://github.com/WinkIntel/bootstrap-svelte/pull/158), [#155](https://github.com/WinkIntel/bootstrap-svelte/issues/155)).
+- Let stateful Pagination interaction replace earlier unchanged active flags while later observed application updates, selected-item cleanup and mode changes restore declarative control. Declarative-only and stateless behavior remain supported ([#156](https://github.com/WinkIntel/bootstrap-svelte/pull/156), [#53](https://github.com/WinkIntel/bootstrap-svelte/issues/53)).
+
+### Added
+
+- Add optional `Pagination.Item isControl` (default `false`) so designated controls retain destinations and callbacks without selecting themselves. Update the Table Prev/Next example and Pagination guidance accordingly ([#156](https://github.com/WinkIntel/bootstrap-svelte/pull/156)).
 
 ## 2.2.2 — 2026-11-06
 
