@@ -2,7 +2,17 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## Unreleased
+## 1.1.6 — Unreleased
+
+### Fixed
+
+- Backport applicable form correctness fixes: synchronize checkbox/switch group membership and native reset defaults, ColorInput/FileInput bindings, standalone ButtonCheck radio checked state and grouped-radio SSR; correct DateInput autofill metadata and nonresizable TextArea styles. Preserve object selection identity, checked ownership and reset behavior when public element references change ([#154](https://github.com/WinkIntel/bootstrap-svelte/pull/154), [#52](https://github.com/WinkIntel/bootstrap-svelte/issues/52)).
+- Make packaged form enhancement types usable in plain Svelte while retaining SvelteKit compatibility. Resolve reproduced declaration conflicts and the five large-union declaration failures without changing public prop, binding or export contracts ([#154](https://github.com/WinkIntel/bootstrap-svelte/pull/154)).
+- Let a stateful Pagination click replace earlier unchanged active flags while later observed application updates, selected-item cleanup and mode changes restore declarative control. Preserve existing application-managed callbacks, declarative-only rendering and stateless behavior ([#157](https://github.com/WinkIntel/bootstrap-svelte/pull/157), [#53](https://github.com/WinkIntel/bootstrap-svelte/issues/53)).
+
+### Maintenance compatibility
+
+- Keep the Svelte `^5.29.0` peer floor and existing 1.x APIs. SwitchInput retains native `indeterminate` support without adding the 2.x `isIndeterminate` convenience prop; Pagination adds no `isControl` prop and leaves Prev/Next handling unchanged. Offcanvas focus/title changes and other 2.x-only behavior are not included.
 
 ## 1.1.5 — 2026-11-06
 
