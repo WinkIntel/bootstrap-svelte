@@ -34,5 +34,3 @@ jobs:
               run: npm ci --ignore-scripts --no-audit --no-fund
             - name: Test integrity guards and static characterization
               run: npm test
-            - name: Report SSR selector and media-query compatibility
-              run: npm run check

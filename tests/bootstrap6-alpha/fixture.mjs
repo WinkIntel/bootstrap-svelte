@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { createRequire } from 'node:module';
+import { createRequire, findPackageJSON, registerHooks } from 'node:module';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { compile } from 'svelte/compiler';
 import { render } from 'svelte/server';
-import ts from 'typescript';
+import semver from 'semver';
+import { thresholds, declarationExpectations, plannedViewportWidths } from './expectations.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -41,25 +43,26 @@ export async function loadStyles() {
 }
 
 const breakpoints = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
+const range = (start, end) => Array.from({ length: end - start + 1 }, (_, index) => start + index);
+const propCases = (component, prop, values) =>
+    values.flatMap((value) => [
+        `<${component} ${prop}={${JSON.stringify(value)}} data-case="${component}-${prop}-${value}">value</${component}>`,
+        ...breakpoints.map(
+            (bp) => `<${component} ${prop}={{ ${bp}: ${JSON.stringify(value)} }} data-case="${component}-${prop}-${bp}-${value}">value</${component}>`
+        )
+    ]);
 const cases = [
     '<Container data-case="container-base">base</Container>',
     '<Container isFluid data-case="container-fluid">fluid</Container>',
     ...breakpoints.map((bp) => `<Container breakpoint="${bp}" data-case="container-${bp}">${bp}</Container>`),
-    '<Container isFluid><Row data-case="row-base"><Col>one</Col><Col>two</Col></Row></Container>',
-    '<Container isFluid><Row cols={3} data-case="row-static"><Col>one</Col><Col>two</Col><Col>three</Col></Row></Container>',
-    ...breakpoints.map((bp) => `<Container isFluid><Row cols={{ ${bp}: 3 }} data-case="row-${bp}"><Col>one</Col><Col>two</Col></Row></Container>`),
-    '<Container isFluid><Row data-case="col-static"><Col sizing={6} offset={2} order={2}>one</Col><Col>two</Col></Row></Container>',
-    ...breakpoints.map(
-        (bp) =>
-            `<Container isFluid><Row data-case="col-${bp}"><Col sizing={{ ${bp}: 6 }} offset={{ ${bp}: 2 }} order={{ ${bp}: 2 }}>one</Col><Col>two</Col></Row></Container>`
-    ),
-    ...breakpoints.map(
-        (bp) => `<Container isFluid><Row data-case="star-${bp}"><Col sizing={{ ${bp}: '*' }}>one</Col><Col>two</Col></Row></Container>`
-    ),
-    ...breakpoints.map(
-        (bp) => `<Container isFluid><Row data-case="auto-${bp}"><Col sizing={{ ${bp}: 'auto' }}>one</Col><Col>two</Col></Row></Container>`
-    ),
-    '<Container isFluid><Row cols={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 }} data-case="row-map"><Col>one</Col><Col>two</Col></Row></Container>'
+    '<Row data-case="row-base"><Col>base</Col></Row>',
+    ...propCases('Row', 'cols', [...range(1, 6), 'auto']),
+    '<Col data-case="col-base">base</Col>',
+    ...propCases('Col', 'sizing', [...range(1, 12), 'auto']),
+    ...breakpoints.map((bp) => `<Col sizing={{ ${bp}: '*' }} data-case="col-star-${bp}">star</Col>`),
+    ...propCases('Col', 'offset', range(0, 11)),
+    ...propCases('Col', 'order', [...range(0, 5), 'first', 'last']),
+    '<Row cols={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 }} data-case="row-map"><Col>one</Col><Col>two</Col></Row>'
 ];
 
 // This changes rendered fixture tokens, never production code or the public xxl API.
@@ -70,33 +73,56 @@ function mapToken(token) {
     return match ? `${match[2] === 'xxl' ? '2xl' : match[2]}:${match[1]}${match[3]}` : token;
 }
 
-export async function renderLayout() {
-    // Keep generated modules under the fixture so normal package resolution works
-    // on any checkout. No absolute machine paths or private .pnpm paths are used.
+export async function renderLayout({ sourceRoot = fileURLToPath(repository), extraCases = [] } = {}) {
     const generated = await mkdtemp(join(here, '.generated-'));
-    try {
-        for (const component of ['Container', 'Row', 'Col']) {
-            const filename = fileURLToPath(new URL(`src/lib/${component}/${component.toLowerCase()}.svelte`, repository));
-            const source = (await readFile(filename, 'utf8')).replaceAll('$lib/common/css.js', './css.mjs');
-            await writeFile(join(generated, `${component}.mjs`), compile(source, { filename, generate: 'server' }).js.code);
+    const library = pathToFileURL(join(sourceRoot, 'src/lib/')).href;
+    // A bounded SSR loader for local .svelte/.ts modules, not a Vite/SvelteKit
+    // replacement: no preprocessing, dynamic aliases, CSS/assets or browser code.
+    // Hooks are scoped to this synchronous import/render and deregistered on failure.
+    const hooks = registerHooks({
+        resolve(specifier, context, nextResolve) {
+            const local = specifier.startsWith('$lib/')
+                ? new URL(specifier.slice(5), library).href
+                : specifier.startsWith('.') && context.parentURL?.startsWith(library)
+                  ? new URL(specifier, context.parentURL).href
+                  : null;
+            if (local) {
+                const source = local.endsWith('.js') && !existsSync(fileURLToPath(local)) ? local.slice(0, -3) + '.ts' : local;
+                return nextResolve(source, context);
+            }
+            if (context.parentURL?.startsWith(library) && !specifier.startsWith('node:') && !specifier.startsWith('file:')) {
+                // Use fixture-owned dependencies even without a root install.
+                return nextResolve(specifier, { ...context, parentURL: import.meta.url });
+            }
+            return nextResolve(specifier, context);
+        },
+        load(url, context, nextLoad) {
+            if (url.startsWith(library) && url.endsWith('.svelte'))
+                return {
+                    format: 'module',
+                    shortCircuit: true,
+                    source: compile(readFileSync(fileURLToPath(url), 'utf8'), { filename: fileURLToPath(url), generate: 'server', runes: true }).js
+                        .code
+                };
+            // Node 26 strips erasable TS syntax natively, preserving runtime imports.
+            return nextLoad(url, context);
         }
-        const css = await readFile(new URL('src/lib/common/css.ts', repository), 'utf8');
-        await writeFile(
-            join(generated, 'css.mjs'),
-            ts.transpileModule(css, {
-                compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 }
-            }).outputText
-        );
-        const fixture = `<script>import Container from './Container.mjs';import Row from './Row.mjs';import Col from './Col.mjs';</script>${cases.join('\n')}`;
+    });
+    try {
+        const imports = ['Container', 'Row', 'Col']
+            .map((name) => `import ${name} from ${JSON.stringify(new URL(`${name}/${name.toLowerCase()}.svelte`, library).href)};`)
+            .join('');
+        const fixture = `<script>${imports}</script>${[...cases, ...extraCases].join('\n')}`;
         await writeFile(
             join(generated, 'Fixture.mjs'),
-            compile(fixture, { filename: join(generated, 'Fixture.svelte'), generate: 'server' }).js.code
+            compile(fixture, { filename: join(generated, 'Fixture.svelte'), generate: 'server', runes: true }).js.code
         );
         const { default: Fixture } = await import(pathToFileURL(join(generated, 'Fixture.mjs')));
         const current = render(Fixture).body;
         const mapped = current.replace(/class="([^"]*)"/g, (_, list) => `class="${list.split(/\s+/).map(mapToken).join(' ')}"`);
-        return { current, mapped, cases: cases.length };
+        return { current, mapped, cases: cases.length + extraCases.length };
     } finally {
+        hooks.deregister();
         await rm(generated, { recursive: true, force: true });
     }
 }
@@ -108,28 +134,76 @@ export function classTokens(html) {
 export function indexCss(css) {
     const classes = new Map();
     postcss.parse(css).walkRules((rule) => {
-        const media = [];
+        const contexts = [];
         for (let ancestor = rule.parent; ancestor; ancestor = ancestor.parent) {
-            if (ancestor.type === 'atrule' && ancestor.name === 'media') media.push(ancestor.params);
+            if (ancestor.type === 'atrule') contexts.unshift({ name: ancestor.name, params: ancestor.params });
         }
+        const declarations = Object.fromEntries(rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]));
+        const importance = Object.fromEntries(rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, !!node.important]));
         selectorParser((selectors) =>
-            selectors.walkClasses((node) => {
-                const rules = classes.get(node.value) ?? [];
-                rules.push({
-                    selector: rule.selector,
-                    media,
-                    declarations: Object.fromEntries(rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]))
+            selectors.each((selector) => {
+                selector.walkClasses((node) => {
+                    // Record occurrences independently from the role of the class.
+                    // Only isolated classes and recognized row-cols child utilities
+                    // are used as grid oracles;
+                    // ancestor/compound/pseudo mentions are still visible in the index.
+                    const subject =
+                        node.parent === selector &&
+                        !selector.nodes.slice(selector.nodes.indexOf(node) + 1).some((part) => part.type === 'combinator');
+                    const isolated = selector.nodes.length === 1 && selector.first === node;
+                    const directChildren =
+                        selector.nodes.length === 3 &&
+                        selector.first === node &&
+                        selector.nodes[1].type === 'combinator' &&
+                        selector.nodes[1].value === '>' &&
+                        selector.last.type === 'universal';
+                    const rules = classes.get(node.value) ?? [];
+                    rules.push({
+                        selector: selector.toString().trim(),
+                        contexts,
+                        media: contexts.filter(({ name }) => name === 'media').map(({ params }) => params),
+                        declarations,
+                        importance,
+                        subject,
+                        isolated,
+                        directChildren
+                    });
+                    classes.set(node.value, rules);
                 });
-                classes.set(node.value, rules);
             })
         ).processSync(rule.selector);
     });
     return classes;
 }
 
+// Reuse unchanged artifacts within one test process; a mutation is a new style
+// object. Also compare css bytes so an accidentally reused mutable object is safe.
+const indexes = new WeakMap();
+function styleIndex(style) {
+    const cached = indexes.get(style);
+    if (cached?.css === style.css) return cached.index;
+    const index = indexCss(style.css);
+    indexes.set(style, { css: style.css, index });
+    return index;
+}
+const gridRules = (index, name) => {
+    // Only row-cols controls the children: other families act on the class-bearing
+    // element. Recognize both public legacy and fixture-mapped responsive names.
+    const isRowCols = /^(?:row-cols-(?:(?:sm|md|lg|xl|xxl)-)?|(?:sm|md|lg|xl|2xl):row-cols-)(?:[1-6]|auto)$/.test(name);
+    return (index.get(name) ?? []).filter(
+        ({ isolated, directChildren, contexts }) =>
+            (isolated || (isRowCols && directChildren)) && contexts.every(({ name }) => name === 'media' || name === 'layer')
+    );
+};
+const mediaMinimum = (rule) => {
+    if (rule.media.length !== 1) return null;
+    const match = rule.media[0].match(/^\((?:min-width: |width >= )(\d+)px\)$/);
+    return match ? Number(match[1]) : null;
+};
+
 export function assertCharacterization(styles, layout) {
-    const baseline = indexCss(styles.baseline.css);
-    const alpha = indexCss(styles.alpha.css);
+    const baseline = styleIndex(styles.baseline);
+    const alpha = styleIndex(styles.alpha);
     const modes = [
         ['bootstrap5-current', baseline, layout.current],
         ['bootstrap6-current', alpha, layout.current],
@@ -138,30 +212,16 @@ export function assertCharacterization(styles, layout) {
     const coverage = modes.map(([mode, index, html]) => {
         const classes = classTokens(html);
         const missing = classes.filter((name) => !index.has(name));
+        const expectedMissing = classes.filter((name) => name === 'offset-0' || (mode === 'bootstrap6-current' && mapToken(name) !== name));
+        assert.deepEqual(
+            missing,
+            expectedMissing,
+            `${mode}: selector coverage changed; review the characterization rather than claiming layout support`
+        );
         return { mode, total: classes.length, matched: classes.length - missing.length, missing };
     });
-    assert.deepEqual(
-        coverage.map(({ matched, total }) => [matched, total]),
-        [
-            [49, 49],
-            [10, 49],
-            [49, 49]
-        ],
-        'selector coverage changed; review the characterization rather than claiming layout support'
-    );
-    const thresholds = [
-        ['sm', 576, 576, 540, 540],
-        ['md', 768, 768, 720, 720],
-        ['lg', 992, 1024, 960, 960],
-        ['xl', 1200, 1280, 1140, 1200],
-        ['xxl', 1400, 1536, 1320, 1440]
-    ];
-    const hasRule = (index, name, media, prop, value) =>
-        index.get(name)?.some((rule) => rule.media.includes(media) && (!prop || rule.declarations[prop] === value));
     for (const [bp, oldWidth, newWidth, oldMax, newMax] of thresholds) {
         const target = bp === 'xxl' ? '2xl' : bp;
-        const oldMedia = `(min-width: ${oldWidth}px)`;
-        const newMedia = `(width >= ${newWidth}px)`;
         for (const [oldName, newName] of [
             [`container-${bp}`, `${target}:container`],
             [`row-cols-${bp}-3`, `${target}:row-cols-3`],
@@ -171,32 +231,69 @@ export function assertCharacterization(styles, layout) {
             [`col-${bp}`, `${target}:col`],
             [`col-${bp}-auto`, `${target}:col-auto`]
         ]) {
-            assert(hasRule(baseline, oldName, oldMedia), `${oldName}: expected ${oldMedia}`);
+            for (const [label, index, name, width] of [
+                ['baseline', baseline, oldName, oldWidth],
+                ['alpha', alpha, newName, newWidth]
+            ]) {
+                const minima = gridRules(index, name)
+                    .filter((rule) => !name.includes('container') || rule.declarations['max-width'])
+                    .map(mediaMinimum)
+                    .filter((value) => value !== null);
+                assert.equal(Math.min(...minima), width, `${label} ${name}: minimum conditional grid rule expected ${width}px`);
+            }
             assert(!alpha.has(oldName), `${oldName}: unexpected legacy alpha selector`);
-            assert(hasRule(alpha, newName, newMedia), `${newName}: expected ${newWidth}px media query`);
         }
-        assert(hasRule(baseline, 'container', oldMedia, 'max-width', `${oldMax}px`), `${bp}: baseline container cap`);
-        assert(hasRule(alpha, 'container', newMedia, 'max-width', `${newMax}px`), `${bp}: alpha container cap`);
+        for (const [label, index, width, max] of [
+            ['baseline', baseline, oldWidth, oldMax],
+            ['alpha', alpha, newWidth, newMax]
+        ]) {
+            assert(
+                gridRules(index, 'container').some((rule) => mediaMinimum(rule) === width && rule.declarations['max-width'] === `${max}px`),
+                `${bp}: ${label} container cap`
+            );
+        }
     }
-    const hasDeclaration = (name, prop, value) => alpha.get(name)?.some((rule) => rule.declarations[prop] === value);
-    for (const [name, prop, value] of [
-        ['row', 'display', 'flex'],
-        ['row', 'flex-wrap', 'wrap'],
-        ['col', 'flex', '1 0 0'],
-        ['col-6', 'width', '50%'],
-        ['row-cols-3', 'width', '33.3333333333%'],
-        ['col-auto', 'width', 'auto'],
-        ['offset-2', 'margin-inline-start', '16.6666666667%'],
-        ['order-2', 'order', '2'],
-        ['container', 'padding-inline', 'calc(var(--bs-gutter-x) * 0.5)']
-    ])
-        assert(hasDeclaration(name, prop, value), `${name}: expected ${prop}: ${value}`);
+    const declarationComparisons = declarationExpectations.map(([name, purpose, oldExpected, newExpected]) => {
+        const snapshots = [
+            ['baseline', baseline, oldExpected],
+            ['alpha', alpha, newExpected]
+        ].map(([label, index, [property, value, important, layer]]) => {
+            const rule = gridRules(index, name).find(
+                (rule) =>
+                    rule.media.length === 0 &&
+                    rule.declarations[property] === value &&
+                    rule.importance[property] === important &&
+                    rule.contexts
+                        .filter(({ name }) => name === 'layer')
+                        .map(({ params }) => params)
+                        .join('.') === (layer ?? '')
+            );
+            assert(rule, `${label} ${name}: expected ${property}: ${value}${important ? ' !important' : ''} in ${layer ?? 'unlayered'} context`);
+            return {
+                selector: rule.selector,
+                property,
+                value,
+                important,
+                layers: rule.contexts.filter(({ name }) => name === 'layer').map(({ params }) => params),
+                contexts: rule.contexts
+            };
+        });
+        return {
+            name,
+            purpose,
+            baseline: snapshots[0],
+            alpha: snapshots[1],
+            declarationChanged: JSON.stringify(oldExpected.slice(0, 3)) !== JSON.stringify(newExpected.slice(0, 3)),
+            contextChanged: JSON.stringify(snapshots[0].contexts) !== JSON.stringify(snapshots[1].contexts)
+        };
+    });
     return {
-        kind: 'static SSR selector/media/declaration characterization; not computed browser layout',
+        kind: 'static SSR selector occurrence/conditional grid rule/declaration characterization; not computed browser layout or cascade',
         fixtureCases: layout.cases,
         svelte: require('svelte/package.json').version,
         assets: Object.fromEntries(Object.entries(styles).map(([key, { version, sha256 }]) => [key, { version, sha256 }])),
         coverage,
+        declarationComparisons,
         breakpoints: thresholds.map(([publicKey, baselineMinimum, alphaMinimum, baselineContainerMax, alphaContainerMax]) => ({
             publicKey,
             baselineMinimum,
@@ -204,13 +301,30 @@ export function assertCharacterization(styles, layout) {
             baselineContainerMax,
             alphaContainerMax
         })),
-        plannedViewportWidths: [375, 575, 576, 767, 768, 991, 992, 1023, 1024, 1199, 1200, 1279, 1280, 1399, 1400, 1535, 1536, 1600],
-        plannedBrowserCombinations: 54,
+        plannedViewportWidths,
+        plannedBrowserCombinations: modes.length * plannedViewportWidths.length,
         browserExecuted: false
     };
 }
 
-export async function characterize() {
+export async function assertInputConsistency({ rootPackage, appHtml } = {}) {
+    rootPackage ??= JSON.parse(await readFile(new URL('package.json', repository), 'utf8'));
+    appHtml ??= await readFile(new URL('src/app.html', repository), 'utf8');
+    for (const name of ['svelte', 'bezier-easing']) {
+        const { version } = JSON.parse(await readFile(findPackageJSON(name, import.meta.url), 'utf8'));
+        const range = rootPackage.devDependencies?.[name] ?? rootPackage.dependencies?.[name];
+        assert(semver.validRange(range) && semver.satisfies(version, range), `${name} ${version} does not satisfy root range ${range}`);
+    }
+    const version = appHtml.match(/https:\/\/cdn\.jsdelivr\.net\/npm\/bootstrap@([^/]+)\/dist\/css\/bootstrap\.min\.css/)?.[1];
+    assert.equal(
+        version,
+        pins.baseline.version,
+        'showcase Bootstrap version differs from baseline pin (the fixture uses the unminified distribution of that version)'
+    );
+}
+
+export async function characterize(options) {
+    await assertInputConsistency(options);
     const styles = await loadStyles();
     return assertCharacterization(styles, await renderLayout());
 }
