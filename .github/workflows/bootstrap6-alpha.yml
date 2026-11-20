@@ -1,0 +1,36 @@
+name: Bootstrap 6 alpha fixture
+
+env:
+    FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+    push:
+        branches: [3.x-alpha]
+    pull_request:
+        branches: [3.x-alpha]
+
+permissions:
+    contents: read
+
+jobs:
+    static-compatibility:
+        name: Bootstrap 6 pinned CSS characterization
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        defaults:
+            run:
+                working-directory: tests/bootstrap6-alpha
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
+            - name: Setup Node.js
+              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              with:
+                  node-version: 26
+                  package-manager-cache: false
+            - name: Install isolated exact CSS and fixture tools
+              run: npm ci --ignore-scripts --no-audit --no-fund
+            - name: Test integrity guards and static characterization
+              run: npm test
