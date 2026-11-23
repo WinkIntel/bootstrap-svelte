@@ -2,7 +2,7 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
-## 2.2.3 — Unreleased
+## 2.2.3 — 2026-11-23
 
 ### Fixed
 
@@ -14,6 +14,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 ### Added
 
 - Add optional `Pagination.Item isControl` (default `false`) so designated controls retain destinations and callbacks without selecting themselves. Update the Table Prev/Next example and Pagination guidance accordingly ([#156](https://github.com/WinkIntel/bootstrap-svelte/pull/156)).
+- Add optional `Form.SwitchInput isIndeterminate`, matching `Form.CheckInput`. The native `indeterminate` prop is accepted as an alias; an explicit `isIndeterminate`, including `false`, takes precedence ([#153](https://github.com/WinkIntel/bootstrap-svelte/pull/153)).
 
 ## 2.2.2 — 2026-11-06
 
