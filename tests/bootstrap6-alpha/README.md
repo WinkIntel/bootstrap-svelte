@@ -28,8 +28,7 @@ another version, or an empty stylesheet.
 | --------------- | ------------------------- | ------------------------------------------------------------------ |
 | Comparison CSS  | `bootstrap@5.3.6`         | `1da4b921953cee097fefd2507bf1c77467041d9db28d4003bfc81eca1369a1cf` |
 | Alpha 1 control | `bootstrap@6.0.0-alpha.1` | `ad0d5123040e043dad1451a6d4483dad4df4e2835e6687d6cf5af8a757283371` |
-
-| Alpha 2 target | `bootstrap@6.0.0-alpha.2` | `4df5807d5807353e17dda52a7ee6c0acb9aabb1401553b026136a2b3e145b480` |
+| Alpha 2 target  | `bootstrap@6.0.0-alpha.2` | `4df5807d5807353e17dda52a7ee6c0acb9aabb1401553b026136a2b3e145b480` |
 
 The comparison uses the same Bootstrap version as the showcase CDN link, checked
 against `src/app.html`; this fixture hashes expanded `bootstrap.css`, whereas the
