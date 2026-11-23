@@ -213,6 +213,56 @@ function components(directory: string): string[] {
 }
 
 describe('component hover documentation', () => {
+    test.each([
+        'module lang="ts"',
+        'lang="ts" module',
+        'context="module" lang="ts"',
+        "lang='ts' context='module'",
+        'context=module lang="ts"',
+        'lang="ts" context=module'
+    ])('resolves instance props after a %s script without accepting unknown props', (attributes) => {
+        const fixture = (prop: string) => `<!--
+@component
+### Props
+- \`${prop}\`: property
+-->
+<script ${attributes}>const registry = new WeakSet();</script>
+<script lang="ts">let { ...props }: ButtonCheckRootProps = $props();</script>`;
+        expect(validateHover(fixture('group')).errors).toEqual([]);
+        expect(validateHover(fixture('madeUp')).errors).toEqual(['madeUp is absent from ButtonCheckRootProps']);
+        const moduleOnly = fixture('group').replace(/<script lang="ts">[\s\S]*?<\/script>/, '');
+        expect(validateHover(moduleOnly).errors).toEqual(['Documented props have no resolved $props() type']);
+    });
+
+    test.each(['T extends module | string', 'T extends string = "module"', 'T extends Record<string, module>'])(
+        'treats generic attribute text as instance-script data (%s)',
+        (generics) => {
+            const source = `<!--
+@component
+### Props
+- \`group\`: property
+-->
+<script lang="ts" generics='${generics}'>let { ...props }: ButtonCheckRootProps = $props();</script>`;
+            expect(validateHover(source).errors).toEqual([]);
+            expect(validateHover(source.replace('ButtonCheckRootProps', 'UnknownProps')).errors).toEqual([
+                'Documented props have no resolved $props() type'
+            ]);
+        }
+    );
+    test('never lets a module-side props annotation mask missing or unknown instance props', () => {
+        const source = `<!--
+@component
+### Props
+- \`group\`: property
+-->
+<script context=module>let { ...props }: ButtonCheckRootProps = $props();</script>
+<script lang="ts">let { ...props }: UnknownProps = $props();</script>`;
+        expect(validateHover(source).errors).toEqual(['Documented props have no resolved $props() type']);
+        expect(validateHover(source.replace('let { ...props }: UnknownProps = $props();', '')).errors).toEqual([
+            'Documented props have no resolved $props() type'
+        ]);
+    });
+
     test('rejects obsolete props while accepting inherited HTML props', () => {
         const fixture = (name: string) =>
             `<!--\n@component\n### Props\n- \`${name}\`: Optional.\n-->\n<script lang="ts">let { ...props }: Pagination.RootProps = $props();</script>`;

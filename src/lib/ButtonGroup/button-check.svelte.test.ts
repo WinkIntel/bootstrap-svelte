@@ -215,14 +215,13 @@ describe('ButtonCheck radio correctness', () => {
 });
 
 describe('ButtonCheck native group ownership transitions', () => {
-    test('preserves the existing checked-release behavior and later parent group control', async () => {
+    test('retains selection on checked release and follows later parent group control', async () => {
         const { container } = render(Ownership);
         const [a, b] = Array.from(container.querySelectorAll('input'));
         expect(a?.checked).toBe(true);
         await fireEvent.click(screen.getByText('Release checked'));
-        // Existing client behavior at bb981f8 also clears the DOM property here;
-        // this SSR-only correction preserves that transition and the parent group.
-        expect(a?.checked).toBe(false);
+        // Releasing checked control retains the group's selection in the DOM.
+        expect(a?.checked).toBe(true);
         expect(b?.checked).toBe(false);
         expect(container.querySelector('output')).toHaveTextContent('"a":undefined');
         await fireEvent.click(screen.getByText('Select B'));
