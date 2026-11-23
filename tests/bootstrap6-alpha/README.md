@@ -176,11 +176,31 @@ hide a substantial gutter/width/offset semantic change.
 
 ## Browser coverage and limits
 
-**Browser measurements remain UNRUN.** Neither tests nor the fixture workflow
-launches a browser or HTTP server. Selector/media/declaration coverage and HTML
-generation do not establish evaluated geometry, cascade correctness or support.
-No enabled browser surface was available for this spike; no alternate browser or
-file-URL workaround was attempted.
+A separate manual integration run on November 23, 2026 measured the
+generated page using Playwright 1.61.1 and its matching Chrome Headless
+**149.0.7827.55** on macOS 27.2.1. It completed **100 frames / 822 relationship
+checks**, with **0 unexpected mismatches** and **44 expected current-token
+mismatches**: 22 each for alpha 1/current and alpha 2/current. Requested, actual
+viewport and client widths matched in every frame. No network attempts, page
+errors or console errors were observed. The disposable offline context used the
+Chromium sandbox, no user profile or server, and `page.setContent`; the browser
+closed and temporary context was removed after the run.
+
+That run used source `a1bc76b6df76d6e9e57b12e0e2fb2e7d8f437225` and generated
+HTML SHA-256 `586529675ff121ad0a8abfe0e00069b79f652aefba3439ed93e8a16f20048672`.
+The generation command below reproduces the artifact; runner execution was a separate
+manual validation, not an added project command or automatic CI coverage. Raw
+results were retained as external task evidence (`execution.json`,
+`chromium149-matrix.json`, `summary-by-mode.json`). The browser API version is the
+engine evidence; its reduced user-agent OS string does not describe the host OS.
+
+Neither `npm test`, `npm run check` nor the fixture workflow launches a browser or
+HTTP server. Their static results and the generator's `browserExecuted: false`
+retain their original meaning. Selector/media/declaration coverage and generation
+alone do not establish evaluated geometry, cascade correctness or product support.
+The original interactive-browser surface was unavailable; no file-URL or other
+workaround was used. The later authorized disposable Playwright run supplies only
+the single-engine observations stated here.
 
 `npm run browser:generate` writes `.generated-browser/index.html` (gitignored).
 The CLI also accepts `--output /explicit/task-local/path/index.html` and runs from
@@ -190,7 +210,8 @@ and inline measurement code; no remote assets, Bootstrap JavaScript or hydration
 Generation only prepares the experiment. Opening it requires a permitted browser
 path supplied separately by the controller; this command does not open it.
 
-The static report retains its planned **90 unrun CSS/viewport combinations**:
+The static report retains its **90 planned CSS/viewport combinations** (it does
+not execute them):
 five modes at `375, 575, 576, 767, 768, 991, 992, 1023, 1024, 1199, 1200, 1279, 1280,
 1399, 1400, 1535, 1536, 1600` pixels. The generated page prepares **100 sequential
 frames**: the middle 16 widths in LTR for responsive checks, plus 375 and 1600px
@@ -203,10 +224,11 @@ responsive Container/Row/Col, a controlled cascade comparison and a full-width
 flex break compared with two separate Rows under nonzero vertical gutters.
 The zero-height full-width break can occupy its own flex line and introduce two
 vertical gaps; separate Rows record their own separation without pretending that
-a row gap automatically supplies spacing between Rows. This comparison is prepared,
-not a measured result. The cascade
-case declares a consumer layer before Bootstrap, then supplies a later unlayered
-consumer override. Relationship expectations use measured row width/gap and the
+a row gap automatically supplies spacing between Rows. In the alpha 2 mapped
+reference at 375 and 1600px LTR, the run observed a 12px row gap, 24px separation
+across the full-width break and **0px** separation between the two separate Rows.
+Separate Rows did not supply one gap. The cascade case declares a consumer layer
+before Bootstrap, then supplies a later unlayered consumer override. Relationship expectations use measured row width/gap and the
 verified declarations, rather than guessed pixel widths. Expected mismatches of
 current alpha responsive tokens are labeled separately from unexpected mismatches;
 the mapped reference is an experiment, not a public API change or support claim.
@@ -227,6 +249,13 @@ CSS under `dir=rtl`, records physical margins, and skips a logical-offset parity
 assertion in that combination. It is not full Bootstrap 5 RTL parity. No browser
 parity flag is asserted by generation. Hydration, interactive behavior, focus,
 full RTL distribution comparison and visual review remain outside this CSS spike.
+
+Firefox, WebKit, Edge and the upstream browser-floor versions (Chrome/Edge 138,
+Firefox 147 and Safari 26) remain **UNRUN**. Chrome 149 passing these finite
+relationships does not establish browser-floor compatibility, cross-engine parity,
+visual parity or Bootstrap 6 product support. The mapped-reference results do not
+repair current production responsive tokens; their expected mismatches remain
+visible in the manual results.
 
 `.github/workflows/bootstrap6-alpha.yml` runs this static fixture only on PRs
 targeting `3.x-alpha` and pushes to that branch. It has read-only repository access
