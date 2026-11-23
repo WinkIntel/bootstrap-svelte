@@ -3,16 +3,18 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "node --test fixture.test.mjs",
-        "check": "node check.mjs"
+        "test": "node --test fixture.test.mjs browser-spike.test.mjs",
+        "check": "node check.mjs",
+        "browser:generate": "node browser-spike.mjs"
     },
     "dependencies": {
+        "bezier-easing": "3.0.1",
         "bootstrap5": "npm:bootstrap@5.3.6",
         "bootstrap6": "npm:bootstrap@6.0.0-alpha.1",
-        "bezier-easing": "3.0.1",
+        "bootstrap6alpha2": "npm:bootstrap@6.0.0-alpha.2",
         "postcss": "8.5.20",
         "postcss-selector-parser": "7.1.1",
-        "svelte": "5.57.0",
-        "semver": "7.8.2"
+        "semver": "7.8.2",
+        "svelte": "5.57.0"
     }
 }
