@@ -89,6 +89,13 @@ describe('Modal Component', () => {
         expect(xlDialog).toHaveClass('modal-xl');
     });
 
+    it('renders the public XXL dialog size as modal-xxl', () => {
+        const props: Modal.DialogProps = { size: 'xxl', 'data-testid': 'xxl-dialog' };
+        render(Modal.Dialog, props);
+
+        expect(screen.getByTestId('xxl-dialog')).toHaveClass('modal-dialog', 'modal-xxl');
+    });
+
     it.each([true, 'static', false] as const)('renders and handles useBackdrop=%s', async (useBackdrop) => {
         const onHide = vi.fn();
         const onHidePrevented = vi.fn();
