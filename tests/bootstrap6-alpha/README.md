@@ -191,13 +191,14 @@ mismatches**: 22 each for alpha 1/current and alpha 2/current. There were **0
 unexpected current-token matches**. Exact order comparisons replace the former
 1px-tolerant cascade checks; 80 additional ordinary width assertions pin the known
 current-token result rather than accepting arbitrary failures. Requested, actual
-viewport and client widths matched in every frame. No network attempts, page
+viewport and client widths matched in every frame. The measured host used zero-width
+root scrollbar gutters in every mode; this is not classic-scrollbar evidence. No network attempts, page
 errors or console errors were observed. The disposable offline context used the
 Chromium sandbox, no user profile or server, and `page.setContent`; the browser
 closed and temporary context was removed after the run.
 
 The revised generated HTML SHA-256 is
-`1c91904f8acbc07de870f0ca5a23cff962ac2d2f9a21bd2782565a72a66a4bd5`.
+`9ceaa787502b6a68105577075df555f00179fbe6816f14fa8f1efb0339aab543`.
 The earlier November 23 run's 822-check result and artifact hash are historical;
 the revised checks above supersede its cascade/incompatibility evidence. The
 generation command below reproduces the revised artifact. Runner execution is a
@@ -213,6 +214,18 @@ alone do not establish evaluated geometry, cascade correctness or product suppor
 The original interactive-browser surface was unavailable; no file-URL or other
 workaround was used. The later authorized disposable Playwright run supplies only
 the single-engine observations stated here.
+
+Alpha 1 ships root `scrollbar-gutter: stable`; alpha 2 does not. A classic
+scrollbar can therefore reduce the body's layout width while `innerWidth` and
+root `clientWidth` still report the full frame width. Container expectations use
+the measured body width (the instrument sets `body { margin: 0 }`), while media-query
+thresholds continue to use `innerWidth`. Each frame records `layoutViewportWidth`
+and `rootScrollbarGutter` separately. Deterministic serialized-program regressions
+cover 0px and 15px gutters, both container assertions and either side of the
+1024/1280/1536px alpha thresholds; those regressions are not browser geometry.
+The available Chrome 149 host measured a 0px gutter. A test-only 15px custom-scrollbar
+style probe also measured 0px, so classic-scrollbar browser coverage remains unrun;
+no pinned CSS was changed or root gutter disabled to obtain the result.
 
 Load, font and animation waits each have a 5-second deadline; setup and wait
 failures record terminal error state and preserve completed-frame evidence.

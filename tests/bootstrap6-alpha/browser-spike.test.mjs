@@ -61,7 +61,18 @@ test('server-free CLI emits verified artifacts, actual SSR markup and a finite u
 
 // Run the actual generated program with deliberately small DOM fault fixtures.
 // This validates reporting/error paths, not browser layout, rendering or support.
-async function runMeasurement({ name = 'cascade', style = 'alpha', orders = ['3', '2'], childWidth = 1280, containerWidth = 1280, fault } = {}) {
+async function runMeasurement({
+    name = 'cascade',
+    style = 'alpha',
+    markup = 'current',
+    orders = ['3', '2'],
+    viewportWidth = 1280,
+    layoutWidth = viewportWidth,
+    rowWidth = layoutWidth,
+    childWidth = rowWidth,
+    containerWidth = layoutWidth,
+    fault
+} = {}) {
     const { runInNewContext } = await import('node:vm');
     const directory = await mkdtemp(join(tmpdir(), 'bootstrap-measurement-fault-'));
     try {
@@ -70,8 +81,8 @@ async function runMeasurement({ name = 'cascade', style = 'alpha', orders = ['3'
         const html = await readFile(output, 'utf8');
         const input = JSON.parse(html.match(/<script id="spike-input" type="application\/json">([\s\S]*?)<\/script>/)[1]);
         const script = html.match(/<script id="measurement-program">([\s\S]*?)<\/script>/)[1];
-        const mode = input.modes.find((mode) => mode.style === style && mode.markup === 'current');
-        input.frames = [{ mode: mode.name, width: 1280, direction: 'ltr', scope: name === 'responsive' ? 'responsive' : 'layout' }];
+        const mode = input.modes.find((mode) => mode.style === style && mode.markup === markup);
+        input.frames = [{ mode: mode.name, width: viewportWidth, direction: 'ltr', scope: name === 'responsive' ? 'responsive' : 'layout' }];
         if (fault === 'second-load') input.frames.push({ ...input.frames[0] });
         const result = { textContent: 'UNRUN' };
         const window = {};
@@ -80,7 +91,8 @@ async function runMeasurement({ name = 'cascade', style = 'alpha', orders = ['3'
         let appendedFrames = 0;
         let frame;
         const doc = {
-            documentElement: { clientWidth: 1280 },
+            documentElement: { clientWidth: viewportWidth },
+            body: { getBoundingClientRect: () => ({ width: layoutWidth }) },
             fonts: { ready: fault === 'fonts' ? new Promise(() => {}) : Promise.resolve() },
             defaultView: { getComputedStyle: (node) => node.css },
             querySelector: () => section,
@@ -109,7 +121,7 @@ async function runMeasurement({ name = 'cascade', style = 'alpha', orders = ['3'
                 }
             };
         }
-        const row = node();
+        const row = node({ width: rowWidth });
         row.children = orders.map((order) => node({ width: childWidth, order }));
         const section = {
             dataset: { spike: name },
@@ -123,7 +135,7 @@ async function runMeasurement({ name = 'cascade', style = 'alpha', orders = ['3'
                 (frame = {
                     style: {},
                     contentDocument: doc,
-                    contentWindow: { innerWidth: 1280, navigator: { userAgent: 'DOM fault fixture' } },
+                    contentWindow: { innerWidth: viewportWidth, navigator: { userAgent: 'DOM fault fixture' } },
                     remove: () => {
                         removed = true;
                         removedFrames++;
@@ -248,3 +260,44 @@ test('serialized timeout preserves completed-frame evidence and cleans both fram
     assert.match(state.errors.join('\n'), /Timed out.*load/);
     assert.equal(removedFrames, 2);
 });
+
+for (const gutter of [0, 15])
+    for (const relationship of ['responsive container width relative to intended cap', 'current tokens leave container'])
+        test(`serialized alpha1 ${relationship} uses layout with ${gutter}px gutter`, async () => {
+            const viewportWidth = 1023;
+            const layoutWidth = viewportWidth - gutter;
+            const { state } = await runMeasurement({ name: 'responsive', style: 'alpha', viewportWidth, layoutWidth });
+            assert.equal(state.status, 'complete');
+            const record = state.results[0];
+            const check = record.cases[0].checks.find((check) => check.relationship.startsWith(relationship));
+            assert.equal(check.observed, layoutWidth);
+            assert.equal(check.expected, layoutWidth);
+            assert.equal(check.matches, true);
+            assert.equal(record.actualViewportWidth, viewportWidth);
+            assert.equal(record.clientWidth, viewportWidth);
+            assert.equal(record.layoutViewportWidth, layoutWidth);
+            assert.equal(record.rootScrollbarGutter, gutter);
+        });
+
+for (const gutter of [0, 15])
+    for (const viewportWidth of [1023, 1024, 1279, 1280, 1535, 1536])
+        test(`serialized mapped alpha1 media queries keep viewport ${viewportWidth}px with ${gutter}px gutter`, async () => {
+            const layoutWidth = viewportWidth - gutter;
+            const count = 1 + [1024, 1280, 1536].filter((minimum) => viewportWidth >= minimum).length;
+            const cap = viewportWidth >= 1536 ? 1440 : viewportWidth >= 1280 ? 1200 : viewportWidth >= 1024 ? 960 : layoutWidth;
+            const containerWidth = Math.min(layoutWidth, cap);
+            const { state } = await runMeasurement({
+                name: 'responsive',
+                style: 'alpha',
+                markup: 'mapped',
+                viewportWidth,
+                layoutWidth,
+                rowWidth: containerWidth,
+                childWidth: containerWidth / count,
+                containerWidth
+            });
+            assert.equal(state.status, 'complete');
+            assert.equal(state.summary.mismatches, 0);
+            assert.equal(state.results[0].cases[0].checks[0].expected, containerWidth / count);
+            assert.equal(state.results[0].cases[0].checks[1].expected, containerWidth);
+        });

@@ -139,9 +139,13 @@ async function measurePage() {
                     rtlParity: style.rtlParity,
                     actualViewportWidth: frame.contentWindow.innerWidth,
                     clientWidth: doc.documentElement.clientWidth,
+                    // A stable classic scrollbar gutter can reduce layout width
+                    // without changing innerWidth or media-query matching.
+                    layoutViewportWidth: doc.body.getBoundingClientRect().width,
                     userAgent: frame.contentWindow.navigator.userAgent,
                     cases: []
                 };
+                record.rootScrollbarGutter = record.actualViewportWidth - record.layoutViewportWidth;
                 const selected =
                     plan.scope === 'responsive' ? [doc.querySelector('[data-spike="responsive"]')] : [...doc.querySelectorAll('[data-spike]')];
                 for (const section of selected) {
@@ -206,16 +210,12 @@ async function measurePage() {
                         check(
                             'responsive container width relative to intended cap',
                             box(section.firstElementChild).width,
-                            Math.min(record.actualViewportWidth, cap),
+                            Math.min(record.layoutViewportWidth, cap),
                             alpha && mode.markup === 'current' && !!active
                         );
                         if (alpha && mode.markup === 'current') {
                             check('current tokens leave child at full row width', children[0].width, width);
-                            check(
-                                'current tokens leave container at viewport width',
-                                box(section.firstElementChild).width,
-                                record.actualViewportWidth
-                            );
+                            check('current tokens leave container at layout width', box(section.firstElementChild).width, record.layoutViewportWidth);
                         }
                     }
                     if (name === 'cascade') {
