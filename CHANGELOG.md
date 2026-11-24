@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## Unreleased
+
+### Added
+
+- Accept `size="xxl"` on `Modal.Dialog` ([#159](https://github.com/WinkIntel/bootstrap-svelte/issues/159)). XXL styling requires Bootstrap 5.3.9 or later in the 5.x series; earlier 5.3 versions use the default dialog width. Bootstrap and Svelte requirements are unchanged.
+
 ## 1.1.6 — 2026-11-23
 
 ### Fixed
