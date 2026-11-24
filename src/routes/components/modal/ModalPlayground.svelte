@@ -23,7 +23,8 @@
         { value: undefined, label: 'Default' },
         { value: 'sm', label: 'Small' },
         { value: 'lg', label: 'Large' },
-        { value: 'xl', label: 'Extra Large' }
+        { value: 'xl', label: 'Extra Large' },
+        { value: 'xxl', label: 'Extra Extra Large' }
     ];
 
     const backdropOptions = [
@@ -218,11 +219,14 @@
 
                     <div class="mb-3">
                         <label for="size" class="form-label">Size</label>
-                        <select id="size" class="form-select" bind:value={size}>
+                        <select id="size" class="form-select" aria-describedby="modal-playground-size-help" bind:value={size}>
                             {#each sizeOptions as sizeOption, sizeOptionIndex (`sizeOption-${sizeOptionIndex}`)}
                                 <option value={sizeOption.value}>{sizeOption.label}</option>
                             {/each}
                         </select>
+                        <div id="modal-playground-size-help" class="form-text">
+                            XXL styling requires Bootstrap 5.3.9 or later in the 5.x series. Earlier 5.3 versions use the default dialog width.
+                        </div>
                     </div>
 
                     <div class="mb-3">

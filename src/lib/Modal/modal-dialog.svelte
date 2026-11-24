@@ -15,6 +15,7 @@ Dialog component that wraps the modal content.
 <Modal.Dialog size="sm">...</Modal.Dialog>
 <Modal.Dialog size="lg">...</Modal.Dialog>
 <Modal.Dialog size="xl">...</Modal.Dialog>
+<Modal.Dialog size="xxl">...</Modal.Dialog>
 ```
 
 #### Scrollable
@@ -45,7 +46,7 @@ Dialog component that wraps the modal content.
 - `id` (string): Optional. ID for the dialog element.
 - `isScrollable` (boolean): Optional. Makes the modal body scrollable.
 - `isVerticallyCentered` (boolean): Optional. Centers the modal vertically.
-- `size` (string): Optional. Size of the modal ('sm', 'lg', 'xl').
+- `size` (string): Optional. Size of the modal ('sm', 'lg', 'xl', 'xxl'). XXL styling requires Bootstrap 5.3.9 or later in the 5.x series. Earlier 5.3 versions use the default dialog width.
 -->
 <script lang="ts">
     import { uniqueClsx } from '$lib/common/css.js';

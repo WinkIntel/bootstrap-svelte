@@ -913,9 +913,12 @@
                         </tr>
                         <tr>
                             <td><code>size</code></td>
-                            <td><code>'sm' | 'lg' | 'xl'</code></td>
+                            <td><code>'sm' | 'lg' | 'xl' | 'xxl'</code></td>
                             <td>-</td>
-                            <td>Controls the size of the modal. Default is medium size.</td>
+                            <td>
+                                Controls the size of the modal. Default is medium size. XXL styling requires Bootstrap 5.3.9 or later in the 5.x
+                                series. Earlier 5.3 versions use the default dialog width.
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -1119,6 +1122,11 @@
                             <td><code>.modal-xl</code></td>
                             <td>Modal.Dialog</td>
                             <td>Creates an extra-large modal.</td>
+                        </tr>
+                        <tr>
+                            <td><code>.modal-xxl</code></td>
+                            <td>Modal.Dialog</td>
+                            <td>Sets a 1320px maximum width at the XXL breakpoint with Bootstrap 5.3.9 or later in the 5.x series.</td>
                         </tr>
                         <tr>
                             <td><code>.modal-fullscreen</code></td>
