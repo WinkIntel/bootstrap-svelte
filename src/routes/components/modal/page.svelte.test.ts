@@ -147,7 +147,8 @@ describe('Other Modal showcase examples', () => {
 test('the playground renders and shows the code for an XXL modal', async () => {
     render(ModalPage);
     const size = screen.getByLabelText('Size');
-    expect(screen.getByRole('option', { name: 'XXL' })).toHaveValue('xxl');
+    expect(screen.getByRole('option', { name: 'Extra Extra Large' })).toHaveValue('xxl');
+    expect(size).toHaveAccessibleDescription(/earlier 5\.3 versions use the default dialog width/i);
     await fireEvent.change(size, { target: { value: 'xxl' } });
     await fireEvent.click(screen.getByRole('button', { name: 'Open Modal' }));
     await vi.advanceTimersByTimeAsync(350);

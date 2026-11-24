@@ -917,7 +917,7 @@
                             <td>-</td>
                             <td>
                                 Controls the size of the modal. Default is medium size. XXL styling requires Bootstrap 5.3.9 or later in the 5.x
-                                series.
+                                series. Earlier 5.3 versions use the default dialog width.
                             </td>
                         </tr>
                     </tbody>

@@ -106,7 +106,8 @@ const modal: ModalTypes.RootProps = { isShown: false };
 <Button {...button} onclick={() => (shown = true)}>Open</Button>
 <Button type="button" bind:value={buttonValue} bind:elementRef={element} />
 <ListGroup.Root isNumbered horizontalOnBreakpoint="md" bind:elementRef={element}><ListGroup.Item>Item</ListGroup.Item></ListGroup.Root>
-<Modal.Root {...modal} isShown={shown} onHide={() => (shown = false)}><Modal.Dialog size="xxl"><Modal.Content><Modal.Body>Body</Modal.Body></Modal.Content></Modal.Dialog></Modal.Root>
+<Modal.Root {...modal} isShown={shown} onHide={() => (shown = false)}><Modal.Dialog><Modal.Content><Modal.Body>Body</Modal.Body></Modal.Content></Modal.Dialog></Modal.Root>
+<Modal.Root isShown={false}><Modal.Dialog size="xxl"><Modal.Content><Modal.Body>XXL body</Modal.Body></Modal.Content></Modal.Dialog></Modal.Root>
 <Dropdown.Root><Dropdown.Toggle bind:elementRef={element}>Menu</Dropdown.Toggle><Dropdown.Menu offset={[0, 8]}><Dropdown.Item>Item</Dropdown.Item></Dropdown.Menu></Dropdown.Root>`
     );
     writeFileSync(
