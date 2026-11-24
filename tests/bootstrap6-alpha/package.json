@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "node --test fixture.test.mjs browser-spike.test.mjs",
+        "test": "node --test --test-concurrency=1 fixture.test.mjs browser-spike.test.mjs",
         "check": "node check.mjs",
         "browser:generate": "node browser-spike.mjs"
     },

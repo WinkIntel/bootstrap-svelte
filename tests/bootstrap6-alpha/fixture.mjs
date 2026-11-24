@@ -164,6 +164,23 @@ export function indexCss(css) {
                         selector.nodes[1].type === 'combinator' &&
                         selector.nodes[1].value === '>' &&
                         selector.last.type === 'universal';
+                    // Follow :where/:is wrappers to the selector whose subject is
+                    // the row or one of its direct children. Descendant-only
+                    // mentions (and negative pseudos) do not target its gutters.
+                    let part = node;
+                    let sequence = node.parent;
+                    const combinators = [];
+                    while (true) {
+                        if (sequence.type === 'selector')
+                            combinators.push(...sequence.nodes.slice(sequence.nodes.indexOf(part) + 1).filter(({ type }) => type === 'combinator'));
+                        if (sequence.parent?.type !== 'pseudo' || ![':where', ':is'].includes(sequence.parent.value)) break;
+                        part = sequence.parent;
+                        sequence = part.parent;
+                    }
+                    const rowGutterTarget =
+                        node.value === 'row' &&
+                        sequence.parent?.type !== 'pseudo' &&
+                        (combinators.length === 0 || (combinators.length === 1 && combinators[0].value.trim() === '>'));
                     const rules = classes.get(node.value) ?? [];
                     rules.push({
                         selector: selector.toString().trim(),
@@ -173,7 +190,19 @@ export function indexCss(css) {
                         importance,
                         subject,
                         isolated,
-                        directChildren
+                        directChildren,
+                        rowGutterTarget,
+                        rowOffsetToken:
+                            sequence.type === 'selector' &&
+                            sequence.nodes.length === 3 &&
+                            part.type === 'pseudo' &&
+                            part.value === ':where' &&
+                            part.toString() === ':where(.row)' &&
+                            sequence.nodes[1].type === 'combinator' &&
+                            sequence.nodes[1].value.trim() === '>' &&
+                            sequence.last.type === 'class'
+                                ? sequence.last.value
+                                : null
                     });
                     classes.set(node.value, rules);
                 });
@@ -300,8 +329,8 @@ export function assertCharacterization(styles, layout) {
             baseline: snapshots[0],
             alpha: snapshots[1],
             alpha2: snapshots[2],
-            declarationChanged: JSON.stringify(oldExpected.slice(0, 3)) !== JSON.stringify(newExpected.slice(0, 3)),
-            contextChanged: JSON.stringify(snapshots[0].contexts) !== JSON.stringify(snapshots[1].contexts)
+            baselineToAlpha1DeclarationChanged: JSON.stringify(oldExpected.slice(0, 3)) !== JSON.stringify(newExpected.slice(0, 3)),
+            baselineToAlpha1ContextChanged: JSON.stringify(snapshots[0].contexts) !== JSON.stringify(snapshots[1].contexts)
         };
     });
     const alpha2GridRules = alpha2GridExpectations.map(([name, selector, property, value]) => {
@@ -320,16 +349,43 @@ export function assertCharacterization(styles, layout) {
     });
     // Absence is meaningful here: alpha.2 removes the row's negative margins and
     // each child's gutter padding/margin rather than retaining both gap systems.
-    for (const [selector, properties] of [
-        ['.row', ['margin', 'margin-inline', 'margin-top', 'margin-left', 'margin-right']],
-        ['.row > *', ['padding', 'padding-inline', 'padding-left', 'padding-right', 'margin', 'margin-top']]
-    ]) {
-        const rules = (alpha2.get('row') ?? []).filter((rule) => rule.selector === selector && rule.media.length === 0);
-        for (const property of properties)
-            assert(
-                rules.every((rule) => !(property in rule.declarations)),
-                `alpha2 ${selector}: unexpected legacy ${property}`
-            );
+    for (const rule of alpha2.get('row') ?? []) {
+        if (!rule.rowGutterTarget) continue;
+        for (const [property, value] of Object.entries(rule.declarations)) {
+            if (!/^(margin|padding)(-|$)/.test(property)) continue;
+            // Exact shipped row-child offsets are positioning, not the removed
+            // all-child gutter mechanism. No other margin/padding is allowed.
+            const offset = rule.rowOffsetToken?.match(/^(?:(sm|md|lg|xl|2xl):)?offset-([0-9]|1[01])$/);
+            const fractions = [
+                '0',
+                '0.0833333333',
+                '0.1666666667',
+                '0.25',
+                '0.3333333333',
+                '0.4166666667',
+                '0.5',
+                '0.5833333333',
+                '0.6666666667',
+                '0.75',
+                '0.8333333333',
+                '0.9166666667'
+            ];
+            const count = offset ? Number(offset[2]) : -1;
+            const expected = count === 0 ? '0' : `calc((100% + var(--bs-gutter-x, 0px)) * ${fractions[count]})`;
+            const minimum = offset?.[1] && thresholds.find(([bp]) => (bp === 'xxl' ? '2xl' : bp) === offset[1])?.[2];
+            const expectedContexts = [
+                { name: 'layer', params: 'layout' },
+                ...(minimum ? [{ name: 'media', params: `(width >= ${minimum}px)` }] : [])
+            ];
+            const allowedOffset =
+                offset &&
+                (count > 0 || minimum) &&
+                property === 'margin-inline-start' &&
+                value === expected &&
+                rule.importance[property] === false &&
+                JSON.stringify(rule.contexts) === JSON.stringify(expectedContexts);
+            assert(allowedOffset, `alpha2 ${rule.selector}: unexpected legacy ${property}`);
+        }
     }
     return {
         alpha2GridRules,

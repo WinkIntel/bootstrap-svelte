@@ -57,13 +57,18 @@ test('selector occurrence does not imply unchanged declarations or browser geome
     assert.deepEqual(report.coverage[2].missing, ['offset-0']);
     const order = report.declarationComparisons.find(({ name }) => name === 'order-2');
     assert.equal(order.baseline.important, true);
+    assert.equal('declarationChanged' in order, false);
+    assert.equal('contextChanged' in order, false);
+    const width = report.declarationComparisons.find(({ name }) => name === 'col-6');
+    assert.equal(width.baselineToAlpha1DeclarationChanged, false);
+    assert.notEqual(width.alpha.value, width.alpha2.value);
     assert.equal(order.alpha.important, false);
     assert.deepEqual(order.alpha.layers, ['utilities']);
     const offset = report.declarationComparisons.find(({ name }) => name === 'offset-2');
     assert.equal(offset.baseline.property, 'margin-left');
     assert.equal(offset.alpha.property, 'margin-inline-start');
-    assert.equal(offset.declarationChanged, true);
-    assert.equal(order.contextChanged, true);
+    assert.equal(offset.baselineToAlpha1DeclarationChanged, true);
+    assert.equal(order.baselineToAlpha1ContextChanged, true);
     assert.equal(report.browserExecuted, false);
 });
 
@@ -279,25 +284,27 @@ for (const [name, baselineProperty, alphaProperty] of [
         });
     }
 
-test('rejects one removed selector independently of asset integrity', () => {
-    const changed = mutatedStyle('alpha', (root) => {
-        directRule(root, 'order-first', 'order').remove();
+for (const key of ['alpha', 'alpha2'])
+    test(`rejects one removed ${key} selector independently of asset integrity`, () => {
+        const changed = mutatedStyle(key, (root) => {
+            directRule(root, 'order-first', 'order').remove();
+        });
+        assert.throws(() => fixture.assertCharacterization(changed, layout), /selector coverage/);
     });
-    assert.throws(() => fixture.assertCharacterization(changed, layout), /selector coverage/);
-});
 
-test('rejects a legacy alpha selector independently of occurrence counts', () => {
-    const changed = mutatedStyle('alpha', (root) => {
-        root.append('.col-lg-auto { width: auto; }');
+for (const key of ['alpha', 'alpha2'])
+    test(`rejects a legacy ${key} selector independently of occurrence counts`, () => {
+        const changed = mutatedStyle(key, (root) => {
+            root.append('.col-lg-auto { width: auto; }');
+        });
+        // Suppress this token in the artificial coverage-only input to exercise the
+        // explicit no-legacy guard rather than the earlier missing-set assertion.
+        const reduced = { ...layout, current: layout.current.replaceAll('col-lg-auto', '') };
+        assert.throws(() => fixture.assertCharacterization(changed, reduced), new RegExp(`col-lg-auto: unexpected legacy ${key} selector`));
     });
-    // Suppress this token in the artificial coverage-only input to exercise the
-    // explicit no-legacy guard rather than the earlier missing-set assertion.
-    const reduced = { ...layout, current: layout.current.replaceAll('col-lg-auto', '') };
-    assert.throws(() => fixture.assertCharacterization(changed, reduced), /col-lg-auto: unexpected legacy/);
-});
 
 test('rejects changed declaration importance and layers', () => {
-    for (const key of ['baseline', 'alpha']) {
+    for (const key of ['baseline', 'alpha', 'alpha2']) {
         const changed = mutatedStyle(key, (root) =>
             directRule(root, 'order-2', 'order').walkDecls('order', (decl) => {
                 decl.important = !decl.important;
@@ -415,7 +422,10 @@ for (const [selector, property] of [
                     });
             })
         );
-        assert.throws(() => fixture.assertCharacterization(changed, layout), /alpha2 .*expected/);
+        assert.throws(
+            () => fixture.assertCharacterization(changed, layout),
+            new RegExp(`alpha2 ${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}: expected ${property}:`)
+        );
     });
 
 for (const [selector, declaration] of [
@@ -434,18 +444,49 @@ test('alpha.2 row-context semantics require their actual selector, layer and imp
             rule.selector = ':where(.other) > .col-6';
         },
         (rule) => {
-            rule.parent.params = 'changed';
+            const isolatedLayer = postcss.atRule({ name: 'layer', params: 'changed' });
+            isolatedLayer.append(rule.clone());
+            rule.root().append(isolatedLayer);
+            rule.remove();
         },
         (rule) =>
             rule.walkDecls('width', (decl) => {
                 decl.important = true;
             })
     ]) {
-        const changed = mutatedStyle('alpha2', (root) =>
+        const changed = mutatedStyle('alpha2', (root) => {
+            let target;
             root.walkRules((rule) => {
-                if (rule.selector === ':where(.row) > .col-6') change(rule);
-            })
-        );
-        assert.throws(() => fixture.assertCharacterization(changed, layout), /alpha2 .*expected/);
+                if (rule.selector === ':where(.row) > .col-6') target ??= rule;
+            });
+            assert(target);
+            change(target);
+        });
+        assert.throws(() => fixture.assertCharacterization(changed, layout), /alpha2 :where\(\.row\) > \.col-6: expected width:/);
     }
+});
+
+for (const [selector, declaration, context] of [
+    ['.row > *', 'padding-inline-start: 12px', ''],
+    ['.row > *', 'padding-inline-end: 12px', ''],
+    ['.row > *', 'margin-block-start: var(--bs-gutter-y)', ''],
+    [':where(.row) > *', 'padding-inline: 12px', ''],
+    ['.row', 'margin-inline: -12px', '@media (width >= 768px)'],
+    [':where(.row)', 'margin-block-start: -12px', '@media (width >= 768px)'],
+    ['.row > .probe-child', 'padding-block: 2px', ''],
+    ['.shell .row', 'margin-inline: -1px', '']
+])
+    test(`rejects legacy gutter ${selector} ${declaration} ${context}`, () => {
+        const rule = `${selector} { ${declaration}; }`;
+        const changed = mutatedStyle('alpha2', (root) => root.append(context ? `${context} { ${rule} }` : rule));
+        assert.throws(() => fixture.assertCharacterization(changed, layout), /alpha2 .*unexpected legacy (?:margin|padding)/);
+    });
+
+test('gutter absence check does not treat unrelated descendant or negative-pseudo rules as row gutters', () => {
+    const changed = mutatedStyle('alpha2', (root) =>
+        root.append(
+            '.row .probe { padding: 2px; } :not(.row) { margin: 1px; } :where(.row .probe) { padding: 2px; } :is(.row .probe) { padding: 2px; }'
+        )
+    );
+    assert.doesNotThrow(() => fixture.assertCharacterization(changed, layout));
 });

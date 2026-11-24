@@ -34,14 +34,13 @@ const layoutCases = [
 // Serialized into the HTML, parsed by generator tests but executed only in a
 // separately permitted real browser. No browser launcher, server or remote asset.
 async function measurePage() {
-    const input = JSON.parse(document.getElementById('spike-input').textContent);
     const state = (window.__bootstrapGridSpike = {
         schemaVersion: 1,
         status: 'running',
         complete: false,
-        userAgent: navigator.userAgent,
-        artifacts: Object.fromEntries(Object.entries(input.styles).map(([key, { version, sha256 }]) => [key, { version, sha256 }])),
-        plannedFrames: input.frames.length,
+        userAgent: null,
+        artifacts: {},
+        plannedFrames: 0,
         results: [],
         errors: [],
         limitations: [
@@ -50,7 +49,20 @@ async function measurePage() {
             'Current alpha responsive tokens are intentionally incompatible; mapped tokens are disposable references.'
         ]
     });
-    const output = document.getElementById('results');
+    let output;
+    async function boundedWait(operation, label) {
+        let timeout;
+        try {
+            return await Promise.race([
+                operation,
+                new Promise((_, reject) => {
+                    timeout = setTimeout(() => reject(new Error(`Timed out waiting for ${label} after 5000ms`)), 5000);
+                })
+            ]);
+        } finally {
+            clearTimeout(timeout);
+        }
+    }
     const near = (a, b) => Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= 1;
     const px = (value) => Number.parseFloat(value) || 0;
     function box(node) {
@@ -79,6 +91,12 @@ async function measurePage() {
         };
     }
     try {
+        output = document.getElementById('results');
+        if (!output) throw new Error('Missing results output element');
+        const input = JSON.parse(document.getElementById('spike-input').textContent);
+        state.userAgent = navigator.userAgent;
+        state.artifacts = Object.fromEntries(Object.entries(input.styles).map(([key, { version, sha256 }]) => [key, { version, sha256 }]));
+        state.plannedFrames = input.frames.length;
         for (const plan of input.frames) {
             const mode = input.modes.find(({ name }) => name === plan.mode);
             const style = input.styles[mode.style];
@@ -95,11 +113,24 @@ async function measurePage() {
             const instrument =
                 '<style>html { overflow: hidden; } body { margin: 0; } section { margin-bottom: 12px; } .spike-cell { min-height: 24px; background: #ddd; } .spike-flex-break { min-height: 0; } .spike-consumer { order: 3; }</style>';
             frame.srcdoc = `<!doctype html><html dir="${plan.direction}"><head><meta charset="utf-8">${controls}<style>${style.css}</style>${instrument}</head><body>${input.layout[mode.markup]}</body></html>`;
-            document.body.append(frame);
             try {
-                await loaded;
-                await frame.contentDocument.fonts.ready;
-                await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                document.body.append(frame);
+                await boundedWait(loaded, 'iframe load');
+                await boundedWait(frame.contentDocument.fonts.ready, 'fonts');
+                let firstAnimation, secondAnimation;
+                try {
+                    await boundedWait(
+                        new Promise((resolve) => {
+                            firstAnimation = requestAnimationFrame(() => {
+                                secondAnimation = requestAnimationFrame(resolve);
+                            });
+                        }),
+                        'animation frames'
+                    );
+                } finally {
+                    if (firstAnimation !== undefined) cancelAnimationFrame(firstAnimation);
+                    if (secondAnimation !== undefined) cancelAnimationFrame(secondAnimation);
+                }
                 const doc = frame.contentDocument;
                 const record = {
                     ...plan,
@@ -178,11 +209,19 @@ async function measurePage() {
                             Math.min(record.actualViewportWidth, cap),
                             alpha && mode.markup === 'current' && !!active
                         );
+                        if (alpha && mode.markup === 'current') {
+                            check('current tokens leave child at full row width', children[0].width, width);
+                            check(
+                                'current tokens leave container at viewport width',
+                                box(section.firstElementChild).width,
+                                record.actualViewportWidth
+                            );
+                        }
                     }
                     if (name === 'cascade') {
                         const important = input.report.declarationComparisons.find(({ name }) => name === 'order-2')[mode.style].important;
-                        check('unlayered consumer order vs pinned utility', Number(children[0].order), important ? 2 : 3);
-                        check('earlier consumer layer vs pinned utility', Number(children[1].order), 2);
+                        check('unlayered consumer order vs pinned utility', children[0].order, important ? '2' : '3');
+                        check('earlier consumer layer vs pinned utility', children[1].order, '2');
                     }
                     const entry = { name, container: box(section.firstElementChild), row: rowBox, children, checks };
                     const nested = section.querySelector('[data-nested-row]');
@@ -230,9 +269,13 @@ async function measurePage() {
                 .length,
             expectedCurrentTokenMismatches: checks.filter(
                 ({ matches, interpretation }) => !matches && interpretation === 'expected-current-token-incompatibility'
+            ).length,
+            unexpectedCurrentTokenMatches: checks.filter(
+                ({ matches, interpretation }) => matches && interpretation === 'expected-current-token-incompatibility'
             ).length
         };
-        output.textContent = `${state.status}: ${JSON.stringify(state.summary, null, 2)}\nFull raw evidence: window.__bootstrapGridSpike (copy as JSON).\nNo all-green Bootstrap 6 support claim.`;
+        if (output)
+            output.textContent = `${state.status}: ${JSON.stringify(state.summary, null, 2)}\nFull raw evidence: window.__bootstrapGridSpike (copy as JSON).\nNo all-green Bootstrap 6 support claim.`;
     }
 }
 
@@ -283,10 +326,11 @@ export async function generateBrowserSpike(output = fileURLToPath(new URL('./.ge
     };
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
     assert(
         process.argv.length === 2 || (process.argv.length === 4 && process.argv[2] === '--output'),
         'usage: node browser-spike.mjs [--output path]'
     );
-    console.log(JSON.stringify(await generateBrowserSpike(process.argv[3] ? resolve(process.argv[3]) : undefined), null, 2));
+    if (process.argv.length === 4) assert(process.argv[3].length > 0, 'output path must be non-empty');
+    console.log(JSON.stringify(await generateBrowserSpike(process.argv.length === 4 ? resolve(process.argv[3]) : undefined), null, 2));
 }
