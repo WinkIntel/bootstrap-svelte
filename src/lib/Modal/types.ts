@@ -2,7 +2,7 @@ import type { BaseBreakpoint, DivElement, HeadingElement, HeadingLevels } from '
 
 export type ModalBackdrop = 'static' | boolean;
 export type ModalFullscreenBreakpoint = BaseBreakpoint | 'always';
-export type ModalSize = 'sm' | 'lg' | 'xl';
+export type ModalSize = 'sm' | 'lg' | 'xl' | 'xxl';
 
 export type ModalRootProps = DivElement & {
     isFocusable?: boolean;

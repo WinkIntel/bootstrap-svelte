@@ -23,7 +23,8 @@
         { value: undefined, label: 'Default' },
         { value: 'sm', label: 'Small' },
         { value: 'lg', label: 'Large' },
-        { value: 'xl', label: 'Extra Large' }
+        { value: 'xl', label: 'Extra Large' },
+        { value: 'xxl', label: 'XXL' }
     ];
 
     const backdropOptions = [
@@ -223,6 +224,7 @@
                                 <option value={sizeOption.value}>{sizeOption.label}</option>
                             {/each}
                         </select>
+                        <div class="form-text">XXL styling requires Bootstrap 5.3.9 or later in the 5.x series.</div>
                     </div>
 
                     <div class="mb-3">

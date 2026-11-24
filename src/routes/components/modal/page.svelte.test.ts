@@ -144,6 +144,18 @@ describe('Other Modal showcase examples', () => {
     });
 });
 
+test('the playground renders and shows the code for an XXL modal', async () => {
+    render(ModalPage);
+    const size = screen.getByLabelText('Size');
+    expect(screen.getByRole('option', { name: 'XXL' })).toHaveValue('xxl');
+    await fireEvent.change(size, { target: { value: 'xxl' } });
+    await fireEvent.click(screen.getByRole('button', { name: 'Open Modal' }));
+    await vi.advanceTimersByTimeAsync(350);
+
+    expect(screen.getByRole('dialog', { name: 'Modal Title' }).querySelector('.modal-dialog')).toHaveClass('modal-xxl');
+    expect(document.querySelector('.playground pre')).toHaveTextContent('size="xxl"');
+});
+
 describe.each([true, false])('Modal playground (event tracking: %s)', (trackEvents) => {
     test('the displayed snippet resets visibility when hiding starts', async () => {
         render(ModalPage);
