@@ -39,7 +39,7 @@ Bootstrap-styled checkbox input component for boolean selections.
 - `checked` (boolean): Optional. Binds the checkbox state. Omitted values render unchecked; initialize a bound variable to a boolean.
 - `class` (string): Optional. Additional CSS classes to apply to the checkbox.
 - `elementRef` (HTMLInputElement): Optional. Reference to the checkbox DOM element.
-- `group` (unknown[] | null): Optional. Bindable checkbox group. Null or undefined uses standalone checked state and does not collect values. Initialize to an array for grouping. Leaving array mode retains the last checked state. Membership follows the checked state of each change event.
+- `group` (unknown[] | null): Optional. Bindable checkbox group. Null or undefined uses standalone checked state and does not collect values. Initialize to an array for grouping. Leaving array mode retains the last checked state. Membership follows the checked state of each change event. During server rendering, an array group alone does not set the initial checked attribute. Pass `checked={group.includes(value)}` explicitly to render the selection on the server.
 - `indeterminate` (boolean): Optional. Native alias for `isIndeterminate`.
 - `isIndeterminate` (boolean): Optional. Sets the indeterminate state; when supplied, takes precedence over `indeterminate`, including false.
 - `isInvalid` (boolean): Optional. Indicates whether the input is invalid. If undefined, no validation styles are applied.
