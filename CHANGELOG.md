@@ -12,6 +12,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 ### Fixed
 
 - Restore Dropdown focus to the last interacted toggle when several toggles share a root, fall back to a remaining registered toggle on replacement or unmount, keep menu labels synchronized with dynamic toggle IDs, and preserve button-group styling while split toggles are mounted ([#174](https://github.com/WinkIntel/bootstrap-svelte/issues/174)).
+- Let `Form.CheckInput` and `Form.SwitchInput` bind an undefined optional `group` without throwing or warning. Null and undefined retain standalone checked/reset behavior without collecting values; leaving array grouping preserves the last checked state. Document these boundaries and the checkbox checked-binding initialization requirement ([#175](https://github.com/WinkIntel/bootstrap-svelte/issues/175)).
 
 ## 2.3.0 — 2026-11-24
 

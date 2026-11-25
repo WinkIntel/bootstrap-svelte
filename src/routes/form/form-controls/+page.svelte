@@ -53,6 +53,18 @@
     </section>
 
     <p>
+        Initialize a checkbox or switch <code>bind:group</code> to an array (for example <code>[]</code>) to collect selected values. A null or
+        undefined group leaves each input standalone and is not converted into an array on click. Changing an array group to null or undefined retains
+        each input's last checked state; subsequent clicks update only its standalone checked binding. Initialize a bound
+        <code>Form.CheckInput checked</code>
+        variable to a boolean; omitting that prop renders an unchecked input.
+    </p>
+    <p>
+        Before hydration, array group membership alone does not set a checkbox or switch's initial checked state. For a server-rendered selection,
+        also pass <code>checked={'{group.includes(value)}'}</code> for each input using the array.
+    </p>
+
+    <p>
         Checkboxes and switches support array <code>bind:group</code> and the native <code>indeterminate</code> alias. An explicit
         <code>isIndeterminate</code> takes precedence, including false. Native form reset restores the initial color and clears file selections, updating
         their bindings without input or change callbacks.

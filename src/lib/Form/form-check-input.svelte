@@ -36,10 +36,10 @@ Bootstrap-styled checkbox input component for boolean selections.
 </Form.Check>
 ```
 ### Props
-- `checked` (boolean): Optional. Binds the checkbox state. If undefined, the checkbox is unchecked.
+- `checked` (boolean): Optional. Binds the checkbox state. Omitted values render unchecked; initialize a bound variable to a boolean.
 - `class` (string): Optional. Additional CSS classes to apply to the checkbox.
 - `elementRef` (HTMLInputElement): Optional. Reference to the checkbox DOM element.
-- `group` (unknown[]): Optional. Bindable checkbox group. Membership follows the checked state of each change event.
+- `group` (unknown[] | null): Optional. Bindable checkbox group. Null or undefined uses standalone checked state and does not collect values. Initialize to an array for grouping. Leaving array mode retains the last checked state. Membership follows the checked state of each change event. During server rendering, an array group alone does not set the initial checked attribute. Pass `checked={group.includes(value)}` explicitly to render the selection on the server.
 - `indeterminate` (boolean): Optional. Native alias for `isIndeterminate`.
 - `isIndeterminate` (boolean): Optional. Sets the indeterminate state; when supplied, takes precedence over `indeterminate`, including false.
 - `isInvalid` (boolean): Optional. Indicates whether the input is invalid. If undefined, no validation styles are applied.
@@ -56,7 +56,7 @@ Bootstrap-styled checkbox input component for boolean selections.
         checked = $bindable(false),
         class: classValues,
         elementRef = $bindable(null),
-        group = $bindable(null),
+        group = $bindable(undefined),
         indeterminate,
         isIndeterminate,
         isInvalid,
@@ -78,7 +78,7 @@ Bootstrap-styled checkbox input component for boolean selections.
     );
 
     const handleChange: ChangeEventHandler<HTMLInputElement> = (event: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
-        if (group !== null) {
+        if (group != null) {
             if (!Array.isArray(group)) {
                 console.warn('Form.CheckInput: `group` prop should be an array when used for grouped inputs.');
             } else {
@@ -104,7 +104,7 @@ Bootstrap-styled checkbox input component for boolean selections.
     });
 
     $effect(() => {
-        if (group !== null && Array.isArray(group)) {
+        if (group != null && Array.isArray(group)) {
             checked = (group as unknown[]).includes(value);
         }
     });
