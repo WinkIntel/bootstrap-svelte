@@ -19,7 +19,7 @@ Breadcrumb item component for use within a Breadcrumb.Root.
 ```
 
 ### Props
-- `anchorProps` (Omit<AnchorElement, 'href'>): Optional. Attributes and handlers for the anchor. The top-level `href` always controls the destination. Ignored for active items, which render no anchor.
+- `anchorProps` (Omit<HTMLAnchorAttributes, 'href' | 'children'>): Optional. Attributes and handlers for the anchor. The top-level `href` always controls the destination. Ignored for active items, which render no anchor.
 - `class` (string): Optional. Additional CSS classes.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
 - `href` (string): Optional. URL for the breadcrumb item. Defaults to "#!".

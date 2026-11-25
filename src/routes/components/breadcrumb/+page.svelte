@@ -12,7 +12,7 @@
 
     const anchorPropsExampleCode = `<Breadcrumb.Root>
     <Breadcrumb.Item
-        href="/library"
+        href="#!"
         anchorProps={{ class: 'link-secondary text-decoration-underline', target: '_blank', rel: 'noopener' }}>
         Library
     </Breadcrumb.Item>
@@ -93,14 +93,16 @@
         </p>
         <div class="card">
             <div class="card-body">
-                <Breadcrumb.Root>
-                    <Breadcrumb.Item
-                        href="/components/breadcrumb"
-                        anchorProps={{ class: 'link-secondary text-decoration-underline', target: '_blank', rel: 'noopener' }}>
-                        Library
-                    </Breadcrumb.Item>
-                    <Breadcrumb.Item isActive={true}>Current page</Breadcrumb.Item>
-                </Breadcrumb.Root>
+                <div class="mb-3">
+                    <Breadcrumb.Root>
+                        <Breadcrumb.Item
+                            href="#!"
+                            anchorProps={{ class: 'link-secondary text-decoration-underline', target: '_blank', rel: 'noopener' }}>
+                            Library
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item isActive={true}>Current page</Breadcrumb.Item>
+                    </Breadcrumb.Root>
+                </div>
                 <SyntaxHighlighter code={anchorPropsExampleCode} />
             </div>
         </div>
@@ -253,7 +255,7 @@
                 <tbody class="table-group-divider">
                     <tr>
                         <td><code>anchorProps</code></td>
-                        <td><code>Omit&lt;AnchorElement, 'href'&gt;</code></td>
+                        <td><code>Omit&lt;HTMLAnchorAttributes, 'href' | 'children'&gt;</code></td>
                         <td><code>undefined</code></td>
                         <td>Attributes and handlers for the anchor. The top-level href wins. Ignored for active items.</td>
                     </tr>
