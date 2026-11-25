@@ -19,6 +19,7 @@ Breadcrumb item component for use within a Breadcrumb.Root.
 ```
 
 ### Props
+- `anchorProps` (Omit<HTMLAnchorAttributes, 'href' | 'children'>): Optional. Attributes and handlers for the anchor. The top-level `href` always controls the destination. Ignored for active items, which render no anchor.
 - `class` (string): Optional. Additional CSS classes.
 - `elementRef` (HTMLElement): Optional. Reference to the DOM element.
 - `href` (string): Optional. URL for the breadcrumb item. Defaults to "#!".
@@ -34,6 +35,7 @@ Breadcrumb item component for use within a Breadcrumb.Root.
     const uid = $props.id();
 
     let {
+        anchorProps,
         children,
         class: classValues,
         elementRef = $bindable(null),
@@ -84,6 +86,6 @@ Breadcrumb item component for use within a Breadcrumb.Root.
     {#if isActive}
         {@render children?.()}
     {:else}
-        <a {href}>{@render children?.()}</a>
+        <a {...anchorProps} {href}>{@render children?.()}</a>
     {/if}
 </li>

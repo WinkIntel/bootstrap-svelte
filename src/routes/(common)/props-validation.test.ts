@@ -88,7 +88,7 @@ describe('showcase props validation', () => {
         }
         expect(errors).toEqual([]);
         expect(tables).toBe(84);
-        expect(rows).toBe(438);
+        expect(rows).toBe(439);
         expect(covered).toMatchInlineSnapshot(`
           {
             "/components/accordion": {
@@ -104,7 +104,7 @@ describe('showcase props validation', () => {
               "tables": 1,
             },
             "/components/breadcrumb": {
-              "rows": 10,
+              "rows": 11,
               "tables": 2,
             },
             "/components/button": {
@@ -339,7 +339,7 @@ ${'#'.repeat(level)} Events
             return result.errors.map((error) => `${relative(root, file)}: ${error}`);
         });
         expect(errors).toEqual([]);
-        expect(total).toEqual({ blocks: 114, props: 651 });
+        expect(total).toEqual({ blocks: 114, props: 652 });
         expect(validateHover(readFileSync(join(root, 'src/lib/Form/form-feedback.svelte'), 'utf8'))).toEqual({
             blocks: 1,
             props: 5,
