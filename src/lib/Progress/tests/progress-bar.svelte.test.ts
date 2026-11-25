@@ -4,6 +4,7 @@ import { render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import { ProgressBar } from '../index.js';
+import ProgressIndeterminateTest from './progress-indeterminate-test.svelte';
 
 describe('ProgressBar.svelte', () => {
     test('renders with default properties', () => {
@@ -41,6 +42,80 @@ describe('ProgressBar.svelte', () => {
         expect(progressElement).toHaveAttribute('aria-valuemin', String(ariaMin));
         expect(progressElement).toHaveAttribute('aria-valuemax', String(ariaMax));
         expect(barElement).toHaveStyle(`width: ${width}`);
+    });
+
+    test.each([false, true])('omits value semantics and computed widths when indeterminate (stacked=%s)', async (stacked) => {
+        const { getByRole, rerender } = render(ProgressIndeterminateTest, {
+            props: {
+                stacked,
+                isIndeterminate: true,
+                ariaLabel: 'Loading page',
+                'aria-valuenow': 99,
+                'aria-valuemin': 1,
+                'aria-valuemax': 200,
+                valueNow: 45,
+                class: 'loading-track',
+                style: 'height: 6px;',
+                backgroundColorVariant: 'success',
+                barProps: { class: 'loading-bar', isAnimated: true, isStriped: true, style: 'opacity: 0.8;' }
+            }
+        });
+        const progress = getByRole('progressbar', { name: 'Loading page' });
+        const bar = progress.querySelector<HTMLElement>('.progress-bar')!;
+
+        expect(progress).not.toHaveAttribute('aria-valuenow');
+        expect(progress).not.toHaveAttribute('aria-valuemin');
+        expect(progress).not.toHaveAttribute('aria-valuemax');
+        expect(progress.style.width).toBe('');
+        expect(bar.style.width).toBe('');
+        expect(progress).toHaveClass('progress', 'loading-track');
+        expect(bar).toHaveClass('progress-bar', 'loading-bar', 'bg-success', 'progress-bar-striped', 'progress-bar-animated');
+        expect(bar).toHaveAttribute('data-bs-theme', 'dark');
+        expect(progress).toHaveStyle('height: 6px');
+        expect(bar).toHaveStyle('opacity: 0.8');
+        expect(progress).not.toHaveAttribute('isIndeterminate');
+
+        await rerender({ isIndeterminate: false });
+        expect(progress).toHaveAttribute('aria-valuenow', '45');
+        expect(progress).toHaveAttribute('aria-valuemin', '0');
+        expect(progress).toHaveAttribute('aria-valuemax', '100');
+        expect(stacked ? progress : bar).toHaveStyle('width: 45%');
+
+        await rerender({ isIndeterminate: true });
+        expect(progress).not.toHaveAttribute('aria-valuenow');
+        expect(progress.style.width).toBe('');
+        expect(bar.style.width).toBe('');
+    });
+
+    test.each([false, true])('preserves consumer widths when indeterminate (stacked=%s)', (stacked) => {
+        const { getByRole } = render(ProgressIndeterminateTest, {
+            props: {
+                stacked,
+                isIndeterminate: true,
+                style: 'width: 80%; height: 8px;',
+                barProps: { style: 'width: 35%; opacity: 0.5;' }
+            }
+        });
+        const progress = getByRole('progressbar');
+        expect(progress).toHaveStyle('width: 80%; height: 8px;');
+        expect(progress.querySelector('.progress-bar')).toHaveStyle('width: 35%; opacity: 0.5;');
+    });
+
+    test.each([false, true])('keeps explicit value text consumer-controlled across modes (stacked=%s)', async (stacked) => {
+        const { getByRole, rerender } = render(ProgressIndeterminateTest, {
+            props: { stacked, isIndeterminate: true, 'aria-valuetext': 'Loading files' }
+        });
+        const progress = getByRole('progressbar');
+        expect(progress).toHaveAttribute('aria-valuetext', 'Loading files');
+        expect(progress).not.toHaveAttribute('aria-valuenow');
+
+        await rerender({ isIndeterminate: false, valueNow: 40, 'aria-valuetext': '4 of 10 files' });
+        expect(progress).toHaveAttribute('aria-valuetext', '4 of 10 files');
+        expect(progress).toHaveAttribute('aria-valuenow', '40');
+
+        await rerender({ isIndeterminate: true, 'aria-valuetext': undefined });
+        expect(progress).not.toHaveAttribute('aria-valuetext');
+        expect(progress).not.toHaveAttribute('aria-valuenow');
     });
 
     test('renders with background color variant', () => {

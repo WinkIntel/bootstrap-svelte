@@ -10,6 +10,15 @@
     <Breadcrumb.Item isActive={true}>Data</Breadcrumb.Item>
 </Breadcrumb.Root>`;
 
+    const anchorPropsExampleCode = `<Breadcrumb.Root>
+    <Breadcrumb.Item
+        href="#!"
+        anchorProps={{ class: 'link-secondary text-decoration-underline', target: '_blank', rel: 'noopener' }}>
+        Library
+    </Breadcrumb.Item>
+    <Breadcrumb.Item isActive={true}>Current page</Breadcrumb.Item>
+</Breadcrumb.Root>`;
+
     const customDividerExampleCode = `<!-- Using character divider -->
 <Breadcrumb.Root divider=">">
     <Breadcrumb.Item href="#!">Home</Breadcrumb.Item>
@@ -69,6 +78,32 @@
                     </Breadcrumb.Root>
                 </div>
                 <SyntaxHighlighter code={basicExampleCode} />
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5" id="anchor-attributes">
+        <h2 class="wk-quick-link">Anchor attributes</h2>
+        <p>
+            Use <code>anchorProps</code> for link classes, attributes such as <code>target</code> and <code>rel</code>,
+            <code>data-sveltekit-*</code> attributes, and event handlers. Other item attributes still apply to the
+            <code>&lt;li&gt;</code>. Set the destination with the top-level <code>href</code> prop; it always takes precedence, even if an untyped
+            object supplies <code>anchorProps.href</code>. Active items render no anchor and ignore
+            <code>anchorProps</code>.
+        </p>
+        <div class="card">
+            <div class="card-body">
+                <div class="mb-3">
+                    <Breadcrumb.Root>
+                        <Breadcrumb.Item
+                            href="#!"
+                            anchorProps={{ class: 'link-secondary text-decoration-underline', target: '_blank', rel: 'noopener' }}>
+                            Library
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item isActive={true}>Current page</Breadcrumb.Item>
+                    </Breadcrumb.Root>
+                </div>
+                <SyntaxHighlighter code={anchorPropsExampleCode} />
             </div>
         </div>
     </section>
@@ -218,6 +253,12 @@
                     </tr>
                 </thead>
                 <tbody class="table-group-divider">
+                    <tr>
+                        <td><code>anchorProps</code></td>
+                        <td><code>Omit&lt;HTMLAnchorAttributes, 'href' | 'children'&gt;</code></td>
+                        <td><code>undefined</code></td>
+                        <td>Attributes and handlers for the anchor. The top-level href wins. Ignored for active items.</td>
+                    </tr>
                     <tr>
                         <td><code>class</code></td>
                         <td><code>string</code></td>

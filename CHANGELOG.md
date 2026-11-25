@@ -4,8 +4,14 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Add `Breadcrumb.Item anchorProps` to forward link attributes and handlers to its anchor. Keep the destination controlled by the top-level `href`; active items render no anchor and ignore these props ([#172](https://github.com/WinkIntel/bootstrap-svelte/issues/172)).
+- Add optional `ProgressBar isIndeterminate` (default `false`) to omit value ARIA attributes and computed widths for unknown progress, including inside `ProgressStacked`, while preserving consumer styles and determinate defaults ([#173](https://github.com/WinkIntel/bootstrap-svelte/issues/173)).
+
 ### Fixed
 
+- Restore Dropdown focus to the last interacted toggle when several toggles share a root, fall back to a remaining registered toggle on replacement or unmount, keep menu labels synchronized with dynamic toggle IDs, and preserve button-group styling while split toggles are mounted ([#174](https://github.com/WinkIntel/bootstrap-svelte/issues/174)).
 - Let `Form.CheckInput` and `Form.SwitchInput` bind an undefined optional `group` without throwing or warning. Null and undefined retain standalone checked/reset behavior without collecting values; leaving array grouping preserves the last checked state. Document these boundaries and the checkbox checked-binding initialization requirement ([#175](https://github.com/WinkIntel/bootstrap-svelte/issues/175)).
 
 ## 2.3.0 — 2026-11-24
