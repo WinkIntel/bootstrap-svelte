@@ -267,7 +267,7 @@
         <p>
             Create split button dropdowns by using a regular <code>Button</code> component next to a <code>Dropdown.Toggle</code> with the
             <code>isSplit</code>
-            prop. Make sure to set <code>isButtonGroup</code> to <code>true</code> on the <code>Dropdown.Root</code>.
+            prop. A mounted split toggle automatically enables button-group styling; <code>isButtonGroup</code> can also keep that styling enabled explicitly.
         </p>
         <div class="card mb-3">
             <div class="card-body">
@@ -449,6 +449,22 @@
                 <SyntaxHighlighter code={directionsCode} />
             </div>
         </div>
+    </section>
+
+    <section class="mb-5" id="multiple-toggles">
+        <h2 class="wk-quick-link">Multiple toggles</h2>
+        <p>
+            More than one <code>Dropdown.Toggle</code> may share one <code>Dropdown.Root</code> and menu, for example when responsive utilities show a
+            compact or expanded trigger. All toggles reflect the same <code>aria-expanded</code> state. The first constructed toggle is the initial fallback;
+            clicking or using ArrowUp/ArrowDown on either toggle makes it the focus-return target and the menu's accessible label. Escape returns focus
+            to that toggle. Passive keys and Escape on another toggle do not change the opener.
+        </p>
+        <p>
+            Removing or replacing the owning toggle hands focus return and labelling to the first remaining registered toggle. When no toggles remain,
+            the reference and label are cleared. Split toggles keep the root styled as a button group while they are mounted; an explicit <code
+                >isButtonGroup</code> keeps that styling even without a split toggle. If responsive styles hide the opener while a menu is open, close the
+            menu before changing layouts or manage focus in the application. Use unique toggle IDs and keep at least one trigger available.
+        </p>
     </section>
 
     <!-- Keyboard Navigation section -->
@@ -1001,7 +1017,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Root Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownRootProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1085,7 +1101,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Toggle Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownToggleProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1150,7 +1166,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Menu Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownMenuProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1210,7 +1226,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Item Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownItemProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1274,7 +1290,7 @@
 
         <h3 class="h5 mt-4">Dropdown.ItemText Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownTextProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1308,7 +1324,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Header Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownHeaderProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1348,7 +1364,7 @@
 
         <h3 class="h5 mt-4">Dropdown.Divider Props</h3>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table data-props-type="DropdownDividerProps" class="table table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
