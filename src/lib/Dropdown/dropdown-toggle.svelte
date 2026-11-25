@@ -1,7 +1,7 @@
 <!--
 @component
 ## Dropdown.Toggle
-The button that triggers the dropdown menu.
+The button that triggers the dropdown menu. Multiple toggles may share a root; Escape returns focus to the last toggle used to click or navigate with ArrowUp/ArrowDown.
 
 @example
 ```svelte
@@ -21,6 +21,7 @@ The button that triggers the dropdown menu.
 -->
 <script lang="ts">
     /* eslint-disable @typescript-eslint/no-explicit-any -- restOfProps spread targets a union element type that is not spreadable without as any */
+    import { onMount } from 'svelte';
     import { Button } from '$lib/Button/index.js';
     import { uniqueClsx } from '$lib/common/css.js';
     import { noop } from '$lib/common/noop.js';
@@ -57,6 +58,8 @@ The button that triggers the dropdown menu.
             return isSplit;
         }
     });
+
+    onMount(() => () => toggleState.dispose());
 
     let classes: string = $derived(uniqueClsx('dropdown-toggle', { 'dropdown-toggle-split': isSplit }, classValues));
 
