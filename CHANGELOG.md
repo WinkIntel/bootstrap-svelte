@@ -6,7 +6,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ### Fixed
 
-- Restore Dropdown focus to the last interacted toggle when several toggles share a root, retain the first registered fallback, and release the owning toggle and menu label on unmount ([#174](https://github.com/WinkIntel/bootstrap-svelte/issues/174)).
+- Restore Dropdown focus to the last interacted toggle when several toggles share a root, fall back to a remaining registered toggle on replacement or unmount, keep menu labels synchronized with dynamic toggle IDs, and preserve button-group styling while split toggles are mounted ([#174](https://github.com/WinkIntel/bootstrap-svelte/issues/174)).
 
 ## 2.3.0 — 2026-11-24
 
