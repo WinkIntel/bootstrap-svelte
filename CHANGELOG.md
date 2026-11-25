@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## Unreleased
+
+### Added
+
+- Add `Breadcrumb.Item anchorProps` to forward link attributes and handlers to its anchor. Keep the destination controlled by the top-level `href`; active items render no anchor and ignore these props ([#172](https://github.com/WinkIntel/bootstrap-svelte/issues/172)).
+
 ## 2.3.0 — 2026-11-24
 
 ### Added
