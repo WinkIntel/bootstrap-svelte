@@ -29,7 +29,7 @@ Supports percentage-based progress visualization with customizable styling, them
 - `barProps` (object): Additional props to pass to the inner progress bar element.
 - `class` (string): Additional CSS classes to apply to the progress container.
 - `elementRef` (HTMLDivElement): Reference to the underlying DOM element.
-- `isIndeterminate` (boolean): Omit value ARIA attributes and computed widths for unknown progress. Defaults to false; consumer styles are preserved.
+- `isIndeterminate` (boolean): Omit numeric value ARIA attributes and computed widths for unknown progress. Defaults to false; consumer styles and explicit aria-valuetext are preserved. Keep consumer value text mode-aware.
 - `style` (string): CSS styles to apply to the progress container.
 - `valueMax` (number): Maximum value for the progress bar. Defaults to 100.
 - `valueMin` (number): Minimum value for the progress bar. Defaults to 0.

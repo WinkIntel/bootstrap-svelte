@@ -101,6 +101,23 @@ describe('ProgressBar.svelte', () => {
         expect(progress.querySelector('.progress-bar')).toHaveStyle('width: 35%; opacity: 0.5;');
     });
 
+    test.each([false, true])('keeps explicit value text consumer-controlled across modes (stacked=%s)', async (stacked) => {
+        const { getByRole, rerender } = render(ProgressIndeterminateTest, {
+            props: { stacked, isIndeterminate: true, 'aria-valuetext': 'Loading files' }
+        });
+        const progress = getByRole('progressbar');
+        expect(progress).toHaveAttribute('aria-valuetext', 'Loading files');
+        expect(progress).not.toHaveAttribute('aria-valuenow');
+
+        await rerender({ isIndeterminate: false, valueNow: 40, 'aria-valuetext': '4 of 10 files' });
+        expect(progress).toHaveAttribute('aria-valuetext', '4 of 10 files');
+        expect(progress).toHaveAttribute('aria-valuenow', '40');
+
+        await rerender({ isIndeterminate: true, 'aria-valuetext': undefined });
+        expect(progress).not.toHaveAttribute('aria-valuetext');
+        expect(progress).not.toHaveAttribute('aria-valuenow');
+    });
+
     test('renders with background color variant', () => {
         const { container } = render(ProgressBar, {
             props: {
