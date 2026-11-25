@@ -1,7 +1,7 @@
 <!--
 @component
 ## Dropdown.Toggle
-The button that triggers the dropdown menu. Multiple toggles may share a root; Escape returns focus to the last interacted toggle.
+The button that triggers the dropdown menu. Multiple toggles may share a root; Escape returns focus to the last toggle used to click or navigate with ArrowUp/ArrowDown.
 
 @example
 ```svelte

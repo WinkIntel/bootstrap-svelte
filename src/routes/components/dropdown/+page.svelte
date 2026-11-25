@@ -456,8 +456,8 @@
         <p>
             More than one <code>Dropdown.Toggle</code> may share one <code>Dropdown.Root</code> and menu, for example when responsive utilities show a
             compact or expanded trigger. All toggles reflect the same <code>aria-expanded</code> state. The first constructed toggle is the initial fallback;
-            clicking or using the keyboard on either toggle makes it the focus-return target and the menu's accessible label. Escape returns focus to that
-            toggle.
+            clicking or using ArrowUp/ArrowDown on either toggle makes it the focus-return target and the menu's accessible label. Escape returns focus
+            to that toggle. Passive keys and Escape on another toggle do not change the opener.
         </p>
         <p>
             Removing the owning toggle releases its reference and label. A remaining toggle takes over on its next interaction. If responsive styles
