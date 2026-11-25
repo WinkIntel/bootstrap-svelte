@@ -18,7 +18,7 @@ export class DropdownRootState {
     #items: DropdownItemState[] = $state([]);
     #menu: DropdownMenuState | null = null; // The menu belonging to this dropdown, registered on construction.
     #reorderScheduled = false;
-    #toggle: DropdownToggleState | null = null; // The toggle that controls this dropdown, registered on construction.
+    #toggle: DropdownToggleState | null = null; // The last interacted toggle, or the first registered fallback.
 
     ariaLabelledBy: string | undefined = $state(undefined); // Used for accessibility, linking the dropdown to a label.
 
@@ -112,6 +112,7 @@ export class DropdownRootState {
     }
     set toggle(toggle: DropdownToggleState | null) {
         this.#toggle = toggle;
+        this.ariaLabelledBy = toggle?.props.id || undefined;
     }
 
     // True when the given element is part of this dropdown — its root (toggle included)
@@ -242,22 +243,33 @@ export class DropdownToggleState {
         // Bind the method to ensure `this` context is correct when used as an event handler.
         this.onclick = this.onclick.bind(this);
         this.onkeydown = this.onkeydown.bind(this);
-        this.root.toggle = this; // Let the root find the toggle again, e.g. to restore focus on Escape.
+        if (!this.root.toggle) {
+            this.root.toggle = this; // Keep the first toggle as the fallback until one is used.
+        }
         if (this.props.isSplit && !this.root.isButtonGroup) {
             // If the toggle is a split button, the root must be treated as a button group
             // to ensure correct Bootstrap styling and layout.
             this.root.isButtonGroup = true;
         }
-        this.root.ariaLabelledBy = this.props.id || undefined; // Set the aria-labelledby attribute for accessibility.
     }
 
     onclick(event: Event) {
+        this.root.toggle = this;
         event.preventDefault();
         this.root.toggleIsShown(event);
     }
 
     onkeydown(event: KeyboardEvent) {
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            this.root.toggle = this;
+        }
         handleKeydown(event, this.root);
+    }
+
+    dispose(): void {
+        if (this.root.toggle === this) {
+            this.root.toggle = null;
+        }
     }
 }
 
