@@ -14,8 +14,9 @@ export type ProgressStackedProps = DivElement;
 
 /**
  * Props for the main Progress component.
- * Follows the WAI-ARIA pattern for progress indicators with appropriate
- * accessibility attributes (min, max, now).
+ * Follows the WAI-ARIA pattern for progress indicators. Numeric value attributes
+ * (min, max, now) are present only for determinate bars. Explicit aria-valuetext
+ * remains consumer-controlled and should be updated or omitted when the mode changes.
  */
 export type ProgressProps = DivElement & {
     /** Accessible label for screen readers describing the progress bar */
@@ -24,6 +25,8 @@ export type ProgressProps = DivElement & {
     backgroundColorVariant?: ProgressBackgroundColorVariant;
     /** Props passed to the inner progress bar element */
     barProps?: ProgressBarProps;
+    /** Omit numeric value ARIA attributes and computed widths for unknown progress (defaults to false). Consumer styles and explicit aria-valuetext are preserved. */
+    isIndeterminate?: boolean;
     /** Maximum value of the progress bar (defaults to 100) */
     valueMax?: number;
     /** Minimum value of the progress bar (defaults to 0) */
