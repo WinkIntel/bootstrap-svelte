@@ -24,6 +24,8 @@ export type ProgressProps = DivElement & {
     backgroundColorVariant?: ProgressBackgroundColorVariant;
     /** Props passed to the inner progress bar element */
     barProps?: ProgressBarProps;
+    /** Omit value ARIA attributes and computed widths for unknown progress (defaults to false). Consumer styles are preserved. */
+    isIndeterminate?: boolean;
     /** Maximum value of the progress bar (defaults to 100) */
     valueMax?: number;
     /** Minimum value of the progress bar (defaults to 0) */

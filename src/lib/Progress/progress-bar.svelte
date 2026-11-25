@@ -29,6 +29,7 @@ Supports percentage-based progress visualization with customizable styling, them
 - `barProps` (object): Additional props to pass to the inner progress bar element.
 - `class` (string): Additional CSS classes to apply to the progress container.
 - `elementRef` (HTMLDivElement): Reference to the underlying DOM element.
+- `isIndeterminate` (boolean): Omit value ARIA attributes and computed widths for unknown progress. Defaults to false; consumer styles are preserved.
 - `style` (string): CSS styles to apply to the progress container.
 - `valueMax` (number): Maximum value for the progress bar. Defaults to 100.
 - `valueMin` (number): Minimum value for the progress bar. Defaults to 0.
@@ -47,6 +48,7 @@ Supports percentage-based progress visualization with customizable styling, them
         class: classValues,
         barProps = {},
         elementRef = $bindable(null),
+        isIndeterminate = false,
         style,
         valueMax = 100,
         valueMin = 0,
@@ -85,7 +87,7 @@ Supports percentage-based progress visualization with customizable styling, them
 
     // Conditionally apply width to the root element's style if this bar is part of a stacked layout
     let styles: string | null | undefined = $derived.by(() => {
-        if (widthPlacement === 'root') {
+        if (!isIndeterminate && widthPlacement === 'root') {
             let cssProps: CSSProperties = fromStyle(style);
             return toStyle({
                 ...cssProps,
@@ -111,7 +113,7 @@ Supports percentage-based progress visualization with customizable styling, them
 
     // Apply width to the inner bar element when not in a stacked layout
     let barStyles: string | null | undefined = $derived.by(() => {
-        if (widthPlacement === 'bar') {
+        if (!isIndeterminate && widthPlacement === 'bar') {
             let cssProps: CSSProperties = fromStyle(barStyle);
             return toStyle({
                 ...cssProps,
@@ -132,9 +134,9 @@ Supports percentage-based progress visualization with customizable styling, them
 <div
     {...restOfProps}
     aria-label={resolvedAriaLabel}
-    aria-valuemax={normalizedProgress.max}
-    aria-valuemin={normalizedProgress.min}
-    aria-valuenow={normalizedProgress.now}
+    aria-valuemax={isIndeterminate ? undefined : normalizedProgress.max}
+    aria-valuemin={isIndeterminate ? undefined : normalizedProgress.min}
+    aria-valuenow={isIndeterminate ? undefined : normalizedProgress.now}
     bind:this={elementRef}
     class={classes}
     role="progressbar"
