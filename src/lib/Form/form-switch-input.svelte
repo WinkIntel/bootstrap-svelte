@@ -33,7 +33,7 @@ Bootstrap-styled switch input component for toggling between two states.
 - `checked` (boolean): Optional. Binds the switch state. If undefined, the switch is unchecked.
 - `class` (string): Optional. Additional CSS classes to apply to the switch.
 - `elementRef` (HTMLInputElement): Optional. Reference to the switch DOM element.
-- `group` (unknown[] | null): Optional. Bindable switch group. Use an array, or null or undefined for standalone checked state.
+- `group` (unknown[] | null): Optional. Bindable switch group. Initialize to an array for grouping. Null or undefined uses standalone checked state without collecting values; leaving array mode retains the last checked state.
 - `indeterminate` (boolean): Optional. Sets the native indeterminate state.
 - `isInvalid` (boolean): Optional. Indicates whether the input is invalid. If undefined, no validation styles are applied.
 - `isValid` (boolean): Optional. Indicates whether the input is valid. If undefined, no validation styles are applied.

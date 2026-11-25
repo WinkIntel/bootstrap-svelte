@@ -6,7 +6,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 
 ### Fixed
 
-- Let `Form.CheckInput` and `Form.SwitchInput` bind an undefined optional `group` without throwing or warning. Null and undefined retain standalone checked/reset behavior; array grouping is unchanged ([#175](https://github.com/WinkIntel/bootstrap-svelte/issues/175)).
+- Let `Form.CheckInput` and `Form.SwitchInput` bind an undefined optional `group` without throwing or warning. Null and undefined retain standalone checked/reset behavior without collecting values; leaving array grouping preserves the last checked state. Document these boundaries and the checkbox checked-binding initialization requirement ([#175](https://github.com/WinkIntel/bootstrap-svelte/issues/175)).
 
 ## 1.2.0 — 2026-11-24
 
