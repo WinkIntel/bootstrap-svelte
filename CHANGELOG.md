@@ -2,6 +2,12 @@
 
 All notable changes to Bootstrap Svelte will be documented in this file.
 
+## Unreleased
+
+### Added
+
+- Add optional `ProgressBar isIndeterminate` (default `false`) to omit value ARIA attributes and computed widths for unknown progress, including inside `ProgressStacked`, while preserving consumer styles and determinate defaults ([#173](https://github.com/WinkIntel/bootstrap-svelte/issues/173)).
+
 ## 1.2.0 — 2026-11-24
 
 ### Added

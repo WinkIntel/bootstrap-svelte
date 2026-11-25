@@ -6,6 +6,12 @@
     // Sample code examples for demonstration
     const basicExampleCode = `<ProgressBar valueNow={25} />`;
 
+    const indeterminateExampleCode = `<ProgressBar
+  isIndeterminate
+  ariaLabel="Loading page"
+  barProps={{ class: 'w-100', isStriped: true, isAnimated: true }}
+/>`;
+
     const heightsExampleCode = `<ProgressBar valueNow={25} style="height: 1px;" />
 <ProgressBar valueNow={25} style="height: 20px;" />`;
 
@@ -71,6 +77,24 @@
                     <ProgressBar valueNow={25} />
                 </div>
                 <SyntaxHighlighter code={basicExampleCode} />
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5" id="indeterminate">
+        <h2 class="wk-quick-link">Indeterminate Progress</h2>
+        <p>
+            Set <code>isIndeterminate</code> when the amount of progress is unknown. The component keeps its accessible label and
+            <code>progressbar</code> role but omits the value ARIA attributes and computed widths, including inside
+            <code>ProgressStacked</code>. Supply a class or inline style to size or animate the bar; consumer <code>style</code> and
+            <code>barProps.style</code> are preserved. Omitting <code>valueNow</code> alone still renders determinate zero progress.
+        </p>
+        <div class="card">
+            <div class="card-body">
+                <div class="mb-3">
+                    <ProgressBar isIndeterminate ariaLabel="Loading page" barProps={{ class: 'w-100', isStriped: true, isAnimated: true }} />
+                </div>
+                <SyntaxHighlighter code={indeterminateExampleCode} />
             </div>
         </div>
     </section>
@@ -277,6 +301,12 @@
                         <td><code>HTMLDivElement</code></td>
                         <td><code>null</code></td>
                         <td>Reference to the DOM element.</td>
+                    </tr>
+                    <tr>
+                        <td><code>isIndeterminate</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>false</code></td>
+                        <td>Omit value ARIA attributes and computed widths when progress is unknown. Consumer styles are preserved.</td>
                     </tr>
                     <tr>
                         <td><code>style</code></td>
