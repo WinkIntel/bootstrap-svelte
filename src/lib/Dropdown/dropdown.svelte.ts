@@ -18,9 +18,15 @@ export class DropdownRootState {
     #items: DropdownItemState[] = $state([]);
     #menu: DropdownMenuState | null = null; // The menu belonging to this dropdown, registered on construction.
     #reorderScheduled = false;
-    #toggle: DropdownToggleState | null = null; // The toggle that controls this dropdown, registered on construction.
+    #toggle: DropdownToggleState | null = $state.raw(null); // The last interacted toggle, cleared when it unmounts.
 
-    ariaLabelledBy: string | undefined = $state(undefined); // Used for accessibility, linking the dropdown to a label.
+    // Membership must survive Svelte staging an incoming branch before disposing the outgoing one.
+    // A reactive snapshot alone can lose that staged registration during disposal.
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- registration must not be rolled back with an outgoing branch; #toggles publishes a reactive snapshot
+    #registeredToggles = new Set<DropdownToggleState>();
+    #toggles: DropdownToggleState[] = $state.raw([]); // Reactive snapshot for split-toggle styling.
+
+    ariaLabelledBy: string | undefined = $derived(this.toggle?.props.id || undefined);
 
     constructor(readonly props: Dropdown.RootProps) {
         this.#autoClose = this.props.autoClose !== undefined ? this.props.autoClose : true; // Default to true if not specified.
@@ -86,7 +92,7 @@ export class DropdownRootState {
     }
 
     get isButtonGroup(): boolean {
-        return this.#isButtonGroup;
+        return this.#isButtonGroup || this.#toggles.some((toggle) => toggle.props.isSplit);
     }
     set isButtonGroup(isButtonGroup: boolean) {
         this.#isButtonGroup = isButtonGroup;
@@ -108,10 +114,23 @@ export class DropdownRootState {
     }
 
     get toggle(): DropdownToggleState | null {
-        return this.#toggle;
+        return this.#toggle ?? this.#toggles[0] ?? null;
     }
     set toggle(toggle: DropdownToggleState | null) {
         this.#toggle = toggle;
+    }
+
+    registerToggle(toggle: DropdownToggleState): void {
+        this.#registeredToggles.add(toggle);
+        this.#toggles = [...this.#registeredToggles];
+    }
+
+    unregisterToggle(toggle: DropdownToggleState): void {
+        this.#registeredToggles.delete(toggle);
+        this.#toggles = [...this.#registeredToggles];
+        if (this.#toggle === toggle) {
+            this.#toggle = null;
+        }
     }
 
     // True when the given element is part of this dropdown — its root (toggle included)
@@ -132,7 +151,7 @@ export class DropdownRootState {
     }
 
     focusOnToggle(): void {
-        this.#toggle?.props.elementRef?.focus();
+        this.toggle?.props.elementRef?.focus();
     }
 
     // Closes the dropdown if it is open, firing the onHide/onHidden callbacks.
@@ -242,22 +261,24 @@ export class DropdownToggleState {
         // Bind the method to ensure `this` context is correct when used as an event handler.
         this.onclick = this.onclick.bind(this);
         this.onkeydown = this.onkeydown.bind(this);
-        this.root.toggle = this; // Let the root find the toggle again, e.g. to restore focus on Escape.
-        if (this.props.isSplit && !this.root.isButtonGroup) {
-            // If the toggle is a split button, the root must be treated as a button group
-            // to ensure correct Bootstrap styling and layout.
-            this.root.isButtonGroup = true;
-        }
-        this.root.ariaLabelledBy = this.props.id || undefined; // Set the aria-labelledby attribute for accessibility.
+        this.root.registerToggle(this);
     }
 
     onclick(event: Event) {
+        this.root.toggle = this;
         event.preventDefault();
         this.root.toggleIsShown(event);
     }
 
     onkeydown(event: KeyboardEvent) {
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            this.root.toggle = this;
+        }
         handleKeydown(event, this.root);
+    }
+
+    dispose(): void {
+        this.root.unregisterToggle(this);
     }
 }
 

@@ -23,7 +23,7 @@ Bootstrap's dropdown component provides a togglable overlay of links and actions
 - `display` (string): Optional. Display mode of the dropdown: 'dynamic' (default), 'static'.
 - `elementRef` (HTMLElement): Optional. Reference to the dropdown DOM element.
 - `id` (string): Optional. Unique identifier for the dropdown, default is `dropdown-{uid}`.
-- `isButtonGroup` (boolean): Optional. If true, the dropdown is styled as part of a button group.
+- `isButtonGroup` (boolean): Optional. If true, the dropdown is styled as part of a button group. A mounted split toggle also enables button-group styling.
 - `onHide` (function): Optional. Callback when the dropdown is about to be hidden.
 - `onHidden` (function): Optional. Callback when the dropdown has been hidden.
 - `onShow` (function): Optional. Callback when the dropdown is about to be shown.
