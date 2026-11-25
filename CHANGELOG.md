@@ -7,6 +7,7 @@ All notable changes to Bootstrap Svelte will be documented in this file.
 ### Added
 
 - Add `Breadcrumb.Item anchorProps` to forward link attributes and handlers to its anchor. Keep the destination controlled by the top-level `href`; active items render no anchor and ignore these props ([#172](https://github.com/WinkIntel/bootstrap-svelte/issues/172)).
+- Add optional `ProgressBar isIndeterminate` (default `false`) to omit value ARIA attributes and computed widths for unknown progress, including inside `ProgressStacked`, while preserving consumer styles and determinate defaults ([#173](https://github.com/WinkIntel/bootstrap-svelte/issues/173)).
 
 ## 2.3.0 — 2026-11-24
 

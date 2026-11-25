@@ -6,6 +6,21 @@
     // Sample code examples for demonstration
     const basicExampleCode = `<ProgressBar valueNow={25} />`;
 
+    const indeterminateExampleCode = `<ProgressBar
+  isIndeterminate
+  ariaLabel="Loading page"
+  barProps={{ class: 'w-100', isStriped: true, isAnimated: true }}
+/>`;
+
+    const stackedIndeterminateExampleCode = `<ProgressStacked>
+  <ProgressBar
+    isIndeterminate
+    ariaLabel="Loading files"
+    style="width: 60%;"
+    barProps={{ isStriped: true, isAnimated: true }}
+  />
+</ProgressStacked>`;
+
     const heightsExampleCode = `<ProgressBar valueNow={25} style="height: 1px;" />
 <ProgressBar valueNow={25} style="height: 20px;" />`;
 
@@ -71,6 +86,37 @@
                     <ProgressBar valueNow={25} />
                 </div>
                 <SyntaxHighlighter code={basicExampleCode} />
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5" id="indeterminate">
+        <h2 class="wk-quick-link">Indeterminate Progress</h2>
+        <p>
+            Set <code>isIndeterminate</code> when the amount of progress is unknown. The component keeps its accessible label and
+            <code>progressbar</code> role but omits the numeric value ARIA attributes and computed widths, including inside
+            <code>ProgressStacked</code>. For a standalone bar, size or animate the inner bar through <code>barProps.class</code> or
+            <code>barProps.style</code>. Inside <code>ProgressStacked</code>, size the segment through <code>class</code> or <code>style</code>
+            on <code>ProgressBar</code> instead: Bootstrap makes the inner bar fill that segment. Consumer styles are preserved, but without consumer
+            sizing an indeterminate bar may have no visible width. Omitting <code>valueNow</code> alone still renders determinate zero progress.
+        </p>
+        <p>
+            Explicit <code>aria-valuetext</code> remains consumer-controlled in both modes. Keep it mode-aware: replace a phrase such as "4 of 10 files"
+            with "Loading files", or omit it, while progress is indeterminate.
+        </p>
+        <div class="card">
+            <div class="card-body">
+                <div class="mb-3">
+                    <ProgressBar isIndeterminate ariaLabel="Loading page" barProps={{ class: 'w-100', isStriped: true, isAnimated: true }} />
+                </div>
+                <SyntaxHighlighter code={indeterminateExampleCode} />
+                <h3 class="h5 mt-4">Stacked indeterminate segment</h3>
+                <div class="mb-3">
+                    <ProgressStacked>
+                        <ProgressBar isIndeterminate ariaLabel="Loading files" style="width: 60%;" barProps={{ isStriped: true, isAnimated: true }} />
+                    </ProgressStacked>
+                </div>
+                <SyntaxHighlighter code={stackedIndeterminateExampleCode} />
             </div>
         </div>
     </section>
@@ -279,6 +325,12 @@
                         <td>Reference to the DOM element.</td>
                     </tr>
                     <tr>
+                        <td><code>isIndeterminate</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>false</code></td>
+                        <td>Omit value ARIA attributes and computed widths when progress is unknown. Consumer styles are preserved.</td>
+                    </tr>
+                    <tr>
                         <td><code>style</code></td>
                         <td><code>string</code></td>
                         <td>—</td>
@@ -387,9 +439,11 @@
 
         <h3 class="h5 mt-4">Accessibility</h3>
         <p>
-            The progress component follows WAI-ARIA patterns for progress indicators, including the proper
-            <code>role="progressbar"</code> and ARIA attributes (<code>aria-valuenow</code>,
-            <code>aria-valuemin</code>, <code>aria-valuemax</code>, and <code>aria-label</code>).
+            The progress component keeps <code>role="progressbar"</code> and an accessible label in both modes. Determinate bars include
+            <code>aria-valuenow</code>, <code>aria-valuemin</code>, and <code>aria-valuemax</code>; those numeric value attributes are omitted when
+            <code>isIndeterminate</code>
+            is set. Explicit <code>aria-valuetext</code> is preserved, so consumers must update or omit it when the mode changes rather than leave a stale
+            determinate value.
         </p>
     </section>
 </div>
