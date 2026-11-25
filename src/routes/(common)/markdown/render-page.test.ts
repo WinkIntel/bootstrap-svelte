@@ -50,6 +50,15 @@ describe('renderPageMarkdown', { timeout: PAGE_RENDER_TIMEOUT }, () => {
         expect(page.markdown).toContain('<Form.CheckInput');
     });
 
+    test('omits the Breadcrumb anchor demo while keeping its code sample', async () => {
+        const { markdown } = await renderPageMarkdown('/components/breadcrumb');
+        const section = markdown.split('## Anchor attributes')[1]?.split('## Custom Dividers')[0];
+        expect(section).toContain('anchorProps=');
+        expect(section).not.toMatch(/^1\. \[Library\]/m);
+        expect(section).not.toMatch(/^2\. Current page/m);
+        expect(section).toContain('href="#!"');
+    });
+
     test('renders inline code inside the lead blockquote as Markdown', async () => {
         const page = await renderPageMarkdown('/form/form-controls');
         expect(page.markdown).toContain('> Give textual form controls like `<input>`s and `<textarea>`s');
